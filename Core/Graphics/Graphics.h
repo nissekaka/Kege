@@ -1,6 +1,7 @@
 #pragma once
 #include <wrl.h>
 #include <d3d11.h>
+#include <vector>
 
 #define KAKA_BG_COLOUR {0.1f, 0.2f, 0.3f, 1.0f}
 
@@ -11,22 +12,8 @@ namespace DirectX
 
 namespace Kaka
 {
-	struct Vertex
-	{
-		struct
-		{
-			float x;
-			float y;
-		} pos;
-
-		struct
-		{
-			unsigned char r;
-			unsigned char g;
-			unsigned char b;
-			unsigned char a;
-		} colour;
-	};
+	struct Vertex;
+	struct FBXMesh;
 
 	class Graphics
 	{
@@ -47,6 +34,8 @@ namespace Kaka
 	public:
 		void DrawTestTriangle2D();
 		void DrawTestCube3D(const float aAngle, const DirectX::XMFLOAT3 aPos);
+		void DrawTestMesh(const std::vector<Vertex>& aVertices, const std::vector<unsigned short>& aIndices,
+		                  const float aAngle, const DirectX::XMFLOAT3 aPos);
 	private:
 		Microsoft::WRL::ComPtr<ID3D11Device> pDevice;
 		Microsoft::WRL::ComPtr<IDXGISwapChain> pSwap;
