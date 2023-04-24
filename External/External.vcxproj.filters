@@ -64,13 +64,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="lib\x64\Debug\assimp-vc143-mt.lib" />
-    <Library Include="lib\x64\Debug\DirectXTex.lib" />
-    <Library Include="lib\x64\Release\assimp-vc143-mt.lib" />
-    <Library Include="lib\x64\Release\DirectXTex.lib" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="lib\x64\Debug\DirectXTex.pdb" />
-    <None Include="lib\x64\Release\DirectXTex.pdb" />
+    <Library Include="lib\assimp-vc143-mt.lib" />
+    <Library Include="lib\DirectXTex.lib" />
   </ItemGroup>
 </Project>

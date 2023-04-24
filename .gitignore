@@ -4,8 +4,7 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 # Added by Anton
-!Game/Assets/Models/*.obj
-!Game/Assets/Models/**/*.obj
+# External libraries
 !External/lib/*
 
 # User-specific files
