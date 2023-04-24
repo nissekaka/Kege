@@ -48,7 +48,7 @@ namespace Kaka
 		height = aHeight;
 
 		// Calculate window size based on desired client region size
-		RECT wr;
+		RECT wr = {};
 		wr.left = 100;
 		wr.right = aWidth + wr.left;
 		wr.top = 100;

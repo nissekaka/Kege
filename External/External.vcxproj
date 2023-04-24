@@ -11,9 +11,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="lib\x64\assimp-vc143-mt.lib" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="include\imgui\imconfig.h" />
     <ClInclude Include="include\imgui\imgui.h" />
     <ClInclude Include="include\imgui\imgui_impl_dx11.h" />
@@ -31,6 +28,16 @@
     <ClCompile Include="include\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="include\imgui\imgui_tables.cpp" />
     <ClCompile Include="include\imgui\imgui_widgets.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="lib\x64\Debug\assimp-vc143-mt.lib" />
+    <Library Include="lib\x64\Debug\DirectXTex.lib" />
+    <Library Include="lib\x64\Release\assimp-vc143-mt.lib" />
+    <Library Include="lib\x64\Release\DirectXTex.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="lib\x64\Debug\DirectXTex.pdb" />
+    <None Include="lib\x64\Release\DirectXTex.pdb" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
