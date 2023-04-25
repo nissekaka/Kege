@@ -2,17 +2,10 @@
 #include "Core/Utility/ImGuiManager.h"
 #include "Core/Utility/Timer.h"
 #include "Core/Windows/Window.h"
-#include "Core/Model/FBXLoader.h"
-#include <DirectXMath.h>
+#include "Core/Model/Model.h"
 
 namespace Kaka
 {
-	struct Vertex
-	{
-		DirectX::XMFLOAT3 pos;
-		DirectX::XMFLOAT3 normal;
-	};
-
 	class Game
 	{
 	public:
@@ -27,8 +20,6 @@ namespace Kaka
 		Window wnd;
 		Timer timer;
 
-		//FBXMesh mesh;
-		std::vector<Vertex> vertices = {};
-		std::vector<unsigned short> indices = {};
+		Model model{"Assets\\Models\\spy\\spy.fbx"};
 	};
 }

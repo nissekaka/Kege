@@ -53,7 +53,7 @@ namespace Kaka
 
 			std::pair<int, int> GetPos() const
 			{
-				return {x, y};
+				return {x,y};
 			}
 
 			int GetPosX() const

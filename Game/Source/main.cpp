@@ -4,8 +4,7 @@
 #endif
 #endif
 
-#include "Core/Windows/Window.h"
-#include "Game.h"
+#include "Game/Source/Game.h"
 
 int WINAPI wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 {

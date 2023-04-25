@@ -36,9 +36,9 @@ namespace Kaka
 		void DisableCursor();
 		bool CursorEnabled() const;
 		static std::optional<int> ProcessMessages();
-		Graphics& Gfx();
+		Graphics& Gfx() const;
 	private:
-		void ConfineCursor();
+		void ConfineCursor() const;
 		void FreeCursor();
 		void HideCursor();
 		void ShowCursor();

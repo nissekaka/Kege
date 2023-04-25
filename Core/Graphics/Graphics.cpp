@@ -1,12 +1,11 @@
 #include "Graphics.h"
+#include "Core/Model/Mesh.h"
+#include "Game/Source/Game.h"
 #include <External/include/imgui/imgui_impl_dx11.h>
 #include <External/include/imgui/imgui_impl_win32.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
 #include <algorithm>
-
-//#include "Core/Model/FBXLoader.h"
-#include "Game/Source/Game.h"
 
 namespace WRL = Microsoft::WRL;
 
@@ -177,9 +176,9 @@ namespace Kaka
 		};
 
 		const Vertex vertices[] = {
-			{{0.0f, 1.0f}, {255, 0, 0, 255}},
-			{{1.0f, -1.0f}, {0, 255, 0, 255}},
-			{{-1.0f, -1.0f}, {0, 0, 255, 255}},
+			{{0.0f,1.0f},{255,0,0,255}},
+			{{1.0f,-1.0f},{0,255,0,255}},
+			{{-1.0f,-1.0f},{0,0,255,255}},
 		};
 
 		// Create vertex buffer
@@ -203,7 +202,7 @@ namespace Kaka
 		// Create index buffer
 		const unsigned short indices[] =
 		{
-			0, 1, 2,
+			0,1,2,
 		};
 
 		WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
@@ -276,8 +275,8 @@ namespace Kaka
 		WRL::ComPtr<ID3D11InputLayout> pInputLayout;
 		const D3D11_INPUT_ELEMENT_DESC ied[] =
 		{
-			{"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0,D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-			{"COLOUR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0,D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"POSITION",0,DXGI_FORMAT_R32G32_FLOAT,0,D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0},
+			{"COLOUR",0,DXGI_FORMAT_R8G8B8A8_UNORM,0,D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0},
 		};
 		pDevice->CreateInputLayout(
 			ied,
@@ -326,14 +325,14 @@ namespace Kaka
 		};
 
 		const Vertex vertices[] = {
-			{{-1.0f, -1.0f, -1.0f}, {255, 0, 0, 255}},
-			{{1.0f, -1.0f, -1.0f}, {0, 255, 0, 255}},
-			{{-1.0f, 1.0f, -1.0f}, {0, 0, 255, 255}},
-			{{1.0f, 1.0f, -1.0f}, {255, 0, 0, 255}},
-			{{-1.0f, -1.0f, 1.0f}, {0, 255, 0, 255}},
-			{{1.0f, -1.0f, 1.0f}, {0, 0, 255, 255}},
-			{{-1.0f, 1.0f, 1.0f}, {128, 128, 0, 255}},
-			{{1.0f, 1.0f, 1.0f}, {0, 128, 128, 255}},
+			{{-1.0f,-1.0f,-1.0f},{255,0,0,255}},
+			{{1.0f,-1.0f,-1.0f},{0,255,0,255}},
+			{{-1.0f,1.0f,-1.0f},{0,0,255,255}},
+			{{1.0f,1.0f,-1.0f},{255,0,0,255}},
+			{{-1.0f,-1.0f,1.0f},{0,255,0,255}},
+			{{1.0f,-1.0f,1.0f},{0,0,255,255}},
+			{{-1.0f,1.0f,1.0f},{128,128,0,255}},
+			{{1.0f,1.0f,1.0f},{0,128,128,255}},
 		};
 
 		// Create vertex buffer
@@ -357,12 +356,12 @@ namespace Kaka
 		// Create index buffer
 		const unsigned short indices[] =
 		{
-			0, 2, 1, 2, 3, 1,
-			1, 3, 5, 3, 7, 5,
-			2, 6, 3, 3, 6, 7,
-			4, 5, 7, 4, 7, 6,
-			0, 4, 2, 2, 4, 6,
-			0, 1, 4, 1, 5, 4
+			0,2,1,2,3,1,
+			1,3,5,3,7,5,
+			2,6,3,3,6,7,
+			4,5,7,4,7,6,
+			0,4,2,2,4,6,
+			0,1,4,1,5,4
 		};
 
 		WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
@@ -436,10 +435,10 @@ namespace Kaka
 		const D3D11_INPUT_ELEMENT_DESC ied[] =
 		{
 			{
-				"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA,
+				"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,
 				0
 			},
-			{"COLOUR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0,D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"COLOUR",0,DXGI_FORMAT_R8G8B8A8_UNORM,0,D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0},
 		};
 		pDevice->CreateInputLayout(
 			ied,
@@ -465,131 +464,5 @@ namespace Kaka
 		pContext->RSSetViewports(1u, &vp);
 
 		pContext->DrawIndexed(static_cast<UINT>(std::size(indices)), 0u, 0u);
-	}
-
-	void Graphics::DrawTestMesh(const std::vector<Vertex>& aVertices, const std::vector<unsigned short>& aIndices,
-	                            const float aAngle, const DirectX::XMFLOAT3 aPos)
-	{
-		// Create vertex buffer
-		WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
-		D3D11_BUFFER_DESC vbd = {};
-		vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		vbd.Usage = D3D11_USAGE_DEFAULT;
-		vbd.CPUAccessFlags = 0u;
-		vbd.MiscFlags = 0u;
-		vbd.ByteWidth = sizeof(Vertex) * static_cast<UINT>(aVertices.size());
-		vbd.StructureByteStride = sizeof(Vertex);
-		D3D11_SUBRESOURCE_DATA vsd = {};
-		vsd.pSysMem = &aVertices[0];
-		pDevice->CreateBuffer(&vbd, &vsd, &pVertexBuffer);
-
-		// Bind vertex buffer to pipeline
-		const UINT stride = sizeof(Vertex);
-		const UINT offset = 0u;
-		pContext->IASetVertexBuffers(0u, 1u, pVertexBuffer.GetAddressOf(), &stride, &offset);
-
-		WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
-		D3D11_BUFFER_DESC ibd = {};
-		ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-		ibd.Usage = D3D11_USAGE_DEFAULT;
-		ibd.CPUAccessFlags = 0u;
-		ibd.MiscFlags = 0u;
-		ibd.ByteWidth = sizeof(unsigned short) * static_cast<UINT>(aIndices.size());
-		ibd.StructureByteStride = sizeof(unsigned short);
-		D3D11_SUBRESOURCE_DATA isd = {};
-		isd.pSysMem = &aIndices[0];
-		pDevice->CreateBuffer(&ibd, &isd, &pIndexBuffer);
-
-		// Bind index buffer
-		pContext->IASetIndexBuffer(pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
-
-		// Create constant buffer for transformation matrix
-		struct ConstantBuffer
-		{
-			DirectX::XMMATRIX transform;
-		};
-		const ConstantBuffer cb =
-		{
-			{
-
-				DirectX::XMMatrixTranspose(
-					DirectX::XMMatrixRotationZ(aAngle) *
-					DirectX::XMMatrixRotationX(aAngle) *
-					DirectX::XMMatrixTranslation(aPos.x, aPos.y, aPos.z + 4.0f) *
-					DirectX::XMMatrixPerspectiveLH(1.0f, static_cast<float>(height) / static_cast<float>(width), 0.5f,
-					                               10.0f)
-				)
-			}
-		};
-		WRL::ComPtr<ID3D11Buffer> pConstantBuffer;
-		D3D11_BUFFER_DESC cbd = {};
-		cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		cbd.Usage = D3D11_USAGE_DYNAMIC;
-		cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		cbd.MiscFlags = 0u;
-		cbd.ByteWidth = sizeof(cb);
-		cbd.StructureByteStride = 0u;
-		D3D11_SUBRESOURCE_DATA csd = {};
-		csd.pSysMem = &cb;
-		pDevice->CreateBuffer(&cbd, &csd, &pConstantBuffer);
-
-		// Bind constant buffer to vertex shader
-		pContext->VSSetConstantBuffers(0u, 1u, pConstantBuffer.GetAddressOf());
-
-		// Create pixel shader
-		WRL::ComPtr<ID3D11PixelShader> pPixelShader;
-		WRL::ComPtr<ID3DBlob> pBlob;
-		D3DReadFileToBlob(L"Shaders\\Default_PS.cso", &pBlob);
-		pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader);
-
-		// Bind pixel shader
-		pContext->PSSetShader(pPixelShader.Get(), nullptr, 0u);
-
-		// Create vertex shader
-		WRL::ComPtr<ID3D11VertexShader> pVertexShader;
-		D3DReadFileToBlob(L"Shaders\\3D_VS.cso", &pBlob);
-		pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader);
-
-		// Bind vertex shader
-		pContext->VSSetShader(pVertexShader.Get(), nullptr, 0u);
-
-		// Input (vertex) layout
-		WRL::ComPtr<ID3D11InputLayout> pInputLayout;
-		const D3D11_INPUT_ELEMENT_DESC ied[] =
-		{
-			{
-				"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-				D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-			},
-			{
-				"COLOUR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0,
-				D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-			},
-
-		};
-		pDevice->CreateInputLayout(
-			ied,
-			static_cast<UINT>(std::size(ied)),
-			pBlob->GetBufferPointer(),
-			pBlob->GetBufferSize(),
-			&pInputLayout);
-
-		// Bind vertex layour
-		pContext->IASetInputLayout(pInputLayout.Get());
-
-		// Set primitive topology to triangle list (groups of 3 vertices)
-		pContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		// Configure viewport
-		D3D11_VIEWPORT vp = {};
-		vp.Width = static_cast<FLOAT>(width);
-		vp.Height = static_cast<FLOAT>(height);
-		vp.MinDepth = 0;
-		vp.MaxDepth = 1;
-		vp.TopLeftX = 0;
-		vp.TopLeftY = 0;
-		pContext->RSSetViewports(1u, &vp);
-
-		pContext->DrawIndexed(static_cast<UINT>(std::size(aIndices)), 0u, 0u);
 	}
 }
