@@ -1,21 +1,37 @@
 #include "Model.h"
 #include "Core/Graphics/Graphics.h"
 #include "Core/Model/FBXLoader.h"
+#include <External/include/imgui/imgui.h>
 #include <d3dcompiler.h>
 #include <wrl/client.h>
 
-#include "imgui/imgui.h"
-
 namespace Kaka
 {
-	Model::Model(const std::string& aFilePath)
+	Model::Model(const Graphics& aGfx, const std::string& aFilePath)
 	{
 		FBXLoader::LoadMesh(aFilePath, mesh);
+		texture.LoadTexture(aGfx.pDevice.Get(), aFilePath);
 	}
 
-	void Model::Draw(const Graphics& aGfx) const
+	void Model::Draw(const Graphics& aGfx)
 	{
 		namespace WRL = Microsoft::WRL;
+
+		// Create a sampler state
+		D3D11_SAMPLER_DESC samplerDesc = CD3D11_SAMPLER_DESC{CD3D11_DEFAULT{}};
+		samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
+
+		ID3D11SamplerState* pSamplerState;
+		aGfx.pDevice->CreateSamplerState(&samplerDesc, &pSamplerState);
+
+		// Bind the sampler state to the device context
+		aGfx.pContext->PSSetSamplers(0, 1, &pSamplerState);
+
+		// Bind shader resource view to pixel shader
+		texture.Bind(aGfx.pContext.Get(), 0);
 
 		// Create vertex buffer
 		WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
@@ -81,7 +97,7 @@ namespace Kaka
 		// Create pixel shader
 		WRL::ComPtr<ID3D11PixelShader> pPixelShader;
 		WRL::ComPtr<ID3DBlob> pBlob;
-		D3DReadFileToBlob(L"Shaders\\Default_PS.cso", &pBlob);
+		D3DReadFileToBlob(L"Shaders\\Diffuse_PS.cso", &pBlob);
 		aGfx.pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader);
 
 		// Bind pixel shader
@@ -89,7 +105,7 @@ namespace Kaka
 
 		// Create vertex shader
 		WRL::ComPtr<ID3D11VertexShader> pVertexShader;
-		D3DReadFileToBlob(L"Shaders\\3D_VS.cso", &pBlob);
+		D3DReadFileToBlob(L"Shaders\\Diffuse_VS.cso", &pBlob);
 		aGfx.pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader);
 
 		// Bind vertex shader
@@ -104,7 +120,7 @@ namespace Kaka
 				D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
 			},
 			{
-				"COLOUR",0,DXGI_FORMAT_R8G8B8A8_UNORM,0,
+				"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,
 				D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
 			},
 

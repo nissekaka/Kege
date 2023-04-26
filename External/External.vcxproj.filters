@@ -63,8 +63,4 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <Library Include="lib\assimp-vc143-mt.lib" />
-    <Library Include="lib\DirectXTex.lib" />
-  </ItemGroup>
 </Project>

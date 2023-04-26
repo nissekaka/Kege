@@ -138,7 +138,7 @@ struct ImDrawListSharedData;        // Data shared among multiple draw lists (ty
 struct ImDrawListSplitter;          // Helper to split a draw list into different layers which can be drawn into out of order, then flattened back.
 struct ImDrawVert;                  // A single vertex (pos + uv + col = 20 bytes by default. Override layout with IMGUI_OVERRIDE_DRAWVERT_STRUCT_LAYOUT)
 struct ImFont;                      // Runtime data for a single font within a parent ImFontAtlas
-struct ImFontAtlas;                 // Runtime data for multiple fonts, bake multiple fonts into a single texture, TTF/OTF font loader
+struct ImFontAtlas;                 // Runtime data for multiple fonts, bake multiple fonts into a single pTexture, TTF/OTF font loader
 struct ImFontBuilderIO;             // Opaque interface to a font builder (stb_truetype or FreeType).
 struct ImFontConfig;                // Configuration data when adding a font or merging fonts
 struct ImFontGlyph;                 // A single font glyph (code point + coordinates within in ImFontAtlas + offset)
@@ -206,7 +206,7 @@ using ImGuiTreeNodeFlags = int;     // -> enum ImGuiTreeNodeFlags_   // Flags: f
 using ImGuiViewportFlags = int;     // -> enum ImGuiViewportFlags_   // Flags: for ImGuiViewport
 using ImGuiWindowFlags = int;       // -> enum ImGuiWindowFlags_     // Flags: for Begin(), BeginChild()
 
-// ImTexture: user data for renderer backend to identify a texture [Compile-time configurable type]
+// ImTexture: user data for renderer backend to identify a pTexture [Compile-time configurable type]
 // - To use something else than an opaque void* pointer: override with e.g. '#define ImTextureID MyTextureType*' in your imconfig.h file.
 // - This can be whatever to you want it to be! read the FAQ about ImTextureID for details.
 #ifndef ImTextureID
@@ -2486,7 +2486,7 @@ struct ImGuiIO
 	float HoverDelayShort;                // = 0.10 sec       // Delay on hovering before IsItemHovered(ImGuiHoveredFlags_DelayShort) returns true.
 	void* UserData;                       // = NULL           // Store your own data.
 
-	ImFontAtlas* Fonts;                          // <auto>           // Font atlas: load, rasterize and pack one or more fonts into a single texture.
+	ImFontAtlas* Fonts;                          // <auto>           // Font atlas: load, rasterize and pack one or more fonts into a single pTexture.
 	float FontGlobalScale;                // = 1.0f           // Global scale all fonts
 	bool FontAllowUserScaling;           // = false          // Allow user scaling text of individual window with CTRL+Wheel.
 	ImFont* FontDefault;                    // = NULL           // Font to use on NewFrame(). Use NULL to uses Fonts->Fonts[0].
@@ -3256,7 +3256,7 @@ struct ImColor
 // NB: You most likely do NOT need to use draw callbacks just to create your own widget or customized UI rendering,
 // you can poke into the draw list for that! Draw callback may be useful for example to:
 //  A) Change your GPU render state,
-//  B) render a complex 3D scene inside a UI element without an intermediate texture/render target, etc.
+//  B) render a complex 3D scene inside a UI element without an intermediate pTexture/render target, etc.
 // The expected behavior from your rendering function is 'if (cmd.UserCallback != NULL) { cmd.UserCallback(parent_list, cmd); } else { RenderTriangles() }'
 // If you want to override the signature of ImDrawCallback, you can simply use e.g. '#define ImDrawCallback MyDrawCallback' (in imconfig.h) + update rendering backend accordingly.
 #ifndef ImDrawCallback
@@ -3277,7 +3277,7 @@ using ImDrawCallback = void(*)(const ImDrawList* parent_list, const ImDrawCmd* c
 struct ImDrawCmd
 {
 	ImVec4 ClipRect;           // 4*4  // Clipping rectangle (x1, y1, x2, y2). Subtract ImDrawData->DisplayPos to get clipping rectangle in "viewport" coordinates
-	ImTextureID TextureId;          // 4-8  // User-provided texture ID. Set by user in ImfontAtlas::SetTexID() for fonts or passed to Image*() functions. Ignore if never using images or multiple fonts atlas.
+	ImTextureID TextureId;          // 4-8  // User-provided pTexture ID. Set by user in ImfontAtlas::SetTexID() for fonts or passed to Image*() functions. Ignore if never using images or multiple fonts atlas.
 	unsigned int
 	VtxOffset;          // 4    // Start offset in vertex buffer. ImGuiBackendFlags_RendererHasVtxOffset: always 0, otherwise may be >0 to support meshes larger than 64K vertices with 16-bit indices.
 	unsigned int IdxOffset;          // 4    // Start offset in index buffer.
@@ -3482,7 +3482,7 @@ struct ImDrawList
 	// Image primitives
 	// - Read FAQ to understand what ImTextureID is.
 	// - "p_min" and "p_max" represent the upper-left and lower-right corners of the rectangle.
-	// - "uv_min" and "uv_max" represent the normalized texture coordinates to use for those corners. Using (0,0)->(1,1) texture coordinates will generally display the entire texture.
+	// - "uv_min" and "uv_max" represent the normalized pTexture coordinates to use for those corners. Using (0,0)->(1,1) pTexture coordinates will generally display the entire pTexture.
 	IMGUI_API void AddImage(ImTextureID user_texture_id, const ImVec2& p_min, const ImVec2& p_max, const ImVec2& uv_min = ImVec2(0, 0), const ImVec2& uv_max = ImVec2(1, 1), ImU32 col = IM_COL32_WHITE);
 	IMGUI_API void AddImageQuad(ImTextureID user_texture_id, const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, const ImVec2& uv1 = ImVec2(0, 0), const ImVec2& uv2 = ImVec2(1, 0),
 	                            const ImVec2& uv3 = ImVec2(1, 1), const ImVec2& uv4 = ImVec2(0, 1), ImU32 col = IM_COL32_WHITE);
@@ -3746,21 +3746,21 @@ enum ImFontAtlasFlags_
 {
 	ImFontAtlasFlags_None = 0,
 	ImFontAtlasFlags_NoPowerOfTwoHeight = 1 << 0,   // Don't round the height to next power of two
-	ImFontAtlasFlags_NoMouseCursors = 1 << 1,   // Don't build software mouse cursors into the atlas (save a little texture memory)
+	ImFontAtlasFlags_NoMouseCursors = 1 << 1,   // Don't build software mouse cursors into the atlas (save a little pTexture memory)
 	ImFontAtlasFlags_NoBakedLines = 1 <<
-	2,   // Don't build thick line textures into the atlas (save a little texture memory, allow support for point/nearest filtering). The AntiAliasedLinesUseTex features uses them, otherwise they will be rendered using polygons (more expensive for CPU/GPU).
+	2,   // Don't build thick line textures into the atlas (save a little pTexture memory, allow support for point/nearest filtering). The AntiAliasedLinesUseTex features uses them, otherwise they will be rendered using polygons (more expensive for CPU/GPU).
 };
 
-// Load and rasterize multiple TTF/OTF fonts into a same texture. The font atlas will build a single texture holding:
+// Load and rasterize multiple TTF/OTF fonts into a same pTexture. The font atlas will build a single pTexture holding:
 //  - One or more fonts.
 //  - Custom graphics data needed to render the shapes needed by Dear ImGui.
 //  - Mouse cursor shapes for software cursor rendering (unless setting 'Flags |= ImFontAtlasFlags_NoMouseCursors' in the font atlas).
-// It is the user-code responsibility to setup/build the atlas, then upload the pixel data into a texture accessible by your graphics api.
+// It is the user-code responsibility to setup/build the atlas, then upload the pixel data into a pTexture accessible by your graphics api.
 //  - Optionally, call any of the AddFont*** functions. If you don't call any, the default font embedded in the code will be loaded for you.
 //  - Call GetTexDataAsAlpha8() or GetTexDataAsRGBA32() to build and retrieve pixels data.
-//  - Upload the pixels data into a texture within your graphics system (see imgui_impl_xxxx.cpp examples)
-//  - Call SetTexID(my_tex_id); and pass the pointer/identifier to your texture in a format natural to your graphics API.
-//    This value will be passed back to you during rendering to identify the texture. Read FAQ entry about ImTextureID for more details.
+//  - Upload the pixels data into a pTexture within your graphics system (see imgui_impl_xxxx.cpp examples)
+//  - Call SetTexID(my_tex_id); and pass the pointer/identifier to your pTexture in a format natural to your graphics API.
+//    This value will be passed back to you during rendering to identify the pTexture. Read FAQ entry about ImTextureID for more details.
 // Common pitfalls:
 // - If you pass a 'glyph_ranges' array to AddFont*** functions, you need to make sure that your array persist up until the
 //   atlas is build (when calling GetTexData*** or Build()). We only copy the pointer, not the data.
@@ -3783,23 +3783,23 @@ struct ImFontAtlas
 	IMGUI_API ImFont*
 	AddFontFromMemoryCompressedBase85TTF(const char* compressed_font_data_base85, float size_pixels, const ImFontConfig* font_cfg = NULL,
 	                                     const ImWchar* glyph_ranges = NULL);              // 'compressed_font_data_base85' still owned by caller. Compress with binary_to_compressed_c.cpp with -base85 parameter.
-	IMGUI_API void ClearInputData();           // Clear input data (all ImFontConfig structures including sizes, TTF data, glyph ranges, etc.) = all the data used to build the texture and fonts.
-	IMGUI_API void ClearTexData();             // Clear output texture data (CPU side). Saves RAM once the texture has been copied to graphics memory.
+	IMGUI_API void ClearInputData();           // Clear input data (all ImFontConfig structures including sizes, TTF data, glyph ranges, etc.) = all the data used to build the pTexture and fonts.
+	IMGUI_API void ClearTexData();             // Clear output pTexture data (CPU side). Saves RAM once the pTexture has been copied to graphics memory.
 	IMGUI_API void ClearFonts();               // Clear output font data (glyphs storage, UV coordinates).
 	IMGUI_API void Clear();                    // Clear all input and output.
 
 	// Build atlas, retrieve pixel data.
-	// User is in charge of copying the pixels into graphics memory (e.g. create a texture with your engine). Then store your texture handle with SetTexID().
+	// User is in charge of copying the pixels into graphics memory (e.g. create a pTexture with your engine). Then store your pTexture handle with SetTexID().
 	// The pitch is always = Width * BytesPerPixels (1 or 4)
 	// Building in RGBA32 format is provided for convenience and compatibility, but note that unless you manually manipulate or copy color data into
-	// the texture (e.g. when using the AddCustomRect*** api), then the RGB pixels emitted will always be white (~75% of memory/bandwidth waste.
+	// the pTexture (e.g. when using the AddCustomRect*** api), then the RGB pixels emitted will always be white (~75% of memory/bandwidth waste.
 	IMGUI_API bool Build();                    // Build pixels data. This is called automatically for you by the GetTexData*** functions.
 	IMGUI_API void GetTexDataAsAlpha8(unsigned char** out_pixels, int* out_width, int* out_height, int* out_bytes_per_pixel = NULL);  // 1 byte per-pixel
 	IMGUI_API void GetTexDataAsRGBA32(unsigned char** out_pixels, int* out_width, int* out_height, int* out_bytes_per_pixel = NULL);  // 4 bytes-per-pixel
 	bool IsBuilt() const
 	{
 		return Fonts.Size > 0 && TexReady;
-	} // Bit ambiguous: used to detect when user didn't build texture but effectively we should check TexID != 0 except that would be backend dependent...
+	} // Bit ambiguous: used to detect when user didn't build pTexture but effectively we should check TexID != 0 except that would be backend dependent...
 	void SetTexID(ImTextureID id)
 	{
 		TexID = id;
@@ -3828,7 +3828,7 @@ struct ImFontAtlas
 
 	// You can request arbitrary rectangles to be packed into the atlas, for your own purposes.
 	// - After calling Build(), you can query the rectangle position and render your pixels.
-	// - If you render colored output, set 'atlas->TexPixelsUseColors = true' as this may help some backends decide of prefered texture format.
+	// - If you render colored output, set 'atlas->TexPixelsUseColors = true' as this may help some backends decide of prefered pTexture format.
 	// - You can also request your rectangles to be mapped as font glyph (given a font + Unicode point),
 	//   so you can render e.g. custom colorful icons and use them as regular glyphs.
 	// - Read docs/FONTS.md for more details about using colorful icons.
@@ -3851,18 +3851,18 @@ struct ImFontAtlas
 	//-------------------------------------------
 
 	ImFontAtlasFlags Flags;              // Build flags (see ImFontAtlasFlags_)
-	ImTextureID TexID;              // User data to refer to the texture once it has been uploaded to user's graphic systems. It is passed back to you during rendering via the ImDrawCmd structure.
+	ImTextureID TexID;              // User data to refer to the pTexture once it has been uploaded to user's graphic systems. It is passed back to you during rendering via the ImDrawCmd structure.
 	int
-	TexDesiredWidth;    // Texture width desired by user before Build(). Must be a power-of-two. If have many glyphs your graphics API have texture size restrictions you may want to increase texture width to decrease height.
+	TexDesiredWidth;    // Texture width desired by user before Build(). Must be a power-of-two. If have many glyphs your graphics API have pTexture size restrictions you may want to increase pTexture width to decrease height.
 	int
-	TexGlyphPadding;    // Padding between glyphs within texture in pixels. Defaults to 1. If your rendering method doesn't rely on bilinear filtering you may set this to 0 (will also need to set AntiAliasedLinesUseTex = false).
+	TexGlyphPadding;    // Padding between glyphs within pTexture in pixels. Defaults to 1. If your rendering method doesn't rely on bilinear filtering you may set this to 0 (will also need to set AntiAliasedLinesUseTex = false).
 	bool Locked;             // Marked as Locked by ImGui::NewFrame() so attempt to modify the atlas will assert.
 	void* UserData;           // Store your own atlas related user-data (if e.g. you have multiple font atlas).
 
 	// [Internal]
-	// NB: Access texture data via GetTexData*() calls! Which will setup a default font for you.
-	bool TexReady;           // Set when texture was built matching current font input
-	bool TexPixelsUseColors; // Tell whether our texture data is known to use colors (rather than just alpha channel), in order to help backend select a format.
+	// NB: Access pTexture data via GetTexData*() calls! Which will setup a default font for you.
+	bool TexReady;           // Set when pTexture was built matching current font input
+	bool TexPixelsUseColors; // Tell whether our pTexture data is known to use colors (rather than just alpha channel), in order to help backend select a format.
 	unsigned char* TexPixelsAlpha8;    // 1 component per pixel, each component is unsigned 8-bit. Total size = TexWidth * TexHeight
 	unsigned int* TexPixelsRGBA32;    // 4 component per pixel, each component is unsigned 8-bit. Total size = TexWidth * TexHeight * 4
 	int TexWidth;           // Texture width calculated during Build().
@@ -3870,7 +3870,7 @@ struct ImFontAtlas
 	ImVec2 TexUvScale;         // = (1.0f/TexWidth, 1.0f/TexHeight)
 	ImVec2 TexUvWhitePixel;    // Texture coordinates to a white pixel
 	ImVector<ImFont*> Fonts;              // Hold all the fonts returned by AddFont*. Fonts[0] is the default font upon calling ImGui::NewFrame(), use ImGui::PushFont()/PopFont() to change the current font.
-	ImVector<ImFontAtlasCustomRect> CustomRects;    // Rectangles for packing custom texture data into the atlas.
+	ImVector<ImFontAtlasCustomRect> CustomRects;    // Rectangles for packing custom pTexture data into the atlas.
 	ImVector<ImFontConfig> ConfigData;         // Configuration data
 	ImVec4 TexUvLines[IM_DRAWLIST_TEX_LINES_WIDTH_MAX + 1];  // UVs for baked anti-aliased lines
 
@@ -3879,8 +3879,8 @@ struct ImFontAtlas
 	unsigned int FontBuilderFlags;   // Shared flags (for all fonts) for custom font builder. THIS IS BUILD IMPLEMENTATION DEPENDENT. Per-font override is also available in ImFontConfig.
 
 	// [Internal] Packing data
-	int PackIdMouseCursors; // Custom texture rectangle ID for white pixel and mouse cursors
-	int PackIdLines;        // Custom texture rectangle ID for baked anti-aliased lines
+	int PackIdMouseCursors; // Custom pTexture rectangle ID for white pixel and mouse cursors
+	int PackIdLines;        // Custom pTexture rectangle ID for baked anti-aliased lines
 
 	// [Obsolete]
 	//typedef ImFontAtlasCustomRect    CustomRect;         // OBSOLETED in 1.72+
@@ -3914,7 +3914,7 @@ struct ImFont
 	bool DirtyLookupTables;  // 1     // out //
 	float Scale;              // 4     // in  // = 1.f      // Base font scale, multiplied by the per-window font scale which you can adjust with SetWindowFontScale()
 	float Ascent, Descent;    // 4+4   // out //            // Ascent: distance from top to bottom of e.g. 'A' [0..FontSize]
-	int MetricsTotalSurface;// 4     // out //            // Total surface in pixels to get an idea of the font rasterization/texture cost (not exact, we approximate the cost of padding between glyphs)
+	int MetricsTotalSurface;// 4     // out //            // Total surface in pixels to get an idea of the font rasterization/pTexture cost (not exact, we approximate the cost of padding between glyphs)
 	ImU8 Used4kPagesMap[(IM_UNICODE_CODEPOINT_MAX + 1) / 4096 /
 		8]; // 2 bytes if ImWchar=ImWchar16, 34 bytes if ImWchar==ImWchar32. Store 1-bit for each block of 4K codepoints that has one active glyph. This is mainly used to facilitate iterations across all used codepoints.
 

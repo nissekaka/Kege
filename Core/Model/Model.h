@@ -1,6 +1,7 @@
 #pragma once
 #include "Model.h"
 #include "Core/Model/Mesh.h"
+#include "Core/Texture/Texture.h"
 #include <DirectXMath.h>
 #include <string>
 
@@ -11,9 +12,9 @@ namespace Kaka
 	class Model
 	{
 	public:
-		Model(const std::string& aFilePath);
+		Model(const Graphics& aGfx, const std::string& aFilePath);
 		~Model() = default;
-		void Draw(const Graphics& aGfx) const;
+		void Draw(const Graphics& aGfx);
 		void SetPosition(DirectX::XMFLOAT3 aPosition);
 		void SetRotation(DirectX::XMFLOAT3 aRotation);
 		void SetScale(float aScale);
@@ -35,5 +36,6 @@ namespace Kaka
 		TransformParameters transform;
 	private:
 		Mesh mesh;
+		Texture texture;
 	};
 }

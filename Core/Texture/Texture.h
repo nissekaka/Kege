@@ -1,19 +1,22 @@
 #pragma once
 #include <External/include/dxtex/DirectXTex.h>
 #include <string>
+#include <d3d11.h>
+#include <stdexcept>
+#include <wrl/client.h>
 
 namespace Kaka
 {
 	class Texture
 	{
 	public:
-		Texture();
+		Texture() = default;
 		~Texture() = default;
-		static Texture LoadTexture(const std::string& aName);
+		void LoadTexture(ID3D11Device* aPDevice, const std::string& aFilePath);
+		void Bind(ID3D11DeviceContext* aPContext, unsigned int aSlot = 0u) const;
+		//ID3D11ShaderResourceView* GetTexture();
+
 	private:
-		Texture(DirectX::ScratchImage aScratch);
-	private:
-		DirectX::ScratchImage scratch;
-		static constexpr DXGI_FORMAT FORMAT = DXGI_FORMAT_B8G8R8A8_UNORM;
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pTexture;
 	};
 }

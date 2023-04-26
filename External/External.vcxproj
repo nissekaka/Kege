@@ -29,10 +29,6 @@
     <ClCompile Include="include\imgui\imgui_tables.cpp" />
     <ClCompile Include="include\imgui\imgui_widgets.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <Library Include="lib\assimp-vc143-mt.lib" />
-    <Library Include="lib\DirectXTex.lib" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

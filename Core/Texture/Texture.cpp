@@ -3,35 +3,59 @@
 
 namespace Kaka
 {
-	Texture::Texture() {}
-
-	Texture Texture::LoadTexture(const std::string& aName)
+	void Texture::LoadTexture(ID3D11Device* aPDevice, const std::string& aFilePath)
 	{
-		DirectX::ScratchImage scratch;
-		HRESULT hr = DirectX::LoadFromDDSFile(ToWide(aName).c_str(), DirectX::DDS_FLAGS_NONE, nullptr, scratch);
+		// Build the texture path by adding "_c.dds" suffix to the FBX file name
+		std::string texturePath = aFilePath;
+		const size_t lastDotIndex = texturePath.find_last_of('.');
+		texturePath = texturePath.substr(0, lastDotIndex) + "_c.dds";
 
-		assert(FAILED(hr) && "Failed to load DDS file");
+		DirectX::TexMetadata metadata;
+		DirectX::ScratchImage image;
 
-		if (scratch.GetImage(0, 0, 0)->format != FORMAT)
+		// Try to load the DDS texture file
+		HRESULT hr = DirectX::LoadFromDDSFile(std::wstring(texturePath.begin(), texturePath.end()).c_str(),
+		                                      DirectX::DDS_FLAGS_NONE, &metadata, image);
+
+		if (FAILED(hr))
 		{
-			DirectX::ScratchImage converted;
-			hr = DirectX::Convert(
-				*scratch.GetImage(0, 0, 0),
-				FORMAT,
-				DirectX::TEX_FILTER_DEFAULT,
-				DirectX::TEX_THRESHOLD_DEFAULT,
-				converted
-			);
-
-			assert(FAILED(hr) && "Failed to convert image");
-
-			return Texture(std::move(converted));
+			// If DDS texture not found, try to load PNG texture with the same name
+			texturePath = aFilePath.substr(0, lastDotIndex) + ".png";
+			hr = DirectX::LoadFromWICFile(std::wstring(texturePath.begin(), texturePath.end()).c_str(),
+			                              DirectX::WIC_FLAGS_NONE, &metadata, image);
 		}
 
-		return Texture(std::move(scratch));
+		if (SUCCEEDED(hr))
+		{
+			// Create the shader resource view from the loaded texture
+			hr = CreateShaderResourceView(aPDevice, image.GetImages(), image.GetImageCount(), metadata,
+			                              pTexture.GetAddressOf());
+			const std::string text =
+				"\n+++++++++++++++++++++++++++++++++++++++++++++++++"
+				"\nLoaded diffuse texture!"
+				"\nModel: " + aFilePath +
+				"\nTexture: " + texturePath;
+			OutputDebugStringA(text.c_str());
+		}
+		if (FAILED(hr))
+		{
+			//throw std::runtime_error("Failed to load texture: " + texturePath);
+			const std::string text =
+				"\n-------------------------------------------------"
+				"\nFailed to load diffuse texture!"
+				"\nModel: " + aFilePath +
+				"\nTexture: " + texturePath;
+			OutputDebugStringA(text.c_str());
+		}
 	}
 
-	Texture::Texture(DirectX::ScratchImage aScratch)
-		:
-		scratch(std::move(aScratch)) {}
+	void Texture::Bind(ID3D11DeviceContext* aPContext, const unsigned int aSlot) const
+	{
+		aPContext->PSSetShaderResources(aSlot, 1u, pTexture.GetAddressOf());
+	}
+
+	//ID3D11ShaderResourceView* Texture::GetTexture()
+	//{
+	//	return pTexture.Get();
+	//}
 }

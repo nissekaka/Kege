@@ -21,8 +21,8 @@ namespace Kaka
 
 	int Game::Go()
 	{
-		model2.SetPosition({1200.0f,0.0f,0.0f});
-		model2.SetScale(0.002f);
+		//model2.SetPosition({0.0f,0.0f,0.0f});
+		//model2.SetScale(0.002f);
 
 		while (true)
 		{
@@ -49,7 +49,8 @@ namespace Kaka
 
 		model.SetRotation({timer.GetTotalTime(),0.0f,timer.GetTotalTime()});
 		model.Draw(wnd.Gfx());
-		model2.Draw(wnd.Gfx());
+		//model2.SetRotation({0.0f,timer.GetTotalTime(),0.0f});
+		//model2.Draw(wnd.Gfx());
 		//wnd.Gfx().DrawTestTriangle2D();
 		wnd.Gfx().DrawTestCube3D(timer.GetTotalTime(), DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f));
 		wnd.Gfx().DrawTestCube3D(-timer.GetTotalTime(), DirectX::XMFLOAT3(-1.0f, 0.0f, 0.0f));
@@ -59,8 +60,8 @@ namespace Kaka
 		{
 			ImGui::ShowDemoWindow();
 		}
-		model.ShowControlWindow("Spy");
-		model2.ShowControlWindow("Muzen");
+		model.ShowControlWindow("Cube");
+		//model2.ShowControlWindow("Muzen");
 		camera.ShowControlWindow();
 
 		// End frame
@@ -106,8 +107,9 @@ namespace Kaka
 			}
 			else
 			{
-				cameraSpeed = cameraSpeedBoost;
+				cameraSpeed = cameraSpeedNormal;
 			}
+
 			if (wnd.keyboard.KeyIsPressed('W'))
 			{
 				camera.Translate({0.0f,0.0f,aDeltaTime * cameraSpeed});

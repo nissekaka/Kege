@@ -106,5 +106,7 @@
     <FxCompile Include="Graphics\Shaders\Default_PS.hlsl" />
     <FxCompile Include="Graphics\Shaders\2D_VS.hlsl" />
     <FxCompile Include="Graphics\Shaders\3D_VS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\Diffuse_PS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\Diffuse_VS.hlsl" />
   </ItemGroup>
 </Project>
