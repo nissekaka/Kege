@@ -1,5 +1,6 @@
 #pragma once
 #include <wrl.h>
+#include <DirectXMath.h>
 #include <d3d11.h>
 
 #define KAKA_BG_COLOUR {0.1f, 0.2f, 0.3f, 1.0f}
@@ -23,6 +24,12 @@ namespace Kaka
 		~Graphics();
 		void BeginFrame();
 		void EndFrame();
+		void DrawIndexed(UINT aCount);
+		void SetProjection(DirectX::FXMMATRIX aProjection);
+		DirectX::XMMATRIX GetProjection() const;
+		void SetCamera(DirectX::FXMMATRIX aCamera);
+		DirectX::XMMATRIX GetCamera() const;
+	public:
 		void EnableImGui();
 		void DisableImGui();
 		bool IsImGuiEnabled() const;
@@ -34,6 +41,8 @@ namespace Kaka
 		void DrawTestTriangle2D();
 		void DrawTestCube3D(const float aAngle, const DirectX::XMFLOAT3 aPos);
 	private:
+		DirectX::XMMATRIX projection{};
+		DirectX::XMMATRIX camera{};
 		Microsoft::WRL::ComPtr<ID3D11Device> pDevice;
 		Microsoft::WRL::ComPtr<IDXGISwapChain> pSwap;
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext;

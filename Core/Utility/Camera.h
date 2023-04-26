@@ -6,13 +6,13 @@ namespace Kaka
 	class Camera
 	{
 	public:
-		Camera() noexcept;
-		DirectX::XMMATRIX GetMatrix() const noexcept;
-		void SpawnControlWindow() noexcept;
-		void Reset() noexcept;
-		void Rotate(float aDx, float aDy) noexcept;
-		void Translate(DirectX::XMFLOAT3 aTranslation) noexcept;
-		DirectX::XMFLOAT3 GetPos() const noexcept;
+		Camera();
+		DirectX::XMMATRIX GetMatrix() const;
+		void ShowControlWindow();
+		void Reset();
+		void Rotate(float aDx, float aDy);
+		void Translate(DirectX::XMFLOAT3 aTranslation);
+		DirectX::XMFLOAT3 GetPos() const;
 
 	private:
 		DirectX::XMFLOAT3 pos;

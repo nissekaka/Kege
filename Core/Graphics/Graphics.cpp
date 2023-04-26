@@ -4,7 +4,6 @@
 #include <External/include/imgui/imgui_impl_dx11.h>
 #include <External/include/imgui/imgui_impl_win32.h>
 #include <d3dcompiler.h>
-#include <DirectXMath.h>
 #include <algorithm>
 
 namespace WRL = Microsoft::WRL;
@@ -95,6 +94,16 @@ namespace Kaka
 		// Bind depth stencil view to OM
 		pContext->OMSetRenderTargets(1u, pTarget.GetAddressOf(), pDepth.Get());
 
+		// Configure viewport
+		D3D11_VIEWPORT vp = {};
+		vp.Width = static_cast<FLOAT>(width);
+		vp.Height = static_cast<FLOAT>(height);
+		vp.MinDepth = 0;
+		vp.MaxDepth = 1;
+		vp.TopLeftX = 0;
+		vp.TopLeftY = 0;
+		pContext->RSSetViewports(1u, &vp);
+
 		// Init imgui d3d impl
 		ImGui_ImplDX11_Init(pDevice.Get(), pContext.Get());
 	}
@@ -128,7 +137,35 @@ namespace Kaka
 			ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 		}
 
-		pSwap->Present(1u, 0u);
+		if (HRESULT hr; FAILED(hr = pSwap->Present(1u, 0u)))
+		{
+			assert(hr == DXGI_ERROR_DEVICE_REMOVED && "Device removed");
+		}
+	}
+
+	void Graphics::DrawIndexed(const UINT aCount)
+	{
+		pContext->DrawIndexed(aCount, 0u, 0u);
+	}
+
+	void Graphics::SetProjection(DirectX::FXMMATRIX aProjection)
+	{
+		projection = aProjection;
+	}
+
+	DirectX::XMMATRIX Graphics::GetProjection() const
+	{
+		return projection;
+	}
+
+	void Graphics::SetCamera(DirectX::FXMMATRIX aCamera)
+	{
+		camera = aCamera;
+	}
+
+	DirectX::XMMATRIX Graphics::GetCamera() const
+	{
+		return camera;
 	}
 
 	void Graphics::EnableImGui()
@@ -291,16 +328,6 @@ namespace Kaka
 		// Set primitive topology to triangle list (groups of 3 vertices)
 		pContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		// Configure viewport
-		D3D11_VIEWPORT vp = {};
-		vp.Width = static_cast<FLOAT>(width);
-		vp.Height = static_cast<FLOAT>(height);
-		vp.MinDepth = 0;
-		vp.MaxDepth = 0;
-		vp.TopLeftX = 0;
-		vp.TopLeftY = 0;
-		pContext->RSSetViewports(1u, &vp);
-
 		pContext->DrawIndexed(static_cast<UINT>(std::size(indices)), 0u, 0u);
 	}
 
@@ -325,14 +352,14 @@ namespace Kaka
 		};
 
 		const Vertex vertices[] = {
-			{{-1.0f,-1.0f,-1.0f},{255,0,0,255}},
-			{{1.0f,-1.0f,-1.0f},{0,255,0,255}},
-			{{-1.0f,1.0f,-1.0f},{0,0,255,255}},
-			{{1.0f,1.0f,-1.0f},{255,0,0,255}},
-			{{-1.0f,-1.0f,1.0f},{0,255,0,255}},
-			{{1.0f,-1.0f,1.0f},{0,0,255,255}},
-			{{-1.0f,1.0f,1.0f},{128,128,0,255}},
-			{{1.0f,1.0f,1.0f},{0,128,128,255}},
+			{{-0.5f,-0.5f,-0.5f},{255,0,0,255}},
+			{{0.5f,-0.5f,-0.5f},{0,255,0,255}},
+			{{-0.5f,0.5f,-0.5f},{0,0,255,255}},
+			{{0.5f,0.5f,-0.5f},{255,0,0,255}},
+			{{-0.5f,-0.5f,0.5f},{0,255,0,255}},
+			{{0.5f,-0.5f,0.5f},{0,0,255,255}},
+			{{-0.5f,0.5f,0.5f},{128,128,0,255}},
+			{{0.5f,0.5f,0.5f},{0,128,128,255}},
 		};
 
 		// Create vertex buffer
@@ -386,17 +413,13 @@ namespace Kaka
 		};
 		const ConstantBuffer cb =
 		{
-			{
-
-				DirectX::XMMatrixTranspose(
-					DirectX::XMMatrixRotationZ(aAngle) *
-					DirectX::XMMatrixRotationX(aAngle) *
-					DirectX::XMMatrixTranslation(aPos.x, aPos.y, aPos.z + 4.0f) *
-					DirectX::XMMatrixPerspectiveLH(1.0f, static_cast<float>(height) / static_cast<float>(width), 0.5f,
-					                               10.0f) *
-					DirectX::XMMatrixScaling(0.5f, 0.5f, 0.5f)
-				)
-			}
+			DirectX::XMMatrixTranspose(
+				DirectX::XMMatrixRotationZ(aAngle) *
+				DirectX::XMMatrixRotationX(aAngle) *
+				DirectX::XMMatrixTranslation(aPos.x, aPos.y, aPos.z) *
+				GetCamera() *
+				GetProjection()
+			)
 		};
 		WRL::ComPtr<ID3D11Buffer> pConstantBuffer;
 		D3D11_BUFFER_DESC cbd = {};
@@ -452,16 +475,6 @@ namespace Kaka
 
 		// Set primitive topology to triangle list (groups of 3 vertices)
 		pContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		// Configure viewport
-		D3D11_VIEWPORT vp = {};
-		vp.Width = static_cast<FLOAT>(width);
-		vp.Height = static_cast<FLOAT>(height);
-		vp.MinDepth = 0;
-		vp.MaxDepth = 1;
-		vp.TopLeftX = 0;
-		vp.TopLeftY = 0;
-		pContext->RSSetViewports(1u, &vp);
 
 		pContext->DrawIndexed(static_cast<UINT>(std::size(indices)), 0u, 0u);
 	}

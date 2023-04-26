@@ -2,15 +2,27 @@
 #include <External/include/imgui/imgui.h>
 #include <DirectXMath.h>
 
+constexpr int WINDOW_WIDTH = 1920;
+constexpr int WINDOW_HEIGHT = 1080;
+
 namespace Kaka
 {
 	Game::Game()
 		:
-		wnd(1920, 1080, L"Kaka") { }
+		wnd(WINDOW_WIDTH, WINDOW_HEIGHT, L"Kaka")
+	{
+		wnd.Gfx().SetProjection(
+			DirectX::XMMatrixPerspectiveLH(
+				1.0f,
+				static_cast<float>(WINDOW_HEIGHT) / static_cast<float>(WINDOW_WIDTH),
+				0.5f,
+				200.0f));
+	}
 
 	int Game::Go()
 	{
-		model.SetPosition({0.0f,0.0f,0.0f});
+		model2.SetPosition({1200.0f,0.0f,0.0f});
+		model2.SetScale(0.002f);
 
 		while (true)
 		{
@@ -29,17 +41,27 @@ namespace Kaka
 	{
 		UNREFERENCED_PARAMETER(aDeltaTime);
 
-		model.Rotate(timer.GetTotalTime());
-
 		// Begin frame
 		wnd.Gfx().BeginFrame();
+		wnd.Gfx().SetCamera(camera.GetMatrix());
 
+		HandleInput(aDeltaTime);
+
+		model.SetRotation({timer.GetTotalTime(),0.0f,timer.GetTotalTime()});
 		model.Draw(wnd.Gfx());
+		model2.Draw(wnd.Gfx());
 		//wnd.Gfx().DrawTestTriangle2D();
-		wnd.Gfx().DrawTestCube3D(timer.GetTotalTime(), DirectX::XMFLOAT3(3.0f, 0.0f, 0.0f));
-		wnd.Gfx().DrawTestCube3D(-timer.GetTotalTime(), DirectX::XMFLOAT3(-3.0f, 0.0f, 0.0f));
+		wnd.Gfx().DrawTestCube3D(timer.GetTotalTime(), DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f));
+		wnd.Gfx().DrawTestCube3D(-timer.GetTotalTime(), DirectX::XMFLOAT3(-1.0f, 0.0f, 0.0f));
 
-		ImGui::ShowDemoWindow();
+		// ImGui windows
+		if (showDemoWindow)
+		{
+			ImGui::ShowDemoWindow();
+		}
+		model.ShowControlWindow("Spy");
+		model2.ShowControlWindow("Muzen");
+		camera.ShowControlWindow();
 
 		// End frame
 		wnd.Gfx().EndFrame();
@@ -48,5 +70,76 @@ namespace Kaka
 	void Game::HandleInput(const float aDeltaTime)
 	{
 		UNREFERENCED_PARAMETER(aDeltaTime);
+
+		while (const auto e = wnd.keyboard.ReadKey())
+		{
+			if (!e->IsPressed())
+			{
+				continue;
+			}
+
+			switch (e->GetKeyCode())
+			{
+			case VK_ESCAPE:
+				if (wnd.CursorEnabled())
+				{
+					wnd.DisableCursor();
+					wnd.mouse.EnableRaw();
+				}
+				else
+				{
+					wnd.EnableCursor();
+					wnd.mouse.DisableRaw();
+				}
+				break;
+			case VK_F1:
+				showDemoWindow = true;
+				break;
+			}
+		}
+
+		if (!wnd.CursorEnabled())
+		{
+			if (wnd.keyboard.KeyIsPressed(VK_SHIFT))
+			{
+				cameraSpeed = cameraSpeedBoost;
+			}
+			else
+			{
+				cameraSpeed = cameraSpeedBoost;
+			}
+			if (wnd.keyboard.KeyIsPressed('W'))
+			{
+				camera.Translate({0.0f,0.0f,aDeltaTime * cameraSpeed});
+			}
+			if (wnd.keyboard.KeyIsPressed('A'))
+			{
+				camera.Translate({-aDeltaTime * cameraSpeed,0.0f,0.0f});
+			}
+			if (wnd.keyboard.KeyIsPressed('S'))
+			{
+				camera.Translate({0.0f,0.0f,-aDeltaTime * cameraSpeed});
+			}
+			if (wnd.keyboard.KeyIsPressed('D'))
+			{
+				camera.Translate({aDeltaTime * cameraSpeed,0.0f,0.0f});
+			}
+			if (wnd.keyboard.KeyIsPressed(VK_SPACE))
+			{
+				camera.Translate({0.0f,aDeltaTime * cameraSpeed,0.0f});
+			}
+			if (wnd.keyboard.KeyIsPressed(VK_CONTROL))
+			{
+				camera.Translate({0.0f,-aDeltaTime * cameraSpeed,0.0f});
+			}
+		}
+
+		while (const auto delta = wnd.mouse.ReadRawDelta())
+		{
+			if (!wnd.CursorEnabled())
+			{
+				camera.Rotate(static_cast<float>(delta->x), static_cast<float>(delta->y));
+			}
+		}
 	}
 }

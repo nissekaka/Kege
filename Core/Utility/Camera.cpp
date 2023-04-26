@@ -1,16 +1,16 @@
 #include "Camera.h"
-
-#include "KakaMath.h"
+#include "Core/Utility/KakaMath.h"
 #include "External/include/imgui/imgui.h"
+#include <algorithm>
 
 namespace Kaka
 {
-	Camera::Camera() noexcept
+	Camera::Camera()
 	{
 		Reset();
 	}
 
-	DirectX::XMMATRIX Camera::GetMatrix() const noexcept
+	DirectX::XMMATRIX Camera::GetMatrix() const
 	{
 		using namespace DirectX;
 
@@ -27,7 +27,7 @@ namespace Kaka
 		return XMMatrixLookAtLH(camPosition, camTarget, XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
 	}
 
-	void Camera::SpawnControlWindow() noexcept
+	void Camera::ShowControlWindow()
 	{
 		if (ImGui::Begin("Camera"))
 		{
@@ -46,20 +46,20 @@ namespace Kaka
 		ImGui::End();
 	}
 
-	void Camera::Reset() noexcept
+	void Camera::Reset()
 	{
-		pos = {-13.5f,6.0f,3.5f};
+		pos = {0.0f,0.0f,-4.0f};
 		pitch = 0.0f;
-		yaw = PI / 2.0f;
+		yaw = 0.0f;
 	}
 
-	void Camera::Rotate(const float aDx, const float aDy) noexcept
+	void Camera::Rotate(const float aDx, const float aDy)
 	{
 		yaw = WrapAngle(yaw + aDx * ROTATION_SPEED);
 		pitch = std::clamp(pitch + aDy * ROTATION_SPEED, 0.995f * -PI / 2.0f, 0.995f * PI / 2.0f);
 	}
 
-	void Camera::Translate(DirectX::XMFLOAT3 aTranslation) noexcept
+	void Camera::Translate(DirectX::XMFLOAT3 aTranslation)
 	{
 		DirectX::XMStoreFloat3(&aTranslation, DirectX::XMVector3Transform(
 			                       DirectX::XMLoadFloat3(&aTranslation),
@@ -74,7 +74,7 @@ namespace Kaka
 		};
 	}
 
-	DirectX::XMFLOAT3 Camera::GetPos() const noexcept
+	DirectX::XMFLOAT3 Camera::GetPos() const
 	{
 		return pos;
 	}

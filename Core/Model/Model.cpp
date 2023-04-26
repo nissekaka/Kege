@@ -4,18 +4,13 @@
 #include <d3dcompiler.h>
 #include <wrl/client.h>
 
+#include "imgui/imgui.h"
+
 namespace Kaka
 {
 	Model::Model(const std::string& aFilePath)
 	{
-		angle = 0.0f;
-		position = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 		FBXLoader::LoadMesh(aFilePath, mesh);
-	}
-
-	void Model::Rotate(const float aAngle)
-	{
-		angle = aAngle;
 	}
 
 	void Model::Draw(const Graphics& aGfx) const
@@ -62,16 +57,11 @@ namespace Kaka
 		};
 		const ConstantBuffer cb =
 		{
-			{
-
-				DirectX::XMMatrixTranspose(
-					DirectX::XMMatrixRotationZ(angle) *
-					DirectX::XMMatrixRotationX(angle) *
-					DirectX::XMMatrixTranslation(position.x, position.y, position.z + 4.0f) *
-					DirectX::XMMatrixPerspectiveLH(1.0f, static_cast<float>(aGfx.GetHeight()) / static_cast<float>(aGfx.GetWidth()), 0.5f,
-					                               10.0f)
-				)
-			}
+			DirectX::XMMatrixTranspose(
+				GetTransform() *
+				aGfx.GetCamera() *
+				aGfx.GetProjection()
+			)
 		};
 		WRL::ComPtr<ID3D11Buffer> pConstantBuffer;
 		D3D11_BUFFER_DESC cbd = {};
@@ -126,27 +116,61 @@ namespace Kaka
 			pBlob->GetBufferSize(),
 			&pInputLayout);
 
-		// Bind vertex layour
+		// Bind vertex layout
 		aGfx.pContext->IASetInputLayout(pInputLayout.Get());
 
 		// Set primitive topology to triangle list (groups of 3 vertices)
 		aGfx.pContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		// Configure viewport
-		D3D11_VIEWPORT vp = {};
-		vp.Width = static_cast<FLOAT>(aGfx.GetWidth());
-		vp.Height = static_cast<FLOAT>(aGfx.GetHeight());
-		vp.MinDepth = 0;
-		vp.MaxDepth = 1;
-		vp.TopLeftX = 0;
-		vp.TopLeftY = 0;
-		aGfx.pContext->RSSetViewports(1u, &vp);
 
 		aGfx.pContext->DrawIndexed(static_cast<UINT>(std::size(mesh.indices)), 0u, 0u);
 	}
 
 	void Model::SetPosition(const DirectX::XMFLOAT3 aPosition)
 	{
-		position = aPosition;
+		transform.x = aPosition.x;
+		transform.y = aPosition.y;
+		transform.z = aPosition.z;
+	}
+
+	void Model::SetRotation(const DirectX::XMFLOAT3 aRotation)
+	{
+		transform.roll = aRotation.x;
+		transform.pitch = aRotation.y;
+		transform.yaw = aRotation.z;
+	}
+
+	void Model::SetScale(const float aScale)
+	{
+		transform.scale = aScale;
+	}
+
+	DirectX::XMMATRIX Model::GetTransform() const
+	{
+		return DirectX::XMMatrixRotationRollPitchYaw(transform.roll, transform.pitch, transform.yaw) *
+			DirectX::XMMatrixTranslation(transform.x, transform.y, transform.z) *
+			DirectX::XMMatrixScaling(transform.scale, transform.scale, transform.scale);
+	}
+
+	void Model::ShowControlWindow(const char* aWindowName)
+	{
+		// Window name defaults to "Model"
+		aWindowName = aWindowName ? aWindowName : "Model";
+
+		if (ImGui::Begin(aWindowName))
+		{
+			ImGui::Columns(2, nullptr, true);
+			ImGui::NextColumn();
+			ImGui::Text("Orientation");
+			ImGui::SliderAngle("Roll", &transform.roll, -180.0f, 180.0f);
+			ImGui::SliderAngle("Pitch", &transform.pitch, -180.0f, 180.0f);
+			ImGui::SliderAngle("Yaw", &transform.yaw, -180.0f, 180.0f);
+			ImGui::Text("Position");
+			ImGui::SliderFloat("X", &transform.x, -2000.0f, 2000.0f);
+			ImGui::SliderFloat("Y", &transform.y, -2000.0f, 2000.0f);
+			ImGui::SliderFloat("Z", &transform.z, -2000.0f, 2000.0f);
+			ImGui::Text("Scale");
+			ImGui::SliderFloat("XYZ", &transform.scale, 0.0f, 5.0f, nullptr, ImGuiSliderFlags_Logarithmic);
+		}
+		ImGui::End();
 	}
 }

@@ -97,6 +97,7 @@
     <ClCompile Include="Input\Keyboard.cpp" />
     <ClCompile Include="Input\Mouse.cpp" />
     <ClCompile Include="Texture\Texture.cpp" />
+    <ClCompile Include="Utility\Camera.cpp" />
     <ClCompile Include="Utility\ImGuiManager.cpp" />
     <ClCompile Include="Utility\KakaUtility.cpp" />
     <ClCompile Include="Utility\Timer.cpp" />
@@ -112,6 +113,7 @@
     <ClInclude Include="Input\Mouse.h" />
     <ClInclude Include="Model\Vertex.h" />
     <ClInclude Include="Texture\Texture.h" />
+    <ClInclude Include="Utility\Camera.h" />
     <ClInclude Include="Utility\ImGuiManager.h" />
     <ClInclude Include="Utility\KakaUtility.h" />
     <ClInclude Include="Utility\Timer.h" />
