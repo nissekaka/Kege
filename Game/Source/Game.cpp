@@ -1,4 +1,5 @@
 #include "Game.h"
+#include <Core/Utility/KakaMath.h>
 #include <External/include/imgui/imgui.h>
 #include <DirectXMath.h>
 
@@ -21,8 +22,10 @@ namespace Kaka
 
 	int Game::Go()
 	{
-		//model2.SetPosition({0.0f,0.0f,0.0f});
-		//model2.SetScale(0.002f);
+		camera.SetPosition({0.0f, 1.0f, -4.0f});
+		//muzen.SetPosition({0.0f, 0.0f, 0.0f});
+		muzen.SetScale(0.002f);
+		//spy.SetRotation({PI / 2, 0.0f, 0.0f});
 
 		while (true)
 		{
@@ -47,21 +50,21 @@ namespace Kaka
 
 		HandleInput(aDeltaTime);
 
-		model.SetRotation({timer.GetTotalTime(),0.0f,timer.GetTotalTime()});
-		model.Draw(wnd.Gfx());
-		//model2.SetRotation({0.0f,timer.GetTotalTime(),0.0f});
-		//model2.Draw(wnd.Gfx());
+		//spy.SetRotation({spy.GetRotation().x, timer.GetTotalTime(), spy.GetRotation().z});
+		//spy.Draw(wnd.Gfx());
+		muzen.SetRotation({0.0f, timer.GetTotalTime(), 0.0f});
+		muzen.Draw(wnd.Gfx());
 		//wnd.Gfx().DrawTestTriangle2D();
-		wnd.Gfx().DrawTestCube3D(timer.GetTotalTime(), DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f));
-		wnd.Gfx().DrawTestCube3D(-timer.GetTotalTime(), DirectX::XMFLOAT3(-1.0f, 0.0f, 0.0f));
+		//wnd.Gfx().DrawTestCube3D(timer.GetTotalTime(), DirectX::XMFLOAT3(2.0f, 0.0f, 0.0f));
+		//wnd.Gfx().DrawTestCube3D(-timer.GetTotalTime(), DirectX::XMFLOAT3(-2.0f, 0.0f, 0.0f));
 
 		// ImGui windows
 		if (showDemoWindow)
 		{
 			ImGui::ShowDemoWindow();
 		}
-		model.ShowControlWindow("Cube");
-		//model2.ShowControlWindow("Muzen");
+		//spy.ShowControlWindow("Spy");
+		muzen.ShowControlWindow("Muzen");
 		camera.ShowControlWindow();
 
 		// End frame
@@ -112,27 +115,27 @@ namespace Kaka
 
 			if (wnd.keyboard.KeyIsPressed('W'))
 			{
-				camera.Translate({0.0f,0.0f,aDeltaTime * cameraSpeed});
+				camera.Translate({0.0f, 0.0f, aDeltaTime * cameraSpeed});
 			}
 			if (wnd.keyboard.KeyIsPressed('A'))
 			{
-				camera.Translate({-aDeltaTime * cameraSpeed,0.0f,0.0f});
+				camera.Translate({-aDeltaTime * cameraSpeed, 0.0f, 0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed('S'))
 			{
-				camera.Translate({0.0f,0.0f,-aDeltaTime * cameraSpeed});
+				camera.Translate({0.0f, 0.0f, -aDeltaTime * cameraSpeed});
 			}
 			if (wnd.keyboard.KeyIsPressed('D'))
 			{
-				camera.Translate({aDeltaTime * cameraSpeed,0.0f,0.0f});
+				camera.Translate({aDeltaTime * cameraSpeed, 0.0f, 0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed(VK_SPACE))
 			{
-				camera.Translate({0.0f,aDeltaTime * cameraSpeed,0.0f});
+				camera.Translate({0.0f, aDeltaTime * cameraSpeed, 0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed(VK_CONTROL))
 			{
-				camera.Translate({0.0f,-aDeltaTime * cameraSpeed,0.0f});
+				camera.Translate({0.0f, -aDeltaTime * cameraSpeed, 0.0f});
 			}
 		}
 

@@ -213,9 +213,9 @@ namespace Kaka
 		};
 
 		const Vertex vertices[] = {
-			{{0.0f,1.0f},{255,0,0,255}},
-			{{1.0f,-1.0f},{0,255,0,255}},
-			{{-1.0f,-1.0f},{0,0,255,255}},
+			{{0.0f, 1.0f}, {255, 0, 0, 255}},
+			{{1.0f, -1.0f}, {0, 255, 0, 255}},
+			{{-1.0f, -1.0f}, {0, 0, 255, 255}},
 		};
 
 		// Create vertex buffer
@@ -239,7 +239,7 @@ namespace Kaka
 		// Create index buffer
 		const unsigned short indices[] =
 		{
-			0,1,2,
+			0, 1, 2,
 		};
 
 		WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
@@ -312,8 +312,8 @@ namespace Kaka
 		WRL::ComPtr<ID3D11InputLayout> pInputLayout;
 		const D3D11_INPUT_ELEMENT_DESC ied[] =
 		{
-			{"POSITION",0,DXGI_FORMAT_R32G32_FLOAT,0,D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0},
-			{"COLOUR",0,DXGI_FORMAT_R8G8B8A8_UNORM,0,D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0},
+			{"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0,D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"COLOUR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0,D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
 		};
 		pDevice->CreateInputLayout(
 			ied,
@@ -352,14 +352,14 @@ namespace Kaka
 		};
 
 		const Vertex vertices[] = {
-			{{-0.5f,-0.5f,-0.5f},{255,0,0,255}},
-			{{0.5f,-0.5f,-0.5f},{0,255,0,255}},
-			{{-0.5f,0.5f,-0.5f},{0,0,255,255}},
-			{{0.5f,0.5f,-0.5f},{255,0,0,255}},
-			{{-0.5f,-0.5f,0.5f},{0,255,0,255}},
-			{{0.5f,-0.5f,0.5f},{0,0,255,255}},
-			{{-0.5f,0.5f,0.5f},{128,128,0,255}},
-			{{0.5f,0.5f,0.5f},{0,128,128,255}},
+			{{-0.5f, -0.5f, -0.5f}, {255, 0, 0, 255}},
+			{{0.5f, -0.5f, -0.5f}, {0, 255, 0, 255}},
+			{{-0.5f, 0.5f, -0.5f}, {0, 0, 255, 255}},
+			{{0.5f, 0.5f, -0.5f}, {255, 0, 0, 255}},
+			{{-0.5f, -0.5f, 0.5f}, {0, 255, 0, 255}},
+			{{0.5f, -0.5f, 0.5f}, {0, 0, 255, 255}},
+			{{-0.5f, 0.5f, 0.5f}, {128, 128, 0, 255}},
+			{{0.5f, 0.5f, 0.5f}, {0, 128, 128, 255}},
 		};
 
 		// Create vertex buffer
@@ -383,12 +383,12 @@ namespace Kaka
 		// Create index buffer
 		const unsigned short indices[] =
 		{
-			0,2,1,2,3,1,
-			1,3,5,3,7,5,
-			2,6,3,3,6,7,
-			4,5,7,4,7,6,
-			0,4,2,2,4,6,
-			0,1,4,1,5,4
+			0, 2, 1, 2, 3, 1,
+			1, 3, 5, 3, 7, 5,
+			2, 6, 3, 3, 6, 7,
+			4, 5, 7, 4, 7, 6,
+			0, 4, 2, 2, 4, 6,
+			0, 1, 4, 1, 5, 4
 		};
 
 		WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
@@ -458,10 +458,10 @@ namespace Kaka
 		const D3D11_INPUT_ELEMENT_DESC ied[] =
 		{
 			{
-				"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,
+				"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA,
 				0
 			},
-			{"COLOUR",0,DXGI_FORMAT_R8G8B8A8_UNORM,0,D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0},
+			{"COLOUR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0,D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
 		};
 		pDevice->CreateInputLayout(
 			ied,

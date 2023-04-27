@@ -1,6 +1,6 @@
 #include "Model.h"
 #include "Core/Graphics/Graphics.h"
-#include "Core/Model/FBXLoader.h"
+#include "Core/Model/MeshLoader.h"
 #include <External/include/imgui/imgui.h>
 #include <d3dcompiler.h>
 #include <wrl/client.h>
@@ -9,7 +9,7 @@ namespace Kaka
 {
 	Model::Model(const Graphics& aGfx, const std::string& aFilePath)
 	{
-		FBXLoader::LoadMesh(aFilePath, mesh);
+		MeshLoader::LoadMesh(aFilePath, mesh);
 		texture.LoadTexture(aGfx.pDevice.Get(), aFilePath);
 	}
 
@@ -22,6 +22,7 @@ namespace Kaka
 		samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
 		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 		samplerDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
 
 		ID3D11SamplerState* pSamplerState;
@@ -116,12 +117,12 @@ namespace Kaka
 		const D3D11_INPUT_ELEMENT_DESC ied[] =
 		{
 			{
-				"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-				D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+				"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+				D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 			},
 			{
-				"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,
-				D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+				"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
+				D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 			},
 
 		};
@@ -160,11 +161,26 @@ namespace Kaka
 		transform.scale = aScale;
 	}
 
+	DirectX::XMFLOAT3 Model::GetPosition() const
+	{
+		return {transform.x, transform.y, transform.z};
+	}
+
+	DirectX::XMFLOAT3 Model::GetRotation() const
+	{
+		return {transform.roll, transform.pitch, transform.yaw};
+	}
+
+	float Model::GetScale() const
+	{
+		return transform.scale;
+	}
+
 	DirectX::XMMATRIX Model::GetTransform() const
 	{
-		return DirectX::XMMatrixRotationRollPitchYaw(transform.roll, transform.pitch, transform.yaw) *
-			DirectX::XMMatrixTranslation(transform.x, transform.y, transform.z) *
-			DirectX::XMMatrixScaling(transform.scale, transform.scale, transform.scale);
+		return DirectX::XMMatrixScaling(transform.scale, transform.scale, transform.scale) *
+			DirectX::XMMatrixRotationRollPitchYaw(transform.roll, transform.pitch, transform.yaw) *
+			DirectX::XMMatrixTranslation(transform.x, transform.y, transform.z);
 	}
 
 	void Model::ShowControlWindow(const char* aWindowName)
@@ -181,9 +197,9 @@ namespace Kaka
 			ImGui::SliderAngle("Pitch", &transform.pitch, -180.0f, 180.0f);
 			ImGui::SliderAngle("Yaw", &transform.yaw, -180.0f, 180.0f);
 			ImGui::Text("Position");
-			ImGui::SliderFloat("X", &transform.x, -2000.0f, 2000.0f);
-			ImGui::SliderFloat("Y", &transform.y, -2000.0f, 2000.0f);
-			ImGui::SliderFloat("Z", &transform.z, -2000.0f, 2000.0f);
+			ImGui::SliderFloat("X", &transform.x, -20.0f, 20.0f);
+			ImGui::SliderFloat("Y", &transform.y, -20.0f, 20.0f);
+			ImGui::SliderFloat("Z", &transform.z, -20.0f, 20.0f);
 			ImGui::Text("Scale");
 			ImGui::SliderFloat("XYZ", &transform.scale, 0.0f, 5.0f, nullptr, ImGuiSliderFlags_Logarithmic);
 		}

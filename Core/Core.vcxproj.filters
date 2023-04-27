@@ -39,7 +39,7 @@
     <ClCompile Include="Utility\ImGuiManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Model\FBXLoader.cpp">
+    <ClCompile Include="Model\MeshLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Model\Model.cpp">
@@ -80,7 +80,7 @@
     <ClInclude Include="Utility\ImGuiManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Model\FBXLoader.h">
+    <ClInclude Include="Model\MeshLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Model\Model.h">

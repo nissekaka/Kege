@@ -20,7 +20,7 @@ namespace Kaka
 		if (FAILED(hr))
 		{
 			// If DDS texture not found, try to load PNG texture with the same name
-			texturePath = aFilePath.substr(0, lastDotIndex) + ".png";
+			texturePath = aFilePath.substr(0, lastDotIndex) + "_c.png";
 			hr = DirectX::LoadFromWICFile(std::wstring(texturePath.begin(), texturePath.end()).c_str(),
 			                              DirectX::WIC_FLAGS_NONE, &metadata, image);
 		}

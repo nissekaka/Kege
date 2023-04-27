@@ -6,7 +6,7 @@ namespace Kaka
 {
 	struct Mesh;
 
-	class FBXLoader
+	class MeshLoader
 	{
 	public:
 		static bool LoadMesh(const std::string& aFilePath, Mesh& aOutMesh);

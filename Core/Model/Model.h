@@ -18,6 +18,9 @@ namespace Kaka
 		void SetPosition(DirectX::XMFLOAT3 aPosition);
 		void SetRotation(DirectX::XMFLOAT3 aRotation);
 		void SetScale(float aScale);
+		DirectX::XMFLOAT3 GetPosition() const;
+		DirectX::XMFLOAT3 GetRotation() const;
+		float GetScale() const;
 		DirectX::XMMATRIX GetTransform() const;
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
