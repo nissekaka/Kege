@@ -71,15 +71,17 @@ namespace Kaka
 		struct ConstantBuffer
 		{
 			DirectX::XMMATRIX transform;
+			DirectX::XMMATRIX viewMatrix;
+			DirectX::XMMATRIX projectionMatrix;
 		};
+
 		const ConstantBuffer cb =
 		{
-			DirectX::XMMatrixTranspose(
-				GetTransform() *
-				aGfx.GetCamera() *
-				aGfx.GetProjection()
-			)
+			DirectX::XMMatrixTranspose(GetTransform()),
+			DirectX::XMMatrixTranspose(aGfx.GetCamera()),
+			DirectX::XMMatrixTranspose(aGfx.GetProjection())
 		};
+
 		WRL::ComPtr<ID3D11Buffer> pConstantBuffer;
 		D3D11_BUFFER_DESC cbd = {};
 		cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -98,7 +100,7 @@ namespace Kaka
 		// Create pixel shader
 		WRL::ComPtr<ID3D11PixelShader> pPixelShader;
 		WRL::ComPtr<ID3DBlob> pBlob;
-		D3DReadFileToBlob(L"Shaders\\Diffuse_PS.cso", &pBlob);
+		D3DReadFileToBlob(L"Shaders\\Light_PS.cso", &pBlob);
 		aGfx.pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader);
 
 		// Bind pixel shader
@@ -106,7 +108,7 @@ namespace Kaka
 
 		// Create vertex shader
 		WRL::ComPtr<ID3D11VertexShader> pVertexShader;
-		D3DReadFileToBlob(L"Shaders\\Diffuse_VS.cso", &pBlob);
+		D3DReadFileToBlob(L"Shaders\\Light_VS.cso", &pBlob);
 		aGfx.pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader);
 
 		// Bind vertex shader
@@ -128,7 +130,6 @@ namespace Kaka
 				"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
 				D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 			},
-
 		};
 		aGfx.pDevice->CreateInputLayout(
 			ied,

@@ -22,10 +22,13 @@ namespace Kaka
 
 	int Game::Go()
 	{
-		camera.SetPosition({0.0f, 1.0f, -4.0f});
-		//muzen.SetPosition({0.0f, 0.0f, 0.0f});
+		camera.SetPosition({0.0f, 1.0f, -3.0f});
+
 		muzen.SetScale(0.002f);
-		//spy.SetRotation({PI / 2, 0.0f, 0.0f});
+		muzen.SetPosition({-1.0f, 0.0f, 0.0f});
+
+		spy.SetRotation({PI / 2, 0.0f, 0.0f});
+		spy.SetPosition({1.0f, 0.0f, 0.0f});
 
 		while (true)
 		{
@@ -50,8 +53,10 @@ namespace Kaka
 
 		HandleInput(aDeltaTime);
 
-		//spy.SetRotation({spy.GetRotation().x, timer.GetTotalTime(), spy.GetRotation().z});
-		//spy.Draw(wnd.Gfx());
+		directionalLight.Bind(wnd.Gfx());
+
+		spy.SetRotation({spy.GetRotation().x, timer.GetTotalTime(), spy.GetRotation().z});
+		spy.Draw(wnd.Gfx());
 		muzen.SetRotation({0.0f, timer.GetTotalTime(), 0.0f});
 		muzen.Draw(wnd.Gfx());
 		//wnd.Gfx().DrawTestTriangle2D();
@@ -63,8 +68,9 @@ namespace Kaka
 		{
 			ImGui::ShowDemoWindow();
 		}
-		//spy.ShowControlWindow("Spy");
+		spy.ShowControlWindow("Spy");
 		muzen.ShowControlWindow("Muzen");
+		directionalLight.ShowControlWindow("Light");
 		camera.ShowControlWindow();
 
 		// End frame

@@ -1,8 +1,9 @@
 #pragma once
+#include "Core/Windows/Window.h"
 #include "Core/Utility/ImGuiManager.h"
 #include "Core/Utility/Timer.h"
 #include "Core/Utility/Camera.h"
-#include "Core/Windows/Window.h"
+#include "Core/Lighting/DirectionalLight.h"
 #include "Core/Model/Model.h"
 
 namespace Kaka
@@ -21,6 +22,7 @@ namespace Kaka
 		Window wnd;
 		Timer timer;
 		Camera camera;
+		DirectionalLight directionalLight;
 	private:
 		bool showDemoWindow = false;
 	private:
@@ -28,7 +30,7 @@ namespace Kaka
 		float cameraSpeedNormal = 1.0f;
 		float cameraSpeedBoost = 2.0f;
 	private:
-		//Model spy{wnd.Gfx(), "Assets\\Models\\spy\\spy.fbx"};
+		Model spy{wnd.Gfx(), "Assets\\Models\\spy\\spy.fbx"};
 		//Model model{wnd.Gfx(), "Assets\\Models\\vamp\\vamp.obj"};
 		Model muzen{wnd.Gfx(), "Assets\\Models\\muzen\\MuzenSpeaker.fbx"};
 	};

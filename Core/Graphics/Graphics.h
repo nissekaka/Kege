@@ -17,6 +17,7 @@ namespace Kaka
 	class Graphics
 	{
 		friend class Model;
+		friend class DirectionalLight;
 	public:
 		Graphics(HWND aHWnd, UINT aWidth, UINT aHeight);
 		Graphics(const Graphics&) = delete;
