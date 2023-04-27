@@ -17,6 +17,7 @@ namespace Kaka
 	{
 		namespace WRL = Microsoft::WRL;
 
+		// ----------------- SAMPLER -----------------
 		// Create a sampler state
 		D3D11_SAMPLER_DESC samplerDesc = CD3D11_SAMPLER_DESC{CD3D11_DEFAULT{}};
 		samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
@@ -31,9 +32,16 @@ namespace Kaka
 		// Bind the sampler state to the device context
 		aGfx.pContext->PSSetSamplers(0, 1, &pSamplerState);
 
+		// ----------------- END SAMPLER -----------------
+
+
+		// ----------------- TEXTURE -----------------
 		// Bind shader resource view to pixel shader
 		texture.Bind(aGfx.pContext.Get(), 0);
+		// ----------------- END TEXTURE -----------------
 
+
+		// ----------------- VERTEX BUFFER -----------------
 		// Create vertex buffer
 		WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
 		D3D11_BUFFER_DESC vbd = {};
@@ -51,7 +59,10 @@ namespace Kaka
 		const UINT stride = sizeof(Vertex);
 		const UINT offset = 0u;
 		aGfx.pContext->IASetVertexBuffers(0u, 1u, pVertexBuffer.GetAddressOf(), &stride, &offset);
+		// ----------------- END VERTEX BUFFER -----------------
 
+
+		// ----------------- INDEX BUFFER -----------------
 		WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
 		D3D11_BUFFER_DESC ibd = {};
 		ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
@@ -66,7 +77,10 @@ namespace Kaka
 
 		// Bind index buffer
 		aGfx.pContext->IASetIndexBuffer(pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
+		// ----------------- END INDEX BUFFER -----------------
 
+
+		// ----------------- TRANSFORM CONSTANT BUFFER -----------------
 		// Create constant buffer for transformation matrix
 		struct ConstantBuffer
 		{
@@ -96,7 +110,10 @@ namespace Kaka
 
 		// Bind constant buffer to vertex shader
 		aGfx.pContext->VSSetConstantBuffers(0u, 1u, pConstantBuffer.GetAddressOf());
+		// ----------------- END TRANSFORM CONSTANT BUFFER -----------------
 
+
+		// ----------------- PIXEL SHADER ----------------- CREATE BLOB BEFORE THIS
 		// Create pixel shader
 		WRL::ComPtr<ID3D11PixelShader> pPixelShader;
 		WRL::ComPtr<ID3DBlob> pBlob;
@@ -105,7 +122,10 @@ namespace Kaka
 
 		// Bind pixel shader
 		aGfx.pContext->PSSetShader(pPixelShader.Get(), nullptr, 0u);
+		// ----------------- END PIXEL SHADER -----------------
 
+
+		// ----------------- VERTEX SHADER ----------------- NEEDS BLOB
 		// Create vertex shader
 		WRL::ComPtr<ID3D11VertexShader> pVertexShader;
 		D3DReadFileToBlob(L"Shaders\\Light_VS.cso", &pBlob);
@@ -113,7 +133,10 @@ namespace Kaka
 
 		// Bind vertex shader
 		aGfx.pContext->VSSetShader(pVertexShader.Get(), nullptr, 0u);
+		// ----------------- END VERTEX SHADER -----------------
 
+
+		// ----------------- INPUT VERTEX LAYOUT ----------------- NEEDS BLOB
 		// Input (vertex) layout
 		WRL::ComPtr<ID3D11InputLayout> pInputLayout;
 		const D3D11_INPUT_ELEMENT_DESC ied[] =
@@ -140,10 +163,16 @@ namespace Kaka
 
 		// Bind vertex layout
 		aGfx.pContext->IASetInputLayout(pInputLayout.Get());
+		// ----------------- END INPUT VERTEX LAYOUT -----------------
 
+
+		// ----------------- TOPOLOGY -----------------
 		// Set primitive topology to triangle list (groups of 3 vertices)
 		aGfx.pContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		// ----------------- END TOPOLOGY -----------------
 
+
+		// Draw
 		aGfx.pContext->DrawIndexed(static_cast<UINT>(std::size(mesh.indices)), 0u, 0u);
 	}
 
