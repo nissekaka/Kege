@@ -29,16 +29,11 @@ namespace Kaka
 		const aiMesh* mesh = scene->mMeshes[0];
 
 		aOutMesh.vertices.reserve(mesh->mNumVertices);
-		//for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
-		//{
-		//	aOutMesh.vertices.push_back({
-		//		{mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z},
-		//		*reinterpret_cast<DirectX::XMFLOAT3*>(&mesh->mNormals[i])
-		//	});
-		//}
+
 		for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
 		{
 			const DirectX::XMFLOAT3 position{mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z};
+			const DirectX::XMFLOAT3 normal = *reinterpret_cast<DirectX::XMFLOAT3*>(&mesh->mNormals[i]);
 			DirectX::XMFLOAT2 texCoord{0.0f, 0.0f};
 
 			// Check if the mesh has texture coordinates
@@ -50,7 +45,7 @@ namespace Kaka
 				texCoord.y = aiTexCoord.y;
 			}
 
-			aOutMesh.vertices.push_back({position, texCoord});
+			aOutMesh.vertices.push_back({position, normal, texCoord});
 		}
 
 		aOutMesh.indices.reserve(
