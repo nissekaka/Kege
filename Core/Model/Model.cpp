@@ -176,16 +176,17 @@ namespace Kaka
 		return {transform.roll, transform.pitch, transform.yaw};
 	}
 
-	float Model::GetScale() const
-	{
-		return transform.scale;
-	}
-
 	DirectX::XMMATRIX Model::GetTransform() const
 	{
+		// TODO Rotates faster when scale is low, scale should only affect size
 		return DirectX::XMMatrixScaling(transform.scale, transform.scale, transform.scale) *
 			DirectX::XMMatrixRotationRollPitchYaw(transform.roll, transform.pitch, transform.yaw) *
 			DirectX::XMMatrixTranslation(transform.x, transform.y, transform.z);
+	}
+
+	float Model::GetScale() const
+	{
+		return transform.scale;
 	}
 
 	void Model::ShowControlWindow(const char* aWindowName)

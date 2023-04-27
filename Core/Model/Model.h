@@ -20,8 +20,8 @@ namespace Kaka
 		void SetScale(float aScale);
 		DirectX::XMFLOAT3 GetPosition() const;
 		DirectX::XMFLOAT3 GetRotation() const;
-		float GetScale() const;
 		DirectX::XMMATRIX GetTransform() const;
+		float GetScale() const;
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
 	private:

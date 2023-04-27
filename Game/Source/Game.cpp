@@ -57,7 +57,7 @@ namespace Kaka
 
 		spy.SetRotation({spy.GetRotation().x, timer.GetTotalTime(), spy.GetRotation().z});
 		spy.Draw(wnd.Gfx());
-		muzen.SetRotation({0.0f, timer.GetTotalTime(), 0.0f});
+		muzen.SetRotation({muzen.GetRotation().x, timer.GetTotalTime(), muzen.GetRotation().z});
 		muzen.Draw(wnd.Gfx());
 		//wnd.Gfx().DrawTestTriangle2D();
 		//wnd.Gfx().DrawTestCube3D(timer.GetTotalTime(), DirectX::XMFLOAT3(2.0f, 0.0f, 0.0f));
