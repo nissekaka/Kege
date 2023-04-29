@@ -1,0 +1,15 @@
+#pragma once
+#include "Bindable.h"
+#include <string>
+
+namespace Kaka
+{
+	class PixelShader : public Bindable
+	{
+	public:
+		PixelShader(const Graphics& aGfx, const std::wstring& aPath);
+		void Bind(const Graphics& aGfx) override;
+	protected:
+		Microsoft::WRL::ComPtr<ID3D11PixelShader> pPixelShader;
+	};
+}

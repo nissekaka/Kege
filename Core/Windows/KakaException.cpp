@@ -3,12 +3,12 @@
 
 namespace Kaka
 {
-	KakaException::KakaException(const int aLine, const char* aFile) noexcept
+	KakaException::KakaException(const int aLine, const char* aFile) 
 		:
 		line(aLine),
 		file(aFile) {}
 
-	const char* KakaException::what() const noexcept
+	const char* KakaException::what() const 
 	{
 		std::ostringstream oss;
 		oss << GetType() << std::endl
@@ -17,22 +17,22 @@ namespace Kaka
 		return whatBuffer.c_str();
 	}
 
-	const char* KakaException::GetType() const noexcept
+	const char* KakaException::GetType() const 
 	{
 		return "Kaka Exception";
 	}
 
-	int KakaException::GetLine() const noexcept
+	int KakaException::GetLine() const 
 	{
 		return line;
 	}
 
-	const std::string& KakaException::GetFile() const noexcept
+	const std::string& KakaException::GetFile() const 
 	{
 		return file;
 	}
 
-	std::string KakaException::GetOriginString() const noexcept
+	std::string KakaException::GetOriginString() const 
 	{
 		std::ostringstream oss;
 		oss << "[File] " << file << std::endl

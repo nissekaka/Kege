@@ -91,13 +91,23 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Core.cpp" />
+    <ClCompile Include="Model\Drawable.cpp" />
+    <ClCompile Include="Graphics\Bindable\Bindable.cpp" />
+    <ClCompile Include="Graphics\Bindable\IndexBuffer.cpp" />
+    <ClCompile Include="Graphics\Bindable\InputLayout.cpp" />
+    <ClCompile Include="Graphics\Bindable\PixelShader.cpp" />
+    <ClCompile Include="Graphics\Bindable\Topology.cpp" />
+    <ClCompile Include="Graphics\Bindable\TransformConstantBuffer.cpp" />
+    <ClCompile Include="Graphics\Bindable\VertexBuffer.cpp" />
+    <ClCompile Include="Graphics\Bindable\VertexShader.cpp" />
     <ClCompile Include="Lighting\DirectionalLight.cpp" />
     <ClCompile Include="Model\Model.cpp" />
     <ClCompile Include="Model\MeshLoader.cpp" />
     <ClCompile Include="Graphics\Graphics.cpp" />
     <ClCompile Include="Input\Keyboard.cpp" />
     <ClCompile Include="Input\Mouse.cpp" />
-    <ClCompile Include="Texture\Texture.cpp" />
+    <ClCompile Include="Graphics\Bindable\Texture.cpp" />
+    <ClCompile Include="Graphics\Bindable\Sampler.cpp" />
     <ClCompile Include="Utility\Camera.cpp" />
     <ClCompile Include="Utility\ImGuiManager.cpp" />
     <ClCompile Include="Utility\KakaUtility.cpp" />
@@ -106,6 +116,17 @@
     <ClCompile Include="Windows\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Model\Drawable.h" />
+    <ClInclude Include="Graphics\Bindable\Bindable.h" />
+    <ClInclude Include="Graphics\Bindable\BindableCommon.h" />
+    <ClInclude Include="Graphics\Bindable\ConstantBuffers.h" />
+    <ClInclude Include="Graphics\Bindable\IndexBuffer.h" />
+    <ClInclude Include="Graphics\Bindable\InputLayout.h" />
+    <ClInclude Include="Graphics\Bindable\PixelShader.h" />
+    <ClInclude Include="Graphics\Bindable\Topology.h" />
+    <ClInclude Include="Graphics\Bindable\TransformConstantBuffer.h" />
+    <ClInclude Include="Graphics\Bindable\VertexBuffer.h" />
+    <ClInclude Include="Graphics\Bindable\VertexShader.h" />
     <ClInclude Include="Lighting\DirectionalLight.h" />
     <ClInclude Include="Model\Mesh.h" />
     <ClInclude Include="Model\Model.h" />
@@ -114,7 +135,8 @@
     <ClInclude Include="Input\Keyboard.h" />
     <ClInclude Include="Input\Mouse.h" />
     <ClInclude Include="Model\Vertex.h" />
-    <ClInclude Include="Texture\Texture.h" />
+    <ClInclude Include="Graphics\Bindable\Texture.h" />
+    <ClInclude Include="Graphics\Bindable\Sampler.h" />
     <ClInclude Include="Utility\Camera.h" />
     <ClInclude Include="Utility\ImGuiManager.h" />
     <ClInclude Include="Utility\KakaUtility.h" />

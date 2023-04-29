@@ -7,12 +7,12 @@ namespace Kaka
 	class KakaException : public std::exception
 	{
 	public:
-		KakaException(int aLine, const char* aFile) noexcept;
-		const char* what() const noexcept override;
-		virtual const char* GetType() const noexcept;
-		int GetLine() const noexcept;
-		const std::string& GetFile() const noexcept;
-		std::string GetOriginString() const noexcept;
+		KakaException(int aLine, const char* aFile) ;
+		const char* what() const  override;
+		virtual const char* GetType() const ;
+		int GetLine() const ;
+		const std::string& GetFile() const ;
+		std::string GetOriginString() const ;
 	private:
 		int line;
 		std::string file;

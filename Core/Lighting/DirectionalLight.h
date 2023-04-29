@@ -8,7 +8,7 @@ namespace Kaka
 	class DirectionalLight
 	{
 	public:
-		DirectionalLight();
+		DirectionalLight(const UINT aSlot = 0u);
 		void Bind(const Graphics& aGfx);
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
@@ -24,5 +24,6 @@ namespace Kaka
 
 	private:
 		DirectionalLightBuffer bufferData;
+		UINT slot;
 	};
 }

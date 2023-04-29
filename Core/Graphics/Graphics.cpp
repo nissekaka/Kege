@@ -3,7 +3,6 @@
 #include "Game/Source/Game.h"
 #include <External/include/imgui/imgui_impl_dx11.h>
 #include <External/include/imgui/imgui_impl_win32.h>
-#include <d3dcompiler.h>
 #include <algorithm>
 
 namespace WRL = Microsoft::WRL;

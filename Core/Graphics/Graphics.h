@@ -2,6 +2,9 @@
 #include <wrl.h>
 #include <DirectXMath.h>
 #include <d3d11.h>
+#include <d3dcompiler.h>
+#include <memory>
+#include <vector>
 
 #define KAKA_BG_COLOUR {0.1f, 0.2f, 0.3f, 1.0f}
 
@@ -17,6 +20,7 @@ namespace Kaka
 	class Graphics
 	{
 		friend class Model;
+		friend class Bindable;
 		friend class DirectionalLight;
 	public:
 		Graphics(HWND aHWnd, UINT aWidth, UINT aHeight);

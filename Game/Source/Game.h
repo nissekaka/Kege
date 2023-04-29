@@ -22,7 +22,7 @@ namespace Kaka
 		Window wnd;
 		Timer timer;
 		Camera camera;
-		DirectionalLight directionalLight;
+		DirectionalLight directionalLight{1u};
 	private:
 		bool showDemoWindow = false;
 	private:

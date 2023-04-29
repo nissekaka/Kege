@@ -3,7 +3,11 @@
 
 namespace Kaka
 {
-	void Texture::LoadTexture(ID3D11Device* aPDevice, const std::string& aFilePath)
+	Texture::Texture(const UINT aSlot)
+		:
+		slot(aSlot) {}
+
+	void Texture::LoadTexture(const Graphics& aGfx, const std::string& aFilePath)
 	{
 		DirectX::ScratchImage image;
 
@@ -31,7 +35,7 @@ namespace Kaka
 			if (SUCCEEDED(hr))
 			{
 				// Create the shader resource view from the loaded texture
-				hr = CreateShaderResourceView(aPDevice, image.GetImages(), image.GetImageCount(), metadata,
+				hr = CreateShaderResourceView(GetDevice(aGfx), image.GetImages(), image.GetImageCount(), metadata,
 				                              pTexture.GetAddressOf());
 				const std::string text =
 					"\n+++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -97,9 +101,9 @@ namespace Kaka
 		//}
 	}
 
-	void Texture::Bind(ID3D11DeviceContext* aPContext, const unsigned int aSlot) const
+	void Texture::Bind(const Graphics& aGfx)
 	{
-		aPContext->PSSetShaderResources(aSlot, 1u, pTexture.GetAddressOf());
+		GetContext(aGfx)->PSSetShaderResources(slot, 1u, pTexture.GetAddressOf());
 	}
 
 	//ID3D11ShaderResourceView* Texture::GetTexture()

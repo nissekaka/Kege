@@ -6,7 +6,9 @@
 
 namespace Kaka
 {
-	DirectionalLight::DirectionalLight()
+	DirectionalLight::DirectionalLight(const UINT aSlot)
+		:
+		slot(aSlot)
 	{
 		Reset();
 	}
@@ -28,8 +30,8 @@ namespace Kaka
 		aGfx.pDevice->CreateBuffer(&dbd, &dsd, &pDirectionalLightBuffer);
 
 		// Bind directional light buffer to vertex shader
-		aGfx.pContext->VSSetConstantBuffers(1u, 1u, pDirectionalLightBuffer.GetAddressOf());
-		aGfx.pContext->PSSetConstantBuffers(1u, 1u, pDirectionalLightBuffer.GetAddressOf());
+		aGfx.pContext->VSSetConstantBuffers(slot, 1u, pDirectionalLightBuffer.GetAddressOf());
+		aGfx.pContext->PSSetConstantBuffers(slot, 1u, pDirectionalLightBuffer.GetAddressOf());
 	}
 
 	void DirectionalLight::ShowControlWindow(const char* aWindowName)

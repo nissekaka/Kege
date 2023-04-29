@@ -1,22 +1,25 @@
 #pragma once
+#include "Bindable.h"
 #include <External/include/dxtex/DirectXTex.h>
 #include <string>
 #include <d3d11.h>
 #include <stdexcept>
 #include <wrl/client.h>
 
+
 namespace Kaka
 {
-	class Texture
+	class Texture : public Bindable
 	{
 	public:
-		Texture() = default;
+		Texture(const UINT aSlot = 0u);
 		~Texture() = default;
-		void LoadTexture(ID3D11Device* aPDevice, const std::string& aFilePath);
-		void Bind(ID3D11DeviceContext* aPContext, unsigned int aSlot = 0u) const;
+		void LoadTexture(const Graphics& aGfx, const std::string& aFilePath);
+		void Bind(const Graphics& aGfx) override;
 		//ID3D11ShaderResourceView* GetTexture();
 
 	private:
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pTexture;
+		UINT slot;
 	};
 }

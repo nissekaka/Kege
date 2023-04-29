@@ -1,15 +1,16 @@
 #pragma once
-#include "Model.h"
+#include "Drawable.h"
 #include "Core/Model/Mesh.h"
-#include "Core/Texture/Texture.h"
+#include "Core/Graphics/Bindable/BindableCommon.h"
 #include <DirectXMath.h>
 #include <string>
+
 
 namespace Kaka
 {
 	class Graphics;
 
-	class Model
+	class Model : public Drawable
 	{
 	public:
 		Model(const Graphics& aGfx, const std::string& aFilePath);
@@ -20,7 +21,7 @@ namespace Kaka
 		void SetScale(float aScale);
 		DirectX::XMFLOAT3 GetPosition() const;
 		DirectX::XMFLOAT3 GetRotation() const;
-		DirectX::XMMATRIX GetTransform() const;
+		DirectX::XMMATRIX GetTransform() const override;
 		float GetScale() const;
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
@@ -39,6 +40,7 @@ namespace Kaka
 		TransformParameters transform;
 	private:
 		Mesh mesh;
-		Texture texture;
+		Texture texture{0u};
+		std::vector<std::unique_ptr<Bindable>> bindablePtrs;
 	};
 }
