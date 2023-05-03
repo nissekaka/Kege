@@ -36,19 +36,28 @@ namespace Kaka
 
 			if (SUCCEEDED(hr))
 			{
+				//if (metadata.format != DXGI_FORMAT_B8G8R8A8_UNORM)
+				//{
+				//	DirectX::ScratchImage decompressedImage;
+				//	// Decompress the texture to a new format (in this case, DXGI_FORMAT_R8G8B8A8_UNORM)
+				//	hr = DirectX::Decompress(image.GetImages(), image.GetImageCount(), image.GetMetadata(),
+				//	                         DXGI_FORMAT_R8G8B8A8_UNORM, decompressedImage);
+				//	image = std::move(decompressedImage);
+				//}
+
 				//// Create texture resource
 				//D3D11_TEXTURE2D_DESC textureDesc = {};
 				//textureDesc.Width = (UINT)metadata.width;
 				//textureDesc.Height = (UINT)metadata.height;
-				//textureDesc.MipLevels = 1;
-				//textureDesc.ArraySize = 1;
+				//textureDesc.MipLevels = 1u;
+				//textureDesc.ArraySize = 1u;
 				//textureDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-				//textureDesc.SampleDesc.Count = 1;
-				//textureDesc.SampleDesc.Quality = 0;
+				//textureDesc.SampleDesc.Count = 1u;
+				//textureDesc.SampleDesc.Quality = 0u;
 				//textureDesc.Usage = D3D11_USAGE_DEFAULT;
 				//textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-				//textureDesc.CPUAccessFlags = 0;
-				//textureDesc.MiscFlags = 0;
+				//textureDesc.CPUAccessFlags = 0u;
+				//textureDesc.MiscFlags = 0u;
 
 				//D3D11_SUBRESOURCE_DATA sd = {};
 				//sd.pSysMem = image.GetPixels();
@@ -255,7 +264,8 @@ namespace Kaka
 		//{
 		//	GetContext(aGfx)->PSSetShaderResources(slot + i, 1u, pTextures[i].GetAddressOf());
 		//}
-		GetContext(aGfx)->PSSetShaderResources(slot, static_cast<UINT>(pTextures.size()), pTextures.data()->GetAddressOf());
+		GetContext(aGfx)->PSSetShaderResources(slot, static_cast<UINT>(pTextures.size()),
+		                                       pTextures.data()->GetAddressOf());
 	}
 
 	BOOL Texture::HasNormalMap() const
