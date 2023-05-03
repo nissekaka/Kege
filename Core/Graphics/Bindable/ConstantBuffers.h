@@ -59,13 +59,14 @@ namespace Kaka
 	class VertexConstantBuffer : public ConstantBuffer<C>
 	{
 		using ConstantBuffer<C>::pConstantBuffer;
+		using ConstantBuffer<C>::slot;
 		using Bindable::GetContext;
 	public:
 		using ConstantBuffer<C>::ConstantBuffer;
 
 		void Bind(const Graphics& aGfx) override
 		{
-			GetContext(aGfx)->VSSetConstantBuffers(0u, 1u, pConstantBuffer.GetAddressOf());
+			GetContext(aGfx)->VSSetConstantBuffers(slot, 1u, pConstantBuffer.GetAddressOf());
 		}
 	};
 
@@ -73,13 +74,14 @@ namespace Kaka
 	class PixelConstantBuffer : public ConstantBuffer<C>
 	{
 		using ConstantBuffer<C>::pConstantBuffer;
+		using ConstantBuffer<C>::slot;
 		using Bindable::GetContext;
 	public:
 		using ConstantBuffer<C>::ConstantBuffer;
 
 		void Bind(const Graphics& aGfx) override
 		{
-			GetContext(aGfx)->PSSetConstantBuffers(0u, 1u, pConstantBuffer.GetAddressOf());
+			GetContext(aGfx)->PSSetConstantBuffers(slot, 1u, pConstantBuffer.GetAddressOf());
 		}
 	};
 }

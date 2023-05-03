@@ -32,9 +32,11 @@ namespace Kaka
 
 		for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
 		{
-			const DirectX::XMFLOAT3 position{mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z};
+			const DirectX::XMFLOAT3 position{mesh->mVertices[i].x,mesh->mVertices[i].y,mesh->mVertices[i].z};
 			const DirectX::XMFLOAT3 normal = *reinterpret_cast<DirectX::XMFLOAT3*>(&mesh->mNormals[i]);
-			DirectX::XMFLOAT2 texCoord{0.0f, 0.0f};
+			DirectX::XMFLOAT2 texCoord{0.0f,0.0f};
+			DirectX::XMFLOAT3 tangent{0.0f,0.0f,0.0f};
+			DirectX::XMFLOAT3 bitangent{0.0f,0.0f,0.0f};
 
 			// Check if the mesh has texture coordinates
 			if (mesh->HasTextureCoords(0))
@@ -45,7 +47,13 @@ namespace Kaka
 				texCoord.y = aiTexCoord.y;
 			}
 
-			aOutMesh.vertices.push_back({position, normal, texCoord});
+			if (mesh->HasTangentsAndBitangents())
+			{
+				tangent = *reinterpret_cast<DirectX::XMFLOAT3*>(&mesh->mTangents[i]);
+				bitangent = *reinterpret_cast<DirectX::XMFLOAT3*>(&mesh->mBitangents[i]);
+			}
+
+			aOutMesh.vertices.push_back({position,normal,texCoord,tangent,bitangent});
 		}
 
 		aOutMesh.indices.reserve(

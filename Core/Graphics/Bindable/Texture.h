@@ -13,13 +13,16 @@ namespace Kaka
 	{
 	public:
 		Texture(const UINT aSlot = 0u);
-		~Texture() = default;
+		~Texture() override = default;
 		void LoadTexture(const Graphics& aGfx, const std::string& aFilePath);
 		void Bind(const Graphics& aGfx) override;
-		//ID3D11ShaderResourceView* GetTexture();
+		BOOL HasNormalMap() const;
+		BOOL HasMaterial() const;
 
 	private:
-		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pTexture;
+		std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> pTextures;
 		UINT slot;
+		BOOL hasNormalMap = FALSE;
+		BOOL hasMaterial = FALSE;
 	};
 }
