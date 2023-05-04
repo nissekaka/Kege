@@ -22,6 +22,7 @@ namespace Kaka
 		friend class Model;
 		friend class Bindable;
 		friend class DirectionalLight;
+		friend class PointLight;
 	public:
 		Graphics(HWND aHWnd, UINT aWidth, UINT aHeight);
 		Graphics(const Graphics&) = delete;

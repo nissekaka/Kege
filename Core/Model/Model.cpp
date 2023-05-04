@@ -42,7 +42,7 @@ namespace Kaka
 		pmc.normalMapEnabled = texture.HasNormalMap();
 		pmc.materialEnabled = texture.HasMaterial();
 
-		PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 2u);
+		PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 3u);
 		psConstantBuffer.Bind(aGfx);
 
 		VertexShader vertexShader(aGfx, L"Shaders\\Light_VS.cso");

@@ -17,7 +17,7 @@ namespace Kaka
 		struct DirectionalLightBuffer
 		{
 			DirectX::XMFLOAT3 lightDirection;
-			float padding1;
+			float padding;
 			DirectX::XMFLOAT3 lightColour;
 			float ambientLight;
 		};

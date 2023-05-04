@@ -54,6 +54,7 @@ namespace Kaka
 		HandleInput(aDeltaTime);
 
 		directionalLight.Bind(wnd.Gfx());
+		pointLight.Bind(wnd.Gfx());
 
 		spy.SetRotation({spy.GetRotation().x,timer.GetTotalTime(),spy.GetRotation().z});
 		spy.Draw(wnd.Gfx());
@@ -70,7 +71,8 @@ namespace Kaka
 		}
 		spy.ShowControlWindow("Spy");
 		muzen.ShowControlWindow("Muzen");
-		directionalLight.ShowControlWindow("Light");
+		directionalLight.ShowControlWindow("Directional Light");
+		pointLight.ShowControlWindow("Point Light");
 		camera.ShowControlWindow();
 
 		// End frame

@@ -37,7 +37,7 @@ namespace Kaka
 	void DirectionalLight::ShowControlWindow(const char* aWindowName)
 	{
 		// Window name defaults to "Light"
-		aWindowName = aWindowName ? aWindowName : "Light";
+		aWindowName = aWindowName ? aWindowName : "Directional Light";
 
 		if (ImGui::Begin(aWindowName))
 		{
@@ -61,9 +61,9 @@ namespace Kaka
 	{
 		bufferData =
 		{
-			{-1.0f, -1.0f, 1.0f},
+			{-1.0f,-1.0f,1.0f},
 			0.0f,
-			{1.0f, 1.0f, 1.0f},
+			{1.0f,1.0f,1.0f},
 			0.4f
 		};
 	}

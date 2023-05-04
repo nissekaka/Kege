@@ -6,7 +6,17 @@ cbuffer DirectionalLightBuffer : register(b1)
     float ambientLight;
 };
 
-cbuffer ModelBuffer : register(b2)
+cbuffer PointLightBuffer : register(b2)
+{
+    float3 lightPos;
+    float3 diffuseColour;
+    float diffuseIntensity;
+    float attConst;
+    float attLin;
+    float attQuad;
+}
+
+cbuffer ModelBuffer : register(b3)
 {
     bool normalMapEnabled;
     bool materialEnabled;
@@ -21,9 +31,9 @@ struct PixelInput
     float3 bitan : BITANGENT;
 };
 
-Texture2D diffuseTexture;
-Texture2D normalTexture;
-Texture2D materialTexture;
+Texture2D albedoTex;
+Texture2D normalTex;
+Texture2D materialTex;
 
 SamplerState splr;
 
@@ -34,7 +44,7 @@ float4 main(PixelInput aInput) : SV_TARGET
         const float3x3 tanBitanNorm = float3x3(normalize(aInput.tan), normalize(aInput.bitan), normalize(aInput.normal));
 
     	// Sample the normal map texture
-        float3 normal = normalTexture.Sample(splr, aInput.texCoord).wyz * 2.0f - 1.0f;
+        float3 normal = normalTex.Sample(splr, aInput.texCoord).wyz * 2.0f - 1.0f;
         normal.z = sqrt(1 - saturate(normal.x * normal.x + normal.y * normal.y));
         normal = normalize(normal);
 
@@ -42,16 +52,21 @@ float4 main(PixelInput aInput) : SV_TARGET
         aInput.normal = mul(normal, tanBitanNorm);
     }
 
+    const float3 vToL = lightPos - (float3) aInput.position;
+    const float distToL = length(vToL);
+    const float3 dirToL = vToL / distToL;
+    const float att = 1.0f / (attConst + attLin * distToL + attQuad * (distToL * distToL));
+
 	// Use the transformed normal for lighting calculations
-    const float diffuseFactor = max(0, dot(aInput.normal, -lightDirection));
-    const float4 textureColour = diffuseTexture.Sample(splr, aInput.texCoord);
+    const float diffuseFactor = max(0, dot(aInput.normal, -lightDirection)) + att * max(0.0f, dot(dirToL, aInput.normal));
+    const float4 textureColour = albedoTex.Sample(splr, aInput.texCoord);
     float3 specularColour = {0.0f, 0.0f, 0.0f};
-	float3 diffuseColour = diffuseFactor * lightColour;
+    float3 diffuseColour = diffuseFactor * lightColour;
 
     if (materialEnabled)
     {
 		// Sample the material texture
-        const float3 material = materialTexture.Sample(splr, aInput.texCoord).xyz;
+        const float3 material = materialTex.Sample(splr, aInput.texCoord).xyz;
 
         float metalness = material.r;
         float roughness = material.g;

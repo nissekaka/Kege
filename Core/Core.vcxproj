@@ -91,6 +91,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Core.cpp" />
+    <ClCompile Include="Lighting\PointLight.cpp" />
     <ClCompile Include="Model\Drawable.cpp" />
     <ClCompile Include="Graphics\Bindable\Bindable.cpp" />
     <ClCompile Include="Graphics\Bindable\IndexBuffer.cpp" />
@@ -116,6 +117,7 @@
     <ClCompile Include="Windows\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Lighting\PointLight.h" />
     <ClInclude Include="Model\Drawable.h" />
     <ClInclude Include="Graphics\Bindable\Bindable.h" />
     <ClInclude Include="Graphics\Bindable\BindableCommon.h" />
