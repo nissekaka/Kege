@@ -9,11 +9,11 @@ namespace Kaka
 	class PointLight
 	{
 	public:
-		PointLight(Graphics& aGfx, const UINT aSlot = 0u, float aRadius = 0.5f);
+		PointLight(Graphics& aGfx, const UINT aSlot = 0u);
 		void Bind(const Graphics& aGfx);
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
-		void Draw(Graphics& aGfx);
+		void SetModelPosition(Model& aModel);
 		void Reset();
 	private:
 		struct PointLightBuffer

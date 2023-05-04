@@ -13,8 +13,11 @@ namespace Kaka
 	class Model : public Drawable
 	{
 	public:
-		Model(const Graphics& aGfx, const std::string& aFilePath);
-		~Model() = default;
+		enum class eShaderType { Default, Light };
+
+	public:
+		Model(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType);
+		~Model() override = default;
 		void Draw(const Graphics& aGfx);
 		void SetPosition(DirectX::XMFLOAT3 aPosition);
 		void SetRotation(DirectX::XMFLOAT3 aRotation);
@@ -25,6 +28,8 @@ namespace Kaka
 		float GetScale() const;
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
+	private:
+		eShaderType shaderType;
 	private:
 		struct TransformParameters
 		{

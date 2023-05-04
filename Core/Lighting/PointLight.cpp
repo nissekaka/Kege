@@ -3,12 +3,11 @@
 
 namespace Kaka
 {
-	PointLight::PointLight(Graphics& aGfx, const UINT aSlot, float aRadius)
+	PointLight::PointLight(Graphics& aGfx, const UINT aSlot)
 		:
 		slot(aSlot)
 	{
 		aGfx;
-		aRadius;
 		Reset();
 	}
 
@@ -62,6 +61,11 @@ namespace Kaka
 		ImGui::End();
 	}
 
+	void PointLight::SetModelPosition(Model& aModel)
+	{
+		aModel.SetPosition(bufferData.pos);
+	}
+
 	void PointLight::Reset()
 	{
 		bufferData = {
@@ -72,12 +76,5 @@ namespace Kaka
 			0.045f,
 			0.0075f
 		};
-	}
-
-	void PointLight::Draw(Graphics& aGfx)
-	{
-		aGfx;
-		//model.SetPosition(bufferData.pos);
-		//model.Draw(aGfx);
 	}
 }

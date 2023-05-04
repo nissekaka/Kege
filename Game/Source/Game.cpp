@@ -30,6 +30,8 @@ namespace Kaka
 		spy.SetRotation({PI / 2,0.0f,0.0f});
 		spy.SetPosition({1.0f,0.0f,0.0f});
 
+		pointLightModel.SetScale(0.25f);
+
 		while (true)
 		{
 			// Process all messages pending
@@ -55,6 +57,8 @@ namespace Kaka
 
 		directionalLight.Bind(wnd.Gfx());
 		pointLight.Bind(wnd.Gfx());
+		pointLight.SetModelPosition(pointLightModel);
+		pointLightModel.Draw(wnd.Gfx());
 
 		spy.SetRotation({spy.GetRotation().x,timer.GetTotalTime(),spy.GetRotation().z});
 		spy.Draw(wnd.Gfx());
