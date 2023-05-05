@@ -30,7 +30,7 @@ namespace Kaka
 		spy.SetRotation({PI / 2, 0.0f, 0.0f});
 		spy.SetPosition({1.0f, 0.0f, 0.0f});
 
-		pointLightModel.SetScale(0.25f);
+		pointLightModel.SetScale(0.1f);
 
 		while (true)
 		{
