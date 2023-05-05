@@ -9,7 +9,7 @@ namespace Kaka
 	class PointLight
 	{
 	public:
-		PointLight(Graphics& aGfx, const UINT aSlot = 0u);
+		PointLight(const UINT aSlot = 0u);
 		void Bind(const Graphics& aGfx);
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
@@ -18,9 +18,10 @@ namespace Kaka
 	private:
 		struct PointLightBuffer
 		{
-			DirectX::XMFLOAT3 pos;
+			DirectX::XMFLOAT3 position;
+			float padding1;
 			DirectX::XMFLOAT3 diffuseColour;
-			float padding[2];
+			float padding2;
 			float diffuseIntensity;
 			float attConst;
 			float attLin;

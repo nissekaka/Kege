@@ -188,5 +188,7 @@
     <FxCompile Include="Graphics\Shaders\Diffuse_VS.hlsl" />
     <FxCompile Include="Graphics\Shaders\Light_PS.hlsl" />
     <FxCompile Include="Graphics\Shaders\Light_VS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\Phong_PS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\Phong_VS.hlsl" />
   </ItemGroup>
 </Project>

@@ -22,13 +22,13 @@ namespace Kaka
 
 	int Game::Go()
 	{
-		camera.SetPosition({0.0f,1.0f,-3.0f});
+		camera.SetPosition({0.0f, 1.0f, -3.0f});
 
 		muzen.SetScale(0.002f);
-		muzen.SetPosition({-1.0f,0.0f,0.0f});
+		muzen.SetPosition({-1.0f, 0.0f, 0.0f});
 
-		spy.SetRotation({PI / 2,0.0f,0.0f});
-		spy.SetPosition({1.0f,0.0f,0.0f});
+		spy.SetRotation({PI / 2, 0.0f, 0.0f});
+		spy.SetPosition({1.0f, 0.0f, 0.0f});
 
 		pointLightModel.SetScale(0.25f);
 
@@ -56,13 +56,13 @@ namespace Kaka
 		HandleInput(aDeltaTime);
 
 		directionalLight.Bind(wnd.Gfx());
-		pointLight.Bind(wnd.Gfx());
 		pointLight.SetModelPosition(pointLightModel);
+		pointLight.Bind(wnd.Gfx());
 		pointLightModel.Draw(wnd.Gfx());
 
-		spy.SetRotation({spy.GetRotation().x,timer.GetTotalTime(),spy.GetRotation().z});
+		spy.SetRotation({spy.GetRotation().x, timer.GetTotalTime(), spy.GetRotation().z});
 		spy.Draw(wnd.Gfx());
-		muzen.SetRotation({muzen.GetRotation().x,timer.GetTotalTime(),muzen.GetRotation().z});
+		muzen.SetRotation({muzen.GetRotation().x, timer.GetTotalTime(), muzen.GetRotation().z});
 		muzen.Draw(wnd.Gfx());
 		//wnd.Gfx().DrawTestTriangle2D();
 		wnd.Gfx().DrawTestCube3D(timer.GetTotalTime(), DirectX::XMFLOAT3(0.0f, 0.0f, 2.0f));
@@ -127,27 +127,27 @@ namespace Kaka
 
 			if (wnd.keyboard.KeyIsPressed('W'))
 			{
-				camera.Translate({0.0f,0.0f,aDeltaTime * cameraSpeed});
+				camera.Translate({0.0f, 0.0f, aDeltaTime * cameraSpeed});
 			}
 			if (wnd.keyboard.KeyIsPressed('A'))
 			{
-				camera.Translate({-aDeltaTime * cameraSpeed,0.0f,0.0f});
+				camera.Translate({-aDeltaTime * cameraSpeed, 0.0f, 0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed('S'))
 			{
-				camera.Translate({0.0f,0.0f,-aDeltaTime * cameraSpeed});
+				camera.Translate({0.0f, 0.0f, -aDeltaTime * cameraSpeed});
 			}
 			if (wnd.keyboard.KeyIsPressed('D'))
 			{
-				camera.Translate({aDeltaTime * cameraSpeed,0.0f,0.0f});
+				camera.Translate({aDeltaTime * cameraSpeed, 0.0f, 0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed(VK_SPACE))
 			{
-				camera.Translate({0.0f,aDeltaTime * cameraSpeed,0.0f});
+				camera.Translate({0.0f, aDeltaTime * cameraSpeed, 0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed(VK_CONTROL))
 			{
-				camera.Translate({0.0f,-aDeltaTime * cameraSpeed,0.0f});
+				camera.Translate({0.0f, -aDeltaTime * cameraSpeed, 0.0f});
 			}
 		}
 

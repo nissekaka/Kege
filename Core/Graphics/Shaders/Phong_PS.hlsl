@@ -22,7 +22,9 @@ cbuffer ModelBuffer : register(b3)
 {
     bool normalMapEnabled;
     bool materialEnabled;
-}
+    float specularIntensity;
+    float specularPower;
+};
 
 struct PixelInput
 {
@@ -40,8 +42,10 @@ Texture2D materialTex;
 
 SamplerState splr;
 
+
 float4 main(PixelInput aInput) : SV_TARGET
 {
+    // sample normal from map if normal mapping enabled
     if (normalMapEnabled)
     {
         const float3x3 tanBitanNorm = float3x3(normalize(aInput.tan), normalize(aInput.bitan), normalize(aInput.normal));
@@ -55,17 +59,37 @@ float4 main(PixelInput aInput) : SV_TARGET
         aInput.normal = mul(normal, tanBitanNorm);
     }
 
+	// Fragment to light vector data
     const float3 vToL = pLightPosition - aInput.viewPos;
     const float distToL = length(vToL);
     const float3 dirToL = vToL / distToL;
-    	// Attenuation
+	// Attenuation
     const float att = 1.0f / (attConst + attLin * distToL + attQuad * (distToL * distToL));
 
     const float3 combinedLight = max(0, dot(aInput.normal, -dLightDirection)) * dLightColour + att * max(0.0f, dot(dirToL, aInput.normal)) * pLightColour * pLightIntensity;
 
+	// Reflected light vector
+    const float3 w = aInput.normal * dot(vToL, aInput.normal);
+    const float3 r = w * 2.0f - vToL;
 
-	// Use the transformed normal for lighting calculations
-    const float4 textureColour = albedoTex.Sample(splr, aInput.texCoord);
-    
-    return float4(saturate(combinedLight + ambientLight), 1.0f) * textureColour;
+    float3 specular;
+    if (materialEnabled)
+    {
+		// Sample the material texture
+        const float3 material = materialTex.Sample(splr, aInput.texCoord).xyz;
+
+        float metalness = material.r;
+        float roughness = material.g;
+        float emissive = material.b;
+
+    	// Calculate specular intensity based on angle between viewing vector and reflection vector, narrow with power function
+        specular = att * (pLightColour * pLightIntensity) * specularIntensity * pow(max(0.0f, dot(normalize(-r), normalize(aInput.viewPos))), specularPower);
+    }
+    else
+    {
+	    // Calculate specular intensity based on angle between viewing vector and reflection vector, narrow with power function
+        specular = att * (pLightColour * pLightIntensity) * specularIntensity * pow(max(0.0f, dot(normalize(-r), normalize(aInput.viewPos))), specularPower);
+    }
+	// Final color
+    return float4(saturate((combinedLight + ambientLight) * albedoTex.Sample(splr, aInput.texCoord).rgb + specular), 1.0f);
 }

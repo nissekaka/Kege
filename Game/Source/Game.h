@@ -24,8 +24,8 @@ namespace Kaka
 		Timer timer;
 		Camera camera;
 		DirectionalLight directionalLight{1u};
-		PointLight pointLight{wnd.Gfx(),2u};
-		Model pointLightModel{wnd.Gfx(),"Assets\\Models\\pointlight\\pointlight.fbx",Model::eShaderType::Light};
+		PointLight pointLight{2u};
+		Model pointLightModel{wnd.Gfx(), "Assets\\Models\\pointlight\\pointlight.fbx", Model::eShaderType::Light};
 	private:
 		bool showDemoWindow = false;
 	private:
@@ -33,8 +33,8 @@ namespace Kaka
 		float cameraSpeedNormal = 1.0f;
 		float cameraSpeedBoost = 2.0f;
 	private:
-		Model spy{wnd.Gfx(),"Assets\\Models\\spy\\spy.fbx",Model::eShaderType::Light};
+		Model spy{wnd.Gfx(), "Assets\\Models\\spy\\spy.fbx", Model::eShaderType::Light};
 		//Model model{wnd.Gfx(), "Assets\\Models\\vamp\\vamp.obj"};
-		Model muzen{wnd.Gfx(),"Assets\\Models\\muzen\\MuzenSpeaker.fbx",Model::eShaderType::Light};
+		Model muzen{wnd.Gfx(), "Assets\\Models\\muzen\\MuzenSpeaker.fbx", Model::eShaderType::Phong};
 	};
 }
