@@ -181,14 +181,16 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Graphics\Shaders\Default_PS.hlsl" />
-    <FxCompile Include="Graphics\Shaders\2D_VS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\3D_PS.hlsl" />
     <FxCompile Include="Graphics\Shaders\3D_VS.hlsl" />
-    <FxCompile Include="Graphics\Shaders\Diffuse_PS.hlsl" />
-    <FxCompile Include="Graphics\Shaders\Diffuse_VS.hlsl" />
     <FxCompile Include="Graphics\Shaders\Light_PS.hlsl" />
     <FxCompile Include="Graphics\Shaders\Light_VS.hlsl" />
     <FxCompile Include="Graphics\Shaders\Phong_PS.hlsl" />
     <FxCompile Include="Graphics\Shaders\Phong_VS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\Solid_VS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\Solid_PS.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Todo.txt" />
   </ItemGroup>
 </Project>

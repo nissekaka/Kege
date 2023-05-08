@@ -14,15 +14,22 @@ namespace Kaka
 
 	void TransformConstantBuffer::Bind(const Graphics& aGfx)
 	{
-		//const DirectX::XMMATRIX modelView = parent.GetTransform() * aGfx.GetCamera();
-		const Transforms transforms =
-		{
-			XMMatrixTranspose(parent.GetTransform()),
-			XMMatrixTranspose(aGfx.GetCamera()),
-			XMMatrixTranspose(aGfx.GetProjection())
-		};
-		pVertexCBuf->Update(aGfx, transforms);
+		UpdateBind(aGfx, GetTransforms(aGfx));
+	}
+
+	void TransformConstantBuffer::UpdateBind(const Graphics& aGfx, const Transforms& aTransforms)
+	{
+		pVertexCBuf->Update(aGfx, aTransforms);
 		pVertexCBuf->Bind(aGfx);
+	}
+
+	TransformConstantBuffer::Transforms TransformConstantBuffer::GetTransforms(const Graphics& aGfx) const
+	{
+		const DirectX::XMMATRIX modelView = parent.GetTransform() * aGfx.GetCamera();
+		return {
+			DirectX::XMMatrixTranspose(modelView),
+			DirectX::XMMatrixTranspose(modelView * aGfx.GetProjection())
+		};
 	}
 
 	std::unique_ptr<VertexConstantBuffer<TransformConstantBuffer::Transforms>> TransformConstantBuffer::pVertexCBuf;

@@ -3,7 +3,6 @@
 #include "Game/Source/Game.h"
 #include <External/include/imgui/imgui_impl_dx11.h>
 #include <External/include/imgui/imgui_impl_win32.h>
-#include <algorithm>
 
 namespace WRL = Microsoft::WRL;
 
@@ -293,7 +292,7 @@ namespace Kaka
 		// Create pixel shader
 		WRL::ComPtr<ID3D11PixelShader> pPixelShader;
 		WRL::ComPtr<ID3DBlob> pBlob;
-		D3DReadFileToBlob(L"Shaders\\Default_PS.cso", &pBlob);
+		D3DReadFileToBlob(L"Shaders\\3D_PS.cso", &pBlob);
 		pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader);
 
 		// Bind pixel shader
@@ -438,7 +437,7 @@ namespace Kaka
 		// Create pixel shader
 		WRL::ComPtr<ID3D11PixelShader> pPixelShader;
 		WRL::ComPtr<ID3DBlob> pBlob;
-		D3DReadFileToBlob(L"Shaders\\Default_PS.cso", &pBlob);
+		D3DReadFileToBlob(L"Shaders\\3D_PS.cso", &pBlob);
 		pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader);
 
 		// Bind pixel shader
@@ -446,7 +445,7 @@ namespace Kaka
 
 		// Create vertex shader
 		WRL::ComPtr<ID3D11VertexShader> pVertexShader;
-		D3DReadFileToBlob(L"Shaders\\3d_VS.cso", &pBlob);
+		D3DReadFileToBlob(L"Shaders\\3D_VS.cso", &pBlob);
 		pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader);
 
 		// Bind vertex shader

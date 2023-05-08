@@ -1,21 +1,19 @@
 #pragma once
-#include <DirectXMath.h>
-
 #include "Core/Graphics/Graphics.h"
+#include "Core/Graphics/Bindable/ConstantBuffers.h"
+#include <DirectXMath.h>
 
 namespace Kaka
 {
 	class DirectionalLight
 	{
 	public:
-		DirectionalLight(const UINT aSlot = 0u);
+		DirectionalLight(const Graphics& aGfx, const UINT aSlot = 0u);
 		void Bind(const Graphics& aGfx);
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
 		void Reset();
 	private:
-		//#pragma warning (push)
-		//#pragma warning (disable : 4324)
 		struct DirectionalLightBuffer
 		{
 			DirectX::XMFLOAT3 lightDirection;
@@ -24,9 +22,8 @@ namespace Kaka
 			float ambientLight;
 		};
 
-		//#pragma warning (pop)
 	private:
 		DirectionalLightBuffer bufferData;
-		UINT slot;
+		PixelConstantBuffer<DirectionalLightBuffer> cbuf;
 	};
 }

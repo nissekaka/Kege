@@ -1,42 +1,23 @@
 #include "DirectionalLight.h"
 #include <External/include/imgui/imgui.h>
-#include <d3d11.h>
-#include <wrl/client.h>
-
 
 namespace Kaka
 {
-	DirectionalLight::DirectionalLight(const UINT aSlot)
+	DirectionalLight::DirectionalLight(const Graphics& aGfx, const UINT aSlot)
 		:
-		slot(aSlot)
+		cbuf(aGfx, aSlot)
 	{
 		Reset();
 	}
 
 	void DirectionalLight::Bind(const Graphics& aGfx)
 	{
-		// Create constant buffer for directional light
-
-		Microsoft::WRL::ComPtr<ID3D11Buffer> pDirectionalLightBuffer;
-		D3D11_BUFFER_DESC dbd = {};
-		dbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		dbd.Usage = D3D11_USAGE_DYNAMIC;
-		dbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		dbd.MiscFlags = 0u;
-		dbd.ByteWidth = sizeof(bufferData);
-		dbd.StructureByteStride = 0u;
-		D3D11_SUBRESOURCE_DATA dsd = {};
-		dsd.pSysMem = &bufferData;
-		aGfx.pDevice->CreateBuffer(&dbd, &dsd, &pDirectionalLightBuffer);
-
-		// Bind directional light buffer to vertex shader
-		aGfx.pContext->VSSetConstantBuffers(slot, 1u, pDirectionalLightBuffer.GetAddressOf());
-		aGfx.pContext->PSSetConstantBuffers(slot, 1u, pDirectionalLightBuffer.GetAddressOf());
+		cbuf.Update(aGfx, bufferData);
+		cbuf.Bind(aGfx);
 	}
 
 	void DirectionalLight::ShowControlWindow(const char* aWindowName)
 	{
-		// Window name defaults to "Light"
 		aWindowName = aWindowName ? aWindowName : "Directional Light";
 
 		if (ImGui::Begin(aWindowName))

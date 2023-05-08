@@ -23,9 +23,9 @@ namespace Kaka
 		Window wnd;
 		Timer timer;
 		Camera camera;
-		DirectionalLight directionalLight{1u};
-		PointLight pointLight{2u};
-		Model pointLightModel{wnd.Gfx(), "Assets\\Models\\pointlight\\pointlight.fbx", Model::eShaderType::Light};
+		DirectionalLight directionalLight{wnd.Gfx(), 1u};
+		PointLight pointLight{wnd.Gfx(), 2u};
+		Model pointLightModel{wnd.Gfx(), "Assets\\Models\\pointlight\\pointlight.fbx", Model::eShaderType::Solid};
 	private:
 		bool showDemoWindow = false;
 	private:

@@ -6,6 +6,7 @@
   <ItemDefinitionGroup>
     <FxCompile>
       <ObjectFileOutput>$(SolutionDir)Game\Shaders\%(Filename).cso</ObjectFileOutput>
+      <ShaderModel>5.0</ShaderModel>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup />

@@ -1,16 +1,15 @@
 #pragma once
-#include <DirectXMath.h>
-
 #include "Core/Graphics/Graphics.h"
 #include "Core/Model/Model.h"
+#include <DirectXMath.h>
 
 namespace Kaka
 {
 	class PointLight
 	{
 	public:
-		PointLight(const UINT aSlot = 0u);
-		void Bind(const Graphics& aGfx);
+		PointLight(const Graphics& aGfx, const UINT aSlot = 0u);
+		void Bind(const Graphics& aGfx, DirectX::FXMMATRIX aView);
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
 		void SetModelPosition(Model& aModel);
@@ -30,6 +29,6 @@ namespace Kaka
 
 	private:
 		PointLightBuffer bufferData;
-		UINT slot;
+		PixelConstantBuffer<PointLightBuffer> cbuf;
 	};
 }

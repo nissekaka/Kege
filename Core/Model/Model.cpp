@@ -33,39 +33,22 @@ namespace Kaka
 
 		switch (shaderType)
 		{
-		case eShaderType::Default:
+		case eShaderType::Solid:
 			{
-				PixelShader pixelShader(aGfx, L"Shaders\\Default_PS.cso");
+				PixelShader pixelShader(aGfx, L"Shaders\\Solid_PS.cso");
 				pixelShader.Bind(aGfx);
 
 				struct PSMaterialConstant
 				{
 					DirectX::XMFLOAT4 colour;
-					DirectX::XMFLOAT3 position;
-					float padding;
 				} pmc;
 				pmc.colour = {1.0f, 1.0f, 1.0f, 1.0f};
-				pmc.position = {transform.x, transform.y, transform.z};
 
 				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
 				psConstantBuffer.Bind(aGfx);
 
-				VertexShader vertexShader(aGfx, L"Shaders\\3D_VS.cso");
+				VertexShader vertexShader(aGfx, L"Shaders\\Solid_VS.cso");
 				vertexShader.Bind(aGfx);
-
-				const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
-				{
-					{
-						"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-					{
-						"COLOUR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-				};
-				InputLayout inputLayout(aGfx, ied, vertexShader.GetBytecode());
-				inputLayout.Bind(aGfx);
 			}
 			break;
 		case eShaderType::Light:

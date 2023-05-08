@@ -1,0 +1,30 @@
+.-----------------.
+|    _  ____ _    |
+|   | |/ / _` |   |
+|   |   ( (_| |   |
+|   |_|\_\__,_|   |
+|   | |/ / _` |   |
+|   |   ( (_| |   |
+|   |_|\_\__,_|   |
+|  			      |
+'-----------------'
+ Direct3D11 Engine
+ by Anton Eriksson
+
+------ TO DO ------
+
+Bugs:
+- Texture resource
+
+Features:
+- PixelShader .h .cpp
+- VertexShader .h .cpp
+- Dynamic Constant Buffer
+- Model instancing
+- Shadows
+- Shadow mapping
+- Cube map (sky)
+- PBR
+- Texture Alpha
+- Line renderer
+- Sprite renderer

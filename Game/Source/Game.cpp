@@ -57,7 +57,7 @@ namespace Kaka
 
 		directionalLight.Bind(wnd.Gfx());
 		pointLight.SetModelPosition(pointLightModel);
-		pointLight.Bind(wnd.Gfx());
+		pointLight.Bind(wnd.Gfx(), camera.GetMatrix());
 		pointLightModel.Draw(wnd.Gfx());
 
 		spy.SetRotation({spy.GetRotation().x, timer.GetTotalTime(), spy.GetRotation().z});

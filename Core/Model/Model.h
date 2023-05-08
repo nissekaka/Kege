@@ -13,7 +13,7 @@ namespace Kaka
 	class Model : public Drawable
 	{
 	public:
-		enum class eShaderType { Default, Light, Phong };
+		enum class eShaderType { Solid, Light, Phong };
 
 	public:
 		Model(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType);
