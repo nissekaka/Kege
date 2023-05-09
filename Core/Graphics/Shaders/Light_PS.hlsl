@@ -58,11 +58,10 @@ float4 main(PixelInput aInput) : SV_TARGET
     const float3 vToL = pLightPosition - aInput.viewPos;
     const float distToL = length(vToL);
     const float3 dirToL = vToL / distToL;
-    	// Attenuation
+	// Attenuation
     const float att = 1.0f / (attConst + attLin * distToL + attQuad * (distToL * distToL));
-
+    // Directional light + point light
     const float3 combinedLight = max(0, dot(aInput.normal, -dLightDirection)) * dLightColour + att * max(0.0f, dot(dirToL, aInput.normal)) * pLightColour * pLightIntensity;
-
 
 	// Use the transformed normal for lighting calculations
     const float4 textureColour = albedoTex.Sample(splr, aInput.texCoord);

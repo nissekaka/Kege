@@ -8,7 +8,7 @@
 |   |_|\_\__,_|   |
 |  			      |
 '-----------------'
- Direct3D11 Engine
+  Direct3D Engine
  by Anton Eriksson
 
 ------ TO DO ------
