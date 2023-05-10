@@ -17,8 +17,7 @@ Bugs:
 - Texture resource
 
 Features:
-- PixelShader .h .cpp
-- VertexShader .h .cpp
+- Multiple point lights (Forward+)?
 - Dynamic Constant Buffer
 - Model instancing
 - Shadows

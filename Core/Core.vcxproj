@@ -193,6 +193,9 @@
   <ItemGroup>
     <Text Include="Todo.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Graphics\Shaders\Light.hlsli" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

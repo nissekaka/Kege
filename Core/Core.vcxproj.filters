@@ -193,4 +193,7 @@
   <ItemGroup>
     <Text Include="Todo.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Graphics\Shaders\Light.hlsli" />
+  </ItemGroup>
 </Project>

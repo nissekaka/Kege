@@ -1,3 +1,15 @@
+#include "Light.hlsli"
+
+static const uint MAX_LIGHTS = 128; // Needs to be the same in PointLight
+
+cbuffer ModelBuffer : register(b0)
+{
+    bool normalMapEnabled;
+    bool materialEnabled;
+    float specularIntensity;
+    float specularPower;
+};
+
 cbuffer DirectionalLightBuffer : register(b1)
 {
     float3 dLightDirection;
@@ -8,23 +20,9 @@ cbuffer DirectionalLightBuffer : register(b1)
 
 cbuffer PointLightBuffer : register(b2)
 {
-    float3 pLightPosition;
-    float padding1;
-    float3 pLightColour;
-    float padding2;
-    float pLightIntensity;
-    float attConst;
-    float attLin;
-    float attQuad;
+    PointLightData plBuf[MAX_LIGHTS]; 
+    uint activeLights;
 }
-
-cbuffer ModelBuffer : register(b3)
-{
-    bool normalMapEnabled;
-    bool materialEnabled;
-    float specularIntensity;
-    float specularPower;
-};
 
 struct PixelInput
 {
@@ -59,37 +57,50 @@ float4 main(PixelInput aInput) : SV_TARGET
         aInput.normal = mul(normal, tanBitanNorm);
     }
 
-	// Fragment to light vector data
-    const float3 vToL = pLightPosition - aInput.viewPos;
-    const float distToL = length(vToL);
-    const float3 dirToL = vToL / distToL;
-	// Attenuation
-    const float att = 1.0f / (attConst + attLin * distToL + attQuad * (distToL * distToL));
+    float3 combinedLight = { 0, 0, 0 };
+    float3 specular = { 0, 0, 0 };
 
-    const float3 combinedLight = max(0, dot(aInput.normal, -dLightDirection)) * dLightColour + att * max(0.0f, dot(dirToL, aInput.normal)) * pLightColour * pLightIntensity;
-
-	// Reflected light vector
-    const float3 w = aInput.normal * dot(vToL, aInput.normal);
-    const float3 r = w * 2.0f - vToL;
-
-    float3 specular;
-    if (materialEnabled)
+    for (uint i = 0; i < activeLights; ++i)
     {
-		// Sample the material texture
-        const float3 material = materialTex.Sample(splr, aInput.texCoord).xyz;
+        if (!plBuf[i].active)
+        {
+            continue;
+        }
 
-        float metalness = material.r;
-        float roughness = material.g;
-        float emissive = material.b;
+    	// Fragment to light vector data
+        const float3 vToL = plBuf[i].pLightPosition - aInput.viewPos;
+        const float distToL = length(vToL);
+        const float3 dirToL = vToL / distToL;
+    	// Attenuation
+        const float att = 1.0f / (plBuf[i].attConst + plBuf[i].attLin * distToL + plBuf[i].attQuad * (distToL * distToL));
 
-    	// Calculate specular intensity based on angle between viewing vector and reflection vector, narrow with power function
-        specular = att * (pLightColour * pLightIntensity) * specularIntensity * pow(max(0.0f, dot(normalize(-r), normalize(aInput.viewPos))), specularPower);
+        combinedLight += max(0.0f, dot(dirToL, aInput.normal)) * plBuf[i].pLightColour * plBuf[i].pLightIntensity;
+
+    	// Reflected light vector
+        const float3 w = aInput.normal * dot(vToL, aInput.normal);
+        const float3 r = w * 2.0f - vToL;
+
+        if (materialEnabled)
+        {
+    		// Sample the material texture
+            const float3 material = materialTex.Sample(splr, aInput.texCoord).xyz;
+
+            float metalness = material.r;
+            float roughness = material.g;
+            float emissive = material.b;
+
+    		// Calculate specular intensity based on angle between viewing vector and reflection vector, narrow with power function
+            specular += att * (plBuf[i].pLightColour * plBuf[i].pLightIntensity) * specularIntensity * pow(max(0.0f, dot(normalize(-r), normalize(aInput.viewPos))), specularPower);
+        }
+        else
+        {
+    		// Calculate specular intensity based on angle between viewing vector and reflection vector, narrow with power function
+            specular += att * (plBuf[i].pLightColour * plBuf[i].pLightIntensity) * specularIntensity * pow(max(0.0f, dot(normalize(-r), normalize(aInput.viewPos))), specularPower);
+        }
     }
-    else
-    {
-	    // Calculate specular intensity based on angle between viewing vector and reflection vector, narrow with power function
-        specular = att * (pLightColour * pLightIntensity) * specularIntensity * pow(max(0.0f, dot(normalize(-r), normalize(aInput.viewPos))), specularPower);
-    }
+
+    combinedLight += max(0, dot(aInput.normal, -dLightDirection)) * dLightColour;
+
 	// Final color
     return float4(saturate((combinedLight + ambientLight) * albedoTex.Sample(splr, aInput.texCoord).rgb + specular), 1.0f);
 }

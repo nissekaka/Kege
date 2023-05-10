@@ -13,6 +13,7 @@ namespace Kaka
 	{
 		MeshLoader::LoadMesh(aFilePath, mesh);
 		texture.LoadTexture(aGfx, aFilePath);
+		solidColour = {1.0f, 1.0f, 1.0f, 1.0f};
 	}
 
 	void Model::Draw(const Graphics& aGfx)
@@ -42,13 +43,24 @@ namespace Kaka
 				{
 					DirectX::XMFLOAT4 colour;
 				} pmc;
-				pmc.colour = {1.0f, 1.0f, 1.0f, 1.0f};
+				pmc.colour = solidColour;
 
 				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
 				psConstantBuffer.Bind(aGfx);
 
 				VertexShader vertexShader(aGfx, L"Shaders\\Solid_VS.cso");
 				vertexShader.Bind(aGfx);
+
+
+				const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
+				{
+					{
+						"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+				};
+				InputLayout inputLayout(aGfx, ied, vertexShader.GetBytecode());
+				inputLayout.Bind(aGfx);
 			}
 			break;
 		case eShaderType::Light:
@@ -66,7 +78,7 @@ namespace Kaka
 				pmc.normalMapEnabled = texture.HasNormalMap();
 				pmc.materialEnabled = texture.HasMaterial();
 
-				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 3u);
+				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
 				psConstantBuffer.Bind(aGfx);
 
 				VertexShader vertexShader(aGfx, L"Shaders\\Light_VS.cso");
@@ -114,7 +126,7 @@ namespace Kaka
 				pmc.normalMapEnabled = texture.HasNormalMap();
 				pmc.materialEnabled = texture.HasMaterial();
 
-				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 3u);
+				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
 				psConstantBuffer.Bind(aGfx);
 
 				VertexShader vertexShader(aGfx, L"Shaders\\Phong_VS.cso");
@@ -172,6 +184,11 @@ namespace Kaka
 	void Model::SetScale(const float aScale)
 	{
 		transform.scale = aScale;
+	}
+
+	void Model::SetColour(const DirectX::XMFLOAT4 aColour)
+	{
+		solidColour = aColour;
 	}
 
 	DirectX::XMFLOAT3 Model::GetPosition() const

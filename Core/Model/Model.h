@@ -22,6 +22,7 @@ namespace Kaka
 		void SetPosition(DirectX::XMFLOAT3 aPosition);
 		void SetRotation(DirectX::XMFLOAT3 aRotation);
 		void SetScale(float aScale);
+		void SetColour(DirectX::XMFLOAT4 aColour);
 		DirectX::XMFLOAT3 GetPosition() const;
 		DirectX::XMFLOAT3 GetRotation() const;
 		DirectX::XMMATRIX GetTransform() const override;
@@ -41,6 +42,8 @@ namespace Kaka
 			float z = 0.0f;
 			float scale = 1.0f;
 		};
+
+		DirectX::XMFLOAT4 solidColour;
 
 		TransformParameters transform;
 	private:

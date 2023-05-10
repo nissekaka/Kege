@@ -2,6 +2,7 @@
 #include "Core/Graphics/Graphics.h"
 #include "Core/Model/Model.h"
 #include <DirectXMath.h>
+#include <array>
 
 namespace Kaka
 {
@@ -12,9 +13,14 @@ namespace Kaka
 		void Bind(const Graphics& aGfx, DirectX::FXMMATRIX aView);
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
+		void SetPosition(DirectX::XMFLOAT3 aPosition);
+		void SetColour(DirectX::XMFLOAT3 aColour);
 		void SetModelPosition(Model& aModel);
+		void SetModelColour(Model& aModel);
 		void Reset();
 	private:
+		static constexpr UINT MAX_LIGHTS = 128u; // Needs to be the same in PixelShader
+
 		struct PointLightBuffer
 		{
 			DirectX::XMFLOAT3 position;
@@ -25,10 +31,22 @@ namespace Kaka
 			float attConst;
 			float attLin;
 			float attQuad;
+			BOOL active = false;
+			float padding3[3];
+		};
+
+		struct PointLightData
+		{
+			std::array<PointLightBuffer, MAX_LIGHTS> plb = {};
+			UINT activeLights;
+			float padding[3];
 		};
 
 	private:
-		PointLightBuffer bufferData;
-		PixelConstantBuffer<PointLightBuffer> cbuf;
+		//PointLightBuffer bufferData;
+		PixelConstantBuffer<PointLightData> cbuf;
+		static std::array<PointLightBuffer, MAX_LIGHTS> bufferData;
+		static UINT sharedIndex;
+		UINT index;
 	};
 }

@@ -2,6 +2,7 @@
 #include <Core/Utility/KakaMath.h>
 #include <External/include/imgui/imgui.h>
 #include <DirectXMath.h>
+#include <random>
 
 constexpr int WINDOW_WIDTH = 1920;
 constexpr int WINDOW_HEIGHT = 1080;
@@ -25,12 +26,33 @@ namespace Kaka
 		camera.SetPosition({0.0f, 1.0f, -3.0f});
 
 		muzen.SetScale(0.002f);
-		muzen.SetPosition({-1.0f, 0.0f, 0.0f});
+		//muzen.SetPosition({-1.0f, 0.0f, 0.0f});
+		muzen.SetPosition({0.0f, 0.0f, 0.0f});
 
-		spy.SetRotation({PI / 2, 0.0f, 0.0f});
-		spy.SetPosition({1.0f, 0.0f, 0.0f});
+		//spy.SetRotation({PI / 2, 0.0f, 0.0f});
+		//spy.SetPosition({1.0f, 0.0f, 0.0f});
+		std::random_device rd;
+		std::mt19937 mt(rd());
+		std::uniform_real_distribution<float> c(0, 100);
 
-		pointLightModel.SetScale(0.1f);
+		constexpr float startX = -4.5f;
+		constexpr float startY = -4.5f;
+
+		for (int y = 0; y < 10; ++y)
+		{
+			for (int x = 0; x < 10; ++x)
+			{
+				const int index = x + 10 * y;
+
+				pointLights[index].SetPosition({startX + x, startY + y, 1.0});
+				pointLights[index].SetColour({c(mt) / 100.0f, c(mt) / 100.0f, c(mt) / 100.0f});
+			}
+		}
+
+		for (auto& model : pointLightModels)
+		{
+			model.SetScale(0.1f);
+		}
 
 		while (true)
 		{
@@ -56,16 +78,24 @@ namespace Kaka
 		HandleInput(aDeltaTime);
 
 		directionalLight.Bind(wnd.Gfx());
-		pointLight.SetModelPosition(pointLightModel);
-		pointLight.Bind(wnd.Gfx(), camera.GetMatrix());
-		pointLightModel.Draw(wnd.Gfx());
+		for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
+		{
+			pointLights[i].SetModelPosition(pointLightModels[i]);
+			pointLights[i].SetModelColour(pointLightModels[i]);
+			pointLights[i].Bind(wnd.Gfx(), camera.GetMatrix());
+		}
+		for (auto& model : pointLightModels)
+		{
+			model.Draw(wnd.Gfx());
+		}
 
-		spy.SetRotation({spy.GetRotation().x, timer.GetTotalTime(), spy.GetRotation().z});
-		spy.Draw(wnd.Gfx());
+
+		//spy.SetRotation({spy.GetRotation().x, timer.GetTotalTime(), spy.GetRotation().z});
+		//spy.Draw(wnd.Gfx());
 		muzen.SetRotation({muzen.GetRotation().x, timer.GetTotalTime(), muzen.GetRotation().z});
 		muzen.Draw(wnd.Gfx());
 		//wnd.Gfx().DrawTestTriangle2D();
-		wnd.Gfx().DrawTestCube3D(timer.GetTotalTime(), DirectX::XMFLOAT3(0.0f, 0.0f, 2.0f));
+		//wnd.Gfx().DrawTestCube3D(timer.GetTotalTime(), DirectX::XMFLOAT3(0.0f, 0.0f, 2.0f));
 		//wnd.Gfx().DrawTestCube3D(-timer.GetTotalTime(), DirectX::XMFLOAT3(-2.0f, 0.0f, 0.0f));
 
 		// ImGui windows
@@ -73,10 +103,16 @@ namespace Kaka
 		{
 			ImGui::ShowDemoWindow();
 		}
-		spy.ShowControlWindow("Spy");
+		//spy.ShowControlWindow("Spy");
 		muzen.ShowControlWindow("Muzen");
 		directionalLight.ShowControlWindow("Directional Light");
-		pointLight.ShowControlWindow("Point Light");
+
+		for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
+		{
+			std::string name = "Point Light " + std::to_string(i);
+			pointLights[i].ShowControlWindow(name.c_str());
+		}
+
 		camera.ShowControlWindow();
 
 		// End frame
