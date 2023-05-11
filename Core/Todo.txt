@@ -20,7 +20,6 @@ Features:
 - Multiple point lights (Forward+)?
 - Dynamic Constant Buffer
 - Model instancing
-- Shadows
 - Shadow mapping
 - Cube map (sky)
 - PBR
