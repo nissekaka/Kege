@@ -12,16 +12,22 @@ namespace Kaka
 		PointLight(const Graphics& aGfx, const UINT aSlot = 0u);
 		void Bind(const Graphics& aGfx, DirectX::FXMMATRIX aView);
 	public:
-		void ShowControlWindow(const char* aWindowName = nullptr);
-		void SetPosition(DirectX::XMFLOAT3 aPosition);
-		void SetColour(DirectX::XMFLOAT3 aColour);
-		void SetModelPosition(Model& aModel);
-		void SetModelColour(Model& aModel);
-		void Reset();
+		void ShowControlWindow(const char* aWindowName = nullptr) const;
+		DirectX::XMMATRIX GetTransform() const;
+		void SetPosition(DirectX::XMFLOAT3 aPosition) const;
+		void SetColour(DirectX::XMFLOAT3 aColour) const;
+		void Reset() const;
+		void Draw(const Graphics& aGfx) const;
 	private:
-		static constexpr UINT MAX_LIGHTS = 128u; // Needs to be the same in PixelShader
+		static constexpr UINT MAX_LIGHTS = 16u; // Needs to be the same in PixelShader
 
-		struct PointLightBuffer
+		struct Transforms
+		{
+			DirectX::XMMATRIX view;
+			DirectX::XMMATRIX projection;
+		};
+
+		struct PointLightData
 		{
 			DirectX::XMFLOAT3 position;
 			float padding1;
@@ -35,18 +41,20 @@ namespace Kaka
 			float padding3[3];
 		};
 
-		struct PointLightData
+		struct PointLightBuffer
 		{
-			std::array<PointLightBuffer, MAX_LIGHTS> plb = {};
+			std::array<PointLightData, MAX_LIGHTS> plb = {};
 			UINT activeLights;
 			float padding[3];
 		};
 
 	private:
-		//PointLightBuffer bufferData;
-		PixelConstantBuffer<PointLightData> cbuf;
-		static std::array<PointLightBuffer, MAX_LIGHTS> bufferData;
+		PixelConstantBuffer<PointLightBuffer> cBuffer;
+		static std::vector<PointLightData> pointLightData;
 		static UINT sharedIndex;
 		UINT index;
 	};
+
+	inline std::vector<PointLight::PointLightData> PointLight::pointLightData = {};
+	inline UINT PointLight::sharedIndex = 0;
 }

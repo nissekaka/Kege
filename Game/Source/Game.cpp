@@ -19,6 +19,11 @@ namespace Kaka
 				static_cast<float>(WINDOW_HEIGHT) / static_cast<float>(WINDOW_WIDTH),
 				0.5f,
 				200.0f));
+
+		for (int i = 0; i < 16; ++i)
+		{
+			pointLights.push_back(PointLight{wnd.Gfx(), 2u});
+		}
 	}
 
 	int Game::Go()
@@ -26,33 +31,46 @@ namespace Kaka
 		camera.SetPosition({0.0f, 1.0f, -3.0f});
 
 		muzen.SetScale(0.002f);
-		//muzen.SetPosition({-1.0f, 0.0f, 0.0f});
-		muzen.SetPosition({0.0f, 0.0f, 0.0f});
+		muzen.SetPosition({-1.0f, 0.0f, 0.0f});
 
-		//spy.SetRotation({PI / 2, 0.0f, 0.0f});
-		//spy.SetPosition({1.0f, 0.0f, 0.0f});
-		std::random_device rd;
-		std::mt19937 mt(rd());
-		std::uniform_real_distribution<float> c(0, 100);
+		pointLights[0].SetPosition({-1.0f, 1.0f, 1.0});
+		pointLights[0].SetColour({1.0f, 0.0f, 0.0f});
+		pointLights[1].SetPosition({-1.0f, 1.0f, -1.0});
+		pointLights[1].SetColour({0.0f, 1.0f, 0.0f});
+		pointLights[2].SetPosition({1.0f, 1.0f, -1.0});
+		pointLights[2].SetColour({0.0f, 1.0f, 1.0f});
+		pointLights[3].SetPosition({1.0f, 1.0f, 1.0});
+		pointLights[3].SetColour({1.0f, 0.0f, 1.0f});
 
-		constexpr float startX = -4.5f;
-		constexpr float startY = -4.5f;
+		pointLights[4].SetPosition({-1.0f, 2.0f, 1.0});
+		pointLights[4].SetColour({1.0f, 0.0f, 0.0f});
+		pointLights[5].SetPosition({-1.0f, 2.0f, -1.0});
+		pointLights[5].SetColour({0.0f, 1.0f, 0.0f});
+		pointLights[6].SetPosition({1.0f, 2.0f, -1.0});
+		pointLights[6].SetColour({0.0f, 1.0f, 1.0f});
+		pointLights[7].SetPosition({1.0f, 2.0f, 1.0});
+		pointLights[7].SetColour({1.0f, 0.0f, 1.0f});
 
-		for (int y = 0; y < 10; ++y)
-		{
-			for (int x = 0; x < 10; ++x)
-			{
-				const int index = x + 10 * y;
+		pointLights[8].SetPosition({-1.0f, 3.0f, 1.0});
+		pointLights[8].SetColour({1.0f, 0.0f, 0.0f});
+		pointLights[9].SetPosition({-1.0f, 3.0f, -1.0});
+		pointLights[9].SetColour({0.0f, 1.0f, 0.0f});
+		pointLights[10].SetPosition({1.0f, 3.0f, -1.0});
+		pointLights[10].SetColour({0.0f, 1.0f, 1.0f});
+		pointLights[11].SetPosition({1.0f, 3.0f, 1.0});
+		pointLights[11].SetColour({1.0f, 0.0f, 1.0f});
 
-				pointLights[index].SetPosition({startX + x, startY + y, 1.0});
-				pointLights[index].SetColour({c(mt) / 100.0f, c(mt) / 100.0f, c(mt) / 100.0f});
-			}
-		}
+		pointLights[12].SetPosition({-1.0f, 4.0f, 1.0});
+		pointLights[12].SetColour({1.0f, 0.0f, 0.0f});
+		pointLights[13].SetPosition({-1.0f, 4.0f, -1.0});
+		pointLights[13].SetColour({0.0f, 1.0f, 0.0f});
+		pointLights[14].SetPosition({1.0f, 4.0f, -1.0});
+		pointLights[14].SetColour({0.0f, 1.0f, 1.0f});
+		pointLights[15].SetPosition({1.0f, 4.0f, 1.0});
+		pointLights[15].SetColour({1.0f, 0.0f, 1.0f});
 
-		for (auto& model : pointLightModels)
-		{
-			model.SetScale(0.1f);
-		}
+		spy.SetPosition({1.0f, 0.0f, 0.0f});
+		spy.SetRotation({PI / 2, 0, 0});
 
 		while (true)
 		{
@@ -80,18 +98,15 @@ namespace Kaka
 		directionalLight.Bind(wnd.Gfx());
 		for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
 		{
-			pointLights[i].SetModelPosition(pointLightModels[i]);
-			pointLights[i].SetModelColour(pointLightModels[i]);
 			pointLights[i].Bind(wnd.Gfx(), camera.GetMatrix());
-		}
-		for (auto& model : pointLightModels)
-		{
-			model.Draw(wnd.Gfx());
+			if (drawLightDebug)
+			{
+				pointLights[i].Draw(wnd.Gfx());
+			}
 		}
 
-
-		//spy.SetRotation({spy.GetRotation().x, timer.GetTotalTime(), spy.GetRotation().z});
-		//spy.Draw(wnd.Gfx());
+		spy.SetRotation({spy.GetRotation().x, timer.GetTotalTime(), spy.GetRotation().z});
+		spy.Draw(wnd.Gfx());
 		muzen.SetRotation({muzen.GetRotation().x, timer.GetTotalTime(), muzen.GetRotation().z});
 		muzen.Draw(wnd.Gfx());
 		//wnd.Gfx().DrawTestTriangle2D();
@@ -99,21 +114,26 @@ namespace Kaka
 		//wnd.Gfx().DrawTestCube3D(-timer.GetTotalTime(), DirectX::XMFLOAT3(-2.0f, 0.0f, 0.0f));
 
 		// ImGui windows
-		if (showDemoWindow)
+		if (showImGui)
 		{
 			ImGui::ShowDemoWindow();
-		}
-		//spy.ShowControlWindow("Spy");
-		muzen.ShowControlWindow("Muzen");
-		directionalLight.ShowControlWindow("Directional Light");
 
-		for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
+			spy.ShowControlWindow("Spy");
+			muzen.ShowControlWindow("Muzen");
+			directionalLight.ShowControlWindow("Directional Light");
+
+			for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
+			{
+				std::string name = "Point Light " + std::to_string(i);
+				pointLights[i].ShowControlWindow(name.c_str());
+			}
+
+			camera.ShowControlWindow();
+		}
+		if (showStatsWindow)
 		{
-			std::string name = "Point Light " + std::to_string(i);
-			pointLights[i].ShowControlWindow(name.c_str());
+			ShowStatsWindow();
 		}
-
-		camera.ShowControlWindow();
 
 		// End frame
 		wnd.Gfx().EndFrame();
@@ -145,7 +165,13 @@ namespace Kaka
 				}
 				break;
 			case VK_F1:
-				showDemoWindow = true;
+				showImGui = !showImGui;
+				break;
+			case VK_F2:
+				showStatsWindow = !showStatsWindow;
+				break;
+			case VK_F3:
+				drawLightDebug = !drawLightDebug;
 				break;
 			}
 		}
@@ -194,5 +220,15 @@ namespace Kaka
 				camera.Rotate(static_cast<float>(delta->x), static_cast<float>(delta->y));
 			}
 		}
+	}
+
+	void Game::ShowStatsWindow()
+	{
+		if (ImGui::Begin("Stats"))
+		{
+			ImGui::Text("%.3f m/s", 1000.0f / ImGui::GetIO().Framerate);
+			ImGui::Text("%.0f FPS", ImGui::GetIO().Framerate);
+		}
+		ImGui::End();
 	}
 }

@@ -1,6 +1,6 @@
 #include "Light.hlsli"
 
-static const uint MAX_LIGHTS = 128; // Needs to be the same in PointLight
+static const uint MAX_LIGHTS = 16u; // Needs to be the same in PointLight
 
 cbuffer ModelBuffer : register(b0)
 {
