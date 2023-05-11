@@ -117,6 +117,9 @@ namespace Kaka
 		if (showImGui)
 		{
 			ImGui::ShowDemoWindow();
+			spy.ShowControlWindow("Spy");
+			muzen.ShowControlWindow("Muzen");
+			directionalLight.ShowControlWindow("Directional Light");
 
 			spy.ShowControlWindow("Spy");
 			muzen.ShowControlWindow("Muzen");
