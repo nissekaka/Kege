@@ -215,23 +215,21 @@ namespace Kaka
 				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
 				psConstantBuffer.Bind(aGfx);
 
-				VertexShader vertexShader(aGfx, L"Shaders\\AnimPhong_VS.cso");
-				vertexShader.Bind(aGfx);
-
-				struct VSSkeletonBuffer
+				struct VSBoneConstant
 				{
 					Bone bones[128u];
 				} vsb;
 
-				for (UINT i = 0; i < modelData.skeleton.bones.size(); ++i)
+				for (int i = 0; i < modelData.skeleton.bones.size(); ++i)
 				{
-					assert(modelData.skeleton.bones.size() < 128u && "Too many bones!");
 					vsb.bones[i] = modelData.skeleton.bones[i];
 				}
 
-				VertexConstantBuffer<VSSkeletonBuffer> vsConstantBuffer(aGfx, vsb, 1u);
-				//vsConstantBuffer.Update(aGfx, vsb);
+				VertexConstantBuffer<VSBoneConstant> vsConstantBuffer(aGfx, vsb, 1u);
 				vsConstantBuffer.Bind(aGfx);
+
+				VertexShader vertexShader(aGfx, L"Shaders\\AnimPhong_VS.cso");
+				vertexShader.Bind(aGfx);
 
 				const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 				{
@@ -290,6 +288,10 @@ namespace Kaka
 
 	void Model::Update(const float aDeltaTime)
 	{
+		if (modelData.modelType != eModelType::Skeletal)
+		{
+			return;
+		}
 		if (selectedAnimationIndex >= 0 && selectedAnimationIndex < modelData.animations.size() && isAnimationPlaying)
 		{
 			AnimationClip& animation = modelData.animations[selectedAnimationIndex];
@@ -323,6 +325,10 @@ namespace Kaka
 
 	void Model::Animate()
 	{
+		if (modelData.modelType != eModelType::Skeletal)
+		{
+			return;
+		}
 		if (selectedAnimationIndex >= 0 && selectedAnimationIndex < modelData.animations.size())
 		{
 			const AnimationClip& animation = modelData.animations[selectedAnimationIndex];
@@ -396,9 +402,12 @@ namespace Kaka
 			// Apply the default pose or any other static transformation when the animation is not playing
 			for (auto& vertex : modelData.animMesh.vertices)
 			{
-				// Apply bone transforms based on bone indices and weights
+				// Initialize the bone transform as the identity matrix
 				DirectX::XMFLOAT4X4 boneTransform{};
-				for (size_t i = 0; i < vertex.boneIndices.size(); ++i)
+				DirectX::XMStoreFloat4x4(&boneTransform, DirectX::XMMatrixIdentity());
+
+				// Apply bone transforms based on bone indices and weights
+				for (size_t i = 0; i < 0; ++i)
 				{
 					unsigned int boneIndex = vertex.boneIndices[i];
 					float boneWeight = vertex.boneWeights[i];
@@ -407,11 +416,15 @@ namespace Kaka
 					const DirectX::XMFLOAT4X4& defaultPoseTransform = modelData.defaultPose[boneIndex];
 
 					// Accumulate the default pose bone transforms based on weights
+					DirectX::XMFLOAT4X4 weightedDefaultPoseTransform;
+					DirectX::XMStoreFloat4x4(&weightedDefaultPoseTransform,
+					                         DirectX::XMLoadFloat4x4(&defaultPoseTransform) * boneWeight);
+
+					// Accumulate the default pose bone transform to the overall bone transform
 					DirectX::XMStoreFloat4x4(&boneTransform,
-					                         DirectX::XMMatrixMultiply(
-						                         DirectX::XMLoadFloat4x4(&boneTransform),
-						                         DirectX::XMLoadFloat4x4(&defaultPoseTransform) * boneWeight
-					                         ));
+					                         DirectX::XMMatrixMultiply(DirectX::XMLoadFloat4x4(&boneTransform),
+					                                                   DirectX::XMLoadFloat4x4(
+						                                                   &weightedDefaultPoseTransform)));
 				}
 
 				// Apply the final bone transform to the vertex

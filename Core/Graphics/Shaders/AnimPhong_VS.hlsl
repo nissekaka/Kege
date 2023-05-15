@@ -16,8 +16,8 @@ struct VertexInput
     float2 texCoord : TEXCOORD;
     float3 tan : TANGENT;
     float3 bitan : BITANGENT;
-    uint4 boneIndices : BLENDINDICES; // Bone indices
-    float4 boneWeights : BLENDWEIGHT; // Bone weights
+    uint4 boneIndices : BLENDINDICES;
+    float4 boneWeights : BLENDWEIGHT;
 };
 
 struct PixelInput
@@ -34,17 +34,17 @@ PixelInput main(VertexInput aInput)
 {
     PixelInput output;
 
-// Accumulate bone transformations based on bone indices and weights
+	// Accumulate bone transformations based on bone indices and weights
     matrix finalTransform;
     for (int i = 0; i < 4; ++i)
     {
         uint boneIndex = aInput.boneIndices[i];
         float boneWeight = aInput.boneWeights[i];
 
-    // Fetch the bone transform from the skeleton buffer
+		// Fetch the bone transform from the skeleton buffer
         matrix boneTransform = boneTransforms[boneIndex];
 
-    // Accumulate the transformed contribution from each bone
+        // Accumulate the transformed contribution from each bone
         finalTransform += boneWeight * boneTransform;
     }
 
