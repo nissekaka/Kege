@@ -17,6 +17,7 @@ Bugs:
 - Texture resource
 
 Features:
+- Animated FBX
 - Multiple point lights (Forward+)?
 - Dynamic Constant Buffer
 - Model instancing

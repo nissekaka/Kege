@@ -39,7 +39,7 @@
     <ClCompile Include="Utility\ImGuiManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Model\MeshLoader.cpp">
+    <ClCompile Include="Model\ModelLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Model\Model.cpp">
@@ -116,13 +116,13 @@
     <ClInclude Include="Utility\ImGuiManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Model\MeshLoader.h">
+    <ClInclude Include="Model\ModelLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Model\Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Model\Mesh.h">
+    <ClInclude Include="Model\ModelData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Model\Vertex.h">
@@ -189,6 +189,7 @@
     <FxCompile Include="Graphics\Shaders\Phong_VS.hlsl" />
     <FxCompile Include="Graphics\Shaders\Solid_VS.hlsl" />
     <FxCompile Include="Graphics\Shaders\Solid_PS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\AnimPhong_VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Todo.txt" />
