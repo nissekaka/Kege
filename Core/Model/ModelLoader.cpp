@@ -39,10 +39,19 @@ namespace Kaka
 			aOutModelData.skeleton = LoadSkeleton(scene);
 			aOutModelData.animations = LoadAnimations(scene);
 			// Store the default pose
+			//for (const Bone& bone : aOutModelData.skeleton.bones)
+			//{
+			//	// Extract the bone's transform matrix from the aiMatrix4x4
+			//	aOutModelData.defaultPose.push_back(bone.offsetMatrix);
+			//}
 			for (const Bone& bone : aOutModelData.skeleton.bones)
 			{
-				// Extract the bone's transform matrix from the aiMatrix4x4
-				aOutModelData.defaultPose.push_back(bone.offsetMatrix);
+				// Compute the default pose transformation matrix as the inverse of the bone's offset matrix
+				DirectX::XMFLOAT4X4 defaultPoseTransform;
+				DirectX::XMStoreFloat4x4(&defaultPoseTransform, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&bone.offsetMatrix)));
+
+				// Store the default pose transformation matrix
+				aOutModelData.defaultPose.push_back(defaultPoseTransform);
 			}
 			aOutModelData.modelType = eModelType::Skeletal;
 			const std::string text = "\nSuccessfully loaded skeleton!"
@@ -62,11 +71,11 @@ namespace Kaka
 
 			for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
 			{
-				const DirectX::XMFLOAT3 position{mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z};
+				const DirectX::XMFLOAT3 position{mesh->mVertices[i].x,mesh->mVertices[i].y,mesh->mVertices[i].z};
 				const DirectX::XMFLOAT3 normal = *reinterpret_cast<DirectX::XMFLOAT3*>(&mesh->mNormals[i]);
-				DirectX::XMFLOAT2 texCoord{0.0f, 0.0f};
-				DirectX::XMFLOAT3 tangent{0.0f, 0.0f, 0.0f};
-				DirectX::XMFLOAT3 bitangent{0.0f, 0.0f, 0.0f};
+				DirectX::XMFLOAT2 texCoord{0.0f,0.0f};
+				DirectX::XMFLOAT3 tangent{0.0f,0.0f,0.0f};
+				DirectX::XMFLOAT3 bitangent{0.0f,0.0f,0.0f};
 				// Initialize bone indices and bone weights for the vertex
 				std::array<unsigned int, 4> boneIndices{};
 				std::array<float, 4> boneWeights{};
@@ -109,6 +118,8 @@ namespace Kaka
 										// Store the bone index and weight for the vertex
 										boneIndices[l] = j;
 										boneWeights[l] = vertexWeight.mWeight;
+										std::string boneText = "\n\nVertex: " + std::to_string(i) + "\nIndex: " + std::to_string(j) + "\nWeight: " + std::to_string(vertexWeight.mWeight);
+										OutputDebugStringA(boneText.c_str());
 										break;
 									}
 								}
@@ -118,7 +129,7 @@ namespace Kaka
 				}
 
 				aOutModelData.animMesh.vertices.push_back({
-					position, normal, texCoord, tangent, bitangent, boneIndices, boneWeights
+					position,normal,texCoord,tangent,bitangent,boneIndices,boneWeights
 				});
 			}
 
@@ -144,11 +155,11 @@ namespace Kaka
 
 			for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
 			{
-				const DirectX::XMFLOAT3 position{mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z};
+				const DirectX::XMFLOAT3 position{mesh->mVertices[i].x,mesh->mVertices[i].y,mesh->mVertices[i].z};
 				const DirectX::XMFLOAT3 normal = *reinterpret_cast<DirectX::XMFLOAT3*>(&mesh->mNormals[i]);
-				DirectX::XMFLOAT2 texCoord{0.0f, 0.0f};
-				DirectX::XMFLOAT3 tangent{0.0f, 0.0f, 0.0f};
-				DirectX::XMFLOAT3 bitangent{0.0f, 0.0f, 0.0f};
+				DirectX::XMFLOAT2 texCoord{0.0f,0.0f};
+				DirectX::XMFLOAT3 tangent{0.0f,0.0f,0.0f};
+				DirectX::XMFLOAT3 bitangent{0.0f,0.0f,0.0f};
 
 				// Check if the mesh has texture coordinates
 				if (mesh->HasTextureCoords(0))
@@ -165,7 +176,7 @@ namespace Kaka
 					bitangent = *reinterpret_cast<DirectX::XMFLOAT3*>(&mesh->mBitangents[i]);
 				}
 
-				aOutModelData.mesh.vertices.push_back({position, normal, texCoord, tangent, bitangent});
+				aOutModelData.mesh.vertices.push_back({position,normal,texCoord,tangent,bitangent});
 			}
 
 			aOutModelData.mesh.indices.reserve(
@@ -243,6 +254,7 @@ namespace Kaka
 					// Create the bone transform matrix from the keyframe data
 					DirectX::XMFLOAT4X4 boneTransform{};
 					DirectX::XMStoreFloat4x4(&boneTransform, DirectX::XMMatrixIdentity());
+
 					DirectX::XMStoreFloat3(reinterpret_cast<DirectX::XMFLOAT3*>(&boneTransform._41),
 					                       DirectX::XMLoadFloat3(
 						                       reinterpret_cast<const DirectX::XMFLOAT3*>(&positionKey.mValue)));

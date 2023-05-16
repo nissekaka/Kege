@@ -6,7 +6,7 @@ cbuffer Transform : register(b0)
 
 cbuffer SkeletonBuffer : register(b1)
 {
-    matrix boneTransforms[128u]; // Array of bone transforms
+    float4x4 boneTransforms[64u]; // Array of bone transforms
 };
 
 struct VertexInput
