@@ -497,12 +497,12 @@ namespace Kaka
 				const int index = z * aSize + x;
 
 				tIndices.push_back(static_cast<unsigned short>(index));
-				tIndices.push_back(static_cast<unsigned short>(index + 1));
 				tIndices.push_back(static_cast<unsigned short>(index + aSize));
+				tIndices.push_back(static_cast<unsigned short>(index + 1));
 
 				tIndices.push_back(static_cast<unsigned short>(index + aSize));
-				tIndices.push_back(static_cast<unsigned short>(index + 1));
 				tIndices.push_back(static_cast<unsigned short>(index + aSize + 1));
+				tIndices.push_back(static_cast<unsigned short>(index + 1));
 			}
 		}
 	}
