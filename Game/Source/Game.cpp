@@ -20,10 +20,10 @@ namespace Kaka
 				0.5f,
 				200.0f));
 
-		for (int i = 0; i < 4; ++i)
-		{
-			pointLights.push_back(PointLight{wnd.Gfx(),2u});
-		}
+		//for (int i = 0; i < 4; ++i)
+		//{
+		//	pointLights.push_back(PointLight{wnd.Gfx(),2u});
+		//}
 	}
 
 	int Game::Go()
@@ -31,25 +31,26 @@ namespace Kaka
 		//spy.LoadModel(wnd.Gfx(), "Assets\\Models\\spy\\spy.fbx", Model::eShaderType::Phong);
 		//muzen.LoadModel(wnd.Gfx(), "Assets\\Models\\muzen\\MuzenSpeaker.fbx", Model::eShaderType::Phong);
 		//vamp.LoadModel(wnd.Gfx(), "Assets\\Models\\vamp\\vamp.fbx", Model::eShaderType::AnimPhong);
-		cube.LoadModel(wnd.Gfx(), "Assets\\Models\\cube\\animcube.fbx", Model::eShaderType::AnimPhong);
+		//cube.LoadModel(wnd.Gfx(), "Assets\\Models\\cube\\animcube.fbx", Model::eShaderType::AnimPhong);
 
 		camera.SetPosition({0.0f,1.0f,-3.0f});
+		wnd.Gfx().CreateTestTerrain(10);
 
-		muzen.SetScale(0.002f);
-		muzen.SetPosition({-1.0f,0.0f,0.0f});
+		//muzen.SetScale(0.002f);
+		//muzen.SetPosition({-1.0f,0.0f,0.0f});
 
-		pointLights[0].SetPosition({-1.0f,1.0f,1.0});
-		pointLights[0].SetColour({1.0f,0.0f,0.0f});
-		pointLights[1].SetPosition({-1.0f,1.0f,-1.0});
-		pointLights[1].SetColour({0.0f,1.0f,0.0f});
-		pointLights[2].SetPosition({1.0f,1.0f,-1.0});
-		pointLights[2].SetColour({0.0f,1.0f,1.0f});
-		pointLights[3].SetPosition({1.0f,1.0f,1.0});
-		pointLights[3].SetColour({1.0f,0.0f,1.0f});
+		//pointLights[0].SetPosition({-1.0f,1.0f,1.0});
+		//pointLights[0].SetColour({1.0f,0.0f,0.0f});
+		//pointLights[1].SetPosition({-1.0f,1.0f,-1.0});
+		//pointLights[1].SetColour({0.0f,1.0f,0.0f});
+		//pointLights[2].SetPosition({1.0f,1.0f,-1.0});
+		//pointLights[2].SetColour({0.0f,1.0f,1.0f});
+		//pointLights[3].SetPosition({1.0f,1.0f,1.0});
+		//pointLights[3].SetColour({1.0f,0.0f,1.0f});
 
-		spy.SetPosition({1.0f,0.0f,0.0f});
-		spy.SetRotation({PI / 2,0,0});
-		vamp.SetRotation({PI / 2,0.0f,0.0f});
+		//spy.SetPosition({1.0f,0.0f,0.0f});
+		//spy.SetRotation({PI / 2,0,0});
+		//vamp.SetRotation({PI / 2,0.0f,0.0f});
 
 		while (true)
 		{
@@ -84,20 +85,21 @@ namespace Kaka
 			}
 		}
 
-		spy.SetRotation({spy.GetRotation().x,timer.GetTotalTime(),spy.GetRotation().z});
-		spy.Draw(wnd.Gfx());
-		muzen.SetRotation({muzen.GetRotation().x,timer.GetTotalTime(),muzen.GetRotation().z});
-		muzen.Draw(wnd.Gfx());
+		//spy.SetRotation({spy.GetRotation().x,timer.GetTotalTime(),spy.GetRotation().z});
+		//spy.Draw(wnd.Gfx());
+		//muzen.SetRotation({muzen.GetRotation().x,timer.GetTotalTime(),muzen.GetRotation().z});
+		//muzen.Draw(wnd.Gfx());
 
-		cube.Update(aDeltaTime);
-		cube.Animate();
-		cube.Draw(wnd.Gfx());
+		//cube.Update(aDeltaTime);
+		//cube.Animate();
+		//cube.Draw(wnd.Gfx());
 		//vamp.Update(aDeltaTime);
 		//vamp.Animate();
 		//vamp.Draw(wnd.Gfx());
 		//wnd.Gfx().DrawTestTriangle2D();
 		//wnd.Gfx().DrawTestCube3D(timer.GetTotalTime(), DirectX::XMFLOAT3(0.0f, 0.0f, 2.0f));
 		//wnd.Gfx().DrawTestCube3D(-timer.GetTotalTime(), DirectX::XMFLOAT3(-2.0f, 0.0f, 0.0f));
+		wnd.Gfx().DrawTestTerrain(wnd.Gfx());
 
 		// ImGui windows
 		if (showImGui)
@@ -106,7 +108,7 @@ namespace Kaka
 			//spy.ShowControlWindow("Spy");
 			//muzen.ShowControlWindow("Muzen");
 			//vamp.ShowControlWindow("Vamp");
-			cube.ShowControlWindow("Cube");
+			//cube.ShowControlWindow("Cube");
 			directionalLight.ShowControlWindow("Directional Light");
 
 			for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)

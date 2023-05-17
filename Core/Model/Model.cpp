@@ -338,21 +338,21 @@ namespace Kaka
 			{
 				// Find the two keyframes for interpolation
 				size_t keyframeIndex1 = 0;
-				size_t keyframeIndex2 = 0;
+				//size_t keyframeIndex2 = 0;
 				for (size_t i = 0; i < animation.keyframes.size() - 1; ++i)
 				{
 					if (animation.keyframes[i + 1].time > animationTime)
 					{
 						keyframeIndex1 = i;
-						keyframeIndex2 = i + 1;
+						//keyframeIndex2 = i + 1;
 						break;
 					}
 				}
 
 				// Interpolate between the two keyframes
 				const Keyframe& keyframe1 = animation.keyframes[keyframeIndex1];
-				const Keyframe& keyframe2 = animation.keyframes[keyframeIndex2];
-				float t = (animationTime - keyframe1.time) / (keyframe2.time - keyframe1.time);
+				//const Keyframe& keyframe2 = animation.keyframes[keyframeIndex2];
+				//float t = (animationTime - keyframe1.time) / (keyframe2.time - keyframe1.time);
 
 				// Interpolate bone transforms for each vertex
 				for (auto& vertex : modelData.animMesh.vertices)
@@ -373,20 +373,20 @@ namespace Kaka
 								continue;
 							}
 						}
-						unsigned int boneIndex = vertex.boneIndices[i];
+						unsigned int boneIndex = vertex.boneIndices[i] + 1;
 						float boneWeight = vertex.boneWeights[i];
 						DirectX::XMFLOAT4X4 interpolatedTransform{};
 						DirectX::XMStoreFloat4x4(&interpolatedTransform,
-						                         DirectX::XMMatrixMultiply(
-							                         DirectX::XMMatrixMultiply(
-								                         DirectX::XMMatrixScaling(1.0f - t, 1.0f - t, 1.0f - t),
-								                         DirectX::XMLoadFloat4x4(&keyframe1.boneTransforms[boneIndex])
-							                         ),
-							                         DirectX::XMMatrixMultiply(
-								                         DirectX::XMMatrixScaling(t, t, t),
-								                         DirectX::XMLoadFloat4x4(&keyframe2.boneTransforms[boneIndex])
-							                         )
-						                         )
+						                         //DirectX::XMMatrixMultiply(
+						                         // DirectX::XMMatrixMultiply(
+						                         //  DirectX::XMMatrixScaling(1.0f - t, 1.0f - t, 1.0f - t),
+						                         DirectX::XMLoadFloat4x4(&keyframe1.boneTransforms[boneIndex])
+						                         //),
+						                         // DirectX::XMMatrixMultiply(
+						                         //  DirectX::XMMatrixScaling(t, t, t),
+						                         //  DirectX::XMLoadFloat4x4(&keyframe2.boneTransforms[boneIndex])
+						                         // )
+						                         //)
 						);
 
 						// Accumulate the interpolated bone transforms based on weights

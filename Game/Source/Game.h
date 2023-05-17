@@ -38,11 +38,8 @@ namespace Kaka
 		float cameraSpeedBoost = 2.0f;
 	private:
 		Model spy{};
-		//Model spy{wnd.Gfx(), "Assets\\Models\\spy\\spy.fbx", Model::eShaderType::Phong};
-		//Model model{wnd.Gfx(), "Assets\\Models\\vamp\\vamp.obj"};
 		Model muzen{};
 		Model vamp{};
 		Model cube{};
-		//Model muzen{wnd.Gfx(), "Assets\\Models\\muzen\\MuzenSpeaker.fbx", Model::eShaderType::Phong};
 	};
 }

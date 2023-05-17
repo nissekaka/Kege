@@ -6,6 +6,8 @@
 #include <memory>
 #include <vector>
 
+#include "Bindable/Texture.h"
+
 #define KAKA_BG_COLOUR {0.1f, 0.2f, 0.3f, 1.0f}
 
 namespace DirectX
@@ -46,6 +48,8 @@ namespace Kaka
 	public:
 		void DrawTestTriangle2D();
 		void DrawTestCube3D(const float aAngle, const DirectX::XMFLOAT3 aPos);
+		void CreateTestTerrain(int aSize);
+		void DrawTestTerrain(const Graphics& aGfx);
 	private:
 		DirectX::XMMATRIX projection{};
 		DirectX::XMMATRIX camera{};
@@ -56,5 +60,20 @@ namespace Kaka
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pDepth;
 		UINT width;
 		UINT height;
+	private:
+		// For DrawTestTerrain
+		struct Vertex
+		{
+			DirectX::XMFLOAT3 position;
+			DirectX::XMFLOAT3 normal;
+			DirectX::XMFLOAT2 texCoord;
+			DirectX::XMFLOAT3 tangent;
+			DirectX::XMFLOAT3 bitangent;
+		};
+
+		Texture texture;
+		std::vector<Vertex> tVertices;
+		std::vector<unsigned short> tIndices;
+		// For DrawTestTerrain -- End
 	};
 }

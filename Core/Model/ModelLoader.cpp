@@ -222,6 +222,22 @@ namespace Kaka
 		return skeleton;
 	}
 
+	// Helper function to find the index of the keyframe that corresponds to the given time
+	unsigned int FindKeyframeIndex(const aiNodeAnim* aChannel, const float aTime)
+	{
+		// Iterate through the position keys to find the index of the keyframe that matches or is closest to the given time
+		for (unsigned int i = 0; i < aChannel->mNumPositionKeys - 1; ++i)
+		{
+			if (aTime < aChannel->mPositionKeys[i + 1].mTime)
+			{
+				return i; // Return the index of the keyframe
+			}
+		}
+
+		// If no keyframe was found, return the last keyframe index
+		return aChannel->mNumPositionKeys - 1;
+	}
+
 	std::vector<AnimationClip> ModelLoader::LoadAnimations(const aiScene* aScene)
 	{
 		std::vector<AnimationClip> animations;
@@ -234,37 +250,57 @@ namespace Kaka
 			AnimationClip animationClip;
 			animationClip.name = animation->mName.C_Str();
 
-			// Iterate through each channel (bone) in the animation
+			unsigned int numFrames = 0; // Initialize the number of frames to zero
+
+			// Calculate the duration of the animation in ticks
+			float animationDuration = static_cast<float>(animation->mDuration);
+
+			// Determine the maximum number of frames among all the channels
 			for (unsigned int j = 0; j < animation->mNumChannels; ++j)
 			{
 				const aiNodeAnim* channel = animation->mChannels[j];
+				numFrames = std::max(numFrames, channel->mNumPositionKeys);
+			}
 
+			// Calculate the duration of a single frame in ticks
+			float frameDuration = animationDuration / (float)numFrames;
+
+			// Iterate through each frame
+			for (unsigned int frameIndex = 0; frameIndex < numFrames; ++frameIndex)
+			{
+				// Create a keyframe for the current frame
 				Keyframe keyframe;
-				keyframe.time = 0.0f; // Initialize time
+				keyframe.time = frameIndex * frameDuration;
 
-				// Iterate through each position keyframe in the channel
-				for (unsigned int k = 0; k < channel->mNumPositionKeys; ++k)
+				// Iterate through each channel (bone)
+				for (unsigned int j = 0; j < animation->mNumChannels; ++j)
 				{
-					const aiVectorKey& positionKey = channel->mPositionKeys[k];
-					const aiQuatKey& rotationKey = channel->mRotationKeys[k];
-					const aiVectorKey& scalingKey = channel->mScalingKeys[k];
+					const aiNodeAnim* channel = animation->mChannels[j];
 
-					keyframe.time = static_cast<float>(positionKey.mTime); // Set keyframe time
+					// Find the position keyframe that corresponds to the current frame
+					unsigned int positionIndex = FindKeyframeIndex(channel, keyframe.time);
+					const aiVectorKey& positionKey = channel->mPositionKeys[positionIndex];
+
+					// Find the rotation keyframe that corresponds to the current frame
+					unsigned int rotationIndex = FindKeyframeIndex(channel, keyframe.time);
+					const aiQuatKey& rotationKey = channel->mRotationKeys[rotationIndex];
+
+					// Find the scaling keyframe that corresponds to the current frame
+					unsigned int scalingIndex = FindKeyframeIndex(channel, keyframe.time);
+					const aiVectorKey& scalingKey = channel->mScalingKeys[scalingIndex];
 
 					// Create the bone transform matrix from the keyframe data
 					DirectX::XMFLOAT4X4 boneTransform{};
 					DirectX::XMStoreFloat4x4(&boneTransform, DirectX::XMMatrixIdentity());
 
 					DirectX::XMStoreFloat3(reinterpret_cast<DirectX::XMFLOAT3*>(&boneTransform._41),
-					                       DirectX::XMLoadFloat3(
-						                       reinterpret_cast<const DirectX::XMFLOAT3*>(&positionKey.mValue)));
+					                       DirectX::XMLoadFloat3(reinterpret_cast<const DirectX::XMFLOAT3*>(&positionKey.mValue)));
 					DirectX::XMStoreFloat4(reinterpret_cast<DirectX::XMFLOAT4*>(&boneTransform._31),
-					                       DirectX::XMLoadFloat4(
-						                       reinterpret_cast<const DirectX::XMFLOAT4*>(&rotationKey.mValue)));
+					                       DirectX::XMLoadFloat4(reinterpret_cast<const DirectX::XMFLOAT4*>(&rotationKey.mValue)));
 					DirectX::XMStoreFloat3(reinterpret_cast<DirectX::XMFLOAT3*>(&boneTransform._11),
-					                       DirectX::XMLoadFloat3(
-						                       reinterpret_cast<const DirectX::XMFLOAT3*>(&scalingKey.mValue)));
+					                       DirectX::XMLoadFloat3(reinterpret_cast<const DirectX::XMFLOAT3*>(&scalingKey.mValue)));
 
+					// Add the bone transform to the keyframe
 					keyframe.boneTransforms.push_back(boneTransform);
 				}
 
