@@ -512,6 +512,7 @@ namespace Kaka
 		Sampler sampler(aGfx, 0u);
 		sampler.Bind(aGfx);
 
+		Texture texture;
 		texture.Bind(aGfx);
 
 		VertexBuffer vb(aGfx, tVertices);

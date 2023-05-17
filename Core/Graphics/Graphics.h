@@ -6,8 +6,6 @@
 #include <memory>
 #include <vector>
 
-#include "Bindable/Texture.h"
-
 #define KAKA_BG_COLOUR {0.1f, 0.2f, 0.3f, 1.0f}
 
 namespace DirectX
@@ -71,7 +69,6 @@ namespace Kaka
 			DirectX::XMFLOAT3 bitangent;
 		};
 
-		Texture texture;
 		std::vector<Vertex> tVertices;
 		std::vector<unsigned short> tIndices;
 		// For DrawTestTerrain -- End
