@@ -79,6 +79,11 @@ namespace Kaka
 		pointLightData[index].diffuseColour = aColour;
 	}
 
+	void PointLight::SetIntensity(const float aIntensity) const
+	{
+		pointLightData[index].diffuseIntensity = aIntensity;
+	}
+
 	void PointLight::Reset() const
 	{
 		pointLightData[index].position = {0.0f, 2.0f, 0.0f};

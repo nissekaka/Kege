@@ -23,6 +23,7 @@ namespace Kaka
 		friend class Bindable;
 		friend class DirectionalLight;
 		friend class PointLight;
+		friend class Terrain;
 	public:
 		Graphics(HWND aHWnd, UINT aWidth, UINT aHeight);
 		Graphics(const Graphics&) = delete;
@@ -46,8 +47,6 @@ namespace Kaka
 	public:
 		void DrawTestTriangle2D();
 		void DrawTestCube3D(const float aAngle, const DirectX::XMFLOAT3 aPos);
-		void CreateTestTerrain(int aSize);
-		void DrawTestTerrain(const Graphics& aGfx);
 	private:
 		DirectX::XMMATRIX projection{};
 		DirectX::XMMATRIX camera{};
@@ -59,18 +58,5 @@ namespace Kaka
 		UINT width;
 		UINT height;
 	private:
-		// For DrawTestTerrain
-		struct Vertex
-		{
-			DirectX::XMFLOAT3 position;
-			DirectX::XMFLOAT3 normal;
-			DirectX::XMFLOAT2 texCoord;
-			DirectX::XMFLOAT3 tangent;
-			DirectX::XMFLOAT3 bitangent;
-		};
-
-		std::vector<Vertex> tVertices;
-		std::vector<unsigned short> tIndices;
-		// For DrawTestTerrain -- End
 	};
 }

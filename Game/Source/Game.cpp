@@ -18,12 +18,12 @@ namespace Kaka
 				1.0f,
 				static_cast<float>(WINDOW_HEIGHT) / static_cast<float>(WINDOW_WIDTH),
 				0.5f,
-				200.0f));
+				500.0f));
 
-		//for (int i = 0; i < 4; ++i)
-		//{
-		//	pointLights.push_back(PointLight{wnd.Gfx(),2u});
-		//}
+		for (int i = 0; i < 4; ++i)
+		{
+			pointLights.push_back(PointLight{wnd.Gfx(), 2u});
+		}
 	}
 
 	int Game::Go()
@@ -33,20 +33,25 @@ namespace Kaka
 		//vamp.LoadModel(wnd.Gfx(), "Assets\\Models\\vamp\\vamp.fbx", Model::eShaderType::AnimPhong);
 		//cube.LoadModel(wnd.Gfx(), "Assets\\Models\\cube\\animcube.fbx", Model::eShaderType::AnimPhong);
 
-		camera.SetPosition({0.0f,1.0f,-3.0f});
-		wnd.Gfx().CreateTestTerrain(10);
+		camera.SetPosition({0.0f, 1.0f, -3.0f});
+
+		terrain.Init(wnd.Gfx(), 250);
 
 		//muzen.SetScale(0.002f);
 		//muzen.SetPosition({-1.0f,0.0f,0.0f});
 
-		//pointLights[0].SetPosition({-1.0f,1.0f,1.0});
-		//pointLights[0].SetColour({1.0f,0.0f,0.0f});
-		//pointLights[1].SetPosition({-1.0f,1.0f,-1.0});
-		//pointLights[1].SetColour({0.0f,1.0f,0.0f});
-		//pointLights[2].SetPosition({1.0f,1.0f,-1.0});
-		//pointLights[2].SetColour({0.0f,1.0f,1.0f});
-		//pointLights[3].SetPosition({1.0f,1.0f,1.0});
-		//pointLights[3].SetColour({1.0f,0.0f,1.0f});
+		pointLights[0].SetPosition({10.0f, 4.0f, 10.0f});
+		pointLights[0].SetColour({1.0f, 0.0f, 0.0f});
+		pointLights[0].SetIntensity(0.35f);
+		pointLights[1].SetPosition({240.0f, 4.0f, 240.0f});
+		pointLights[1].SetColour({0.0f, 1.0f, 0.0f});
+		pointLights[1].SetIntensity(0.35f);
+		pointLights[2].SetPosition({10.0f, 4.0f, 240.0f});
+		pointLights[2].SetColour({0.0f, 1.0f, 1.0f});
+		pointLights[2].SetIntensity(0.35f);
+		pointLights[3].SetPosition({240.0f, 4.0f, 10.0f});
+		pointLights[3].SetColour({1.0f, 0.0f, 1.0f});
+		pointLights[3].SetIntensity(0.35f);
 
 		//spy.SetPosition({1.0f,0.0f,0.0f});
 		//spy.SetRotation({PI / 2,0,0});
@@ -99,7 +104,7 @@ namespace Kaka
 		//wnd.Gfx().DrawTestTriangle2D();
 		//wnd.Gfx().DrawTestCube3D(timer.GetTotalTime(), DirectX::XMFLOAT3(0.0f, 0.0f, 2.0f));
 		//wnd.Gfx().DrawTestCube3D(-timer.GetTotalTime(), DirectX::XMFLOAT3(-2.0f, 0.0f, 0.0f));
-		wnd.Gfx().DrawTestTerrain(wnd.Gfx());
+		terrain.Draw(wnd.Gfx());
 
 		// ImGui windows
 		if (showImGui)
@@ -178,27 +183,27 @@ namespace Kaka
 
 			if (wnd.keyboard.KeyIsPressed('W'))
 			{
-				camera.Translate({0.0f,0.0f,aDeltaTime * cameraSpeed});
+				camera.Translate({0.0f, 0.0f, aDeltaTime * cameraSpeed});
 			}
 			if (wnd.keyboard.KeyIsPressed('A'))
 			{
-				camera.Translate({-aDeltaTime * cameraSpeed,0.0f,0.0f});
+				camera.Translate({-aDeltaTime * cameraSpeed, 0.0f, 0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed('S'))
 			{
-				camera.Translate({0.0f,0.0f,-aDeltaTime * cameraSpeed});
+				camera.Translate({0.0f, 0.0f, -aDeltaTime * cameraSpeed});
 			}
 			if (wnd.keyboard.KeyIsPressed('D'))
 			{
-				camera.Translate({aDeltaTime * cameraSpeed,0.0f,0.0f});
+				camera.Translate({aDeltaTime * cameraSpeed, 0.0f, 0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed(VK_SPACE))
 			{
-				camera.Translate({0.0f,aDeltaTime * cameraSpeed,0.0f});
+				camera.Translate({0.0f, aDeltaTime * cameraSpeed, 0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed(VK_CONTROL))
 			{
-				camera.Translate({0.0f,-aDeltaTime * cameraSpeed,0.0f});
+				camera.Translate({0.0f, -aDeltaTime * cameraSpeed, 0.0f});
 			}
 		}
 

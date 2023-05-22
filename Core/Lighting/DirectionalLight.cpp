@@ -41,7 +41,7 @@ namespace Kaka
 	void DirectionalLight::Reset()
 	{
 		bufferData.lightDirection = {-1.0f, -1.0f, 1.0f};
-		bufferData.lightColour = {1.0f, 1.0f, 1.0f};
-		bufferData.ambientLight = 0.0f;
+		bufferData.lightColour = {0.6f, 0.6f, 0.6f};
+		bufferData.ambientLight = 0.4f;
 	}
 }

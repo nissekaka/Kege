@@ -8,6 +8,8 @@
 #include "Core/Model/Model.h"
 #include <array>
 
+#include "Game/Source/Terrain.h"
+
 namespace Kaka
 {
 	class Game
@@ -26,7 +28,7 @@ namespace Kaka
 		Timer timer;
 		Camera camera;
 
-		DirectionalLight directionalLight{wnd.Gfx(),1u};
+		DirectionalLight directionalLight{wnd.Gfx(), 1u};
 		std::vector<PointLight> pointLights;
 	private:
 		bool showImGui = true;
@@ -41,5 +43,6 @@ namespace Kaka
 		Model muzen{};
 		Model vamp{};
 		Model cube{};
+		Terrain terrain{};
 	};
 }

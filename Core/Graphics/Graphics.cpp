@@ -2,7 +2,6 @@
 #include "Game/Source/Game.h"
 #include <External/include/imgui/imgui_impl_dx11.h>
 #include <External/include/imgui/imgui_impl_win32.h>
-#include <External/include/TGP/uppgift05_helper.h>
 
 namespace WRL = Microsoft::WRL;
 
@@ -211,9 +210,9 @@ namespace Kaka
 		};
 
 		const Vertex vertices[] = {
-			{{0.0f,1.0f},{255,0,0,255}},
-			{{1.0f,-1.0f},{0,255,0,255}},
-			{{-1.0f,-1.0f},{0,0,255,255}},
+			{{0.0f, 1.0f}, {255, 0, 0, 255}},
+			{{1.0f, -1.0f}, {0, 255, 0, 255}},
+			{{-1.0f, -1.0f}, {0, 0, 255, 255}},
 		};
 
 		// Create vertex buffer
@@ -237,7 +236,7 @@ namespace Kaka
 		// Create index buffer
 		const unsigned short indices[] =
 		{
-			0,1,2,
+			0, 1, 2,
 		};
 
 		WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
@@ -310,8 +309,8 @@ namespace Kaka
 		WRL::ComPtr<ID3D11InputLayout> pInputLayout;
 		const D3D11_INPUT_ELEMENT_DESC ied[] =
 		{
-			{"POSITION",0,DXGI_FORMAT_R32G32_FLOAT,0,D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0},
-			{"COLOUR",0,DXGI_FORMAT_R8G8B8A8_UNORM,0,D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0},
+			{"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0,D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"COLOUR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0,D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
 		};
 		pDevice->CreateInputLayout(
 			ied,
@@ -350,14 +349,14 @@ namespace Kaka
 		};
 
 		const Vertex vertices[] = {
-			{{-0.5f,-0.5f,-0.5f},{255,0,0,255}},
-			{{0.5f,-0.5f,-0.5f},{0,255,0,255}},
-			{{-0.5f,0.5f,-0.5f},{0,0,255,255}},
-			{{0.5f,0.5f,-0.5f},{255,0,0,255}},
-			{{-0.5f,-0.5f,0.5f},{0,255,0,255}},
-			{{0.5f,-0.5f,0.5f},{0,0,255,255}},
-			{{-0.5f,0.5f,0.5f},{128,128,0,255}},
-			{{0.5f,0.5f,0.5f},{0,128,128,255}},
+			{{-0.5f, -0.5f, -0.5f}, {255, 0, 0, 255}},
+			{{0.5f, -0.5f, -0.5f}, {0, 255, 0, 255}},
+			{{-0.5f, 0.5f, -0.5f}, {0, 0, 255, 255}},
+			{{0.5f, 0.5f, -0.5f}, {255, 0, 0, 255}},
+			{{-0.5f, -0.5f, 0.5f}, {0, 255, 0, 255}},
+			{{0.5f, -0.5f, 0.5f}, {0, 0, 255, 255}},
+			{{-0.5f, 0.5f, 0.5f}, {128, 128, 0, 255}},
+			{{0.5f, 0.5f, 0.5f}, {0, 128, 128, 255}},
 		};
 
 		// Create vertex buffer
@@ -381,12 +380,12 @@ namespace Kaka
 		// Create index buffer
 		const unsigned short indices[] =
 		{
-			0,2,1,2,3,1,
-			1,3,5,3,7,5,
-			2,6,3,3,6,7,
-			4,5,7,4,7,6,
-			0,4,2,2,4,6,
-			0,1,4,1,5,4
+			0, 2, 1, 2, 3, 1,
+			1, 3, 5, 3, 7, 5,
+			2, 6, 3, 3, 6, 7,
+			4, 5, 7, 4, 7, 6,
+			0, 4, 2, 2, 4, 6,
+			0, 1, 4, 1, 5, 4
 		};
 
 		WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
@@ -456,10 +455,10 @@ namespace Kaka
 		const D3D11_INPUT_ELEMENT_DESC ied[] =
 		{
 			{
-				"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,
+				"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA,
 				0
 			},
-			{"COLOUR",0,DXGI_FORMAT_R8G8B8A8_UNORM,0,D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0},
+			{"COLOUR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0,D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
 		};
 		pDevice->CreateInputLayout(
 			ied,
@@ -475,121 +474,5 @@ namespace Kaka
 		pContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		pContext->DrawIndexed(static_cast<UINT>(std::size(indices)), 0u, 0u);
-	}
-
-	void Graphics::CreateTestTerrain(const int aSize)
-	{
-		for (int z = 0; z < aSize; ++z)
-		{
-			for (int x = 0; x < aSize; ++x)
-			{
-				Vertex vertex;
-				vertex.position = {static_cast<float>(x),RandomFloat(),static_cast<float>(z)};
-				vertex.normal = {0.0f,1.0f,0.0f};
-				tVertices.push_back(vertex);
-			}
-		}
-
-		for (int z = 0; z < aSize - 1; ++z)
-		{
-			for (int x = 0; x < aSize - 1; ++x)
-			{
-				const int index = z * aSize + x;
-
-				tIndices.push_back(static_cast<unsigned short>(index));
-				tIndices.push_back(static_cast<unsigned short>(index + aSize));
-				tIndices.push_back(static_cast<unsigned short>(index + 1));
-
-				tIndices.push_back(static_cast<unsigned short>(index + aSize));
-				tIndices.push_back(static_cast<unsigned short>(index + aSize + 1));
-				tIndices.push_back(static_cast<unsigned short>(index + 1));
-			}
-		}
-	}
-
-	void Graphics::DrawTestTerrain(const Graphics& aGfx)
-	{
-		Sampler sampler(aGfx, 0u);
-		sampler.Bind(aGfx);
-
-		Texture texture;
-		texture.Bind(aGfx);
-
-		VertexBuffer vb(aGfx, tVertices);
-		vb.Bind(aGfx);
-
-		IndexBuffer ib(aGfx, tIndices);
-		ib.Bind(aGfx);
-
-		// Create constant buffer for transformation matrix
-		struct ConstantBuffer
-		{
-			DirectX::XMMATRIX modelView;
-			DirectX::XMMATRIX modelProjection;
-		};
-
-		auto tf = DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f) *
-			DirectX::XMMatrixRotationRollPitchYaw(0, 0, 0) *
-			DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
-
-		const DirectX::XMMATRIX modelView = tf * aGfx.GetCamera();
-
-		const ConstantBuffer cb =
-		{
-			DirectX::XMMatrixTranspose(modelView),
-			DirectX::XMMatrixTranspose(modelView * aGfx.GetProjection())
-		};
-		VertexConstantBuffer<ConstantBuffer> vcb(aGfx, cb, 0u);
-		vcb.Bind(aGfx);
-
-		PixelShader pixelShader(aGfx, L"Shaders\\Phong_PS.cso");
-		pixelShader.Bind(aGfx);
-
-		struct PSMaterialConstant
-		{
-			BOOL normalMapEnabled = FALSE;
-			BOOL materialEnabled = FALSE;
-			float specularIntensity = 0.1f;
-			float specularPower = 30.0f;
-		} pmc;
-		pmc.normalMapEnabled = texture.HasNormalMap();
-		pmc.materialEnabled = texture.HasMaterial();
-
-		PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-		psConstantBuffer.Bind(aGfx);
-
-		VertexShader vertexShader(aGfx, L"Shaders\\Phong_VS.cso");
-		vertexShader.Bind(aGfx);
-
-		const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
-		{
-			{
-				"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-				D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-			},
-			{
-				"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-				D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-			},
-			{
-				"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,
-				D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-			},
-			{
-				"TANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-				D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-			},
-			{
-				"BITANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-				D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-			},
-		};
-		InputLayout inputLayout(aGfx, ied, vertexShader.GetBytecode());
-		inputLayout.Bind(aGfx);
-
-		Topology topology(aGfx, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		topology.Bind(aGfx);
-
-		aGfx.pContext->DrawIndexed(static_cast<UINT>(std::size(tIndices)), 0u, 0u);
 	}
 }

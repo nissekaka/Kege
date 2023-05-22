@@ -14,7 +14,8 @@ namespace Kaka
 	public:
 		Texture(const UINT aSlot = 0u);
 		~Texture() override = default;
-		void LoadTexture(const Graphics& aGfx, const std::string& aFilePath);
+		void LoadTextureFromModel(const Graphics& aGfx, const std::string& aFilePath);
+		void LoadTextureFromPath(const Graphics& aGfx, const std::string& aFilePath);
 		void Bind(const Graphics& aGfx) override;
 		BOOL HasNormalMap() const;
 		BOOL HasMaterial() const;

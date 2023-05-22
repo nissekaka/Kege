@@ -16,6 +16,7 @@ namespace Kaka
 		DirectX::XMMATRIX GetTransform() const;
 		void SetPosition(DirectX::XMFLOAT3 aPosition) const;
 		void SetColour(DirectX::XMFLOAT3 aColour) const;
+		void SetIntensity(float aIntensity) const;
 		void Reset() const;
 		void Draw(const Graphics& aGfx) const;
 	private:

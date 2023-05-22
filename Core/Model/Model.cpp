@@ -12,8 +12,8 @@ namespace Kaka
 		shaderType(aShaderType)
 	{
 		isLoaded = ModelLoader::LoadModel(aFilePath, modelData);
-		texture.LoadTexture(aGfx, aFilePath);
-		solidColour = {1.0f,1.0f,1.0f,1.0f};
+		texture.LoadTextureFromModel(aGfx, aFilePath);
+		solidColour = {1.0f, 1.0f, 1.0f, 1.0f};
 	}
 
 	void Model::LoadModel(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType)
@@ -21,8 +21,8 @@ namespace Kaka
 		shaderType = aShaderType;
 
 		isLoaded = ModelLoader::LoadModel(aFilePath, modelData);
-		texture.LoadTexture(aGfx, aFilePath);
-		solidColour = {1.0f,1.0f,1.0f,1.0f};
+		texture.LoadTextureFromModel(aGfx, aFilePath);
+		solidColour = {1.0f, 1.0f, 1.0f, 1.0f};
 	}
 
 	void Model::Draw(const Graphics& aGfx)
@@ -40,28 +40,28 @@ namespace Kaka
 		switch (modelData.modelType)
 		{
 		case eModelType::None:
-		{
-			assert("No model type!");
-		}
-		break;
+			{
+				assert("No model type!");
+			}
+			break;
 		case eModelType::Static:
-		{
-			VertexBuffer vertexBuffer(aGfx, modelData.mesh.vertices);
-			vertexBuffer.Bind(aGfx);
+			{
+				VertexBuffer vertexBuffer(aGfx, modelData.mesh.vertices);
+				vertexBuffer.Bind(aGfx);
 
-			IndexBuffer indexBuffer(aGfx, modelData.mesh.indices);
-			indexBuffer.Bind(aGfx);
-		}
-		break;
+				IndexBuffer indexBuffer(aGfx, modelData.mesh.indices);
+				indexBuffer.Bind(aGfx);
+			}
+			break;
 		case eModelType::Skeletal:
-		{
-			VertexBuffer vertexBuffer(aGfx, modelData.animMesh.vertices);
-			vertexBuffer.Bind(aGfx);
+			{
+				VertexBuffer vertexBuffer(aGfx, modelData.animMesh.vertices);
+				vertexBuffer.Bind(aGfx);
 
-			IndexBuffer indexBuffer(aGfx, modelData.animMesh.indices);
-			indexBuffer.Bind(aGfx);
-		}
-		break;
+				IndexBuffer indexBuffer(aGfx, modelData.animMesh.indices);
+				indexBuffer.Bind(aGfx);
+			}
+			break;
 		default:
 			assert("Error!");
 		}
@@ -73,199 +73,199 @@ namespace Kaka
 		switch (shaderType)
 		{
 		case eShaderType::Solid:
-		{
-			PixelShader pixelShader(aGfx, L"Shaders\\Solid_PS.cso");
-			pixelShader.Bind(aGfx);
-
-			struct PSMaterialConstant
 			{
-				DirectX::XMFLOAT4 colour;
-			} pmc;
-			pmc.colour = solidColour;
+				PixelShader pixelShader(aGfx, L"Shaders\\Solid_PS.cso");
+				pixelShader.Bind(aGfx);
 
-			PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-			psConstantBuffer.Bind(aGfx);
-
-			VertexShader vertexShader(aGfx, L"Shaders\\Solid_VS.cso");
-			vertexShader.Bind(aGfx);
-
-
-			const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
-			{
+				struct PSMaterialConstant
 				{
-					"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
-			};
-			InputLayout inputLayout(aGfx, ied, vertexShader.GetBytecode());
-			inputLayout.Bind(aGfx);
-		}
-		break;
-		case eShaderType::Light:
-		{
-			PixelShader pixelShader(aGfx, L"Shaders\\Light_PS.cso");
-			pixelShader.Bind(aGfx);
+					DirectX::XMFLOAT4 colour;
+				} pmc;
+				pmc.colour = solidColour;
 
-			struct PSMaterialConstant
-			{
-				BOOL normalMapEnabled = FALSE;
-				BOOL materialEnabled = FALSE;
-				BOOL padding1;
-				BOOL padding2;
-			} pmc;
-			pmc.normalMapEnabled = texture.HasNormalMap();
-			pmc.materialEnabled = texture.HasMaterial();
+				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
+				psConstantBuffer.Bind(aGfx);
 
-			PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-			psConstantBuffer.Bind(aGfx);
+				VertexShader vertexShader(aGfx, L"Shaders\\Solid_VS.cso");
+				vertexShader.Bind(aGfx);
 
-			VertexShader vertexShader(aGfx, L"Shaders\\Light_VS.cso");
-			vertexShader.Bind(aGfx);
 
-			const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
-			{
+				const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 				{
-					"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
-				{
-					"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
-				{
-					"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
-				{
-					"TANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
-				{
-					"BITANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
-			};
-			InputLayout inputLayout(aGfx, ied, vertexShader.GetBytecode());
-			inputLayout.Bind(aGfx);
-		}
-		break;
-		case eShaderType::Phong:
-		{
-			PixelShader pixelShader(aGfx, L"Shaders\\Phong_PS.cso");
-			pixelShader.Bind(aGfx);
-
-			struct PSMaterialConstant
-			{
-				BOOL normalMapEnabled = FALSE;
-				BOOL materialEnabled = FALSE;
-				float specularIntensity = 0.1f;
-				float specularPower = 30.0f;
-			} pmc;
-			pmc.normalMapEnabled = texture.HasNormalMap();
-			pmc.materialEnabled = texture.HasMaterial();
-
-			PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-			psConstantBuffer.Bind(aGfx);
-
-			VertexShader vertexShader(aGfx, L"Shaders\\Phong_VS.cso");
-			vertexShader.Bind(aGfx);
-
-			const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
-			{
-				{
-					"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
-				{
-					"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
-				{
-					"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
-				{
-					"TANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
-				{
-					"BITANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
-			};
-			InputLayout inputLayout(aGfx, ied, vertexShader.GetBytecode());
-			inputLayout.Bind(aGfx);
-		}
-		break;
-		case eShaderType::AnimPhong:
-		{
-			PixelShader pixelShader(aGfx, L"Shaders\\Phong_PS.cso");
-			pixelShader.Bind(aGfx);
-
-			struct PSMaterialConstant
-			{
-				BOOL normalMapEnabled = FALSE;
-				BOOL materialEnabled = FALSE;
-				float specularIntensity = 0.1f;
-				float specularPower = 30.0f;
-			} pmc;
-			pmc.normalMapEnabled = texture.HasNormalMap();
-			pmc.materialEnabled = texture.HasMaterial();
-
-			PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-			psConstantBuffer.Bind(aGfx);
-
-			struct VSBoneConstant
-			{
-				DirectX::XMFLOAT4X4 bones[64u];
-			} vsb;
-
-			for (int i = 0; i < modelData.skeleton.bones.size(); ++i)
-			{
-				vsb.bones[i] = modelData.skeleton.bones[i].offsetMatrix;
+					{
+						"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+				};
+				InputLayout inputLayout(aGfx, ied, vertexShader.GetBytecode());
+				inputLayout.Bind(aGfx);
 			}
-
-			VertexConstantBuffer<VSBoneConstant> vsConstantBuffer(aGfx, vsb, 1u);
-			vsConstantBuffer.Bind(aGfx);
-
-			VertexShader vertexShader(aGfx, L"Shaders\\AnimPhong_VS.cso");
-			vertexShader.Bind(aGfx);
-
-			const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
+			break;
+		case eShaderType::Light:
 			{
+				PixelShader pixelShader(aGfx, L"Shaders\\Light_PS.cso");
+				pixelShader.Bind(aGfx);
+
+				struct PSMaterialConstant
 				{
-					"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
+					BOOL normalMapEnabled = FALSE;
+					BOOL materialEnabled = FALSE;
+					BOOL padding1;
+					BOOL padding2;
+				} pmc;
+				pmc.normalMapEnabled = texture.HasNormalMap();
+				pmc.materialEnabled = texture.HasMaterial();
+
+				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
+				psConstantBuffer.Bind(aGfx);
+
+				VertexShader vertexShader(aGfx, L"Shaders\\Light_VS.cso");
+				vertexShader.Bind(aGfx);
+
+				const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 				{
-					"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
+					{
+						"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+					{
+						"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+					{
+						"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+					{
+						"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+					{
+						"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+				};
+				InputLayout inputLayout(aGfx, ied, vertexShader.GetBytecode());
+				inputLayout.Bind(aGfx);
+			}
+			break;
+		case eShaderType::Phong:
+			{
+				PixelShader pixelShader(aGfx, L"Shaders\\Phong_PS.cso");
+				pixelShader.Bind(aGfx);
+
+				struct PSMaterialConstant
 				{
-					"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
+					BOOL normalMapEnabled = FALSE;
+					BOOL materialEnabled = FALSE;
+					float specularIntensity = 0.1f;
+					float specularPower = 30.0f;
+				} pmc;
+				pmc.normalMapEnabled = texture.HasNormalMap();
+				pmc.materialEnabled = texture.HasMaterial();
+
+				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
+				psConstantBuffer.Bind(aGfx);
+
+				VertexShader vertexShader(aGfx, L"Shaders\\Phong_VS.cso");
+				vertexShader.Bind(aGfx);
+
+				const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 				{
-					"TANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
+					{
+						"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+					{
+						"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+					{
+						"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+					{
+						"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+					{
+						"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+				};
+				InputLayout inputLayout(aGfx, ied, vertexShader.GetBytecode());
+				inputLayout.Bind(aGfx);
+			}
+			break;
+		case eShaderType::AnimPhong:
+			{
+				PixelShader pixelShader(aGfx, L"Shaders\\Phong_PS.cso");
+				pixelShader.Bind(aGfx);
+
+				struct PSMaterialConstant
 				{
-					"BITANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
+					BOOL normalMapEnabled = FALSE;
+					BOOL materialEnabled = FALSE;
+					float specularIntensity = 0.1f;
+					float specularPower = 30.0f;
+				} pmc;
+				pmc.normalMapEnabled = texture.HasNormalMap();
+				pmc.materialEnabled = texture.HasMaterial();
+
+				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
+				psConstantBuffer.Bind(aGfx);
+
+				struct VSBoneConstant
 				{
-					"BLENDINDICES",0,DXGI_FORMAT_R8G8B8A8_UINT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
+					DirectX::XMFLOAT4X4 bones[64u];
+				} vsb;
+
+				for (int i = 0; i < modelData.skeleton.bones.size(); ++i)
 				{
-					"BLENDWEIGHT",0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
-			};
-			InputLayout inputLayout(aGfx, ied, vertexShader.GetBytecode());
-			inputLayout.Bind(aGfx);
-		}
-		break;
+					vsb.bones[i] = modelData.skeleton.bones[i].offsetMatrix;
+				}
+
+				VertexConstantBuffer<VSBoneConstant> vsConstantBuffer(aGfx, vsb, 1u);
+				vsConstantBuffer.Bind(aGfx);
+
+				VertexShader vertexShader(aGfx, L"Shaders\\AnimPhong_VS.cso");
+				vertexShader.Bind(aGfx);
+
+				const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
+				{
+					{
+						"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+					{
+						"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+					{
+						"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+					{
+						"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+					{
+						"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+					{
+						"BLENDINDICES", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+					{
+						"BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+				};
+				InputLayout inputLayout(aGfx, ied, vertexShader.GetBytecode());
+				inputLayout.Bind(aGfx);
+			}
+			break;
 		}
 
 		Topology topology(aGfx, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -435,12 +435,14 @@ namespace Kaka
 
 					// Accumulate the default pose bone transform to the overall bone transform
 					DirectX::XMFLOAT4X4 weightedDefaultPoseTransform;
-					DirectX::XMStoreFloat4x4(&weightedDefaultPoseTransform, DirectX::XMLoadFloat4x4(&defaultPoseTransform));
+					DirectX::XMStoreFloat4x4(&weightedDefaultPoseTransform,
+					                         DirectX::XMLoadFloat4x4(&defaultPoseTransform));
 
 					// Accumulate the default pose bone transform to the overall bone transform
 					DirectX::XMStoreFloat4x4(&boneTransform,
 					                         DirectX::XMMatrixMultiply(DirectX::XMLoadFloat4x4(&boneTransform),
-					                                                   DirectX::XMLoadFloat4x4(&weightedDefaultPoseTransform)));
+					                                                   DirectX::XMLoadFloat4x4(
+						                                                   &weightedDefaultPoseTransform)));
 				}
 
 				// Apply the final bone transform to the vertex
@@ -513,12 +515,12 @@ namespace Kaka
 
 	DirectX::XMFLOAT3 Model::GetPosition() const
 	{
-		return {transform.x,transform.y,transform.z};
+		return {transform.x, transform.y, transform.z};
 	}
 
 	DirectX::XMFLOAT3 Model::GetRotation() const
 	{
-		return {transform.roll,transform.pitch,transform.yaw};
+		return {transform.roll, transform.pitch, transform.yaw};
 	}
 
 	DirectX::XMMATRIX Model::GetTransform() const

@@ -190,6 +190,8 @@
     <FxCompile Include="Graphics\Shaders\Solid_VS.hlsl" />
     <FxCompile Include="Graphics\Shaders\Solid_PS.hlsl" />
     <FxCompile Include="Graphics\Shaders\AnimPhong_VS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\TerrainPhong_PS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\TerrainPhong_VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Todo.txt" />

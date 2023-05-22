@@ -5,7 +5,6 @@
 #include <DirectXMath.h>
 #include <string>
 
-
 namespace Kaka
 {
 	class Graphics;
