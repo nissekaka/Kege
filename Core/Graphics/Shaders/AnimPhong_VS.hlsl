@@ -24,10 +24,10 @@ struct PixelInput
 {
     float3 viewPos : POSITION;
     float4 position : SV_POSITION;
-    float3 normal : NORMAL;
+    float3 viewNormal : NORMAL;
     float2 texCoord : TEXCOORD;
-    float3 tan : TANGENT;
-    float3 bitan : BITANGENT;
+    float3 viewTan : TANGENT;
+    float3 viewitan : BITANGENT;
 };
 
 PixelInput main(VertexInput aInput)
@@ -52,9 +52,9 @@ PixelInput main(VertexInput aInput)
     const float4 worldPosition = mul(finalTransform, float4(aInput.position, 1.0f));
 
     output.viewPos = (float3) mul(worldPosition, modelView);
-    output.normal = mul(aInput.normal, (float3x3) finalTransform);
-    output.tan = mul(aInput.tan, (float3x3) finalTransform);
-    output.bitan = mul(aInput.bitan, (float3x3) finalTransform);
+    output.viewNormal = mul(aInput.normal, (float3x3) finalTransform);
+    output.viewTan = mul(aInput.tan, (float3x3) finalTransform);
+    output.viewitan = mul(aInput.bitan, (float3x3) finalTransform);
     output.position = mul(worldPosition, modelViewProj);
     output.texCoord = aInput.texCoord;
 

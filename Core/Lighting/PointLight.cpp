@@ -37,9 +37,11 @@ namespace Kaka
 		if (ImGui::Begin(aWindowName))
 		{
 			ImGui::Text("Position");
-			ImGui::SliderFloat("X", &pointLightData[index].position.x, -20.0f, 20.0f, "%.1f");
-			ImGui::SliderFloat("Y", &pointLightData[index].position.y, -20.0f, 20.0f, "%.1f");
-			ImGui::SliderFloat("Z", &pointLightData[index].position.z, -20.0f, 20.0f, "%.1f");
+			ImGui::DragFloat3("XYZ", &pointLightData[index].position.x, 1.0f);
+			//ImGui::DragFloat("Y", &pointLightData[index].position.x, 1.0f);
+			//ImGui::DragFloat("Z", &pointLightData[index].position.x, 1.0f);
+			//ImGui::SliderFloat("Y", &pointLightData[index].position.y, -20.0f, 20.0f, "%.1f");
+			//ImGui::SliderFloat("Z", &pointLightData[index].position.z, -20.0f, 20.0f, "%.1f");
 
 			ImGui::Text("Intensity/Colour");
 			ImGui::SliderFloat("Intensity", &pointLightData[index].diffuseIntensity, 0.01f, 2.0f, "%.2f");
@@ -86,8 +88,8 @@ namespace Kaka
 
 	void PointLight::Reset() const
 	{
-		pointLightData[index].position = {0.0f, 2.0f, 0.0f};
-		pointLightData[index].diffuseColour = {1.0f, 1.0f, 1.0f};
+		pointLightData[index].position = {0.0f,2.0f,0.0f};
+		pointLightData[index].diffuseColour = {1.0f,1.0f,1.0f};
 		pointLightData[index].diffuseIntensity = 1.0f;
 		pointLightData[index].attConst = 1.0f;
 		pointLightData[index].attLin = 0.045f;
@@ -98,26 +100,26 @@ namespace Kaka
 	void PointLight::Draw(const Graphics& aGfx) const
 	{
 		const std::vector<Vertex> vertices = {
-			{{-0.1f, 0.0f, 0.0f}},
-			{{0.1f, 0.0f, 0.0f}},
-			{{0.0f, -0.1f, 0.0f}},
-			{{0.0f, 0.1f, 0.0f}},
-			{{0.0f, 0.0f, -0.1f}},
-			{{0.0f, 0.0f, 0.1f}}
+			{{-0.1f,0.0f,0.0f}},
+			{{0.1f,0.0f,0.0f}},
+			{{0.0f,-0.1f,0.0f}},
+			{{0.0f,0.1f,0.0f}},
+			{{0.0f,0.0f,-0.1f}},
+			{{0.0f,0.0f,0.1f}}
 		};
 		VertexBuffer vertexBuffer(aGfx, vertices);
 		vertexBuffer.Bind(aGfx);
 
 		const std::vector<unsigned short> indices =
 		{
-			0, 2, 4,
-			0, 4, 3,
-			0, 3, 5,
-			0, 5, 2,
-			1, 4, 2,
-			1, 3, 4,
-			1, 5, 3,
-			1, 2, 5
+			0,2,4,
+			0,4,3,
+			0,3,5,
+			0,5,2,
+			1,4,2,
+			1,3,4,
+			1,5,3,
+			1,2,5
 		};
 
 		IndexBuffer indexBuffer(aGfx, indices);
@@ -175,8 +177,8 @@ namespace Kaka
 		const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 		{
 			{
-				"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-				D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+				"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
+				D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
 			},
 		};
 		InputLayout inputLayout(aGfx, ied, vertexShader.GetBytecode());

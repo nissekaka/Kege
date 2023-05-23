@@ -4,8 +4,8 @@
 #include <DirectXMath.h>
 #include <random>
 
-constexpr int WINDOW_WIDTH = 1920;
-constexpr int WINDOW_HEIGHT = 1080;
+constexpr int WINDOW_WIDTH = 2560;
+constexpr int WINDOW_HEIGHT = 1440;
 
 namespace Kaka
 {
@@ -22,35 +22,35 @@ namespace Kaka
 
 		for (int i = 0; i < 4; ++i)
 		{
-			pointLights.push_back(PointLight{wnd.Gfx(), 2u});
+			pointLights.push_back(PointLight{wnd.Gfx(),2u});
 		}
 	}
 
 	int Game::Go()
 	{
 		//spy.LoadModel(wnd.Gfx(), "Assets\\Models\\spy\\spy.fbx", Model::eShaderType::Phong);
-		//muzen.LoadModel(wnd.Gfx(), "Assets\\Models\\muzen\\MuzenSpeaker.fbx", Model::eShaderType::Phong);
-		//vamp.LoadModel(wnd.Gfx(), "Assets\\Models\\vamp\\vamp.fbx", Model::eShaderType::AnimPhong);
+		muzen.LoadModel(wnd.Gfx(), "Assets\\Models\\muzen\\MuzenSpeaker.fbx", Model::eShaderType::Phong);
+		vamp.LoadModel(wnd.Gfx(), "Assets\\Models\\vamp\\vamp.fbx", Model::eShaderType::AnimPhong);
 		//cube.LoadModel(wnd.Gfx(), "Assets\\Models\\cube\\animcube.fbx", Model::eShaderType::AnimPhong);
 
-		camera.SetPosition({0.0f, 1.0f, -3.0f});
+		camera.SetPosition({0.0f,1.0f,-3.0f});
 
 		terrain.Init(wnd.Gfx(), 250);
 
-		//muzen.SetScale(0.002f);
-		//muzen.SetPosition({-1.0f,0.0f,0.0f});
+		muzen.SetScale(0.002f);
+		muzen.SetPosition({-1.0f,0.0f,0.0f});
 
-		pointLights[0].SetPosition({10.0f, 4.0f, 10.0f});
-		pointLights[0].SetColour({1.0f, 0.0f, 0.0f});
+		pointLights[0].SetPosition({10.0f,4.0f,10.0f});
+		pointLights[0].SetColour({1.0f,0.0f,0.0f});
 		pointLights[0].SetIntensity(0.35f);
-		pointLights[1].SetPosition({240.0f, 4.0f, 240.0f});
-		pointLights[1].SetColour({0.0f, 1.0f, 0.0f});
+		pointLights[1].SetPosition({240.0f,4.0f,240.0f});
+		pointLights[1].SetColour({0.0f,1.0f,0.0f});
 		pointLights[1].SetIntensity(0.35f);
-		pointLights[2].SetPosition({10.0f, 4.0f, 240.0f});
-		pointLights[2].SetColour({0.0f, 1.0f, 1.0f});
+		pointLights[2].SetPosition({10.0f,4.0f,240.0f});
+		pointLights[2].SetColour({0.0f,1.0f,1.0f});
 		pointLights[2].SetIntensity(0.35f);
-		pointLights[3].SetPosition({240.0f, 4.0f, 10.0f});
-		pointLights[3].SetColour({1.0f, 0.0f, 1.0f});
+		pointLights[3].SetPosition({240.0f,4.0f,10.0f});
+		pointLights[3].SetColour({1.0f,0.0f,1.0f});
 		pointLights[3].SetIntensity(0.35f);
 
 		//spy.SetPosition({1.0f,0.0f,0.0f});
@@ -93,14 +93,14 @@ namespace Kaka
 		//spy.SetRotation({spy.GetRotation().x,timer.GetTotalTime(),spy.GetRotation().z});
 		//spy.Draw(wnd.Gfx());
 		//muzen.SetRotation({muzen.GetRotation().x,timer.GetTotalTime(),muzen.GetRotation().z});
-		//muzen.Draw(wnd.Gfx());
+		muzen.Draw(wnd.Gfx());
 
 		//cube.Update(aDeltaTime);
 		//cube.Animate();
 		//cube.Draw(wnd.Gfx());
 		//vamp.Update(aDeltaTime);
 		//vamp.Animate();
-		//vamp.Draw(wnd.Gfx());
+		vamp.Draw(wnd.Gfx());
 		//wnd.Gfx().DrawTestTriangle2D();
 		//wnd.Gfx().DrawTestCube3D(timer.GetTotalTime(), DirectX::XMFLOAT3(0.0f, 0.0f, 2.0f));
 		//wnd.Gfx().DrawTestCube3D(-timer.GetTotalTime(), DirectX::XMFLOAT3(-2.0f, 0.0f, 0.0f));
@@ -183,27 +183,27 @@ namespace Kaka
 
 			if (wnd.keyboard.KeyIsPressed('W'))
 			{
-				camera.Translate({0.0f, 0.0f, aDeltaTime * cameraSpeed});
+				camera.Translate({0.0f,0.0f,aDeltaTime * cameraSpeed});
 			}
 			if (wnd.keyboard.KeyIsPressed('A'))
 			{
-				camera.Translate({-aDeltaTime * cameraSpeed, 0.0f, 0.0f});
+				camera.Translate({-aDeltaTime * cameraSpeed,0.0f,0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed('S'))
 			{
-				camera.Translate({0.0f, 0.0f, -aDeltaTime * cameraSpeed});
+				camera.Translate({0.0f,0.0f,-aDeltaTime * cameraSpeed});
 			}
 			if (wnd.keyboard.KeyIsPressed('D'))
 			{
-				camera.Translate({aDeltaTime * cameraSpeed, 0.0f, 0.0f});
+				camera.Translate({aDeltaTime * cameraSpeed,0.0f,0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed(VK_SPACE))
 			{
-				camera.Translate({0.0f, aDeltaTime * cameraSpeed, 0.0f});
+				camera.Translate({0.0f,aDeltaTime * cameraSpeed,0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed(VK_CONTROL))
 			{
-				camera.Translate({0.0f, -aDeltaTime * cameraSpeed, 0.0f});
+				camera.Translate({0.0f,-aDeltaTime * cameraSpeed,0.0f});
 			}
 		}
 

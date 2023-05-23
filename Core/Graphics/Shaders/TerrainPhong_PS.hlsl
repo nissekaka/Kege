@@ -1,4 +1,5 @@
 #include "Light.hlsli"
+#include "ShaderOps.hlsl"
 
 static const uint MAX_LIGHTS = 16u; // Needs to be the same in PointLight
 
@@ -30,10 +31,10 @@ struct PixelInput
     float3 worldNorm : WNORMAL;
     float3 viewPos : POSITION;
     float4 position : SV_POSITION;
-    float3 normal : NORMAL;
+    float3 viewNormal : NORMAL;
     float2 texCoord : TEXCOORD;
-    float3 tan : TANGENT;
-    float3 bitan : BITANGENT;
+    float3 viewTan : TANGENT;
+    float3 viewBitan : BITANGENT;
 };
 
 Texture2D albedoTexGrass : register(t0);
@@ -73,16 +74,14 @@ float4 main(PixelInput aInput) : SV_TARGET
     const float heightBlend = smoothstep(5.0f, 15.0f, aInput.worldPos.y);
 
     const float3 colour = lerp(rockColour, lerp(lerp(grassColour, dirtColour, lowBlend), snowColour, heightBlend), slopeBlend).rgb;
+    const float3 normal = lerp(rockNormal, lerp(lerp(grassNormal, dirtNormal, lowBlend), snowNormal, heightBlend), slopeBlend);
 
-    // Sample normal from map if normal mapping enabled
-    //if (normalMapEnabled)
-    //{
-        const float3x3 tanBitanNorm = float3x3(normalize(aInput.tan), normalize(aInput.bitan), normalize(aInput.normal));
-        const float3 normal = lerp(rockNormal, lerp(lerp(grassNormal, dirtNormal, lowBlend), snowNormal, heightBlend), slopeBlend);
-
-		// Transform the normal map value into tangent space
-        aInput.normal = normalize(mul(tanBitanNorm, normal));
-    //}
+	// Sample normal from map if normal mapping enabled
+    if (normalMapEnabled)
+    {
+        const float3 mappedNormal = MapNormal(normalize(aInput.viewTan), normalize(aInput.viewBitan), aInput.viewNormal, aInput.texCoord, normal, splr);
+        aInput.viewNormal = lerp(aInput.viewNormal, mappedNormal, 1.0f);
+    }
 
     float3 combinedLight = { 0, 0, 0 };
     float3 specular = { 0, 0, 0 };
@@ -98,21 +97,22 @@ float4 main(PixelInput aInput) : SV_TARGET
         const float3 vToL = plBuf[i].pLightPosition - aInput.viewPos;
         const float distToL = length(vToL);
         const float3 dirToL = vToL / distToL;
-    	// Attenuation
-        const float att = 1.0f / (plBuf[i].attConst + plBuf[i].attLin * distToL + plBuf[i].attQuad * (distToL * distToL));
 
-        combinedLight += max(0.0f, dot(dirToL, aInput.normal)) * plBuf[i].pLightColour * plBuf[i].pLightIntensity;
-
-    	// Reflected light vector
-        const float3 w = aInput.normal * dot(vToL, aInput.normal);
-        const float3 r = w * 2.0f - vToL;
-
-    	// Calculate specular intensity based on angle between viewing vector and reflection vector, narrow with power function
-        specular += att * (plBuf[i].pLightColour * plBuf[i].pLightIntensity) * specularIntensity * pow(max(0.0f, dot(normalize(-r), normalize(aInput.viewPos))), specularPower);
+		// Attenuation
+        const float att = Attenuate(plBuf[i].attConst, plBuf[i].attLin, plBuf[i].attQuad, distToL);
+		// Diffuse
+        combinedLight += Diffuse(plBuf[i].pLightColour, plBuf[i].pLightIntensity, att, dirToL, aInput.viewNormal);;
+		// Specular reflected
+        specular += Speculate(plBuf[i].pLightColour * plBuf[i].pLightIntensity,
+        specularIntensity, aInput.viewNormal,
+        vToL, aInput.viewPos, att, specularPower);
     }
+    
+    combinedLight += max(0, dot(aInput.viewNormal, -dLightDirection)) * dLightColour;
+    //combinedLight += Diffuse(dLightColour, dLightColour, 1.0f, -dLightDirection, aInput.viewNormal);
 
-    combinedLight += max(0, dot(aInput.worldNorm, -dLightDirection)) * dLightColour;
+    const float3 twoDirAmbientLight = ambientLight * ((0.5f + 0.5f * aInput.worldNorm.y) * skyColour + (0.5f - 0.5f * aInput.worldNorm.y) * groundColour);
 
 	// Final color
-    return float4(saturate((combinedLight + ((0.5f + 0.5f * aInput.worldNorm.y) * skyColour * ambientLight + (0.5f - 0.5f * aInput.worldNorm.y) * groundColour * ambientLight)) * colour + specular), 1.0f);
+    return float4(saturate((combinedLight + twoDirAmbientLight) * colour /*+ specular*/), 1.0f);
 }

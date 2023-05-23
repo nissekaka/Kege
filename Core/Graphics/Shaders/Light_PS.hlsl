@@ -28,10 +28,10 @@ struct PixelInput
 {
     float3 viewPos : POSITION;
     float4 position : SV_POSITION;
-    float3 normal : NORMAL;
+    float3 viewNormal : NORMAL;
     float2 texCoord : TEXCOORD;
-    float3 tan : TANGENT;
-    float3 bitan : BITANGENT;
+    float3 viewTan : TANGENT;
+    float3 viewitan : BITANGENT;
 };
 
 Texture2D albedoTex;
@@ -44,7 +44,7 @@ float4 main(PixelInput aInput) : SV_TARGET
 {
     if (normalMapEnabled)
     {
-        const float3x3 tanBitanNorm = float3x3(normalize(aInput.tan), normalize(aInput.bitan), normalize(aInput.normal));
+        const float3x3 tanBitanNorm = float3x3(normalize(aInput.viewTan), normalize(aInput.viewitan), normalize(aInput.viewNormal));
 
     	// Sample the normal map texture
         float3 normal = normalTex.Sample(splr, aInput.texCoord).wyz * 2.0f - 1.0f;
@@ -52,7 +52,7 @@ float4 main(PixelInput aInput) : SV_TARGET
         normal = normalize(normal);
 
 		// Transform the normal map value into tangent space
-        aInput.normal = mul(normal, tanBitanNorm);
+        aInput.viewNormal = mul(normal, tanBitanNorm);
     }
 
     const float3 vToL = pLightPosition - aInput.viewPos;
@@ -61,7 +61,7 @@ float4 main(PixelInput aInput) : SV_TARGET
 	// Attenuation
     const float att = 1.0f / (attConst + attLin * distToL + attQuad * (distToL * distToL));
     // Directional light + point light
-    const float3 combinedLight = max(0, dot(aInput.normal, -dLightDirection)) * dLightColour + att * max(0.0f, dot(dirToL, aInput.normal)) * pLightColour * pLightIntensity;
+    const float3 combinedLight = max(0, dot(aInput.viewNormal, -dLightDirection)) * dLightColour + att * max(0.0f, dot(dirToL, aInput.viewNormal)) * pLightColour * pLightIntensity;
 
 	// Use the transformed normal for lighting calculations
     const float4 textureColour = albedoTex.Sample(splr, aInput.texCoord);

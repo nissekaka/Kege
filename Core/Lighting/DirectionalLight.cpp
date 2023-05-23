@@ -12,6 +12,10 @@ namespace Kaka
 
 	void DirectionalLight::Bind(const Graphics& aGfx)
 	{
+		// TODO Fix directional lights!
+		const DirectX::XMVECTOR viewLight = DirectX::XMLoadFloat3(&bufferData.lightDirection);
+		DirectX::XMStoreFloat3(&bufferData.lightDirection, DirectX::XMVector3Transform(viewLight, aGfx.GetCamera()));
+
 		cbuf.Update(aGfx, bufferData);
 		cbuf.Bind(aGfx);
 	}
@@ -40,8 +44,8 @@ namespace Kaka
 
 	void DirectionalLight::Reset()
 	{
-		bufferData.lightDirection = {-1.0f, -1.0f, 1.0f};
-		bufferData.lightColour = {0.6f, 0.6f, 0.6f};
+		bufferData.lightDirection = {-1.0f,-1.0f,1.0f};
+		bufferData.lightColour = {0.6f,0.6f,0.6f};
 		bufferData.ambientLight = 0.4f;
 	}
 }

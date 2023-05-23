@@ -30,13 +30,12 @@ namespace Kaka
 			{
 				Vertex vertex;
 				float noiseValue = noiseGenerator.GetNoise(static_cast<float>(x), static_cast<float>(z));
-				vertex.position = {static_cast<float>(x), noiseValue * 25.0f, static_cast<float>(z)};
-				vertex.texCoord = {static_cast<float>(x) / 8.0f, static_cast<float>(z) / 8.0f};
+				vertex.position = {static_cast<float>(x),noiseValue * 25.0f,static_cast<float>(z)};
+				vertex.normal = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
+				vertex.texCoord = {static_cast<float>(x) / 8.0f,static_cast<float>(z) / 8.0f};
+				vertex.tangent = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
+				vertex.bitangent = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 				tVertices.push_back(vertex);
-				if (z == 499 && x == 499)
-				{
-					OutputDebugStringA("Hello");
-				}
 			}
 		}
 
@@ -59,10 +58,10 @@ namespace Kaka
 				DirectX::XMFLOAT3 leftPosition = (x > 0) ? tVertices[indexLeft].position : currentPosition;
 				DirectX::XMFLOAT3 rightPosition = (x < aSize - 1) ? tVertices[indexRight].position : currentPosition;
 
-				const DirectX::XMVECTOR edge1 = DirectX::XMVectorSubtract(XMLoadFloat3(&topPosition),
-				                                                          XMLoadFloat3(&bottomPosition));
-				const DirectX::XMVECTOR edge2 = DirectX::XMVectorSubtract(XMLoadFloat3(&leftPosition),
-				                                                          XMLoadFloat3(&rightPosition));
+				DirectX::XMVECTOR edge1 = DirectX::XMVectorSubtract(XMLoadFloat3(&topPosition),
+				                                                    XMLoadFloat3(&bottomPosition));
+				DirectX::XMVECTOR edge2 = DirectX::XMVectorSubtract(XMLoadFloat3(&leftPosition),
+				                                                    XMLoadFloat3(&rightPosition));
 				DirectX::XMVECTOR normal = DirectX::XMVector3Cross(edge1, edge2);
 
 				normal = DirectX::XMVector3Normalize(normal);
@@ -70,7 +69,30 @@ namespace Kaka
 
 				if (isBorder)
 				{
-					DirectX::XMStoreFloat3(&tVertices[currentIndex].normal, {0, 1, 0});
+					DirectX::XMStoreFloat3(&tVertices[currentIndex].normal, {0,1,0});
+				}
+				else
+				{
+					edge1 = DirectX::XMVectorSubtract(XMLoadFloat3(&leftPosition), XMLoadFloat3(&currentPosition));
+					edge2 = DirectX::XMVectorSubtract(XMLoadFloat3(&bottomPosition), XMLoadFloat3(&currentPosition));
+
+					DirectX::XMFLOAT2 deltaUV1 = DirectX::XMFLOAT2(1.0f, 0.0f);
+					DirectX::XMFLOAT2 deltaUV2 = DirectX::XMFLOAT2(0.0f, 1.0f);
+
+					// Calculate tangent
+					DirectX::XMVECTOR tangent;
+					tangent = DirectX::XMVectorScale(DirectX::XMVectorSubtract(DirectX::XMVectorScale(edge1, deltaUV2.y), DirectX::XMVectorScale(edge2, deltaUV1.y)),
+					                                 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y));
+					tangent = DirectX::XMVector3Normalize(tangent);
+
+					// Calculate bitangent
+					DirectX::XMVECTOR bitangent;
+					bitangent = DirectX::XMVectorScale(DirectX::XMVectorSubtract(DirectX::XMVectorScale(edge2, deltaUV1.x), DirectX::XMVectorScale(edge1, deltaUV2.x)),
+					                                   1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y));
+					bitangent = DirectX::XMVector3Normalize(bitangent);
+
+					DirectX::XMStoreFloat3(&tVertices[currentIndex].tangent, tangent);
+					DirectX::XMStoreFloat3(&tVertices[currentIndex].bitangent, bitangent);
 				}
 			}
 		}
@@ -91,20 +113,14 @@ namespace Kaka
 			}
 		}
 
-		//terrainTexture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Grass\\Grass_005_BaseColor.jpg");
-		//terrainTexture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Grass\\Grass_005_Normal.jpg");
-		//terrainTexture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Rock\\Rock_044_BaseColor.jpg");
-		//terrainTexture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Rock\\Rock_044_Normal.jpg");
-		//terrainTexture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Snow\\Snow_003_BaseColor.jpg");
-		//terrainTexture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Snow\\Snow_003_Normal.jpg");
-		terrainTexture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Grass\\Stylized_Grass_003_BaseColor.jpg");
-		terrainTexture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Grass\\Stylized_Grass_003_Normal.jpg");
-		terrainTexture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Dirt\\Stylized_Dry_Mud_001_BaseColor.jpg");
-		terrainTexture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Dirt\\Stylized_Dry_Mud_001_Normal.jpg");
-		terrainTexture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Rock\\peter-larsen-stylizedrockdiffuse.jpg");
-		terrainTexture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Rock\\peter-larsen-stylizedrocknormal-png.jpg");
-		terrainTexture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Snow\\Snow_001_BaseColor.jpg");
-		terrainTexture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Snow\\Snow_001_Normal.jpg");
+		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Grass\\Stylized_Grass_003_BaseColor.jpg");
+		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Grass\\Stylized_Grass_003_Normal.jpg");
+		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Dirt\\Stylized_Dry_Mud_001_BaseColor.jpg");
+		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Dirt\\Stylized_Dry_Mud_001_Normal.jpg");
+		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Rock\\peter-larsen-stylizedrockdiffuse.jpg");
+		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Rock\\peter-larsen-stylizedrocknormal-png.jpg");
+		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Snow\\Snow_001_BaseColor.jpg");
+		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Snow\\Snow_001_Normal.jpg");
 	}
 
 	void Terrain::Draw(const Graphics& aGfx)
@@ -112,7 +128,7 @@ namespace Kaka
 		Sampler sampler(aGfx, 0u);
 		sampler.Bind(aGfx);
 
-		terrainTexture.Bind(aGfx);
+		texture.Bind(aGfx);
 
 		VertexBuffer vb(aGfx, tVertices);
 		vb.Bind(aGfx);
@@ -120,35 +136,19 @@ namespace Kaka
 		IndexBuffer ib(aGfx, tIndices);
 		ib.Bind(aGfx);
 
-		// Create constant buffer for transformation matrix
-		struct ConstantBuffer
-		{
-			DirectX::XMMATRIX modelView;
-			DirectX::XMMATRIX modelProjection;
-		};
-
-		const DirectX::XMMATRIX modelView = GetTransform() * aGfx.GetCamera();
-
-		const ConstantBuffer cb =
-		{
-			DirectX::XMMatrixTranspose(modelView),
-			DirectX::XMMatrixTranspose(modelView * aGfx.GetProjection())
-		};
-		VertexConstantBuffer<ConstantBuffer> vcb(aGfx, cb, 0u);
-		vcb.Bind(aGfx);
+		TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
+		transformConstantBuffer.Bind(aGfx);
 
 		PixelShader pixelShader(aGfx, L"Shaders\\TerrainPhong_PS.cso");
 		pixelShader.Bind(aGfx);
 
-		struct PSMaterialConstant
+		const struct PSMaterialConstant
 		{
-			BOOL normalMapEnabled = FALSE;
-			BOOL materialEnabled = FALSE;
+			BOOL normalMapEnabled = TRUE;
+			BOOL materialEnabled = TRUE;
 			float specularIntensity = 0.1f;
-			float specularPower = 30.0f;
+			float specularPower = 500.0f;
 		} pmc;
-		pmc.normalMapEnabled = terrainTexture.HasNormalMap();
-		pmc.materialEnabled = terrainTexture.HasMaterial();
 
 		PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
 		psConstantBuffer.Bind(aGfx);
@@ -159,24 +159,24 @@ namespace Kaka
 		const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 		{
 			{
-				"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-				D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+				"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
+				D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
 			},
 			{
-				"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-				D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+				"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
+				D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
 			},
 			{
-				"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
-				D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+				"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,
+				D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
 			},
 			{
-				"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-				D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+				"TANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
+				D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
 			},
 			{
-				"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-				D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+				"BITANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
+				D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
 			},
 		};
 		InputLayout inputLayout(aGfx, ied, vertexShader.GetBytecode());

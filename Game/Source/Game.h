@@ -28,12 +28,12 @@ namespace Kaka
 		Timer timer;
 		Camera camera;
 
-		DirectionalLight directionalLight{wnd.Gfx(), 1u};
+		DirectionalLight directionalLight{wnd.Gfx(),1u};
 		std::vector<PointLight> pointLights;
 	private:
 		bool showImGui = true;
 		bool showStatsWindow = true;
-		bool drawLightDebug = true;
+		bool drawLightDebug = false;
 	private:
 		float cameraSpeed = 1.0f;
 		float cameraSpeedNormal = 1.0f;

@@ -10,7 +10,6 @@ namespace Kaka
 	class Terrain : public Drawable
 	{
 	public:
-		std::vector<Vertex> GenerateTerrain(int aSize, float aScale, float aHeightScale);
 		void Init(const Graphics& aGfx, int aSize);
 		void Draw(const Graphics& aGfx);
 		DirectX::XMMATRIX GetTransform() const override;
@@ -18,6 +17,6 @@ namespace Kaka
 	private:
 		std::vector<Vertex> tVertices;
 		std::vector<unsigned short> tIndices;
-		Texture terrainTexture;
+		Texture texture;
 	};
 }

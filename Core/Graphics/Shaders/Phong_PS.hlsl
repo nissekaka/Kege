@@ -28,10 +28,10 @@ struct PixelInput
 {
     float3 viewPos : POSITION;
     float4 position : SV_POSITION;
-    float3 normal : NORMAL;
+    float3 viewNormal : NORMAL;
     float2 texCoord : TEXCOORD;
-    float3 tan : TANGENT;
-    float3 bitan : BITANGENT;
+    float3 viewTan : TANGENT;
+    float3 viewBitan : BITANGENT;
 };
 
 Texture2D albedoTex;
@@ -46,7 +46,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     // sample normal from map if normal mapping enabled
     if (normalMapEnabled)
     {
-        const float3x3 tanBitanNorm = float3x3(normalize(aInput.tan), normalize(aInput.bitan), normalize(aInput.normal));
+        const float3x3 tanBitanNorm = float3x3(normalize(aInput.viewTan), normalize(aInput.viewBitan), normalize(aInput.viewNormal));
 
     	// Sample the normal map texture
         float3 normal = normalTex.Sample(splr, aInput.texCoord).wyz * 2.0f - 1.0f;
@@ -54,7 +54,7 @@ float4 main(PixelInput aInput) : SV_TARGET
         normal = normalize(normal);
 
 		// Transform the normal map value into tangent space
-        aInput.normal = mul(normal, tanBitanNorm);
+        aInput.viewNormal = mul(normal, tanBitanNorm);
     }
 
     float3 combinedLight = { 0, 0, 0 };
@@ -74,10 +74,10 @@ float4 main(PixelInput aInput) : SV_TARGET
     	// Attenuation
         const float att = 1.0f / (plBuf[i].attConst + plBuf[i].attLin * distToL + plBuf[i].attQuad * (distToL * distToL));
 
-        combinedLight += max(0.0f, dot(dirToL, aInput.normal)) * plBuf[i].pLightColour * plBuf[i].pLightIntensity;
+        combinedLight += max(0.0f, dot(dirToL, aInput.viewNormal)) * plBuf[i].pLightColour * plBuf[i].pLightIntensity;
 
     	// Reflected light vector
-        const float3 w = aInput.normal * dot(vToL, aInput.normal);
+        const float3 w = aInput.viewNormal * dot(vToL, aInput.viewNormal);
         const float3 r = w * 2.0f - vToL;
 
         if (materialEnabled)
@@ -99,7 +99,7 @@ float4 main(PixelInput aInput) : SV_TARGET
         }
     }
 
-    combinedLight += max(0, dot(aInput.normal, -dLightDirection)) * dLightColour;
+    combinedLight += max(0, dot(aInput.viewNormal, -dLightDirection)) * dLightColour;
 
 	// Final color
     return float4(saturate((combinedLight + ambientLight) * albedoTex.Sample(splr, aInput.texCoord).rgb + specular), 1.0f);

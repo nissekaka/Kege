@@ -72,7 +72,7 @@ namespace Kaka
 		assert(hWnd && "hWnd is null");
 
 		// Show window
-		ShowWindow(hWnd, SW_SHOWDEFAULT);
+		ShowWindow(hWnd, SW_MAXIMIZE);
 
 		// Create graphics object
 		pGfx = std::make_unique<Graphics>(hWnd, width, height);
