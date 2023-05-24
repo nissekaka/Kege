@@ -87,6 +87,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     float3 combinedLight = { 0, 0, 0 };
     float3 specular = { 0, 0, 0 };
 
+    // Point lights
     for (uint i = 0; i < activeLights; ++i)
     {
         if (!plBuf[i].active)
@@ -109,11 +110,16 @@ float4 main(PixelInput aInput) : SV_TARGET
         vToL, aInput.viewPos, att, specularPower);
     }
 
+    // Directional light
     const float3 viewDirectionalLightDir = mul(dLightDirection, (float3x3) aInput.modelView);
     combinedLight += max(0, dot(aInput.viewNormal, -viewDirectionalLightDir)) * dLightColour;
+    specular += Speculate(dLightColour,
+        specularIntensity, aInput.viewNormal,
+        viewDirectionalLightDir, aInput.viewPos, 1.0f, specularPower);
 
+    // Ambient light
     const float3 twoDirAmbientLight = ambientLight * ((0.5f + 0.5f * aInput.worldNorm.y) * skyColour + (0.5f - 0.5f * aInput.worldNorm.y) * groundColour);
 
 	// Final color
-    return float4(saturate((combinedLight + twoDirAmbientLight) * colour /*+ specular*/), 1.0f);
+    return float4(saturate((combinedLight + twoDirAmbientLight) * colour + specular), 1.0f);
 }

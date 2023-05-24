@@ -207,8 +207,8 @@ namespace Kaka
 			{
 				BOOL normalMapEnabled = TRUE;
 				BOOL materialEnabled = TRUE;
-				float specularIntensity = 0.1f;
-				float specularPower = 500.0f;
+				float specularIntensity = 0.05f;
+				float specularPower = 2.0f;
 			} pmc;
 
 			PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);

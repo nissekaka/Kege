@@ -72,14 +72,10 @@ namespace Kaka
 
 		directionalLight.Bind(wnd.Gfx());
 
-		const float radius = 300.0f;
-		const float speed = 0.1f;
-
 		if (directionalLight.ShouldSimulate())
 		{
 			static float sunAngle = 0.0f;
-			static const float rotationSpeed = 0.4f;
-			static const DirectX::XMFLOAT3 baseColor = {1.0f,1.0f,1.0f};
+			static const float rotationSpeed = 0.8f;
 			static const DirectX::XMFLOAT3 lowColor = {0.4f,0.4f,0.6f};
 			static const DirectX::XMFLOAT3 highColor = {1.0f,0.8f,0.6f};
 			static const float colorLerpThreshold = -0.5f;
@@ -112,6 +108,9 @@ namespace Kaka
 
 		for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
 		{
+			constexpr float radius = 300.0f;
+			constexpr float speed = 0.8f;
+
 			pointLights[i].Bind(wnd.Gfx(), camera.GetMatrix());
 			angle[i] += speed * aDeltaTime;
 
