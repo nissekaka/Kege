@@ -23,6 +23,7 @@ struct PixelInput
     float2 texCoord : TEXCOORD;
     float3 viewTan : TANGENT;
     float3 viewBitan : BITANGENT;
+    matrix modelView : MODELVIEW;
 };
 
 PixelInput main(VertexInput aInput)
@@ -37,6 +38,7 @@ PixelInput main(VertexInput aInput)
     output.viewBitan = mul(aInput.bitan, (float3x3) modelView);
     output.position = mul(float4(aInput.position, 1.0f), modelViewProj);
     output.texCoord = aInput.texCoord;
+    output.modelView = modelView;
     
     return output;
 }

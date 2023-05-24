@@ -13,6 +13,11 @@ namespace Kaka
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
 		void Reset();
+		void SetDirection(DirectX::XMFLOAT3 aDirection);
+		void SetColour(DirectX::XMFLOAT3 aColour);
+		void EnableSimulation();
+		void DisableSimulation();
+		bool ShouldSimulate() const;
 	private:
 		struct DirectionalLightBuffer
 		{
@@ -25,5 +30,6 @@ namespace Kaka
 	private:
 		DirectionalLightBuffer bufferData;
 		PixelConstantBuffer<DirectionalLightBuffer> cbuf;
+		bool shouldSimulate = true;
 	};
 }

@@ -13,8 +13,8 @@ namespace Kaka
 	void DirectionalLight::Bind(const Graphics& aGfx)
 	{
 		// TODO Fix directional lights!
-		const DirectX::XMVECTOR viewLight = DirectX::XMLoadFloat3(&bufferData.lightDirection);
-		DirectX::XMStoreFloat3(&bufferData.lightDirection, DirectX::XMVector3Transform(viewLight, aGfx.GetCamera()));
+		//const DirectX::XMVECTOR viewLight = DirectX::XMLoadFloat3(&bufferData.lightDirection);
+		//DirectX::XMStoreFloat3(&bufferData.lightDirection, DirectX::XMVector3Transform(viewLight, aGfx.GetCamera()));
 
 		cbuf.Update(aGfx, bufferData);
 		cbuf.Bind(aGfx);
@@ -34,6 +34,17 @@ namespace Kaka
 			ImGui::ColorEdit3("R", &bufferData.lightColour.x);
 			ImGui::Text("Ambient");
 			ImGui::SliderFloat("Intensity", &bufferData.ambientLight, 0.0f, 1.0f);
+			if (ImGui::Button("Simulate On/Off"))
+			{
+				if (shouldSimulate)
+				{
+					DisableSimulation();
+				}
+				else
+				{
+					EnableSimulation();
+				}
+			}
 			if (ImGui::Button("Reset"))
 			{
 				Reset();
@@ -46,6 +57,31 @@ namespace Kaka
 	{
 		bufferData.lightDirection = {-1.0f,-1.0f,1.0f};
 		bufferData.lightColour = {0.6f,0.6f,0.6f};
-		bufferData.ambientLight = 0.4f;
+		bufferData.ambientLight = 0.1f;
+	}
+
+	void DirectionalLight::SetDirection(const DirectX::XMFLOAT3 aDirection)
+	{
+		bufferData.lightDirection = aDirection;
+	}
+
+	void DirectionalLight::SetColour(const DirectX::XMFLOAT3 aColour)
+	{
+		bufferData.lightColour = aColour;
+	}
+
+	void DirectionalLight::EnableSimulation()
+	{
+		shouldSimulate = true;
+	}
+
+	void DirectionalLight::DisableSimulation()
+	{
+		shouldSimulate = false;
+	}
+
+	bool DirectionalLight::ShouldSimulate() const
+	{
+		return shouldSimulate;
 	}
 }

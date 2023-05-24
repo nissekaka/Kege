@@ -18,7 +18,7 @@ namespace Kaka
 				1.0f,
 				static_cast<float>(WINDOW_HEIGHT) / static_cast<float>(WINDOW_WIDTH),
 				0.5f,
-				500.0f));
+				1000.0f));
 
 		for (int i = 0; i < 4; ++i)
 		{
@@ -29,33 +29,23 @@ namespace Kaka
 	int Game::Go()
 	{
 		//spy.LoadModel(wnd.Gfx(), "Assets\\Models\\spy\\spy.fbx", Model::eShaderType::Phong);
-		muzen.LoadModel(wnd.Gfx(), "Assets\\Models\\muzen\\MuzenSpeaker.fbx", Model::eShaderType::Phong);
-		vamp.LoadModel(wnd.Gfx(), "Assets\\Models\\vamp\\vamp.fbx", Model::eShaderType::AnimPhong);
+		//muzen.LoadModel(wnd.Gfx(), "Assets\\Models\\muzen\\MuzenSpeaker.fbx", Model::eShaderType::Phong);
+		//vamp.LoadModel(wnd.Gfx(), "Assets\\Models\\vamp\\vamp.fbx", Model::eShaderType::AnimPhong);
 		//cube.LoadModel(wnd.Gfx(), "Assets\\Models\\cube\\animcube.fbx", Model::eShaderType::AnimPhong);
 
-		camera.SetPosition({0.0f,1.0f,-3.0f});
+		//camera.SetPosition({0.0f,1.0f,-3.0f});
 
-		terrain.Init(wnd.Gfx(), 250);
+		constexpr int terrainSize = 1000;
+		terrain.Init(wnd.Gfx(), terrainSize);
+		terrain.SetPosition(DirectX::XMFLOAT3(-terrainSize / 2.0f, -25.0f, -terrainSize / 2.0f));
 
 		muzen.SetScale(0.002f);
 		muzen.SetPosition({-1.0f,0.0f,0.0f});
 
-		pointLights[0].SetPosition({10.0f,4.0f,10.0f});
-		pointLights[0].SetColour({1.0f,0.0f,0.0f});
-		pointLights[0].SetIntensity(0.35f);
-		pointLights[1].SetPosition({240.0f,4.0f,240.0f});
-		pointLights[1].SetColour({0.0f,1.0f,0.0f});
-		pointLights[1].SetIntensity(0.35f);
-		pointLights[2].SetPosition({10.0f,4.0f,240.0f});
-		pointLights[2].SetColour({0.0f,1.0f,1.0f});
-		pointLights[2].SetIntensity(0.35f);
-		pointLights[3].SetPosition({240.0f,4.0f,10.0f});
-		pointLights[3].SetColour({1.0f,0.0f,1.0f});
-		pointLights[3].SetIntensity(0.35f);
-
-		//spy.SetPosition({1.0f,0.0f,0.0f});
-		//spy.SetRotation({PI / 2,0,0});
-		//vamp.SetRotation({PI / 2,0.0f,0.0f});
+		pointLights[0].SetColour({0.0f,1.0f,1.0f});
+		pointLights[1].SetColour({1.0f,1.0f,0.0f});
+		pointLights[2].SetColour({0.0f,1.0f,0.0f});
+		pointLights[3].SetColour({1.0f,0.0f,0.0f});
 
 		while (true)
 		{
@@ -81,9 +71,60 @@ namespace Kaka
 		HandleInput(aDeltaTime);
 
 		directionalLight.Bind(wnd.Gfx());
+
+		const float radius = 300.0f;
+		const float speed = 0.1f;
+
+		if (directionalLight.ShouldSimulate())
+		{
+			static float sunAngle = 0.0f;
+			static const float rotationSpeed = 0.4f;
+			static const DirectX::XMFLOAT3 baseColor = {1.0f,1.0f,1.0f};
+			static const DirectX::XMFLOAT3 lowColor = {0.4f,0.4f,0.6f};
+			static const DirectX::XMFLOAT3 highColor = {1.0f,0.8f,0.6f};
+			static const float colorLerpThreshold = -0.5f;
+
+			// Update the angle based on time and speed
+			sunAngle += rotationSpeed * aDeltaTime;
+
+			// Calculate the new direction vector using trigonometry
+			DirectX::XMFLOAT3 direction;
+			direction.x = std::cos(sunAngle);
+			direction.y = std::sin(sunAngle);
+			direction.z = 0.0f; // Assuming the light is pointing straight down
+
+			// Set the new direction
+			directionalLight.SetDirection(direction);
+
+			// Calculate the color based on the vertical position of the light
+			float colorLerp = direction.y - colorLerpThreshold;
+			colorLerp = std::clamp(colorLerp, 0.0f, 1.0f); // Clamp between 0 and 1
+
+			// Interpolate between lowColor and highColor based on the colorLerp value
+			DirectX::XMFLOAT3 currentColor;
+			currentColor.x = lowColor.x + colorLerp * (highColor.x - lowColor.x);
+			currentColor.y = lowColor.y + colorLerp * (highColor.y - lowColor.y);
+			currentColor.z = lowColor.z + colorLerp * (highColor.z - lowColor.z);
+
+			// Set the new color
+			directionalLight.SetColour(currentColor);
+		}
+
 		for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
 		{
 			pointLights[i].Bind(wnd.Gfx(), camera.GetMatrix());
+			angle[i] += speed * aDeltaTime;
+
+			float posX = radius * std::cos(angle[i]);
+			float posZ = radius * std::sin(angle[i]);
+
+			pointLights[i].SetPosition({posX,15.0f,posZ});
+
+			if (angle[i] > 2 * PI)
+			{
+				angle[i] -= 2 * PI;
+			}
+
 			if (drawLightDebug)
 			{
 				pointLights[i].Draw(wnd.Gfx());

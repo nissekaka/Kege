@@ -44,7 +44,7 @@ namespace Kaka
 			//ImGui::SliderFloat("Z", &pointLightData[index].position.z, -20.0f, 20.0f, "%.1f");
 
 			ImGui::Text("Intensity/Colour");
-			ImGui::SliderFloat("Intensity", &pointLightData[index].diffuseIntensity, 0.01f, 2.0f, "%.2f");
+			ImGui::SliderFloat("Intensity", &pointLightData[index].diffuseIntensity, 0.01f, 4.0f, "%.2f");
 			ImGui::ColorEdit3("Diffuse Colour", &pointLightData[index].diffuseColour.x);
 
 			ImGui::Text("Falloff");
@@ -90,10 +90,10 @@ namespace Kaka
 	{
 		pointLightData[index].position = {0.0f,2.0f,0.0f};
 		pointLightData[index].diffuseColour = {1.0f,1.0f,1.0f};
-		pointLightData[index].diffuseIntensity = 1.0f;
+		pointLightData[index].diffuseIntensity = 2.0f;
 		pointLightData[index].attConst = 1.0f;
-		pointLightData[index].attLin = 0.045f;
-		pointLightData[index].attQuad = 0.0075f;
+		pointLightData[index].attLin = 0.02f;
+		pointLightData[index].attQuad = 0.00055f;
 		pointLightData[index].active = true;
 	}
 

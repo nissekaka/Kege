@@ -35,6 +35,7 @@ struct PixelInput
     float2 texCoord : TEXCOORD;
     float3 viewTan : TANGENT;
     float3 viewBitan : BITANGENT;
+    matrix modelView : MODELVIEW;
 };
 
 Texture2D albedoTexGrass : register(t0);
@@ -107,9 +108,9 @@ float4 main(PixelInput aInput) : SV_TARGET
         specularIntensity, aInput.viewNormal,
         vToL, aInput.viewPos, att, specularPower);
     }
-    
-    combinedLight += max(0, dot(aInput.viewNormal, -dLightDirection)) * dLightColour;
-    //combinedLight += Diffuse(dLightColour, dLightColour, 1.0f, -dLightDirection, aInput.viewNormal);
+
+    const float3 viewDirectionalLightDir = mul(dLightDirection, (float3x3) aInput.modelView);
+    combinedLight += max(0, dot(aInput.viewNormal, -viewDirectionalLightDir)) * dLightColour;
 
     const float3 twoDirAmbientLight = ambientLight * ((0.5f + 0.5f * aInput.worldNorm.y) * skyColour + (0.5f - 0.5f * aInput.worldNorm.y) * groundColour);
 

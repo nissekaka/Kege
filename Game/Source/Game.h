@@ -3,6 +3,7 @@
 #include "Core/Utility/ImGuiManager.h"
 #include "Core/Utility/Timer.h"
 #include "Core/Utility/Camera.h"
+#include <Core/Utility/KakaMath.h>
 #include "Core/Lighting/DirectionalLight.h"
 #include "Core/Lighting/PointLight.h"
 #include "Core/Model/Model.h"
@@ -30,6 +31,8 @@ namespace Kaka
 
 		DirectionalLight directionalLight{wnd.Gfx(),1u};
 		std::vector<PointLight> pointLights;
+		float angle[4] = {0.0f,PI / 2,PI,PI * 1.5f};
+
 	private:
 		bool showImGui = true;
 		bool showStatsWindow = true;

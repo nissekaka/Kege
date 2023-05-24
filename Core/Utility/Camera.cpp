@@ -15,9 +15,7 @@ namespace Kaka
 		if (ImGui::Begin("Camera"))
 		{
 			ImGui::Text("Position");
-			ImGui::SliderFloat("X", &position.x, -80.0f, 80.0f, "%.1f");
-			ImGui::SliderFloat("Y", &position.y, -80.0f, 80.0f, "%.1f");
-			ImGui::SliderFloat("Z", &position.z, -80.0f, 80.0f, "%.1f");
+			ImGui::DragFloat3("XYZ", &position.x);
 			ImGui::Text("Orientation");
 			ImGui::SliderAngle("Pitch", &pitch, 0.995f * -90.0f, 0.995f * 90.0f);
 			ImGui::SliderAngle("Yaw", &yaw, -180.0f, 180.0f);
@@ -31,8 +29,8 @@ namespace Kaka
 
 	void Camera::Reset()
 	{
-		position = {0.0f, 0.0f, 0.0f};
-		pitch = 0.0f;
+		position = {0.0f,140.0f,-450.0f};
+		pitch = PI / 6;
 		yaw = 0.0f;
 	}
 
