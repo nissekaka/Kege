@@ -37,14 +37,18 @@ namespace Kaka
 			{
 				Vertex vertex;
 				float noiseValue = noiseGenerator.GetNoise(static_cast<float>(x), static_cast<float>(z));
-				vertex.position = DirectX::XMFLOAT3(static_cast<float>(x), noiseValue * heightMul, static_cast<float>(z));
+				vertex.position = DirectX::XMFLOAT3(static_cast<float>(x), noiseValue * heightMul,
+				                                    static_cast<float>(z));
 				vertex.normal = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
-				vertex.texCoord = DirectX::XMFLOAT2(static_cast<float>(x) / texCoordResFactor, static_cast<float>(z) / texCoordResFactor);
+				vertex.texCoord = DirectX::XMFLOAT2(static_cast<float>(x) / texCoordResFactor,
+				                                    static_cast<float>(z) / texCoordResFactor);
 				vertex.tangent = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 				vertex.bitangent = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 				terrainVertices.push_back(vertex);
 			}
 		}
+
+		OutputDebugStringA("\nDone generating...");
 
 		float smoothingFactor = 1.0f;
 		float heightThreshold = 0.0f;
@@ -61,46 +65,47 @@ namespace Kaka
 					const int indexBottom = (z + 1) * aSize + x;
 					const int indexLeft = z * aSize + (x - 1);
 					const int indexRight = z * aSize + (x + 1);
+
 					if (terrainVertices[currentIndex].position.y > heightThreshold)
 					{
 						continue;
 					}
 
-					// Calculate average position of neighboring vertices
+					// Calculate average position of neighbouring vertices
 					DirectX::XMFLOAT3 averagePosition = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
-					int numNeighbors = 0;
+					int numNeighbours = 0;
 
 					if (z > 0)
 					{
 						averagePosition.x += terrainVertices[indexTop].position.x;
 						averagePosition.y += terrainVertices[indexTop].position.y;
 						averagePosition.z += terrainVertices[indexTop].position.z;
-						numNeighbors++;
+						numNeighbours++;
 					}
 					if (z < aSize - 1)
 					{
 						averagePosition.x += terrainVertices[indexBottom].position.x;
 						averagePosition.y += terrainVertices[indexBottom].position.y;
 						averagePosition.z += terrainVertices[indexBottom].position.z;
-						numNeighbors++;
+						numNeighbours++;
 					}
 					if (x > 0)
 					{
 						averagePosition.x += terrainVertices[indexLeft].position.x;
 						averagePosition.y += terrainVertices[indexLeft].position.y;
 						averagePosition.z += terrainVertices[indexLeft].position.z;
-						numNeighbors++;
+						numNeighbours++;
 					}
 					if (x < aSize - 1)
 					{
 						averagePosition.x += terrainVertices[indexRight].position.x;
 						averagePosition.y += terrainVertices[indexRight].position.y;
 						averagePosition.z += terrainVertices[indexRight].position.z;
-						numNeighbors++;
+						numNeighbours++;
 					}
-					averagePosition.x /= numNeighbors;
-					averagePosition.y /= numNeighbors;
-					averagePosition.z /= numNeighbors;
+					averagePosition.x /= numNeighbours;
+					averagePosition.y /= numNeighbours;
+					averagePosition.z /= numNeighbours;
 
 					DirectX::XMFLOAT3& currentPosition = terrainVertices[currentIndex].position;
 					DirectX::XMFLOAT3 smoothedPosition = DirectX::XMFLOAT3(
@@ -114,6 +119,8 @@ namespace Kaka
 				}
 			}
 		}
+
+		OutputDebugStringA("\nDone smoothing...");
 
 		// Calculate normals
 		for (int z = 0; z < aSize; ++z)
@@ -130,9 +137,13 @@ namespace Kaka
 
 				DirectX::XMFLOAT3& currentPosition = terrainVertices[currentIndex].position;
 				DirectX::XMFLOAT3 topPosition = (z > 0) ? terrainVertices[indexTop].position : currentPosition;
-				DirectX::XMFLOAT3 bottomPosition = (z < aSize - 1) ? terrainVertices[indexBottom].position : currentPosition;
+				DirectX::XMFLOAT3 bottomPosition = (z < aSize - 1)
+					                                   ? terrainVertices[indexBottom].position
+					                                   : currentPosition;
 				DirectX::XMFLOAT3 leftPosition = (x > 0) ? terrainVertices[indexLeft].position : currentPosition;
-				DirectX::XMFLOAT3 rightPosition = (x < aSize - 1) ? terrainVertices[indexRight].position : currentPosition;
+				DirectX::XMFLOAT3 rightPosition = (x < aSize - 1)
+					                                  ? terrainVertices[indexRight].position
+					                                  : currentPosition;
 
 				DirectX::XMVECTOR edge1 = DirectX::XMVectorSubtract(XMLoadFloat3(&topPosition),
 				                                                    XMLoadFloat3(&bottomPosition));
@@ -145,7 +156,7 @@ namespace Kaka
 
 				if (isBorder)
 				{
-					DirectX::XMStoreFloat3(&terrainVertices[currentIndex].normal, {0,1,0});
+					DirectX::XMStoreFloat3(&terrainVertices[currentIndex].normal, {0, 1, 0});
 				}
 				else
 				{
@@ -157,14 +168,18 @@ namespace Kaka
 
 					// Calculate tangent
 					DirectX::XMVECTOR tangent;
-					tangent = DirectX::XMVectorScale(DirectX::XMVectorSubtract(DirectX::XMVectorScale(edge1, deltaUV2.y), DirectX::XMVectorScale(edge2, deltaUV1.y)),
-					                                 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y));
+					tangent = DirectX::XMVectorScale(
+						DirectX::XMVectorSubtract(DirectX::XMVectorScale(edge1, deltaUV2.y),
+						                          DirectX::XMVectorScale(edge2, deltaUV1.y)),
+						1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y));
 					tangent = DirectX::XMVector3Normalize(tangent);
 
 					// Calculate bitangent
 					DirectX::XMVECTOR bitangent;
-					bitangent = DirectX::XMVectorScale(DirectX::XMVectorSubtract(DirectX::XMVectorScale(edge2, deltaUV1.x), DirectX::XMVectorScale(edge1, deltaUV2.x)),
-					                                   1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y));
+					bitangent = DirectX::XMVectorScale(
+						DirectX::XMVectorSubtract(DirectX::XMVectorScale(edge2, deltaUV1.x),
+						                          DirectX::XMVectorScale(edge1, deltaUV2.x)),
+						1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y));
 					bitangent = DirectX::XMVector3Normalize(bitangent);
 
 					DirectX::XMStoreFloat3(&terrainVertices[currentIndex].tangent, tangent);
@@ -172,6 +187,8 @@ namespace Kaka
 				}
 			}
 		}
+
+		OutputDebugStringA("\nDone with normals...");
 
 		for (int z = 0; z < aSize - 1; ++z)
 		{
@@ -188,6 +205,9 @@ namespace Kaka
 				terrainIndices.push_back(static_cast<unsigned short>(index + 1));
 			}
 		}
+
+		OutputDebugStringA("\nPushed indices...");
+
 
 		constexpr int subsetSize = 62500;
 		const int numVertices = static_cast<int>(terrainVertices.size());
@@ -207,11 +227,14 @@ namespace Kaka
 
 				for (int j = endIndex - aSize - 1; j <= endIndex; ++j)
 				{
-					terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].position = terrainVertices[j].position;
+					terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].position = terrainVertices[j].
+						position;
 					terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].normal = terrainVertices[j].normal;
-					terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].texCoord = terrainVertices[j].texCoord;
+					terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].texCoord = terrainVertices[j].
+						texCoord;
 					terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].tangent = terrainVertices[j].tangent;
-					terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].bitangent = terrainVertices[j].bitangent;
+					terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].bitangent = terrainVertices[j].
+						bitangent;
 				}
 			}
 
@@ -242,6 +265,8 @@ namespace Kaka
 			}
 		}
 
+		OutputDebugStringA("\nMoved to subsets...");
+
 		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Grass\\Stylized_Grass_003_BaseColor.jpg");
 		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Grass\\Stylized_Grass_003_Normal.jpg");
 		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Dirt\\Stylized_Dry_Mud_001_BaseColor.jpg");
@@ -264,6 +289,8 @@ namespace Kaka
 
 		inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
 		topology.Init(aGfx, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		OutputDebugStringA("\nDone!");
 	}
 
 	void Terrain::Draw(const Graphics& aGfx)
