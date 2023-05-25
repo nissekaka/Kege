@@ -18,7 +18,7 @@ namespace Kaka
 				1.0f,
 				static_cast<float>(WINDOW_HEIGHT) / static_cast<float>(WINDOW_WIDTH),
 				0.5f,
-				1000.0f));
+				5000.0f));
 
 		for (int i = 0; i < 4; ++i)
 		{
@@ -28,19 +28,21 @@ namespace Kaka
 
 	int Game::Go()
 	{
-		//spy.LoadModel(wnd.Gfx(), "Assets\\Models\\spy\\spy.fbx", Model::eShaderType::Phong);
+		spy.LoadModel(wnd.Gfx(), "Assets\\Models\\spy\\spy.fbx", Model::eShaderType::Phong);
+		spy.SetPosition({229.0f,69.0f,-84.0});
+		spy.SetRotation({PI / 2,PI * 2 / 3,0.0f});
 		//muzen.LoadModel(wnd.Gfx(), "Assets\\Models\\muzen\\MuzenSpeaker.fbx", Model::eShaderType::Phong);
 		//vamp.LoadModel(wnd.Gfx(), "Assets\\Models\\vamp\\vamp.fbx", Model::eShaderType::AnimPhong);
 		//cube.LoadModel(wnd.Gfx(), "Assets\\Models\\cube\\animcube.fbx", Model::eShaderType::AnimPhong);
 
-		//camera.SetPosition({0.0f,1.0f,-3.0f});
+		camera.SetPosition({232.0f,71.0f,-83.0f});
 
-		constexpr int terrainSize = 1000;
+		constexpr int terrainSize = 2500;
 		terrain.Init(wnd.Gfx(), terrainSize);
 		terrain.SetPosition(DirectX::XMFLOAT3(-terrainSize / 2.0f, -25.0f, -terrainSize / 2.0f));
 
-		muzen.SetScale(0.002f);
-		muzen.SetPosition({-1.0f,0.0f,0.0f});
+		//muzen.SetScale(0.002f);
+		//muzen.SetPosition({-1.0f,0.0f,0.0f});
 
 		pointLights[0].SetColour({0.0f,1.0f,1.0f});
 		pointLights[1].SetColour({1.0f,1.0f,0.0f});
@@ -71,40 +73,7 @@ namespace Kaka
 		HandleInput(aDeltaTime);
 
 		directionalLight.Bind(wnd.Gfx());
-
-		if (directionalLight.ShouldSimulate())
-		{
-			static float sunAngle = 0.0f;
-			static const float rotationSpeed = 0.8f;
-			static const DirectX::XMFLOAT3 lowColor = {0.4f,0.4f,0.6f};
-			static const DirectX::XMFLOAT3 highColor = {1.0f,0.8f,0.6f};
-			static const float colorLerpThreshold = -0.5f;
-
-			// Update the angle based on time and speed
-			sunAngle += rotationSpeed * aDeltaTime;
-
-			// Calculate the new direction vector using trigonometry
-			DirectX::XMFLOAT3 direction;
-			direction.x = std::cos(sunAngle);
-			direction.y = std::sin(sunAngle);
-			direction.z = 0.0f; // Assuming the light is pointing straight down
-
-			// Set the new direction
-			directionalLight.SetDirection(direction);
-
-			// Calculate the color based on the vertical position of the light
-			float colorLerp = direction.y - colorLerpThreshold;
-			colorLerp = std::clamp(colorLerp, 0.0f, 1.0f); // Clamp between 0 and 1
-
-			// Interpolate between lowColor and highColor based on the colorLerp value
-			DirectX::XMFLOAT3 currentColor;
-			currentColor.x = lowColor.x + colorLerp * (highColor.x - lowColor.x);
-			currentColor.y = lowColor.y + colorLerp * (highColor.y - lowColor.y);
-			currentColor.z = lowColor.z + colorLerp * (highColor.z - lowColor.z);
-
-			// Set the new color
-			directionalLight.SetColour(currentColor);
-		}
+		directionalLight.Simulate(aDeltaTime);
 
 		for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
 		{
@@ -131,29 +100,27 @@ namespace Kaka
 		}
 
 		//spy.SetRotation({spy.GetRotation().x,timer.GetTotalTime(),spy.GetRotation().z});
-		//spy.Draw(wnd.Gfx());
+		spy.Draw(wnd.Gfx());
 		//muzen.SetRotation({muzen.GetRotation().x,timer.GetTotalTime(),muzen.GetRotation().z});
-		muzen.Draw(wnd.Gfx());
+		//muzen.Draw(wnd.Gfx());
 
 		//cube.Update(aDeltaTime);
 		//cube.Animate();
 		//cube.Draw(wnd.Gfx());
 		//vamp.Update(aDeltaTime);
 		//vamp.Animate();
-		vamp.Draw(wnd.Gfx());
-		//wnd.Gfx().DrawTestTriangle2D();
-		//wnd.Gfx().DrawTestCube3D(timer.GetTotalTime(), DirectX::XMFLOAT3(0.0f, 0.0f, 2.0f));
-		//wnd.Gfx().DrawTestCube3D(-timer.GetTotalTime(), DirectX::XMFLOAT3(-2.0f, 0.0f, 0.0f));
+		//vamp.Draw(wnd.Gfx());
 		terrain.Draw(wnd.Gfx());
 
 		// ImGui windows
 		if (showImGui)
 		{
 			ImGui::ShowDemoWindow();
-			//spy.ShowControlWindow("Spy");
+			spy.ShowControlWindow("Spy");
 			//muzen.ShowControlWindow("Muzen");
 			//vamp.ShowControlWindow("Vamp");
 			//cube.ShowControlWindow("Cube");
+			terrain.ShowControlWindow("Terrain");
 			directionalLight.ShowControlWindow("Directional Light");
 
 			for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)

@@ -1,5 +1,8 @@
 #include "DirectionalLight.h"
 #include <External/include/imgui/imgui.h>
+#include <DirectXMath.h>
+#include <algorithm>
+#include <complex>
 
 namespace Kaka
 {
@@ -80,8 +83,33 @@ namespace Kaka
 		shouldSimulate = false;
 	}
 
-	bool DirectionalLight::ShouldSimulate() const
+	void DirectionalLight::Simulate(const float aDeltaTime)
 	{
-		return shouldSimulate;
+		if (!shouldSimulate)
+		{
+			return;
+		}
+		// Update the angle based on time and speed
+		sunAngle += rotationSpeed * aDeltaTime;
+
+		DirectX::XMFLOAT3 direction;
+		direction.x = std::cos(sunAngle);
+		direction.y = std::sin(sunAngle);
+		direction.z = 0.0f; // Assuming the light is pointing straight down
+
+		SetDirection(direction);
+
+		// Calculate the color based on the vertical position of the light
+		float colorLerp = direction.y - colorLerpThreshold;
+		colorLerp = std::clamp(colorLerp, 0.0f, 1.0f);
+
+		// Interpolate between lowColor and highColor based on the colorLerp value
+		DirectX::XMFLOAT3 currentColor;
+		currentColor.x = lowColor.x + colorLerp * (highColor.x - lowColor.x);
+		currentColor.y = lowColor.y + colorLerp * (highColor.y - lowColor.y);
+		currentColor.z = lowColor.z + colorLerp * (highColor.z - lowColor.z);
+
+		// Set the new color
+		SetColour(currentColor);
 	}
 }

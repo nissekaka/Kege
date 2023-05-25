@@ -1,5 +1,6 @@
 #include "Terrain.h"
 #include "Core/Model/Vertex.h"
+#include "External/include/imgui/imgui.h"
 
 #include "TGP/uppgift05_helper.h"
 #include "TGP/FastNoiseLite.h"
@@ -19,13 +20,13 @@ namespace Kaka
 		FastNoiseLite noiseGenerator;
 		noiseGenerator.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
 		noiseGenerator.SetFractalType(FastNoiseLite::FractalType_Ridged);
-		noiseGenerator.SetFrequency(0.005f);
+		noiseGenerator.SetFrequency(0.0012f);
 		noiseGenerator.SetFractalOctaves(8);
-		noiseGenerator.SetFractalLacunarity(1.5f);
+		noiseGenerator.SetFractalLacunarity(1.8f);
 		noiseGenerator.SetFractalGain(0.5f);
 
-		constexpr float heightMul = 25.0f;
-		constexpr float texCoordResFactor = 12.0f;
+		constexpr float heightMul = 100.0f;
+		constexpr float texCoordResFactor = 20.0f;
 
 		std::vector<Vertex> terrainVertices;
 		std::vector<unsigned short> terrainIndices;
@@ -42,6 +43,75 @@ namespace Kaka
 				vertex.tangent = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 				vertex.bitangent = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 				terrainVertices.push_back(vertex);
+			}
+		}
+
+		float smoothingFactor = 1.0f;
+		float heightThreshold = 0.0f;
+		int smoothingIterations = 15;
+
+		for (int i = 0; i < smoothingIterations; ++i)
+		{
+			for (int z = 0; z < aSize; ++z)
+			{
+				for (int x = 0; x < aSize; ++x)
+				{
+					const int currentIndex = z * aSize + x;
+					const int indexTop = (z - 1) * aSize + x;
+					const int indexBottom = (z + 1) * aSize + x;
+					const int indexLeft = z * aSize + (x - 1);
+					const int indexRight = z * aSize + (x + 1);
+					if (terrainVertices[currentIndex].position.y > heightThreshold)
+					{
+						continue;
+					}
+
+					// Calculate average position of neighboring vertices
+					DirectX::XMFLOAT3 averagePosition = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
+					int numNeighbors = 0;
+
+					if (z > 0)
+					{
+						averagePosition.x += terrainVertices[indexTop].position.x;
+						averagePosition.y += terrainVertices[indexTop].position.y;
+						averagePosition.z += terrainVertices[indexTop].position.z;
+						numNeighbors++;
+					}
+					if (z < aSize - 1)
+					{
+						averagePosition.x += terrainVertices[indexBottom].position.x;
+						averagePosition.y += terrainVertices[indexBottom].position.y;
+						averagePosition.z += terrainVertices[indexBottom].position.z;
+						numNeighbors++;
+					}
+					if (x > 0)
+					{
+						averagePosition.x += terrainVertices[indexLeft].position.x;
+						averagePosition.y += terrainVertices[indexLeft].position.y;
+						averagePosition.z += terrainVertices[indexLeft].position.z;
+						numNeighbors++;
+					}
+					if (x < aSize - 1)
+					{
+						averagePosition.x += terrainVertices[indexRight].position.x;
+						averagePosition.y += terrainVertices[indexRight].position.y;
+						averagePosition.z += terrainVertices[indexRight].position.z;
+						numNeighbors++;
+					}
+					averagePosition.x /= numNeighbors;
+					averagePosition.y /= numNeighbors;
+					averagePosition.z /= numNeighbors;
+
+					DirectX::XMFLOAT3& currentPosition = terrainVertices[currentIndex].position;
+					DirectX::XMFLOAT3 smoothedPosition = DirectX::XMFLOAT3(
+						currentPosition.x + (averagePosition.x - currentPosition.x) * smoothingFactor,
+						currentPosition.y + (averagePosition.y - currentPosition.y) * smoothingFactor,
+						currentPosition.z + (averagePosition.z - currentPosition.z) * smoothingFactor
+					);
+
+					// Update the vertex position
+					terrainVertices[currentIndex].position = smoothedPosition;
+				}
 			}
 		}
 
@@ -180,70 +250,45 @@ namespace Kaka
 		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Rock\\peter-larsen-stylizedrocknormal-png.jpg");
 		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Snow\\Snow_001_BaseColor.jpg");
 		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Snow\\Snow_001_Normal.jpg");
+
+		sampler.Init(aGfx, 0u);
+
+		for (auto& subset : terrainSubsets)
+		{
+			subset.vertexBuffer.Init(aGfx, subset.vertices);
+			subset.indexBuffer.Init(aGfx, subset.indices);
+		}
+
+		pixelShader.Init(aGfx, L"Shaders\\TerrainPhong_PS.cso");
+		vertexShader.Init(aGfx, L"Shaders\\TerrainPhong_VS.cso");
+
+		inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
+		topology.Init(aGfx, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 
 	void Terrain::Draw(const Graphics& aGfx)
 	{
-		for (const auto& subset : terrainSubsets)
+		for (auto& subset : terrainSubsets)
 		{
-			Sampler sampler(aGfx, 0u);
 			sampler.Bind(aGfx);
 
 			texture.Bind(aGfx);
 
-			VertexBuffer vb(aGfx, subset.vertices);
-			vb.Bind(aGfx);
-
-			IndexBuffer ib(aGfx, subset.indices);
-			ib.Bind(aGfx);
+			subset.vertexBuffer.Bind(aGfx);
+			subset.indexBuffer.Bind(aGfx);
 
 			TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
 			transformConstantBuffer.Bind(aGfx);
 
-			PixelShader pixelShader(aGfx, L"Shaders\\TerrainPhong_PS.cso");
 			pixelShader.Bind(aGfx);
-
-			const struct PSMaterialConstant
-			{
-				BOOL normalMapEnabled = TRUE;
-				BOOL materialEnabled = TRUE;
-				float specularIntensity = 0.05f;
-				float specularPower = 2.0f;
-			} pmc;
 
 			PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
 			psConstantBuffer.Bind(aGfx);
 
-			VertexShader vertexShader(aGfx, L"Shaders\\TerrainPhong_VS.cso");
 			vertexShader.Bind(aGfx);
 
-			const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
-			{
-				{
-					"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
-				{
-					"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
-				{
-					"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
-				{
-					"TANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
-				{
-					"BITANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-					D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
-				},
-			};
-			InputLayout inputLayout(aGfx, ied, vertexShader.GetBytecode());
 			inputLayout.Bind(aGfx);
 
-			Topology topology(aGfx, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			topology.Bind(aGfx);
 
 			aGfx.pContext->DrawIndexed(static_cast<UINT>(std::size(subset.indices)), 0u, 0u);
@@ -259,8 +304,29 @@ namespace Kaka
 
 	DirectX::XMMATRIX Terrain::GetTransform() const
 	{
-		return DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f) *
-			DirectX::XMMatrixRotationRollPitchYaw(0, 0, 0) *
+		return DirectX::XMMatrixScaling(transform.scale, transform.scale, transform.scale) *
+			DirectX::XMMatrixRotationRollPitchYaw(transform.roll, transform.pitch, transform.roll) *
 			DirectX::XMMatrixTranslation(transform.x, transform.y, transform.z);
+	}
+
+	void Terrain::ShowControlWindow(const char* aWindowName)
+	{
+		aWindowName = aWindowName ? aWindowName : "Terrain";
+
+		if (ImGui::Begin(aWindowName))
+		{
+			ImGui::Text("Orientation");
+			ImGui::SliderAngle("Roll", &transform.roll, -180.0f, 180.0f);
+			ImGui::SliderAngle("Pitch", &transform.pitch, -180.0f, 180.0f);
+			ImGui::SliderAngle("Yaw", &transform.yaw, -180.0f, 180.0f);
+			ImGui::Text("Position");
+			ImGui::DragFloat3("XYZ", &transform.x);
+			ImGui::Text("Scale");
+			ImGui::DragFloat("XYZ", &transform.scale, 0.1f, 0.0f, 10.0f, "%.1f");
+			ImGui::Text("Specular");
+			ImGui::SliderFloat("Intensity", &pmc.specularIntensity, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
+			ImGui::DragFloat("Power", &pmc.specularPower);
+		}
+		ImGui::End();
 	}
 }

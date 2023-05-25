@@ -34,6 +34,15 @@ namespace Kaka
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
 	private:
+		Sampler sampler = {};
+		VertexBuffer vertexBuffer = {};
+		IndexBuffer indexBuffer = {};
+		PixelShader pixelShader;
+		VertexShader vertexShader;
+		std::vector<D3D11_INPUT_ELEMENT_DESC> ied;
+		InputLayout inputLayout;
+		Topology topology = {};
+	private:
 		eShaderType shaderType;
 	private:
 		struct TransformParameters
@@ -47,9 +56,11 @@ namespace Kaka
 			float scale = 1.0f;
 		};
 
-		DirectX::XMFLOAT4 solidColour;
-
 		TransformParameters transform;
+
+		DirectX::XMFLOAT4 solidColour;
+		float specularIntensity = 0.1f;
+		float specularPower = 2.0f;
 
 	private:
 		ModelData modelData;

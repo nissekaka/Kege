@@ -17,7 +17,7 @@ namespace Kaka
 		void SetColour(DirectX::XMFLOAT3 aColour);
 		void EnableSimulation();
 		void DisableSimulation();
-		bool ShouldSimulate() const;
+		void Simulate(const float aDeltaTime);
 	private:
 		struct DirectionalLightBuffer
 		{
@@ -30,6 +30,12 @@ namespace Kaka
 	private:
 		DirectionalLightBuffer bufferData;
 		PixelConstantBuffer<DirectionalLightBuffer> cbuf;
+	private:
 		bool shouldSimulate = true;
+		float sunAngle = 0.0f;
+		const float rotationSpeed = 0.8f;
+		const DirectX::XMFLOAT3 lowColor = {0.4f,0.4f,0.6f};
+		const DirectX::XMFLOAT3 highColor = {1.0f,0.8f,0.6f};
+		const float colorLerpThreshold = -0.5f;
 	};
 }
