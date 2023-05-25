@@ -24,6 +24,7 @@ namespace Kaka
 		friend class DirectionalLight;
 		friend class PointLight;
 		friend class Terrain;
+		friend class Skybox;
 	public:
 		Graphics(HWND aHWnd, UINT aWidth, UINT aHeight);
 		Graphics(const Graphics&) = delete;

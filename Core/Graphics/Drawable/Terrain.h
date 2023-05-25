@@ -1,7 +1,7 @@
 #pragma once
 #include "Core/Graphics/Graphics.h"
 #include "Core/Graphics/Bindable/BindableCommon.h"
-#include "Core/Model/Drawable.h"
+#include "Core/Graphics/Drawable/Drawable.h"
 
 namespace Kaka
 {

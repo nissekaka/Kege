@@ -1,7 +1,7 @@
 #include "ModelLoader.h"
 //#include "Core/Model/Mesh.h"
 #include "Core/Windows/Window.h"
-#include "Core/Model/Vertex.h"
+#include "Core/Graphics/Drawable/Vertex.h"
 #include <External/include/assimp/Importer.hpp>
 #include <External/include/assimp/scene.h>
 #include <External/include/assimp/postprocess.h>

@@ -39,10 +39,10 @@
     <ClCompile Include="Utility\ImGuiManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Model\ModelLoader.cpp">
+    <ClCompile Include="Graphics\Drawable\ModelLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Model\Model.cpp">
+    <ClCompile Include="Graphics\Drawable\Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\Bindable\Texture.cpp">
@@ -54,7 +54,7 @@
     <ClCompile Include="Utility\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Lighting\DirectionalLight.cpp">
+    <ClCompile Include="Graphics\Lighting\DirectionalLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\Bindable\IndexBuffer.cpp">
@@ -81,13 +81,22 @@
     <ClCompile Include="Graphics\Bindable\Bindable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Model\Drawable.cpp">
+    <ClCompile Include="Graphics\Drawable\Drawable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\Bindable\Sampler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Lighting\PointLight.cpp">
+    <ClCompile Include="Graphics\Lighting\PointLight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Bindable\CubeTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Drawable\Skybox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Drawable\Terrain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -116,16 +125,16 @@
     <ClInclude Include="Utility\ImGuiManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Model\ModelLoader.h">
+    <ClInclude Include="Graphics\Drawable\ModelLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Model\Model.h">
+    <ClInclude Include="Graphics\Drawable\Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Model\ModelData.h">
+    <ClInclude Include="Graphics\Drawable\ModelData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Model\Vertex.h">
+    <ClInclude Include="Graphics\Drawable\Vertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\Bindable\Texture.h">
@@ -137,7 +146,7 @@
     <ClInclude Include="Utility\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Lighting\DirectionalLight.h">
+    <ClInclude Include="Graphics\Lighting\DirectionalLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\Bindable\Bindable.h">
@@ -170,13 +179,22 @@
     <ClInclude Include="Graphics\Bindable\VertexShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Model\Drawable.h">
+    <ClInclude Include="Graphics\Drawable\Drawable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\Bindable\Sampler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Lighting\PointLight.h">
+    <ClInclude Include="Graphics\Lighting\PointLight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Bindable\CubeTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Drawable\Skybox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Drawable\Terrain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -192,6 +210,8 @@
     <FxCompile Include="Graphics\Shaders\AnimPhong_VS.hlsl" />
     <FxCompile Include="Graphics\Shaders\TerrainPhong_PS.hlsl" />
     <FxCompile Include="Graphics\Shaders\TerrainPhong_VS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\Skybox_VS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\Skybox_PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Todo.txt" />

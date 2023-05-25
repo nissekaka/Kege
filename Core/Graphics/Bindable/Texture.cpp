@@ -1,5 +1,5 @@
 #include "Texture.h"
-#include "Core/Utility/KakaUtility.h"
+#include <External/include/dxtex/DirectXTex.h>
 
 namespace Kaka
 {

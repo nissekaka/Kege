@@ -1,11 +1,9 @@
 #pragma once
 #include "Bindable.h"
-#include <External/include/dxtex/DirectXTex.h>
 #include <string>
 #include <d3d11.h>
 #include <stdexcept>
 #include <wrl/client.h>
-
 
 namespace Kaka
 {

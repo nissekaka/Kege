@@ -1,6 +1,6 @@
 #pragma once
 #include "ConstantBuffers.h"
-#include "Core/Model/Drawable.h"
+#include "Core/Graphics/Drawable/Drawable.h"
 #include <DirectXMath.h>
 
 namespace Kaka

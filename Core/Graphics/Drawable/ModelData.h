@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-#include "Core/Model/Vertex.h"
+#include "Core/Graphics/Drawable/Vertex.h"
 #include <vector>
 
 namespace Kaka

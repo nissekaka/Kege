@@ -4,12 +4,13 @@
 #include "Core/Utility/Timer.h"
 #include "Core/Utility/Camera.h"
 #include <Core/Utility/KakaMath.h>
-#include "Core/Lighting/DirectionalLight.h"
-#include "Core/Lighting/PointLight.h"
-#include "Core/Model/Model.h"
+#include "Core/Graphics/Lighting/DirectionalLight.h"
+#include "Core/Graphics/Lighting/PointLight.h"
+#include "Core/Graphics/Drawable/Model.h"
+#include "Core/Graphics/Drawable/Terrain.h"
+#include "Core/Graphics/Drawable/Skybox.h"
 #include <array>
 
-#include "Game/Source/Terrain.h"
 
 namespace Kaka
 {
@@ -47,5 +48,6 @@ namespace Kaka
 		Model vamp{};
 		Model cube{};
 		Terrain terrain{};
+		Skybox skybox{};
 	};
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include "Core/Graphics/Graphics.h"
-#include "Core/Model/Model.h"
+#include "Core/Graphics/Drawable/Model.h"
 #include <DirectXMath.h>
 #include <array>
 

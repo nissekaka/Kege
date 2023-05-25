@@ -1,5 +1,5 @@
 #include "Terrain.h"
-#include "Core/Model/Vertex.h"
+#include "Core/Graphics/Drawable/Vertex.h"
 #include "External/include/imgui/imgui.h"
 
 #include "TGP/uppgift05_helper.h"

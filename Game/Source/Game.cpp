@@ -28,8 +28,9 @@ namespace Kaka
 
 	int Game::Go()
 	{
+		skybox.Init(wnd.Gfx());
 		spy.LoadModel(wnd.Gfx(), "Assets\\Models\\spy\\spy.fbx", Model::eShaderType::Phong);
-		spy.SetPosition({229.0f,69.0f,-84.0});
+		spy.SetPosition({228.4f,69.28f,-84.0});
 		spy.SetRotation({PI / 2,PI * 2 / 3,0.0f});
 		//muzen.LoadModel(wnd.Gfx(), "Assets\\Models\\muzen\\MuzenSpeaker.fbx", Model::eShaderType::Phong);
 		//vamp.LoadModel(wnd.Gfx(), "Assets\\Models\\vamp\\vamp.fbx", Model::eShaderType::AnimPhong);

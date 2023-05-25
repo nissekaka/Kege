@@ -1,6 +1,6 @@
 #pragma once
 #include "Drawable.h"
-#include "Core/Model/ModelData.h"
+#include "Core/Graphics/Drawable/ModelData.h"
 #include "Core/Graphics/Bindable/BindableCommon.h"
 #include <DirectXMath.h>
 #include <string>

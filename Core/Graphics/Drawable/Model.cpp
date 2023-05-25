@@ -1,6 +1,6 @@
 #include "Model.h"
 #include "Core/Graphics/Graphics.h"
-#include "Core/Model/ModelLoader.h"
+#include "Core/Graphics/Drawable/ModelLoader.h"
 #include <External/include/imgui/imgui.h>
 #include <d3dcompiler.h>
 #include <wrl/client.h>
