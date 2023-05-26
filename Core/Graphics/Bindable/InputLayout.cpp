@@ -6,17 +6,11 @@ namespace Kaka
 	                         const std::vector<D3D11_INPUT_ELEMENT_DESC>& aLayout,
 	                         ID3DBlob* aPVertexShaderBytecode)
 	{
-		GetDevice(aGfx)->CreateInputLayout
-		(
-			aLayout.data(),
-			static_cast<UINT>(aLayout.size()),
-			aPVertexShaderBytecode->GetBufferPointer(),
-			aPVertexShaderBytecode->GetBufferSize(),
-			&pInputLayout
-		);
+		Init(aGfx, aLayout, aPVertexShaderBytecode);
 	}
 
-	void InputLayout::Init(const Graphics& aGfx, const std::vector<D3D11_INPUT_ELEMENT_DESC>& aLayout, ID3DBlob* aPVertexShaderBytecode)
+	void InputLayout::Init(const Graphics& aGfx, const std::vector<D3D11_INPUT_ELEMENT_DESC>& aLayout,
+	                       ID3DBlob* aPVertexShaderBytecode)
 	{
 		GetDevice(aGfx)->CreateInputLayout
 		(

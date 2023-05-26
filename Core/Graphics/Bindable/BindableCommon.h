@@ -9,5 +9,8 @@
 #include "CubeTexture.h"
 #include "Topology.h"
 #include "TransformConstantBuffer.h"
+#include "SkyboxTransformConstantBuffer.h"
 #include "VertexBuffer.h"
 #include "VertexShader.h"
+#include "Rasterizer.h"
+#include "DepthStencil.h"

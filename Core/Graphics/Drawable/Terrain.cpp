@@ -290,6 +290,9 @@ namespace Kaka
 		inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
 		topology.Init(aGfx, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+		rasterizer.Init(aGfx, false);
+		depthStencil.Init(aGfx, DepthStencil::Mode::Write);
+
 		OutputDebugStringA("\nDone!");
 	}
 
@@ -313,10 +316,10 @@ namespace Kaka
 			psConstantBuffer.Bind(aGfx);
 
 			vertexShader.Bind(aGfx);
-
 			inputLayout.Bind(aGfx);
-
 			topology.Bind(aGfx);
+			rasterizer.Bind(aGfx);
+			depthStencil.Bind(aGfx);
 
 			aGfx.pContext->DrawIndexed(static_cast<UINT>(std::size(subset.indices)), 0u, 0u);
 		}

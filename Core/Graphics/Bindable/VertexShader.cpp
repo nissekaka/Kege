@@ -4,14 +4,7 @@ namespace Kaka
 {
 	VertexShader::VertexShader(const Graphics& aGfx, const std::wstring& aPath)
 	{
-		D3DReadFileToBlob(aPath.c_str(), &pBytecodeBlob);
-		GetDevice(aGfx)->CreateVertexShader
-		(
-			pBytecodeBlob->GetBufferPointer(),
-			pBytecodeBlob->GetBufferSize(),
-			nullptr,
-			&pVertexShader
-		);
+		Init(aGfx, aPath);
 	}
 
 	void VertexShader::Init(const Graphics& aGfx, const std::wstring& aPath)

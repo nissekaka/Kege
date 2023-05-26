@@ -22,21 +22,21 @@ namespace Kaka
 
 		for (int i = 0; i < 4; ++i)
 		{
-			pointLights.push_back(PointLight{wnd.Gfx(),2u});
+			pointLights.push_back(PointLight{wnd.Gfx(), 2u});
 		}
 	}
 
 	int Game::Go()
 	{
-		skybox.Init(wnd.Gfx());
+		skybox.Init(wnd.Gfx(), "Assets\\Textures\\Skybox\\Miramar\\", "Assets\\Textures\\Skybox\\Kurt\\");
 		spy.LoadModel(wnd.Gfx(), "Assets\\Models\\spy\\spy.fbx", Model::eShaderType::Phong);
-		spy.SetPosition({228.4f,69.28f,-84.0});
-		spy.SetRotation({PI / 2,PI * 2 / 3,0.0f});
+		spy.SetPosition({228.4f, 69.28f, -84.0});
+		spy.SetRotation({PI / 2, PI * 2 / 3, 0.0f});
 		//muzen.LoadModel(wnd.Gfx(), "Assets\\Models\\muzen\\MuzenSpeaker.fbx", Model::eShaderType::Phong);
 		//vamp.LoadModel(wnd.Gfx(), "Assets\\Models\\vamp\\vamp.fbx", Model::eShaderType::AnimPhong);
 		//cube.LoadModel(wnd.Gfx(), "Assets\\Models\\cube\\animcube.fbx", Model::eShaderType::AnimPhong);
 
-		camera.SetPosition({232.0f,71.0f,-83.0f});
+		camera.SetPosition({232.0f, 71.0f, -83.0f});
 
 		constexpr int terrainSize = 2500;
 		terrain.Init(wnd.Gfx(), terrainSize);
@@ -45,10 +45,10 @@ namespace Kaka
 		//muzen.SetScale(0.002f);
 		//muzen.SetPosition({-1.0f,0.0f,0.0f});
 
-		pointLights[0].SetColour({0.0f,1.0f,1.0f});
-		pointLights[1].SetColour({1.0f,1.0f,0.0f});
-		pointLights[2].SetColour({0.0f,1.0f,0.0f});
-		pointLights[3].SetColour({1.0f,0.0f,0.0f});
+		pointLights[0].SetColour({0.0f, 1.0f, 1.0f});
+		pointLights[1].SetColour({1.0f, 1.0f, 0.0f});
+		pointLights[2].SetColour({0.0f, 1.0f, 0.0f});
+		pointLights[3].SetColour({1.0f, 0.0f, 0.0f});
 
 		while (true)
 		{
@@ -82,16 +82,16 @@ namespace Kaka
 			constexpr float speed = 0.8f;
 
 			pointLights[i].Bind(wnd.Gfx(), camera.GetMatrix());
-			angle[i] += speed * aDeltaTime;
+			pointLightAngles[i] += speed * aDeltaTime;
 
-			float posX = radius * std::cos(angle[i]);
-			float posZ = radius * std::sin(angle[i]);
+			float posX = radius * std::cos(pointLightAngles[i]);
+			float posZ = radius * std::sin(pointLightAngles[i]);
 
-			pointLights[i].SetPosition({posX,15.0f,posZ});
+			pointLights[i].SetPosition({posX, 15.0f, posZ});
 
-			if (angle[i] > 2 * PI)
+			if (pointLightAngles[i] > 2 * PI)
 			{
-				angle[i] -= 2 * PI;
+				pointLightAngles[i] -= 2 * PI;
 			}
 
 			if (drawLightDebug)
@@ -99,6 +99,9 @@ namespace Kaka
 				pointLights[i].Draw(wnd.Gfx());
 			}
 		}
+		skyboxAngle.y += skyboxSpeed * aDeltaTime;
+		skybox.Rotate(skyboxAngle);
+		skybox.Draw(wnd.Gfx());
 
 		//spy.SetRotation({spy.GetRotation().x,timer.GetTotalTime(),spy.GetRotation().z});
 		spy.Draw(wnd.Gfx());
@@ -191,27 +194,27 @@ namespace Kaka
 
 			if (wnd.keyboard.KeyIsPressed('W'))
 			{
-				camera.Translate({0.0f,0.0f,aDeltaTime * cameraSpeed});
+				camera.Translate({0.0f, 0.0f, aDeltaTime * cameraSpeed});
 			}
 			if (wnd.keyboard.KeyIsPressed('A'))
 			{
-				camera.Translate({-aDeltaTime * cameraSpeed,0.0f,0.0f});
+				camera.Translate({-aDeltaTime * cameraSpeed, 0.0f, 0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed('S'))
 			{
-				camera.Translate({0.0f,0.0f,-aDeltaTime * cameraSpeed});
+				camera.Translate({0.0f, 0.0f, -aDeltaTime * cameraSpeed});
 			}
 			if (wnd.keyboard.KeyIsPressed('D'))
 			{
-				camera.Translate({aDeltaTime * cameraSpeed,0.0f,0.0f});
+				camera.Translate({aDeltaTime * cameraSpeed, 0.0f, 0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed(VK_SPACE))
 			{
-				camera.Translate({0.0f,aDeltaTime * cameraSpeed,0.0f});
+				camera.Translate({0.0f, aDeltaTime * cameraSpeed, 0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed(VK_CONTROL))
 			{
-				camera.Translate({0.0f,-aDeltaTime * cameraSpeed,0.0f});
+				camera.Translate({0.0f, -aDeltaTime * cameraSpeed, 0.0f});
 			}
 		}
 

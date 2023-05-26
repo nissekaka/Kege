@@ -42,6 +42,8 @@ namespace Kaka
 		std::vector<D3D11_INPUT_ELEMENT_DESC> ied;
 		InputLayout inputLayout;
 		Topology topology = {};
+		Rasterizer rasterizer = {};
+		DepthStencil depthStencil = {};
 	private:
 		eShaderType shaderType;
 	private:

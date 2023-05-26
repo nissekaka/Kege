@@ -9,8 +9,9 @@ namespace Kaka
 	public:
 		Skybox() = default;
 		~Skybox() override = default;
-		void Init(const Graphics& aGfx);
+		void Init(const Graphics& aGfx, const std::string& aDayPath, const std::string& aNightPath);
 		void Draw(const Graphics& aGfx);
+		void Rotate(DirectX::XMFLOAT3 aRotation);
 	public:
 		DirectX::XMMATRIX GetTransform() const override;
 	private:
@@ -26,6 +27,12 @@ namespace Kaka
 		};
 
 		TransformParameters transform;
+
+		struct Transforms
+		{
+			DirectX::XMMATRIX projection;
+		};
+
 		Sampler sampler = {};
 		VertexBuffer vertexBuffer = {};
 		IndexBuffer indexBuffer = {};
@@ -34,12 +41,14 @@ namespace Kaka
 		const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 		{
 			{
-				"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-				D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+				"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+				D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 			},
 		};
 		InputLayout inputLayout;
 		Topology topology = {};
+		Rasterizer rasterizer = {};
+		DepthStencil depthStencil = {};
 
 		struct Vertex
 		{
@@ -52,26 +61,27 @@ namespace Kaka
 		};
 
 		const std::vector<Vertex> vertices = {
-			{{-0.5f,-0.5f,-0.5f}},
-			{{0.5f,-0.5f,-0.5f}},
-			{{-0.5f,0.5f,-0.5f}},
-			{{0.5f,0.5f,-0.5f}},
-			{{-0.5f,-0.5f,0.5f}},
-			{{0.5f,-0.5f,0.5f}},
-			{{-0.5f,0.5f,0.5f}},
-			{{0.5f,0.5f,0.5f}},
+			{{-0.5f, -0.5f, -0.5f}},
+			{{0.5f, -0.5f, -0.5f}},
+			{{-0.5f, 0.5f, -0.5f}},
+			{{0.5f, 0.5f, -0.5f}},
+			{{-0.5f, -0.5f, 0.5f}},
+			{{0.5f, -0.5f, 0.5f}},
+			{{-0.5f, 0.5f, 0.5f}},
+			{{0.5f, 0.5f, 0.5f}},
 		};
 
 		const std::vector<unsigned short> indices =
 		{
-			0,2,1,2,3,1,
-			1,3,5,3,7,5,
-			2,6,3,3,6,7,
-			4,5,7,4,7,6,
-			0,4,2,2,4,6,
-			0,1,4,1,5,4
+			0, 2, 1, 2, 3, 1,
+			1, 3, 5, 3, 7, 5,
+			2, 6, 3, 3, 6, 7,
+			4, 5, 7, 4, 7, 6,
+			0, 4, 2, 2, 4, 6,
+			0, 1, 4, 1, 5, 4
 		};
 	private:
-		CubeTexture texture;
+		CubeTexture dayTexture{0u};
+		CubeTexture nightTexture{1u};
 	};
 }

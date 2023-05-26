@@ -13,6 +13,7 @@ namespace Kaka
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
 		void Reset();
+		DirectX::XMFLOAT3 GetDirection() const;
 		void SetDirection(DirectX::XMFLOAT3 aDirection);
 		void SetColour(DirectX::XMFLOAT3 aColour);
 		void EnableSimulation();
@@ -34,8 +35,8 @@ namespace Kaka
 		bool shouldSimulate = true;
 		float sunAngle = 0.0f;
 		const float rotationSpeed = 0.8f;
-		const DirectX::XMFLOAT3 lowColor = {0.4f,0.4f,0.6f};
-		const DirectX::XMFLOAT3 highColor = {1.0f,0.8f,0.6f};
+		const DirectX::XMFLOAT3 lowColor = {0.4f, 0.4f, 0.6f};
+		const DirectX::XMFLOAT3 highColor = {1.0f, 0.8f, 0.6f};
 		const float colorLerpThreshold = -0.5f;
 	};
 }

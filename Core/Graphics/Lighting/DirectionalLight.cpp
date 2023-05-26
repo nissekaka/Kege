@@ -58,9 +58,14 @@ namespace Kaka
 
 	void DirectionalLight::Reset()
 	{
-		bufferData.lightDirection = {-1.0f,-1.0f,1.0f};
-		bufferData.lightColour = {0.6f,0.6f,0.6f};
+		bufferData.lightDirection = {-1.0f, -1.0f, 1.0f};
+		bufferData.lightColour = {0.6f, 0.6f, 0.6f};
 		bufferData.ambientLight = 0.1f;
+	}
+
+	DirectX::XMFLOAT3 DirectionalLight::GetDirection() const
+	{
+		return bufferData.lightDirection;
 	}
 
 	void DirectionalLight::SetDirection(const DirectX::XMFLOAT3 aDirection)

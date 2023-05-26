@@ -92,6 +92,7 @@
   <ItemGroup>
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="Graphics\Bindable\CubeTexture.cpp" />
+    <ClCompile Include="Graphics\Bindable\DepthStencil.cpp" />
     <ClCompile Include="Graphics\Drawable\Skybox.cpp" />
     <ClCompile Include="Graphics\Drawable\Terrain.cpp" />
     <ClCompile Include="Graphics\Lighting\PointLight.cpp" />
@@ -112,6 +113,8 @@
     <ClCompile Include="Input\Mouse.cpp" />
     <ClCompile Include="Graphics\Bindable\Texture.cpp" />
     <ClCompile Include="Graphics\Bindable\Sampler.cpp" />
+    <ClCompile Include="Graphics\Bindable\SkyboxTransformConstantBuffer.cpp" />
+    <ClCompile Include="Graphics\Bindable\Rasterizer.cpp" />
     <ClCompile Include="Utility\Camera.cpp" />
     <ClCompile Include="Utility\ImGuiManager.cpp" />
     <ClCompile Include="Utility\KakaUtility.cpp" />
@@ -121,6 +124,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graphics\Bindable\CubeTexture.h" />
+    <ClInclude Include="Graphics\Bindable\DepthStencil.h" />
     <ClInclude Include="Graphics\Drawable\Skybox.h" />
     <ClInclude Include="Graphics\Drawable\Terrain.h" />
     <ClInclude Include="Graphics\Lighting\PointLight.h" />
@@ -145,6 +149,8 @@
     <ClInclude Include="Graphics\Drawable\Vertex.h" />
     <ClInclude Include="Graphics\Bindable\Texture.h" />
     <ClInclude Include="Graphics\Bindable\Sampler.h" />
+    <ClInclude Include="Graphics\Bindable\SkyboxTransformConstantBuffer.h" />
+    <ClInclude Include="Graphics\Bindable\Rasterizer.h" />
     <ClInclude Include="Utility\Camera.h" />
     <ClInclude Include="Utility\ImGuiManager.h" />
     <ClInclude Include="Utility\KakaUtility.h" />

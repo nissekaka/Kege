@@ -4,15 +4,7 @@ namespace Kaka
 {
 	PixelShader::PixelShader(const Graphics& aGfx, const std::wstring& aPath)
 	{
-		Microsoft::WRL::ComPtr<ID3DBlob> pBlob;
-		D3DReadFileToBlob(aPath.c_str(), &pBlob);
-		GetDevice(aGfx)->CreatePixelShader
-		(
-			pBlob->GetBufferPointer(),
-			pBlob->GetBufferSize(),
-			nullptr,
-			&pPixelShader
-		);
+		Init(aGfx, aPath);
 	}
 
 	void PixelShader::Init(const Graphics& aGfx, const std::wstring& aPath)

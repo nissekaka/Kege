@@ -2,11 +2,12 @@
 
 namespace Kaka
 {
-	void Skybox::Init(const Graphics& aGfx)
+	void Skybox::Init(const Graphics& aGfx, const std::string& aDayPath, const std::string& aNightPath)
 	{
 		UNREFERENCED_PARAMETER(aGfx);
 
-		texture.LoadTextures(aGfx, "Assets\\Textures\\Skybox\\");
+		dayTexture.LoadTextures(aGfx, aDayPath);
+		nightTexture.LoadTextures(aGfx, aNightPath);
 
 		sampler.Init(aGfx, 0u);
 
@@ -18,6 +19,9 @@ namespace Kaka
 
 		inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
 		topology.Init(aGfx, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		rasterizer.Init(aGfx, true);
+		depthStencil.Init(aGfx, DepthStencil::Mode::DepthFirst);
 	}
 
 	void Skybox::Draw(const Graphics& aGfx)
@@ -26,22 +30,31 @@ namespace Kaka
 
 		sampler.Bind(aGfx);
 
-		texture.Bind(aGfx);
+		dayTexture.Bind(aGfx);
+		nightTexture.Bind(aGfx);
 
 		vertexBuffer.Bind(aGfx);
 		indexBuffer.Bind(aGfx);
 
-		//TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
-		//transformConstantBuffer.Bind(aGfx);
+		SkyboxTransformConstantBuffer skyboxTransformConstantBuffer(aGfx, *this, 0u);
+		skyboxTransformConstantBuffer.Bind(aGfx);
 
 		pixelShader.Bind(aGfx);
 		vertexShader.Bind(aGfx);
 
 		inputLayout.Bind(aGfx);
-
 		topology.Bind(aGfx);
+		rasterizer.Bind(aGfx);
+		depthStencil.Bind(aGfx);
 
 		aGfx.pContext->DrawIndexed(static_cast<UINT>(std::size(indices)), 0u, 0u);
+	}
+
+	void Skybox::Rotate(const DirectX::XMFLOAT3 aRotation)
+	{
+		transform.roll = aRotation.x;
+		transform.pitch = aRotation.y;
+		transform.yaw = aRotation.z;
 	}
 
 	DirectX::XMMATRIX Skybox::GetTransform() const

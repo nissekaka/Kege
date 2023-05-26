@@ -30,7 +30,7 @@ struct PixelInput
     float3 worldPos : WPOSITION;
     float3 worldNorm : WNORMAL;
     float3 viewPos : POSITION;
-    float4 position : SV_POSITION;
+    float4 position : SV_POSITION; // Not used
     float3 viewNormal : NORMAL;
     float2 texCoord : TEXCOORD;
     float3 viewTan : TANGENT;
