@@ -48,6 +48,10 @@ namespace Kaka
 		depthStencil.Bind(aGfx);
 
 		aGfx.pContext->DrawIndexed(static_cast<UINT>(std::size(indices)), 0u, 0u);
+		// Unbind shader resources
+		ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
+		aGfx.pContext->PSSetShaderResources(0, 1, nullSRVs);
+		aGfx.pContext->PSSetShaderResources(1, 1, nullSRVs);
 	}
 
 	void Skybox::Rotate(const DirectX::XMFLOAT3 aRotation)

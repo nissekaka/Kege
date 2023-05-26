@@ -38,7 +38,7 @@ namespace Kaka
 
 		camera.SetPosition({232.0f, 71.0f, -83.0f});
 
-		constexpr int terrainSize = 2500;
+		constexpr int terrainSize = 500;
 		terrain.Init(wnd.Gfx(), terrainSize);
 		terrain.SetPosition(DirectX::XMFLOAT3(-terrainSize / 2.0f, -25.0f, -terrainSize / 2.0f));
 

@@ -11,6 +11,6 @@ namespace Kaka
 		void Init(const Graphics& aGfx, const D3D11_PRIMITIVE_TOPOLOGY aType);
 		void Bind(const Graphics& aGfx) override;
 	protected:
-		D3D11_PRIMITIVE_TOPOLOGY type;
+		D3D11_PRIMITIVE_TOPOLOGY type = {};
 	};
 }

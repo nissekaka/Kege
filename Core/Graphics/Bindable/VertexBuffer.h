@@ -43,7 +43,7 @@ namespace Kaka
 
 		void Bind(const Graphics& aGfx) override;
 	protected:
-		UINT stride;
+		UINT stride = {};
 		Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
 	};
 }

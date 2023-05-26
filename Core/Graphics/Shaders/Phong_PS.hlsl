@@ -38,9 +38,9 @@ struct PixelInput
     matrix modelView : MODELVIEW;
 };
 
-Texture2D albedoTex;
-Texture2D normalTex;
-Texture2D materialTex;
+Texture2D albedoTex : register (t0);
+Texture2D normalTex : register(t1);
+Texture2D materialTex : register(t2);
 
 SamplerState splr;
 

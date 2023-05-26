@@ -35,7 +35,7 @@ namespace Kaka
 		{
 			for (int x = 0; x < aSize; ++x)
 			{
-				Vertex vertex;
+				Vertex vertex = {};
 				float noiseValue = noiseGenerator.GetNoise(static_cast<float>(x), static_cast<float>(z));
 				vertex.position = DirectX::XMFLOAT3(static_cast<float>(x), noiseValue * heightMul,
 				                                    static_cast<float>(z));
@@ -322,6 +322,17 @@ namespace Kaka
 			depthStencil.Bind(aGfx);
 
 			aGfx.pContext->DrawIndexed(static_cast<UINT>(std::size(subset.indices)), 0u, 0u);
+
+			// Unbind shader resources
+			ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
+			aGfx.pContext->PSSetShaderResources(0, 1, nullSRVs); // albedoTexGrass
+			aGfx.pContext->PSSetShaderResources(1, 1, nullSRVs); // normalTexGrass
+			aGfx.pContext->PSSetShaderResources(2, 1, nullSRVs); // albedoTexDirt
+			aGfx.pContext->PSSetShaderResources(3, 1, nullSRVs); // normalTexDirt
+			aGfx.pContext->PSSetShaderResources(4, 1, nullSRVs); // albedoTexRock
+			aGfx.pContext->PSSetShaderResources(5, 1, nullSRVs); // normalTexRock
+			aGfx.pContext->PSSetShaderResources(6, 1, nullSRVs); // albedoTexSnow
+			aGfx.pContext->PSSetShaderResources(7, 1, nullSRVs); // normalTexSnow
 		}
 	}
 

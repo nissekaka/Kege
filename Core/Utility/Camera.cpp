@@ -29,9 +29,8 @@ namespace Kaka
 
 	void Camera::Reset()
 	{
-		position = {0.0f,0.0f,-4.0f};
+		position = {0.0f, 0.0f, -4.0f};
 		//position = {0.0f,140.0f,-450.0f};
-		pitch = PI / 8;
 		//pitch = 0.0f;
 		yaw = -PI * 2 / 5;
 	}

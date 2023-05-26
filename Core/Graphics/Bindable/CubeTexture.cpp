@@ -10,8 +10,8 @@ namespace Kaka
 
 	void CubeTexture::LoadTextures(const Graphics& aGfx, const std::string& aFolderPath)
 	{
-		DirectX::ScratchImage image[6];
-		DirectX::TexMetadata metadata[6];
+		DirectX::ScratchImage image[6] = {};
+		DirectX::TexMetadata metadata[6] = {};
 
 		HRESULT hr;
 
@@ -59,7 +59,7 @@ namespace Kaka
 			textureDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
 
 			// Subresource data
-			D3D11_SUBRESOURCE_DATA sd[6];
+			D3D11_SUBRESOURCE_DATA sd[6] = {};
 			for (int i = 0; i < 6; ++i)
 			{
 				sd[i].pSysMem = image[i].GetPixels();

@@ -12,7 +12,7 @@ namespace Kaka
 		void Bind(const Graphics& aGfx) override;
 		UINT GetCount() const;
 	protected:
-		UINT count;
+		UINT count = {};
 		Microsoft::WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
 	};
 }

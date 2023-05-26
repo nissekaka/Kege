@@ -14,6 +14,6 @@ namespace Kaka
 		void Bind(const Graphics& aGfx) override;
 	protected:
 		Microsoft::WRL::ComPtr<ID3D11RasterizerState> pRasterizer;
-		bool twoSided;
+		bool twoSided = {};
 	};
 }

@@ -201,7 +201,7 @@ namespace Kaka
 				struct PSMaterialConstant
 				{
 					DirectX::XMFLOAT4 colour;
-				} pmc;
+				} pmc = {};
 				pmc.colour = solidColour;
 
 				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
@@ -214,8 +214,8 @@ namespace Kaka
 				{
 					BOOL normalMapEnabled = FALSE;
 					BOOL materialEnabled = FALSE;
-					BOOL padding1;
-					BOOL padding2;
+					BOOL padding1 = {};
+					BOOL padding2 = {};
 				} pmc;
 				pmc.normalMapEnabled = texture.HasNormalMap();
 				pmc.materialEnabled = texture.HasMaterial();
@@ -262,7 +262,7 @@ namespace Kaka
 				struct VSBoneConstant
 				{
 					DirectX::XMFLOAT4X4 bones[64u];
-				} vsb;
+				} vsb = {};
 
 				for (int i = 0; i < modelData.skeleton.bones.size(); ++i)
 				{
@@ -294,6 +294,11 @@ namespace Kaka
 		}
 
 		aGfx.pContext->DrawIndexed(static_cast<UINT>(std::size(indices)), 0u, 0u);
+		// Unbind shader resources
+		ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
+		aGfx.pContext->PSSetShaderResources(0, 1, nullSRVs);
+		aGfx.pContext->PSSetShaderResources(1, 1, nullSRVs);
+		aGfx.pContext->PSSetShaderResources(2, 1, nullSRVs);
 	}
 
 	void Model::Update(const float aDeltaTime)
