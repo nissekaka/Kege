@@ -19,6 +19,6 @@ namespace Kaka
 	private:
 		static Skeleton LoadSkeleton(const aiScene* aScene);
 		static std::vector<AnimationClip> LoadAnimations(const aiScene* aScene);
-		static DirectX::XMFLOAT4X4 ConvertAssimpMatrixToDirectX(const aiMatrix4x4& aAssimpMatrix);
+		static DirectX::XMFLOAT4X4 AssimpToDirectXMatrix(const aiMatrix4x4& aAssimpMatrix);
 	};
 }

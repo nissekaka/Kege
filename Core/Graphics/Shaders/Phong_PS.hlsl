@@ -60,19 +60,6 @@ float4 main(PixelInput aInput) : SV_TARGET
         aInput.viewNormal = lerp(aInput.viewNormal, mappedNormal, 1.0f);
     }
 
-  //  if (normalMapEnabled)
-  //  {
-  //      const float3x3 tanBitanNorm = float3x3(normalize(aInput.viewTan), normalize(aInput.viewBitan), normalize(aInput.viewNormal));
-
-  //  	// Sample the normal map texture
-  //      float3 normal = normalTex.Sample(splr, aInput.texCoord).wyz * 2.0f - 1.0f;
-  //      normal.z = sqrt(1 - saturate(normal.x * normal.x + normal.y * normal.y));
-  //      normal = normalize(normal);
-
-		//// Transform the normal map value into tangent space
-  //      aInput.viewNormal = mul(normal, tanBitanNorm);
-  //  }
-
     float3 combinedLight = { 0, 0, 0 };
     float3 specular = { 0, 0, 0 };
 
@@ -99,26 +86,6 @@ float4 main(PixelInput aInput) : SV_TARGET
         vToL, aInput.viewPos, att, specularPower);
     }
 
-    //for (uint i = 0; i < activeLights; ++i)
-    //{
-    //    if (!plBuf[i].active)
-    //    {
-    //        continue;
-    //    }
-
-    //	// Fragment to light vector data
-    //    const float3 vToL = plBuf[i].pLightPosition - aInput.viewPos;
-    //    const float distToL = length(vToL);
-    //    const float3 dirToL = vToL / distToL;
-    //	// Attenuation
-    //    const float att = 1.0f / (plBuf[i].attConst + plBuf[i].attLin * distToL + plBuf[i].attQuad * (distToL * distToL));
-
-    //    combinedLight += max(0.0f, dot(dirToL, aInput.viewNormal)) * plBuf[i].pLightColour * plBuf[i].pLightIntensity;
-
-    //	// Reflected light vector
-    //    const float3 w = aInput.viewNormal * dot(vToL, aInput.viewNormal);
-    //    const float3 r = w * 2.0f - vToL;
-
     //    if (materialEnabled)
     //    {
     //		// Sample the material texture
@@ -136,7 +103,6 @@ float4 main(PixelInput aInput) : SV_TARGET
     //		// Calculate specular intensity based on angle between viewing vector and reflection vector, narrow with power function
     //        specular += att * (plBuf[i].pLightColour * plBuf[i].pLightIntensity) * specularIntensity * pow(max(0.0f, dot(normalize(-r), normalize(aInput.viewPos))), specularPower);
     //    }
-    //}
 
     // Directional light
     const float3 viewDirectionalLightDir = mul(dLightDirection, (float3x3) aInput.modelView);

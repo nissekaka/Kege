@@ -14,7 +14,7 @@
 ------ TO DO ------
 
 Bugs:
-- Texture resource
+- Texture resource (Olivers .dds)
 
 Features:
 - Animated FBX
@@ -22,7 +22,6 @@ Features:
 - Dynamic Constant Buffer
 - Model instancing
 - Shadow mapping
-- Cube map (sky)
 - PBR
 - Texture Alpha
 - Line renderer

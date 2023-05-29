@@ -187,6 +187,11 @@ namespace Kaka
 		sampler.Bind(aGfx);
 		texture.Bind(aGfx);
 
+		if (modelData.modelType == eModelType::Skeletal)
+		{
+			vertexBuffer.Init(aGfx, modelData.animMesh.vertices);
+		}
+
 		vertexBuffer.Bind(aGfx);
 		indexBuffer.Bind(aGfx);
 
@@ -338,6 +343,24 @@ namespace Kaka
 		return transformedNormal;
 	}
 
+	DirectX::XMFLOAT3 TransformTangent(const DirectX::XMFLOAT3& aTangent, const DirectX::XMFLOAT4X4& aTransform)
+	{
+		DirectX::XMFLOAT3 transformedTangent;
+		DirectX::XMStoreFloat3(&transformedTangent,
+		                       DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&aTangent),
+		                                                         DirectX::XMLoadFloat4x4(&aTransform)));
+		return transformedTangent;
+	}
+
+	DirectX::XMFLOAT3 TransformBitangent(const DirectX::XMFLOAT3& aBitangent, const DirectX::XMFLOAT4X4& aTransform)
+	{
+		DirectX::XMFLOAT3 transformedBitangent;
+		DirectX::XMStoreFloat3(&transformedBitangent,
+		                       DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&aBitangent),
+		                                                         DirectX::XMLoadFloat4x4(&aTransform)));
+		return transformedBitangent;
+	}
+
 	void Model::Animate()
 	{
 		if (modelData.modelType != eModelType::Skeletal)
@@ -353,56 +376,51 @@ namespace Kaka
 			{
 				// Find the two keyframes for interpolation
 				size_t keyframeIndex1 = 0;
-				//size_t keyframeIndex2 = 0;
+				size_t keyframeIndex2 = 0;
 				for (size_t i = 0; i < animation.keyframes.size() - 1; ++i)
 				{
 					if (animation.keyframes[i + 1].time > animationTime)
 					{
 						keyframeIndex1 = i;
-						//keyframeIndex2 = i + 1;
+						keyframeIndex2 = i + 1;
 						break;
 					}
 				}
 
 				// Interpolate between the two keyframes
 				const Keyframe& keyframe1 = animation.keyframes[keyframeIndex1];
-				//const Keyframe& keyframe2 = animation.keyframes[keyframeIndex2];
-				//float t = (animationTime - keyframe1.time) / (keyframe2.time - keyframe1.time);
+				const Keyframe& keyframe2 = animation.keyframes[keyframeIndex2];
+				float t = (animationTime - keyframe1.time) / (keyframe2.time - keyframe1.time);
 
 				// Interpolate bone transforms for each vertex
 				for (auto& vertex : modelData.animMesh.vertices)
 				{
 					// Apply bone transforms based on bone indices and weights
-					DirectX::XMFLOAT4X4 boneTransform{};
-					DirectX::XMStoreFloat4x4(&boneTransform, DirectX::XMMatrixIdentity());
-
 					DirectX::XMFLOAT4X4 accumulatedTransform{};
-					DirectX::XMStoreFloat4x4(&accumulatedTransform, DirectX::XMLoadFloat4x4(&boneTransform));
+					DirectX::XMStoreFloat4x4(&accumulatedTransform, DirectX::XMMatrixIdentity());
 
 					for (size_t i = 0; i < vertex.boneIndices.size(); ++i)
 					{
-						if (i > 0)
+						if (i > 0 && vertex.boneIndices[i] == vertex.boneIndices[i - 1])
 						{
-							if (vertex.boneIndices[i] == vertex.boneIndices[i - 1])
+							continue;
+						}
+
+						unsigned int boneIndex = vertex.boneIndices[i];
+						float boneWeight = vertex.boneWeights[i];
+
+						// Interpolate the bone transforms between the two keyframes
+						const DirectX::XMFLOAT4X4& transform1 = keyframe1.boneTransforms[boneIndex];
+						const DirectX::XMFLOAT4X4& transform2 = keyframe2.boneTransforms[boneIndex];
+						DirectX::XMFLOAT4X4 interpolatedTransform{};
+						for (int row = 0; row < 4; ++row)
+						{
+							for (int col = 0; col < 4; ++col)
 							{
-								continue;
+								interpolatedTransform.m[row][col] = transform1.m[row][col] + t * (transform2.m[row][col]
+									- transform1.m[row][col]);
 							}
 						}
-						unsigned int boneIndex = vertex.boneIndices[i] + 1;
-						float boneWeight = vertex.boneWeights[i];
-						DirectX::XMFLOAT4X4 interpolatedTransform{};
-						DirectX::XMStoreFloat4x4(&interpolatedTransform,
-						                         //DirectX::XMMatrixMultiply(
-						                         // DirectX::XMMatrixMultiply(
-						                         //  DirectX::XMMatrixScaling(1.0f - t, 1.0f - t, 1.0f - t),
-						                         DirectX::XMLoadFloat4x4(&keyframe1.boneTransforms[boneIndex])
-						                         //),
-						                         // DirectX::XMMatrixMultiply(
-						                         //  DirectX::XMMatrixScaling(t, t, t),
-						                         //  DirectX::XMLoadFloat4x4(&keyframe2.boneTransforms[boneIndex])
-						                         // )
-						                         //)
-						);
 
 						// Accumulate the interpolated bone transforms based on weights
 						DirectX::XMFLOAT4X4 transformedBone{};
@@ -413,8 +431,7 @@ namespace Kaka
 						DirectX::XMStoreFloat4x4(&newBoneTransform,
 						                         DirectX::XMMatrixMultiply(
 							                         DirectX::XMLoadFloat4x4(&accumulatedTransform),
-							                         DirectX::XMLoadFloat4x4(&transformedBone)
-						                         ));
+							                         DirectX::XMLoadFloat4x4(&transformedBone)));
 
 						accumulatedTransform = newBoneTransform;
 					}
@@ -422,8 +439,8 @@ namespace Kaka
 					// Apply the final bone transform to the vertex
 					vertex.position = TransformPosition(vertex.position, accumulatedTransform);
 					vertex.normal = TransformNormal(vertex.normal, accumulatedTransform);
-					vertex.tangent = TransformNormal(vertex.tangent, accumulatedTransform);
-					vertex.bitangent = TransformNormal(vertex.bitangent, accumulatedTransform);
+					vertex.tangent = TransformTangent(vertex.tangent, accumulatedTransform);
+					vertex.bitangent = TransformBitangent(vertex.bitangent, accumulatedTransform);
 				}
 			}
 			else
@@ -433,74 +450,120 @@ namespace Kaka
 		}
 		else
 		{
-			// Apply the default pose or any other static transformation when the animation is not playing
-			for (auto& vertex : modelData.animMesh.vertices)
+			//// Calculate the default pose bone transforms outside the loop
+			//std::vector<DirectX::XMFLOAT4X4> defaultPoseTransforms(modelData.skeleton.bones.size());
+
+			//for (size_t i = 0; i < defaultPoseTransforms.size(); ++i)
+			//{
+			//	defaultPoseTransforms[i] = modelData.defaultPose[i];
+			//}
+
+			//// Apply the default pose or any other static transformation when the animation is not playing
+			//for (int index = 0; index < modelData.animMesh.vertices.size(); ++index)
+			//{
+			//	BoneVertex& vertex = modelData.animMesh.vertices[index];
+
+			//	// Initialize the accumulated transform as the identity matrix
+			//	DirectX::XMFLOAT4X4 accumulatedTransform;
+			//	DirectX::XMStoreFloat4x4(&accumulatedTransform, DirectX::XMMatrixIdentity());
+
+			//	// Apply bone transforms based on bone indices and weights
+			//	for (size_t i = 0; i < vertex.boneIndices.size(); ++i)
+			//	{
+			//		unsigned int boneIndex = vertex.boneIndices[i];
+			//		float boneWeight = vertex.boneWeights[i];
+
+			//		if (boneWeight > 0.0f) // Consider only non-zero bone weights
+			//		{
+			//			// Use the default pose transform for the corresponding bone index
+			//			const DirectX::XMFLOAT4X4& defaultPoseTransform = defaultPoseTransforms[boneIndex];
+
+			//			// Scale the default pose transform by the bone weight
+			//			DirectX::XMFLOAT4X4 weightedTransform;
+			//			DirectX::XMStoreFloat4x4(&weightedTransform,
+			//			                         DirectX::XMMatrixScaling(boneWeight, boneWeight, boneWeight));
+
+			//			// Compute the weighted bone transform
+			//			DirectX::XMFLOAT4X4 weightedBoneTransform;
+			//			DirectX::XMStoreFloat4x4(&weightedBoneTransform, DirectX::XMMatrixMultiply(
+			//				                         DirectX::XMLoadFloat4x4(&weightedTransform),
+			//				                         DirectX::XMLoadFloat4x4(&defaultPoseTransform)));
+
+			//			// Accumulate the weighted bone transform
+			//			DirectX::XMStoreFloat4x4(&accumulatedTransform, DirectX::XMMatrixMultiply(
+			//				                         DirectX::XMLoadFloat4x4(&weightedBoneTransform),
+			//				                         DirectX::XMLoadFloat4x4(&accumulatedTransform)));
+			//		}
+			//	}
+
+			//	// Apply the final bone transform to the vertex
+			//	vertex.position = TransformPosition(vertex.position, accumulatedTransform);
+			//	vertex.normal = TransformNormal(vertex.normal, accumulatedTransform);
+			//	vertex.tangent = TransformTangent(vertex.tangent, accumulatedTransform);
+			//	vertex.bitangent = TransformBitangent(vertex.bitangent, accumulatedTransform);
+			//}
+			// Calculate the default pose bone transforms outside the loop
+			std::vector<DirectX::XMFLOAT4X4> defaultPoseTransforms(modelData.skeleton.bones.size());
+
+			for (size_t i = 0; i < defaultPoseTransforms.size(); ++i)
 			{
+				defaultPoseTransforms[i] = modelData.defaultPose[i];
+			}
+
+			// Apply the default pose or any other static transformation when the animation is not playing
+			//for (auto& vertex : modelData.animMesh.vertices)
+			for (int index = 0; index < modelData.animMesh.vertices.size(); ++index)
+			{
+				BoneVertex& vertex = modelData.animMesh.vertices[index];
 				// Initialize the bone transform as the identity matrix
-				DirectX::XMFLOAT4X4 boneTransform{};
+				DirectX::XMFLOAT4X4 boneTransform;
 				DirectX::XMStoreFloat4x4(&boneTransform, DirectX::XMMatrixIdentity());
 
 				// Apply bone transforms based on bone indices and weights
 				for (size_t i = 0; i < vertex.boneIndices.size(); ++i)
 				{
 					unsigned int boneIndex = vertex.boneIndices[i];
+					float boneWeight = vertex.boneWeights[i];
 
-					// Use the default pose transform for the corresponding bone index
-					const DirectX::XMFLOAT4X4& defaultPoseTransform = modelData.skeleton.bones[boneIndex].offsetMatrix;
+					if (boneWeight > 0.0f) // Consider only non-zero bone weights
+					{
+						// Use the default pose transform for the corresponding bone index
+						const DirectX::XMFLOAT4X4& defaultPoseTransform = defaultPoseTransforms[boneIndex];
 
-					// Accumulate the default pose bone transform to the overall bone transform
-					DirectX::XMFLOAT4X4 weightedDefaultPoseTransform;
-					DirectX::XMStoreFloat4x4(&weightedDefaultPoseTransform,
-					                         DirectX::XMLoadFloat4x4(&defaultPoseTransform));
+						// Scale the default pose transform by the bone weight
+						DirectX::XMFLOAT4X4 weightedTransform;
+						DirectX::XMStoreFloat4x4(&weightedTransform,
+						                         DirectX::XMMatrixScaling(boneWeight, boneWeight, boneWeight));
 
-					// Accumulate the default pose bone transform to the overall bone transform
-					DirectX::XMStoreFloat4x4(&boneTransform,
-					                         DirectX::XMMatrixMultiply(DirectX::XMLoadFloat4x4(&boneTransform),
-					                                                   DirectX::XMLoadFloat4x4(
-						                                                   &weightedDefaultPoseTransform)));
+						// Compute the weighted bone transform
+						DirectX::XMFLOAT4X4 weightedBoneTransform;
+						DirectX::XMStoreFloat4x4(&weightedBoneTransform, DirectX::XMMatrixMultiply(
+							                         DirectX::XMLoadFloat4x4(&weightedTransform),
+							                         DirectX::XMLoadFloat4x4(&defaultPoseTransform)));
+
+						// Accumulate the weighted bone transform to the overall bone transform
+						for (int row = 0; row < 4; ++row)
+						{
+							for (int col = 0; col < 4; ++col)
+							{
+								boneTransform.m[row][col] += weightedBoneTransform.m[row][col] - defaultPoseTransform.m[
+									row][col];
+							}
+						}
+					}
 				}
 
 				// Apply the final bone transform to the vertex
-				vertex.position = TransformPosition(vertex.position, boneTransform);
-				vertex.normal = TransformNormal(vertex.normal, boneTransform);
-				vertex.tangent = TransformNormal(vertex.tangent, boneTransform);
-				vertex.bitangent = TransformNormal(vertex.bitangent, boneTransform);
+				auto newPos = TransformPosition(vertex.position, boneTransform);
+				auto newNor = TransformNormal(vertex.normal, boneTransform);
+				auto newTan = TransformTangent(vertex.tangent, boneTransform);
+				auto newBit = TransformBitangent(vertex.bitangent, boneTransform);
+
+				vertex.position = newPos;
+				vertex.normal = newNor;
+				vertex.tangent = newTan;
+				vertex.bitangent = newBit;
 			}
-
-			//// Apply the default pose or any other static transformation when the animation is not playing
-			//for (auto& vertex : modelData.animMesh.vertices)
-			//{
-			//	// Initialize the bone transform as the identity matrix
-			//	DirectX::XMFLOAT4X4 boneTransform{};
-			//	DirectX::XMStoreFloat4x4(&boneTransform, DirectX::XMMatrixIdentity());
-
-			//	// Apply bone transforms based on bone indices and weights
-			//	for (size_t i = 0; i < 4; ++i)
-			//	{
-			//		unsigned int boneIndex = vertex.boneIndices[i];
-			//		float boneWeight = vertex.boneWeights[i];
-
-			//		// Use the default pose transform for the corresponding bone index
-			//		const DirectX::XMFLOAT4X4& defaultPoseTransform = modelData.defaultPose[boneIndex];
-
-			//		// Accumulate the default pose bone transforms based on weights
-			//		DirectX::XMFLOAT4X4 weightedDefaultPoseTransform;
-			//		DirectX::XMStoreFloat4x4(&weightedDefaultPoseTransform,
-			//		                         DirectX::XMLoadFloat4x4(&defaultPoseTransform) * boneWeight);
-
-			//		// Accumulate the default pose bone transform to the overall bone transform
-			//		DirectX::XMStoreFloat4x4(&boneTransform,
-			//		                         DirectX::XMMatrixMultiply(DirectX::XMLoadFloat4x4(&boneTransform),
-			//		                                                   DirectX::XMLoadFloat4x4(
-			//			                                                   &weightedDefaultPoseTransform)));
-			//	}
-
-			//	// Apply the final bone transform to the vertex
-			//	vertex.position = TransformPosition(vertex.position, boneTransform);
-			//	vertex.normal = TransformNormal(vertex.normal, boneTransform);
-			//	vertex.tangent = TransformNormal(vertex.tangent, boneTransform);
-			//	vertex.bitangent = TransformNormal(vertex.bitangent, boneTransform);
-			//}
 		}
 	}
 
@@ -607,6 +670,11 @@ namespace Kaka
 					{
 						isAnimationPlaying = true;
 					}
+				}
+				if (ImGui::Button("Stop"))
+				{
+					isAnimationPlaying = false;
+					selectedAnimationIndex = -1;
 				}
 			}
 

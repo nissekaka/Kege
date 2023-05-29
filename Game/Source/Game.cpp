@@ -33,8 +33,13 @@ namespace Kaka
 		spy.SetPosition({228.4f, 69.28f, -84.0});
 		spy.SetRotation({PI / 2, PI * 2 / 3, 0.0f});
 		//muzen.LoadModel(wnd.Gfx(), "Assets\\Models\\muzen\\MuzenSpeaker.fbx", Model::eShaderType::Phong);
-		//vamp.LoadModel(wnd.Gfx(), "Assets\\Models\\vamp\\vamp.fbx", Model::eShaderType::AnimPhong);
-		//cube.LoadModel(wnd.Gfx(), "Assets\\Models\\cube\\animcube.fbx", Model::eShaderType::AnimPhong);
+		vamp.LoadModel(wnd.Gfx(), "Assets\\Models\\vamp\\vamp.fbx", Model::eShaderType::AnimPhong);
+		vamp.SetPosition({230.0f, 70.0f, -81.0f});
+		vamp.SetRotation({PI / 2, PI * 2 / 3, 0.0f});
+
+		cube.LoadModel(wnd.Gfx(), "Assets\\Models\\cube\\animcube.fbx", Model::eShaderType::AnimPhong);
+		cube.SetPosition({230.0f, 71.0f, -82.0f});
+
 
 		camera.SetPosition({232.0f, 71.0f, -83.0f});
 
@@ -108,12 +113,12 @@ namespace Kaka
 		//muzen.SetRotation({muzen.GetRotation().x,timer.GetTotalTime(),muzen.GetRotation().z});
 		//muzen.Draw(wnd.Gfx());
 
-		//cube.Update(aDeltaTime);
-		//cube.Animate();
-		//cube.Draw(wnd.Gfx());
-		//vamp.Update(aDeltaTime);
-		//vamp.Animate();
-		//vamp.Draw(wnd.Gfx());
+		cube.Update(aDeltaTime);
+		cube.Animate();
+		cube.Draw(wnd.Gfx());
+		vamp.Update(aDeltaTime);
+		vamp.Animate();
+		vamp.Draw(wnd.Gfx());
 		terrain.Draw(wnd.Gfx());
 
 		// ImGui windows
@@ -122,8 +127,8 @@ namespace Kaka
 			ImGui::ShowDemoWindow();
 			spy.ShowControlWindow("Spy");
 			//muzen.ShowControlWindow("Muzen");
-			//vamp.ShowControlWindow("Vamp");
-			//cube.ShowControlWindow("Cube");
+			vamp.ShowControlWindow("Vamp");
+			cube.ShowControlWindow("Cube");
 			terrain.ShowControlWindow("Terrain");
 			directionalLight.ShowControlWindow("Directional Light");
 

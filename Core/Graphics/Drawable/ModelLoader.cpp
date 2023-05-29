@@ -20,8 +20,9 @@ namespace Kaka
 		                                         aiProcess_FlipUVs |
 		                                         aiProcess_ConvertToLeftHanded |
 		                                         aiProcess_LimitBoneWeights |
-		                                         aiProcess_GenSmoothNormals |
-		                                         aiProcess_FindInvalidData
+		                                         /*aiProcess_GenSmoothNormals |*/
+		                                         //aiProcess_FindInvalidData |
+		                                         aiProcessPreset_TargetRealtime_Quality
 		);
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
@@ -38,17 +39,22 @@ namespace Kaka
 			// Load the skeleton and animations
 			aOutModelData.skeleton = LoadSkeleton(scene);
 			aOutModelData.animations = LoadAnimations(scene);
-			// Store the default pose
+			//// Store the default pose
 			//for (const Bone& bone : aOutModelData.skeleton.bones)
 			//{
-			//	// Extract the bone's transform matrix from the aiMatrix4x4
-			//	aOutModelData.defaultPose.push_back(bone.offsetMatrix);
+			//	// Store the default pose transformation matrix as the bone's offset matrix
+			//	DirectX::XMFLOAT4X4 defaultPoseTransform = bone.offsetMatrix;
+
+			//	// Store the default pose transformation matrix
+			//	aOutModelData.defaultPose.push_back(defaultPoseTransform);
 			//}
 			for (const Bone& bone : aOutModelData.skeleton.bones)
 			{
 				// Compute the default pose transformation matrix as the inverse of the bone's offset matrix
 				DirectX::XMFLOAT4X4 defaultPoseTransform;
-				DirectX::XMStoreFloat4x4(&defaultPoseTransform, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&bone.offsetMatrix)));
+				DirectX::XMStoreFloat4x4(&defaultPoseTransform,
+				                         DirectX::XMMatrixInverse(
+					                         nullptr, DirectX::XMLoadFloat4x4(&bone.offsetMatrix)));
 
 				// Store the default pose transformation matrix
 				aOutModelData.defaultPose.push_back(defaultPoseTransform);
@@ -71,14 +77,14 @@ namespace Kaka
 
 			for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
 			{
-				const DirectX::XMFLOAT3 position{mesh->mVertices[i].x,mesh->mVertices[i].y,mesh->mVertices[i].z};
+				const DirectX::XMFLOAT3 position{mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z};
 				const DirectX::XMFLOAT3 normal = *reinterpret_cast<DirectX::XMFLOAT3*>(&mesh->mNormals[i]);
-				DirectX::XMFLOAT2 texCoord{0.0f,0.0f};
-				DirectX::XMFLOAT3 tangent{0.0f,0.0f,0.0f};
-				DirectX::XMFLOAT3 bitangent{0.0f,0.0f,0.0f};
+				DirectX::XMFLOAT2 texCoord{0.0f, 0.0f};
+				DirectX::XMFLOAT3 tangent{0.0f, 0.0f, 0.0f};
+				DirectX::XMFLOAT3 bitangent{0.0f, 0.0f, 0.0f};
 				// Initialize bone indices and bone weights for the vertex
-				std::array<unsigned int, 4> boneIndices{};
-				std::array<float, 4> boneWeights{};
+				std::array<unsigned int, 4> boneIndices = {};
+				std::array<float, 4> boneWeights = {};
 
 				// Check if the mesh has texture coordinates
 				if (mesh->HasTextureCoords(0))
@@ -97,6 +103,9 @@ namespace Kaka
 
 				if (mesh->HasBones())
 				{
+					// Keep track of the number of bone influences encountered
+					unsigned int numInfluences = 0;
+
 					// Iterate over each bone influencing the current vertex
 					for (unsigned int j = 0; j < mesh->mNumBones; ++j)
 					{
@@ -110,26 +119,52 @@ namespace Kaka
 							// Check if the vertex index matches the current vertex
 							if (vertexWeight.mVertexId == i)
 							{
-								// Find an empty slot in boneIndices and boneWeights arrays
-								for (unsigned int l = 0; l < boneIndices.size(); ++l)
+								// Find the smallest weight slot in boneWeights array
+								unsigned int minWeightIndex = 0;
+								float minWeight = boneWeights[0];
+
+								for (unsigned int l = 1; l < boneWeights.size(); ++l)
 								{
-									if (boneWeights[l] == 0.0f)
+									if (boneWeights[l] < minWeight)
 									{
-										// Store the bone index and weight for the vertex
-										boneIndices[l] = j;
-										boneWeights[l] = vertexWeight.mWeight;
-										std::string boneText = "\n\nVertex: " + std::to_string(i) + "\nIndex: " + std::to_string(j) + "\nWeight: " + std::to_string(vertexWeight.mWeight);
-										OutputDebugStringA(boneText.c_str());
-										break;
+										minWeight = boneWeights[l];
+										minWeightIndex = l;
 									}
+								}
+
+								// Store the bone index and weight for the vertex if weight is larger than the smallest weight
+								if (vertexWeight.mWeight > minWeight)
+								{
+									boneIndices[minWeightIndex] = j;
+									boneWeights[minWeightIndex] = vertexWeight.mWeight;
+
+									// Increment the number of influences
+									if (numInfluences < boneIndices.size())
+										numInfluences++;
 								}
 							}
 						}
 					}
-				}
 
+					// Normalize bone weights if there are multiple influences
+					if (numInfluences > 1)
+					{
+						// Calculate the sum of bone weights
+						float weightSum = 0.0f;
+						for (unsigned int l = 0; l < numInfluences; ++l)
+						{
+							weightSum += boneWeights[l];
+						}
+
+						// Normalize the bone weights
+						for (unsigned int l = 0; l < numInfluences; ++l)
+						{
+							boneWeights[l] /= weightSum;
+						}
+					}
+				}
 				aOutModelData.animMesh.vertices.push_back({
-					position,normal,texCoord,tangent,bitangent,boneIndices,boneWeights
+					position, normal, texCoord, tangent, bitangent, boneIndices, boneWeights
 				});
 			}
 
@@ -155,11 +190,11 @@ namespace Kaka
 
 			for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
 			{
-				const DirectX::XMFLOAT3 position{mesh->mVertices[i].x,mesh->mVertices[i].y,mesh->mVertices[i].z};
+				const DirectX::XMFLOAT3 position{mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z};
 				const DirectX::XMFLOAT3 normal = *reinterpret_cast<DirectX::XMFLOAT3*>(&mesh->mNormals[i]);
-				DirectX::XMFLOAT2 texCoord{0.0f,0.0f};
-				DirectX::XMFLOAT3 tangent{0.0f,0.0f,0.0f};
-				DirectX::XMFLOAT3 bitangent{0.0f,0.0f,0.0f};
+				DirectX::XMFLOAT2 texCoord{0.0f, 0.0f};
+				DirectX::XMFLOAT3 tangent{0.0f, 0.0f, 0.0f};
+				DirectX::XMFLOAT3 bitangent{0.0f, 0.0f, 0.0f};
 
 				// Check if the mesh has texture coordinates
 				if (mesh->HasTextureCoords(0))
@@ -176,7 +211,7 @@ namespace Kaka
 					bitangent = *reinterpret_cast<DirectX::XMFLOAT3*>(&mesh->mBitangents[i]);
 				}
 
-				aOutModelData.mesh.vertices.push_back({position,normal,texCoord,tangent,bitangent});
+				aOutModelData.mesh.vertices.push_back({position, normal, texCoord, tangent, bitangent});
 			}
 
 			aOutModelData.mesh.indices.reserve(
@@ -212,7 +247,7 @@ namespace Kaka
 				// Create a Bone struct and populate its properties
 				Bone skeletonBone;
 				skeletonBone.name = bone->mName.C_Str();
-				skeletonBone.offsetMatrix = ConvertAssimpMatrixToDirectX(bone->mOffsetMatrix);
+				skeletonBone.offsetMatrix = AssimpToDirectXMatrix(bone->mOffsetMatrix);
 
 				// Add the bone to the skeleton
 				skeleton.bones.push_back(skeletonBone);
@@ -253,7 +288,7 @@ namespace Kaka
 			unsigned int numFrames = 0; // Initialize the number of frames to zero
 
 			// Calculate the duration of the animation in ticks
-			float animationDuration = static_cast<float>(animation->mDuration);
+			const float animationDuration = static_cast<float>(animation->mDuration);
 
 			// Determine the maximum number of frames among all the channels
 			for (unsigned int j = 0; j < animation->mNumChannels; ++j)
@@ -270,35 +305,31 @@ namespace Kaka
 			{
 				// Create a keyframe for the current frame
 				Keyframe keyframe;
-				keyframe.time = frameIndex * frameDuration;
+				keyframe.time = (float)frameIndex * frameDuration;
 
 				// Iterate through each channel (bone)
 				for (unsigned int j = 0; j < animation->mNumChannels; ++j)
 				{
 					const aiNodeAnim* channel = animation->mChannels[j];
 
-					// Find the position keyframe that corresponds to the current frame
-					unsigned int positionIndex = FindKeyframeIndex(channel, keyframe.time);
-					const aiVectorKey& positionKey = channel->mPositionKeys[positionIndex];
-
-					// Find the rotation keyframe that corresponds to the current frame
-					unsigned int rotationIndex = FindKeyframeIndex(channel, keyframe.time);
-					const aiQuatKey& rotationKey = channel->mRotationKeys[rotationIndex];
-
-					// Find the scaling keyframe that corresponds to the current frame
-					unsigned int scalingIndex = FindKeyframeIndex(channel, keyframe.time);
-					const aiVectorKey& scalingKey = channel->mScalingKeys[scalingIndex];
+					const unsigned int keyframeIndex = FindKeyframeIndex(channel, keyframe.time);
+					const aiVectorKey& positionKey = channel->mPositionKeys[keyframeIndex];
+					const aiQuatKey& rotationKey = channel->mRotationKeys[keyframeIndex];
+					const aiVectorKey& scalingKey = channel->mScalingKeys[keyframeIndex];
 
 					// Create the bone transform matrix from the keyframe data
 					DirectX::XMFLOAT4X4 boneTransform{};
 					DirectX::XMStoreFloat4x4(&boneTransform, DirectX::XMMatrixIdentity());
 
 					DirectX::XMStoreFloat3(reinterpret_cast<DirectX::XMFLOAT3*>(&boneTransform._41),
-					                       DirectX::XMLoadFloat3(reinterpret_cast<const DirectX::XMFLOAT3*>(&positionKey.mValue)));
+					                       DirectX::XMLoadFloat3(
+						                       reinterpret_cast<const DirectX::XMFLOAT3*>(&positionKey.mValue)));
 					DirectX::XMStoreFloat4(reinterpret_cast<DirectX::XMFLOAT4*>(&boneTransform._31),
-					                       DirectX::XMLoadFloat4(reinterpret_cast<const DirectX::XMFLOAT4*>(&rotationKey.mValue)));
+					                       DirectX::XMLoadFloat4(
+						                       reinterpret_cast<const DirectX::XMFLOAT4*>(&rotationKey.mValue)));
 					DirectX::XMStoreFloat3(reinterpret_cast<DirectX::XMFLOAT3*>(&boneTransform._11),
-					                       DirectX::XMLoadFloat3(reinterpret_cast<const DirectX::XMFLOAT3*>(&scalingKey.mValue)));
+					                       DirectX::XMLoadFloat3(
+						                       reinterpret_cast<const DirectX::XMFLOAT3*>(&scalingKey.mValue)));
 
 					// Add the bone transform to the keyframe
 					keyframe.boneTransforms.push_back(boneTransform);
@@ -315,31 +346,179 @@ namespace Kaka
 		return animations;
 	}
 
-	DirectX::XMFLOAT4X4 ModelLoader::ConvertAssimpMatrixToDirectX(const aiMatrix4x4& aAssimpMatrix)
+	DirectX::XMFLOAT4X4 ModelLoader::AssimpToDirectXMatrix(const aiMatrix4x4& aAssimpMatrix)
 	{
-		DirectX::XMFLOAT4X4 directxMatrix{};
-
-		// Transpose the matrix since Assimp uses a row-major matrix representation
-		directxMatrix._11 = aAssimpMatrix.a1;
-		directxMatrix._12 = aAssimpMatrix.a2;
-		directxMatrix._13 = aAssimpMatrix.a3;
-		directxMatrix._14 = aAssimpMatrix.a4;
-
-		directxMatrix._21 = aAssimpMatrix.b1;
-		directxMatrix._22 = aAssimpMatrix.b2;
-		directxMatrix._23 = aAssimpMatrix.b3;
-		directxMatrix._24 = aAssimpMatrix.b4;
-
-		directxMatrix._31 = aAssimpMatrix.c1;
-		directxMatrix._32 = aAssimpMatrix.c2;
-		directxMatrix._33 = aAssimpMatrix.c3;
-		directxMatrix._34 = aAssimpMatrix.c4;
-
-		directxMatrix._41 = aAssimpMatrix.d1;
-		directxMatrix._42 = aAssimpMatrix.d2;
-		directxMatrix._43 = aAssimpMatrix.d3;
-		directxMatrix._44 = aAssimpMatrix.d4;
-
-		return directxMatrix;
+		return {
+			aAssimpMatrix.a1, aAssimpMatrix.b1, aAssimpMatrix.c1, aAssimpMatrix.d1,
+			aAssimpMatrix.a2, aAssimpMatrix.b2, aAssimpMatrix.c2, aAssimpMatrix.d2,
+			aAssimpMatrix.a3, aAssimpMatrix.b3, aAssimpMatrix.c3, aAssimpMatrix.d3,
+			aAssimpMatrix.a4, aAssimpMatrix.b4, aAssimpMatrix.c4, aAssimpMatrix.d4
+		};
 	}
+
+	//bool Mesh::LoadMesh(const std::string& Filename)
+	//{
+	//	m_pScene = m_Importer.ReadFile(Filename.c_str(), aiProcess_Triangulate | aiProcess_GenSmoothNormals |
+	//		aiProcess_FlipUVs);
+
+	//	if (m_pScene)
+	//	{
+	//		m_GlobalInverseTransform = m_pScene->mRootNode->mTransformation;
+	//		m_GlobalInverseTransform = m_GlobalInverseTransform.Inverse();
+	//	}
+	//	else
+	//	{
+	//		printf("Error parsing '%s': '%s'\n", Filename.c_str(), m_Importer.GetErrorString());
+	//	}
+
+	//	return Ret;
+	//}
+
+	//void Mesh::LoadBones(uint MeshIndex, const aiMesh* pMesh, std::vector<BoneVertex>& Bones)
+	//{
+	//	for (uint i = 0; i < pMesh->mNumBones; i++)
+	//	{
+	//		uint BoneIndex = 0;
+	//		string BoneName(pMesh->mBones[i]->mName.data);
+
+	//		if (m_BoneMapping.find(BoneName) == m_BoneMapping.end())
+	//		{
+	//			BoneIndex = m_NumBones;
+	//			m_NumBones++;
+	//			BoneInfo bi;
+	//			m_BoneInfo.push_back(bi);
+	//		}
+	//		else
+	//		{
+	//			BoneIndex = m_BoneMapping[BoneName];
+	//		}
+
+	//		m_BoneMapping[BoneName] = BoneIndex;
+	//		m_BoneInfo[BoneIndex].BoneOffset = AssimpToDirectXMatrix(pMesh->mBones[i]->mOffsetMatrix);
+
+	//		for (uint j = 0; j < pMesh->mBones[i]->mNumWeights; j++)
+	//		{
+	//			uint VertexID = m_Entries[MeshIndex].BaseVertex + pMesh->mBones[i]->mWeights[j].mVertexId;
+	//			float Weight = pMesh->mBones[i]->mWeights[j].mWeight;
+	//			Bones[VertexID].AddBoneData(BoneIndex, Weight);
+	//		}
+	//	}
+	//}
+
+	//void Mesh::VertexBoneData::AddBoneData(uint BoneID, float Weight)
+	//{
+	//	for (uint i = 0; i < ARRAY_SIZE_IN_ELEMENTS(IDs); i++)
+	//	{
+	//		if (Weights[i] == 0.0f)
+	//		{
+	//			IDs[i] = BoneID;
+	//			Weights[i] = Weight;
+	//			return;
+	//		}
+	//	}
+
+	//	// Should never get here - more bones than we have space for
+	//	assert(0);
+	//}
+
+	//XMMATRIX Mesh::BoneTransform(float TimeInSeconds, vector<XMMATRIX>& Transforms)
+	//{
+	//	XMMATRIX Identity = XMMatrixIdentity();
+
+	//	float TicksPerSecond = m_pScene->mAnimations[0]->mTicksPerSecond != 0 ?
+	//		m_pScene->mAnimations[0]->mTicksPerSecond : 25.0f;
+	//	float TimeInTicks = TimeInSeconds * TicksPerSecond;
+	//	float AnimationTime = fmod(TimeInTicks, m_pScene->mAnimations[0]->mDuration);
+
+	//	ReadNodeHierarchy(AnimationTime, m_pScene->mRootNode, Identity);
+
+	//	Transforms.resize(m_NumBones);
+
+	//	for (uint i = 0; i < m_NumBones; i++)
+	//	{
+	//		Transforms[i] = XMMatrixTranspose(XMLoadFloat4x4(&m_BoneInfo[i].FinalTransformation));
+	//	}
+	//}
+
+	//void Mesh::ReadNodeHierarchy(float AnimationTime, const aiNode* pNode, const XMMATRIX& ParentTransform)
+	//{
+	//	string NodeName(pNode->mName.data);
+
+	//	const aiAnimation* pAnimation = m_pScene->mAnimations[0];
+
+	//	XMMATRIX NodeTransformation = XMMatrixTranspose(XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4*>(&pNode->mTransformation)));
+
+	//	const aiNodeAnim* pNodeAnim = FindNodeAnim(pAnimation, NodeName);
+
+	//	if (pNodeAnim)
+	//	{
+	//		// Interpolate scaling and generate scaling transformation matrix
+	//		aiVector3D Scaling;
+	//		CalcInterpolatedScaling(Scaling, AnimationTime, pNodeAnim);
+	//		XMMATRIX ScalingM = XMMatrixScaling(Scaling.x, Scaling.y, Scaling.z);
+
+	//		// Interpolate rotation and generate rotation transformation matrix
+	//		aiQuaternion RotationQ;
+	//		CalcInterpolatedRotation(RotationQ, AnimationTime, pNodeAnim);
+	//		XMMATRIX RotationM = XMMatrixTranspose(XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4*>(&RotationQ.GetMatrix())));
+
+	//		// Interpolate translation and generate translation transformation matrix
+	//		aiVector3D Translation;
+	//		CalcInterpolatedPosition(Translation, AnimationTime, pNodeAnim);
+	//		XMMATRIX TranslationM = XMMatrixTranslation(Translation.x, Translation.y, Translation.z);
+
+	//		// Combine the above transformations
+	//		NodeTransformation = TranslationM * RotationM * ScalingM;
+	//	}
+
+	//	XMMATRIX GlobalTransformation = ParentTransform * NodeTransformation;
+
+	//	if (m_BoneMapping.find(NodeName) != m_BoneMapping.end())
+	//	{
+	//		uint BoneIndex = m_BoneMapping[NodeName];
+	//		XMMATRIX BoneOffset = XMMatrixTranspose(XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4*>(&m_BoneInfo[BoneIndex].BoneOffset)));
+	//		m_BoneInfo[BoneIndex].FinalTransformation = XMMatrixTranspose(XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4*>(&m_GlobalInverseTransform))) * GlobalTransformation * BoneOffset;
+	//	}
+
+	//	for (uint i = 0; i < pNode->mNumChildren; i++)
+	//	{
+	//		ReadNodeHierarchy(AnimationTime, pNode->mChildren[i], GlobalTransformation);
+	//	}
+	//}
+
+	//void Mesh::CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim)
+	//{
+	//	// We need at least two values to interpolate...
+	//	if (pNodeAnim->mNumRotationKeys == 1)
+	//	{
+	//		Out = pNodeAnim->mRotationKeys[0].mValue;
+	//		return;
+	//	}
+
+	//	uint RotationIndex = FindRotation(AnimationTime, pNodeAnim);
+	//	uint NextRotationIndex = (RotationIndex + 1);
+	//	assert(NextRotationIndex < pNodeAnim->mNumRotationKeys);
+	//	float DeltaTime = pNodeAnim->mRotationKeys[NextRotationIndex].mTime - pNodeAnim->mRotationKeys[RotationIndex].mTime;
+	//	float Factor = (AnimationTime - (float)pNodeAnim->mRotationKeys[RotationIndex].mTime) / DeltaTime;
+	//	assert(Factor >= 0.0f && Factor <= 1.0f);
+	//	const aiQuaternion& StartRotationQ = pNodeAnim->mRotationKeys[RotationIndex].mValue;
+	//	const aiQuaternion& EndRotationQ = pNodeAnim->mRotationKeys[NextRotationIndex].mValue;
+	//	aiQuaternion::Interpolate(Out, StartRotationQ, EndRotationQ, Factor);
+	//	Out = Out.Normalize();
+	//}
+
+	//uint Mesh::FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim)
+	//{
+	//	assert(pNodeAnim->mNumRotationKeys > 0);
+
+	//	for (uint i = 0; i < pNodeAnim->mNumRotationKeys - 1; i++)
+	//	{
+	//		if (AnimationTime < (float)pNodeAnim->mRotationKeys[i + 1].mTime)
+	//		{
+	//			return i;
+	//		}
+	//	}
+
+	//	assert(0);
+	//}
 }
