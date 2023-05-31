@@ -49,8 +49,9 @@ namespace Kaka
 		Mesh mesh;
 		AnimatedMesh animMesh;
 		Skeleton skeleton;
-		std::vector<AnimationClip> animations{};
-		std::vector<DirectX::XMFLOAT4X4> defaultPose;
+		std::vector<AnimationClip> animations = {};
+		std::vector<DirectX::XMFLOAT4X4> bindPose = {};
 		eModelType modelType = eModelType::None;
+		DirectX::XMFLOAT4X4 globalInverseMatrix = {};
 	};
 }

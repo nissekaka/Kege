@@ -80,7 +80,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     if (normalMapEnabled)
     {
         const float3 mappedNormal = MapNormal(normalize(aInput.viewTan), normalize(aInput.viewBitan), aInput.viewNormal, aInput.texCoord, normal, splr);
-        aInput.viewNormal = lerp(aInput.viewNormal, mappedNormal, 1.0f);
+        aInput.viewNormal =  mappedNormal;
     }
 
     float3 combinedLight = { 0, 0, 0 };
@@ -100,7 +100,7 @@ float4 main(PixelInput aInput) : SV_TARGET
         const float3 dirToL = vToL / distToL;
 
 		// Attenuation
-        const float att = Attenuate(plBuf[i].attConst, plBuf[i].attLin, plBuf[i].attQuad, distToL);
+        const float att = Attenuate(plBuf[i].radius, plBuf[i].falloff, distToL);
 		// Diffuse
         combinedLight += Diffuse(plBuf[i].pLightColour, plBuf[i].pLightIntensity, att, dirToL, aInput.viewNormal);;
 		// Specular reflected

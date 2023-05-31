@@ -215,6 +215,9 @@
     <ClInclude Include="Graphics\Bindable\DepthStencil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\Lighting\SpotLight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Graphics\Shaders\3D_PS.hlsl" />

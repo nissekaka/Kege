@@ -30,9 +30,9 @@ namespace Kaka
 		Timer timer;
 		Camera camera;
 
-		DirectionalLight directionalLight{wnd.Gfx(), 1u};
+		DirectionalLight directionalLight{wnd.Gfx(),1u};
 		std::vector<PointLight> pointLights;
-		float pointLightAngles[4] = {0.0f, PI / 2, PI, PI * 1.5f};
+		float pointLightAngles[4] = {0.0f,PI / 2,PI,PI * 1.5f};
 
 	private:
 		bool showImGui = true;
@@ -47,6 +47,7 @@ namespace Kaka
 		Model muzen{};
 		Model vamp{};
 		Model cube{};
+		Model cubeTwoBones{};
 		Terrain terrain{};
 		Skybox skybox{};
 		float skyboxSpeed = 0.005f;

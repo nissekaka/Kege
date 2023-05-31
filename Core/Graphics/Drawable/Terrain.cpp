@@ -156,7 +156,7 @@ namespace Kaka
 
 				if (isBorder)
 				{
-					DirectX::XMStoreFloat3(&terrainVertices[currentIndex].normal, {0, 1, 0});
+					DirectX::XMStoreFloat3(&terrainVertices[currentIndex].normal, {0,1,0});
 				}
 				else
 				{

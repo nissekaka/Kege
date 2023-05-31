@@ -32,9 +32,11 @@ float3 MapNormal(
     return normalize(mul(tanNormal, tanToTarget));
 }
 
-float Attenuate(uniform float aAttConst, uniform float aAttLin, uniform float aAttQuad, const in float aDistFragToL)
+float Attenuate(uniform float aRadius, uniform float aFalloff, const in float aDistFragToL)
 {
-    return 1.0f / (aAttConst + aAttLin * aDistFragToL + aAttQuad * (aDistFragToL * aDistFragToL));
+    float attenuation = clamp(1.0f - aDistFragToL / aRadius, 0.0f, 1.0f);
+    attenuation = pow(attenuation, aFalloff);
+    return attenuation;
 }
 
 float3 Diffuse(

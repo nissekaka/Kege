@@ -22,7 +22,7 @@ namespace Kaka
 
 		for (int i = 0; i < 4; ++i)
 		{
-			pointLights.push_back(PointLight{wnd.Gfx(), 2u});
+			pointLights.push_back(PointLight{wnd.Gfx(),2u});
 		}
 	}
 
@@ -30,18 +30,20 @@ namespace Kaka
 	{
 		skybox.Init(wnd.Gfx(), "Assets\\Textures\\Skybox\\Miramar\\", "Assets\\Textures\\Skybox\\Kurt\\");
 		spy.LoadModel(wnd.Gfx(), "Assets\\Models\\spy\\spy.fbx", Model::eShaderType::Phong);
-		spy.SetPosition({228.4f, 69.28f, -84.0});
-		spy.SetRotation({PI / 2, PI * 2 / 3, 0.0f});
+		spy.SetPosition({228.4f,69.28f,-84.0});
+		spy.SetRotation({PI / 2,PI * 2 / 3,0.0f});
 		//muzen.LoadModel(wnd.Gfx(), "Assets\\Models\\muzen\\MuzenSpeaker.fbx", Model::eShaderType::Phong);
-		vamp.LoadModel(wnd.Gfx(), "Assets\\Models\\vamp\\vamp.fbx", Model::eShaderType::AnimPhong);
-		vamp.SetPosition({230.0f, 70.0f, -81.0f});
-		vamp.SetRotation({PI / 2, PI * 2 / 3, 0.0f});
+		//vamp.LoadModel(wnd.Gfx(), "Assets\\Models\\vamp\\vamp.fbx", Model::eShaderType::AnimPhong);
+		//vamp.SetPosition({230.0f,70.0f,-81.0f});
+		//vamp.SetRotation({PI / 2,PI * 2 / 3,0.0f});
 
-		cube.LoadModel(wnd.Gfx(), "Assets\\Models\\cube\\animcube.fbx", Model::eShaderType::AnimPhong);
-		cube.SetPosition({230.0f, 71.0f, -82.0f});
+		//cube.LoadModel(wnd.Gfx(), "Assets\\Models\\cube\\animcube.fbx", Model::eShaderType::AnimPhong);
+		//cube.SetPosition({230.0f,71.0f,-82.0f});
 
+		cubeTwoBones.LoadModel(wnd.Gfx(), "Assets\\Models\\cube\\animcube_twobones.fbx", Model::eShaderType::AnimPhong);
+		cubeTwoBones.SetPosition({230.0f,71.0f,-81.0f});
 
-		camera.SetPosition({232.0f, 71.0f, -83.0f});
+		camera.SetPosition({232.0f,71.0f,-83.0f});
 
 		constexpr int terrainSize = 500;
 		terrain.Init(wnd.Gfx(), terrainSize);
@@ -50,10 +52,10 @@ namespace Kaka
 		//muzen.SetScale(0.002f);
 		//muzen.SetPosition({-1.0f,0.0f,0.0f});
 
-		pointLights[0].SetColour({0.0f, 1.0f, 1.0f});
-		pointLights[1].SetColour({1.0f, 1.0f, 0.0f});
-		pointLights[2].SetColour({0.0f, 1.0f, 0.0f});
-		pointLights[3].SetColour({1.0f, 0.0f, 0.0f});
+		pointLights[0].SetColour({0.0f,1.0f,1.0f});
+		pointLights[1].SetColour({1.0f,1.0f,0.0f});
+		pointLights[2].SetColour({0.0f,1.0f,0.0f});
+		pointLights[3].SetColour({1.0f,0.0f,0.0f});
 
 		while (true)
 		{
@@ -83,21 +85,22 @@ namespace Kaka
 
 		for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
 		{
-			constexpr float radius = 300.0f;
-			constexpr float speed = 0.8f;
-
 			pointLights[i].Bind(wnd.Gfx(), camera.GetMatrix());
-			pointLightAngles[i] += speed * aDeltaTime;
 
-			float posX = radius * std::cos(pointLightAngles[i]);
-			float posZ = radius * std::sin(pointLightAngles[i]);
+			//constexpr float radius = 300.0f;
+			//constexpr float speed = 0.8f;
 
-			pointLights[i].SetPosition({posX, 15.0f, posZ});
+			//pointLightAngles[i] += speed * aDeltaTime;
 
-			if (pointLightAngles[i] > 2 * PI)
-			{
-				pointLightAngles[i] -= 2 * PI;
-			}
+			//float posX = radius * std::cos(pointLightAngles[i]);
+			//float posZ = radius * std::sin(pointLightAngles[i]);
+
+			//pointLights[i].SetPosition({posX,15.0f,posZ});
+
+			//if (pointLightAngles[i] > 2 * PI)
+			//{
+			//	pointLightAngles[i] -= 2 * PI;
+			//}
 
 			if (drawLightDebug)
 			{
@@ -113,12 +116,16 @@ namespace Kaka
 		//muzen.SetRotation({muzen.GetRotation().x,timer.GetTotalTime(),muzen.GetRotation().z});
 		//muzen.Draw(wnd.Gfx());
 
-		cube.Update(aDeltaTime);
-		cube.Animate();
-		cube.Draw(wnd.Gfx());
-		vamp.Update(aDeltaTime);
-		vamp.Animate();
-		vamp.Draw(wnd.Gfx());
+		//cube.Update(aDeltaTime);
+		//cube.Animate();
+		//cube.Draw(wnd.Gfx());
+		cubeTwoBones.Update(aDeltaTime);
+		cubeTwoBones.Animate();
+		cubeTwoBones.Draw(wnd.Gfx());
+
+		//vamp.Update(aDeltaTime);
+		//vamp.Animate();
+		//vamp.Draw(wnd.Gfx());
 		terrain.Draw(wnd.Gfx());
 
 		// ImGui windows
@@ -127,8 +134,9 @@ namespace Kaka
 			ImGui::ShowDemoWindow();
 			spy.ShowControlWindow("Spy");
 			//muzen.ShowControlWindow("Muzen");
-			vamp.ShowControlWindow("Vamp");
-			cube.ShowControlWindow("Cube");
+			//vamp.ShowControlWindow("Vamp");
+			//cube.ShowControlWindow("Cube");
+			cubeTwoBones.ShowControlWindow("CubeTwoBones");
 			terrain.ShowControlWindow("Terrain");
 			directionalLight.ShowControlWindow("Directional Light");
 
@@ -199,27 +207,27 @@ namespace Kaka
 
 			if (wnd.keyboard.KeyIsPressed('W'))
 			{
-				camera.Translate({0.0f, 0.0f, aDeltaTime * cameraSpeed});
+				camera.Translate({0.0f,0.0f,aDeltaTime * cameraSpeed});
 			}
 			if (wnd.keyboard.KeyIsPressed('A'))
 			{
-				camera.Translate({-aDeltaTime * cameraSpeed, 0.0f, 0.0f});
+				camera.Translate({-aDeltaTime * cameraSpeed,0.0f,0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed('S'))
 			{
-				camera.Translate({0.0f, 0.0f, -aDeltaTime * cameraSpeed});
+				camera.Translate({0.0f,0.0f,-aDeltaTime * cameraSpeed});
 			}
 			if (wnd.keyboard.KeyIsPressed('D'))
 			{
-				camera.Translate({aDeltaTime * cameraSpeed, 0.0f, 0.0f});
+				camera.Translate({aDeltaTime * cameraSpeed,0.0f,0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed(VK_SPACE))
 			{
-				camera.Translate({0.0f, aDeltaTime * cameraSpeed, 0.0f});
+				camera.Translate({0.0f,aDeltaTime * cameraSpeed,0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed(VK_CONTROL))
 			{
-				camera.Translate({0.0f, -aDeltaTime * cameraSpeed, 0.0f});
+				camera.Translate({0.0f,-aDeltaTime * cameraSpeed,0.0f});
 			}
 		}
 

@@ -21,7 +21,7 @@ namespace Kaka
 		                                         aiProcess_ConvertToLeftHanded |
 		                                         aiProcess_LimitBoneWeights |
 		                                         /*aiProcess_GenSmoothNormals |*/
-		                                         //aiProcess_FindInvalidData |
+		                                         aiProcess_FindInvalidData |
 		                                         aiProcessPreset_TargetRealtime_Quality
 		);
 
@@ -33,33 +33,32 @@ namespace Kaka
 
 		const aiMesh* mesh = scene->mMeshes[0];
 
+		aOutModelData.globalInverseMatrix = AssimpToDirectXMatrix(scene->mRootNode->mTransformation);
+		DirectX::XMStoreFloat4x4(&aOutModelData.globalInverseMatrix,
+		                         DirectX::XMMatrixInverse(
+			                         nullptr, DirectX::XMLoadFloat4x4(&aOutModelData.globalInverseMatrix)));
+
 		// Check if scene contains animations
 		if (scene->mNumAnimations > 0)
 		{
 			// Load the skeleton and animations
 			aOutModelData.skeleton = LoadSkeleton(scene);
 			aOutModelData.animations = LoadAnimations(scene);
-			//// Store the default pose
-			//for (const Bone& bone : aOutModelData.skeleton.bones)
-			//{
-			//	// Store the default pose transformation matrix as the bone's offset matrix
-			//	DirectX::XMFLOAT4X4 defaultPoseTransform = bone.offsetMatrix;
 
-			//	// Store the default pose transformation matrix
-			//	aOutModelData.defaultPose.push_back(defaultPoseTransform);
-			//}
 			for (const Bone& bone : aOutModelData.skeleton.bones)
 			{
-				// Compute the default pose transformation matrix as the inverse of the bone's offset matrix
-				DirectX::XMFLOAT4X4 defaultPoseTransform;
-				DirectX::XMStoreFloat4x4(&defaultPoseTransform,
+				// Compute the bind pose transformation matrix as the inverse of the bone's offset matrix
+				DirectX::XMFLOAT4X4 bindPoseBoneTransform;
+				DirectX::XMStoreFloat4x4(&bindPoseBoneTransform,
 				                         DirectX::XMMatrixInverse(
 					                         nullptr, DirectX::XMLoadFloat4x4(&bone.offsetMatrix)));
 
-				// Store the default pose transformation matrix
-				aOutModelData.defaultPose.push_back(defaultPoseTransform);
+				// Store the bind pose transformation matrix
+				aOutModelData.bindPose.push_back(bindPoseBoneTransform);
 			}
+
 			aOutModelData.modelType = eModelType::Skeletal;
+
 			const std::string text = "\nSuccessfully loaded skeleton!"
 				"\nNumber of bones: " + std::to_string(aOutModelData.skeleton.bones.size()) +
 				"\nNumber of animations: " + std::to_string(aOutModelData.animations.size());
@@ -77,11 +76,11 @@ namespace Kaka
 
 			for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
 			{
-				const DirectX::XMFLOAT3 position{mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z};
+				const DirectX::XMFLOAT3 position{mesh->mVertices[i].x,mesh->mVertices[i].y,mesh->mVertices[i].z};
 				const DirectX::XMFLOAT3 normal = *reinterpret_cast<DirectX::XMFLOAT3*>(&mesh->mNormals[i]);
-				DirectX::XMFLOAT2 texCoord{0.0f, 0.0f};
-				DirectX::XMFLOAT3 tangent{0.0f, 0.0f, 0.0f};
-				DirectX::XMFLOAT3 bitangent{0.0f, 0.0f, 0.0f};
+				DirectX::XMFLOAT2 texCoord{0.0f,0.0f};
+				DirectX::XMFLOAT3 tangent{0.0f,0.0f,0.0f};
+				DirectX::XMFLOAT3 bitangent{0.0f,0.0f,0.0f};
 				// Initialize bone indices and bone weights for the vertex
 				std::array<unsigned int, 4> boneIndices = {};
 				std::array<float, 4> boneWeights = {};
@@ -140,7 +139,9 @@ namespace Kaka
 
 									// Increment the number of influences
 									if (numInfluences < boneIndices.size())
+									{
 										numInfluences++;
+									}
 								}
 							}
 						}
@@ -164,7 +165,7 @@ namespace Kaka
 					}
 				}
 				aOutModelData.animMesh.vertices.push_back({
-					position, normal, texCoord, tangent, bitangent, boneIndices, boneWeights
+					position,normal,texCoord,tangent,bitangent,boneIndices,boneWeights
 				});
 			}
 
@@ -190,11 +191,11 @@ namespace Kaka
 
 			for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
 			{
-				const DirectX::XMFLOAT3 position{mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z};
+				const DirectX::XMFLOAT3 position{mesh->mVertices[i].x,mesh->mVertices[i].y,mesh->mVertices[i].z};
 				const DirectX::XMFLOAT3 normal = *reinterpret_cast<DirectX::XMFLOAT3*>(&mesh->mNormals[i]);
-				DirectX::XMFLOAT2 texCoord{0.0f, 0.0f};
-				DirectX::XMFLOAT3 tangent{0.0f, 0.0f, 0.0f};
-				DirectX::XMFLOAT3 bitangent{0.0f, 0.0f, 0.0f};
+				DirectX::XMFLOAT2 texCoord{0.0f,0.0f};
+				DirectX::XMFLOAT3 tangent{0.0f,0.0f,0.0f};
+				DirectX::XMFLOAT3 bitangent{0.0f,0.0f,0.0f};
 
 				// Check if the mesh has texture coordinates
 				if (mesh->HasTextureCoords(0))
@@ -211,7 +212,7 @@ namespace Kaka
 					bitangent = *reinterpret_cast<DirectX::XMFLOAT3*>(&mesh->mBitangents[i]);
 				}
 
-				aOutModelData.mesh.vertices.push_back({position, normal, texCoord, tangent, bitangent});
+				aOutModelData.mesh.vertices.push_back({position,normal,texCoord,tangent,bitangent});
 			}
 
 			aOutModelData.mesh.indices.reserve(
@@ -260,8 +261,16 @@ namespace Kaka
 	// Helper function to find the index of the keyframe that corresponds to the given time
 	unsigned int FindKeyframeIndex(const aiNodeAnim* aChannel, const float aTime)
 	{
+		const unsigned int numKeys = aChannel->mNumPositionKeys;
+
+		// Handle cases where the given time is greater than the last keyframe time
+		if (aTime >= aChannel->mPositionKeys[numKeys - 1].mTime)
+		{
+			return numKeys - 1; // Return the index of the last keyframe
+		}
+
 		// Iterate through the position keys to find the index of the keyframe that matches or is closest to the given time
-		for (unsigned int i = 0; i < aChannel->mNumPositionKeys - 1; ++i)
+		for (unsigned int i = 0; i < numKeys - 1; ++i)
 		{
 			if (aTime < aChannel->mPositionKeys[i + 1].mTime)
 			{
@@ -270,7 +279,7 @@ namespace Kaka
 		}
 
 		// If no keyframe was found, return the last keyframe index
-		return aChannel->mNumPositionKeys - 1;
+		return numKeys - 1;
 	}
 
 	std::vector<AnimationClip> ModelLoader::LoadAnimations(const aiScene* aScene)
@@ -285,20 +294,19 @@ namespace Kaka
 			AnimationClip animationClip;
 			animationClip.name = animation->mName.C_Str();
 
-			unsigned int numFrames = 0; // Initialize the number of frames to zero
-
-			// Calculate the duration of the animation in ticks
-			const float animationDuration = static_cast<float>(animation->mDuration);
+			const float animationTicksPerSecond = animation->mTicksPerSecond != 0 ? static_cast<float>(animation->mTicksPerSecond) : 25.0f;
+			const float animationDuration = static_cast<float>(animation->mDuration) / animationTicksPerSecond;
 
 			// Determine the maximum number of frames among all the channels
-			for (unsigned int j = 0; j < animation->mNumChannels; ++j)
+			unsigned int numFrames = 0;
+			for (unsigned int j = 1; j < animation->mNumChannels; ++j)
 			{
 				const aiNodeAnim* channel = animation->mChannels[j];
 				numFrames = std::max(numFrames, channel->mNumPositionKeys);
 			}
 
-			// Calculate the duration of a single frame in ticks
-			float frameDuration = animationDuration / (float)numFrames;
+			// Calculate the duration of a single frame in seconds
+			float frameDuration = animationDuration / static_cast<float>(numFrames);
 
 			// Iterate through each frame
 			for (unsigned int frameIndex = 0; frameIndex < numFrames; ++frameIndex)
@@ -308,28 +316,34 @@ namespace Kaka
 				keyframe.time = (float)frameIndex * frameDuration;
 
 				// Iterate through each channel (bone)
-				for (unsigned int j = 0; j < animation->mNumChannels; ++j)
+				for (unsigned int j = 1; j < animation->mNumChannels; ++j)
 				{
 					const aiNodeAnim* channel = animation->mChannels[j];
 
-					const unsigned int keyframeIndex = FindKeyframeIndex(channel, keyframe.time);
-					const aiVectorKey& positionKey = channel->mPositionKeys[keyframeIndex];
-					const aiQuatKey& rotationKey = channel->mRotationKeys[keyframeIndex];
-					const aiVectorKey& scalingKey = channel->mScalingKeys[keyframeIndex];
+					//const unsigned int keyframeIndex = FindKeyframeIndex(channel, keyframe.time);
+					const aiVectorKey& positionKey = channel->mPositionKeys[frameIndex];
+					//const aiQuatKey& rotationKey = channel->mRotationKeys[keyframeIndex];
+					//const aiVectorKey& scalingKey = channel->mScalingKeys[keyframeIndex];
 
 					// Create the bone transform matrix from the keyframe data
 					DirectX::XMFLOAT4X4 boneTransform{};
 					DirectX::XMStoreFloat4x4(&boneTransform, DirectX::XMMatrixIdentity());
 
-					DirectX::XMStoreFloat3(reinterpret_cast<DirectX::XMFLOAT3*>(&boneTransform._41),
-					                       DirectX::XMLoadFloat3(
-						                       reinterpret_cast<const DirectX::XMFLOAT3*>(&positionKey.mValue)));
-					DirectX::XMStoreFloat4(reinterpret_cast<DirectX::XMFLOAT4*>(&boneTransform._31),
-					                       DirectX::XMLoadFloat4(
-						                       reinterpret_cast<const DirectX::XMFLOAT4*>(&rotationKey.mValue)));
-					DirectX::XMStoreFloat3(reinterpret_cast<DirectX::XMFLOAT3*>(&boneTransform._11),
-					                       DirectX::XMLoadFloat3(
-						                       reinterpret_cast<const DirectX::XMFLOAT3*>(&scalingKey.mValue)));
+
+					DirectX::XMFLOAT3 position(positionKey.mValue.x, positionKey.mValue.y, positionKey.mValue.z);
+					std::string posKey = "\nIndex: " + std::to_string(frameIndex) + "  Pos: " + std::to_string(position.x) + ", " + std::to_string(position.y) + ", " + std::to_string(position.z);
+					OutputDebugStringA(posKey.c_str());
+					//DirectX::XMFLOAT4 rotation(rotationKey.mValue.x, rotationKey.mValue.y, rotationKey.mValue.z, rotationKey.mValue.w);
+					//DirectX::XMFLOAT3 scaling(scalingKey.mValue.x, scalingKey.mValue.y, scalingKey.mValue.z);
+					DirectX::XMFLOAT4 rotation(0.0f, 0.0f, 0.0f, 0.0f);
+					DirectX::XMFLOAT3 scaling(1.0f, 1.0f, 1.0f);
+
+					DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&position));
+					DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&rotation));
+					DirectX::XMMATRIX scalingMatrix = DirectX::XMMatrixScalingFromVector(DirectX::XMLoadFloat3(&scaling));
+
+					DirectX::XMMATRIX boneTransformMatrix = translationMatrix * rotationMatrix * scalingMatrix;
+					DirectX::XMStoreFloat4x4(&boneTransform, boneTransformMatrix);
 
 					// Add the bone transform to the keyframe
 					keyframe.boneTransforms.push_back(boneTransform);
@@ -349,10 +363,10 @@ namespace Kaka
 	DirectX::XMFLOAT4X4 ModelLoader::AssimpToDirectXMatrix(const aiMatrix4x4& aAssimpMatrix)
 	{
 		return {
-			aAssimpMatrix.a1, aAssimpMatrix.b1, aAssimpMatrix.c1, aAssimpMatrix.d1,
-			aAssimpMatrix.a2, aAssimpMatrix.b2, aAssimpMatrix.c2, aAssimpMatrix.d2,
-			aAssimpMatrix.a3, aAssimpMatrix.b3, aAssimpMatrix.c3, aAssimpMatrix.d3,
-			aAssimpMatrix.a4, aAssimpMatrix.b4, aAssimpMatrix.c4, aAssimpMatrix.d4
+			aAssimpMatrix.a1,aAssimpMatrix.b1,aAssimpMatrix.c1,aAssimpMatrix.d1,
+			aAssimpMatrix.a2,aAssimpMatrix.b2,aAssimpMatrix.c2,aAssimpMatrix.d2,
+			aAssimpMatrix.a3,aAssimpMatrix.b3,aAssimpMatrix.c3,aAssimpMatrix.d3,
+			aAssimpMatrix.a4,aAssimpMatrix.b4,aAssimpMatrix.c4,aAssimpMatrix.d4
 		};
 	}
 

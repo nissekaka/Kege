@@ -61,7 +61,7 @@ PixelInput main(VertexInput aInput)
     output.viewNormal = mul(aInput.normal, (float3x3) modelView);
     output.viewTan = mul(aInput.tan, (float3x3) modelView);
     output.viewBitan = mul(aInput.bitan, (float3x3) modelView);
-    output.position = mul(float4(aInput.position, 1.0f), modelViewProj);
+    output.position = mul(worldPosition, modelViewProj);
     output.texCoord = aInput.texCoord;
     output.modelView = modelView;
     

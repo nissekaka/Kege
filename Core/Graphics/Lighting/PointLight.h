@@ -32,14 +32,14 @@ namespace Kaka
 		{
 			DirectX::XMFLOAT3 position;
 			float padding1;
-			DirectX::XMFLOAT3 diffuseColour;
+			DirectX::XMFLOAT3 colour;
 			float padding2;
 			float diffuseIntensity;
-			float attConst;
-			float attLin;
-			float attQuad;
+			float radius;
+			float falloff;
+			float padding3;
 			BOOL active = false;
-			float padding3[3];
+			float padding4[3];
 		};
 
 		struct PointLightBuffer

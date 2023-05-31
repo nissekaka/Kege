@@ -13,7 +13,7 @@ namespace Kaka
 	{
 		isLoaded = ModelLoader::LoadModel(aFilePath, modelData);
 		texture.LoadTextureFromModel(aGfx, aFilePath);
-		solidColour = {1.0f, 1.0f, 1.0f, 1.0f};
+		solidColour = {1.0f,1.0f,1.0f,1.0f};
 	}
 
 	void Model::LoadModel(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType)
@@ -22,7 +22,7 @@ namespace Kaka
 
 		isLoaded = ModelLoader::LoadModel(aFilePath, modelData);
 		texture.LoadTextureFromModel(aGfx, aFilePath);
-		solidColour = {1.0f, 1.0f, 1.0f, 1.0f};
+		solidColour = {1.0f,1.0f,1.0f,1.0f};
 
 		if (isLoaded)
 		{
@@ -32,22 +32,22 @@ namespace Kaka
 			switch (modelData.modelType)
 			{
 			case eModelType::None:
-				{
-					assert("No model type!");
-				}
-				break;
+			{
+				assert("No model type!");
+			}
+			break;
 			case eModelType::Static:
-				{
-					vertexBuffer.Init(aGfx, modelData.mesh.vertices);
-					indexBuffer.Init(aGfx, modelData.mesh.indices);
-				}
-				break;
+			{
+				vertexBuffer.Init(aGfx, modelData.mesh.vertices);
+				indexBuffer.Init(aGfx, modelData.mesh.indices);
+			}
+			break;
 			case eModelType::Skeletal:
-				{
-					vertexBuffer.Init(aGfx, modelData.animMesh.vertices);
-					indexBuffer.Init(aGfx, modelData.animMesh.indices);
-				}
-				break;
+			{
+				vertexBuffer.Init(aGfx, modelData.animMesh.vertices);
+				indexBuffer.Init(aGfx, modelData.animMesh.indices);
+			}
+			break;
 			default:
 				assert("Error!");
 			}
@@ -56,118 +56,118 @@ namespace Kaka
 			switch (shaderType)
 			{
 			case eShaderType::Solid:
-				{
-					pixelShader.Init(aGfx, L"Shaders\\Solid_PS.cso");
-					vertexShader.Init(aGfx, L"Shaders\\Solid_VS.cso");
+			{
+				pixelShader.Init(aGfx, L"Shaders\\Solid_PS.cso");
+				vertexShader.Init(aGfx, L"Shaders\\Solid_VS.cso");
 
-					ied =
+				ied =
+				{
 					{
-						{
-							"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-					};
-				}
-				break;
+						"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
+						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+					},
+				};
+			}
+			break;
 			case eShaderType::Light:
-				{
-					pixelShader.Init(aGfx, L"Shaders\\Light_PS.cso");
-					vertexShader.Init(aGfx, L"Shaders\\Light_VS.cso");
+			{
+				pixelShader.Init(aGfx, L"Shaders\\Light_PS.cso");
+				vertexShader.Init(aGfx, L"Shaders\\Light_VS.cso");
 
-					ied =
+				ied =
+				{
 					{
-						{
-							"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-					};
-				}
-				break;
+						"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
+						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+					},
+					{
+						"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
+						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+					},
+					{
+						"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,
+						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+					},
+					{
+						"TANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
+						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+					},
+					{
+						"BITANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
+						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+					},
+				};
+			}
+			break;
 			case eShaderType::Phong:
-				{
-					pixelShader.Init(aGfx, L"Shaders\\Phong_PS.cso");
-					vertexShader.Init(aGfx, L"Shaders\\Phong_VS.cso");
+			{
+				pixelShader.Init(aGfx, L"Shaders\\Phong_PS.cso");
+				vertexShader.Init(aGfx, L"Shaders\\Phong_VS.cso");
 
-					ied =
+				ied =
+				{
 					{
-						{
-							"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-					};
-					inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
-				}
-				break;
+						"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
+						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+					},
+					{
+						"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
+						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+					},
+					{
+						"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,
+						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+					},
+					{
+						"TANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
+						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+					},
+					{
+						"BITANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
+						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+					},
+				};
+				inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
+			}
+			break;
 			case eShaderType::AnimPhong:
-				{
-					pixelShader.Init(aGfx, L"Shaders\\Phong_PS.cso");
-					vertexShader.Init(aGfx, L"Shaders\\AnimPhong_VS.cso");
+			{
+				pixelShader.Init(aGfx, L"Shaders\\Phong_PS.cso");
+				vertexShader.Init(aGfx, L"Shaders\\AnimPhong_VS.cso");
 
-					ied =
+				ied =
+				{
 					{
-						{
-							"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"BLENDINDICES", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-					};
-				}
-				break;
+						"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
+						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+					},
+					{
+						"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
+						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+					},
+					{
+						"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,
+						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+					},
+					{
+						"TANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
+						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+					},
+					{
+						"BITANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
+						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+					},
+					{
+						"BLENDINDICES",0,DXGI_FORMAT_R8G8B8A8_UINT,0,
+						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+					},
+					{
+						"BLENDWEIGHT",0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,
+						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+					},
+				};
+			}
+			break;
 			}
 
 			inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
@@ -202,82 +202,82 @@ namespace Kaka
 		switch (shaderType)
 		{
 		case eShaderType::Solid:
+		{
+			struct PSMaterialConstant
 			{
-				struct PSMaterialConstant
-				{
-					DirectX::XMFLOAT4 colour;
-				} pmc = {};
-				pmc.colour = solidColour;
+				DirectX::XMFLOAT4 colour;
+			} pmc = {};
+			pmc.colour = solidColour;
 
-				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-				psConstantBuffer.Bind(aGfx);
-			}
-			break;
+			PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
+			psConstantBuffer.Bind(aGfx);
+		}
+		break;
 		case eShaderType::Light:
+		{
+			struct PSMaterialConstant
 			{
-				struct PSMaterialConstant
-				{
-					BOOL normalMapEnabled = FALSE;
-					BOOL materialEnabled = FALSE;
-					BOOL padding1 = {};
-					BOOL padding2 = {};
-				} pmc;
-				pmc.normalMapEnabled = texture.HasNormalMap();
-				pmc.materialEnabled = texture.HasMaterial();
+				BOOL normalMapEnabled = FALSE;
+				BOOL materialEnabled = FALSE;
+				BOOL padding1 = {};
+				BOOL padding2 = {};
+			} pmc;
+			pmc.normalMapEnabled = texture.HasNormalMap();
+			pmc.materialEnabled = texture.HasMaterial();
 
-				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-				psConstantBuffer.Bind(aGfx);
-			}
-			break;
+			PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
+			psConstantBuffer.Bind(aGfx);
+		}
+		break;
 		case eShaderType::Phong:
+		{
+			struct PSMaterialConstant
 			{
-				struct PSMaterialConstant
-				{
-					BOOL normalMapEnabled = FALSE;
-					BOOL materialEnabled = FALSE;
-					float specularIntensity = 0.1f;
-					float specularPower = 30.0f;
-				} pmc;
-				pmc.normalMapEnabled = texture.HasNormalMap();
-				pmc.materialEnabled = texture.HasMaterial();
-				pmc.specularIntensity = specularIntensity;
-				pmc.specularPower = specularPower;
+				BOOL normalMapEnabled = FALSE;
+				BOOL materialEnabled = FALSE;
+				float specularIntensity = 0.1f;
+				float specularPower = 30.0f;
+			} pmc;
+			pmc.normalMapEnabled = texture.HasNormalMap();
+			pmc.materialEnabled = texture.HasMaterial();
+			pmc.specularIntensity = specularIntensity;
+			pmc.specularPower = specularPower;
 
-				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-				psConstantBuffer.Bind(aGfx);
-			}
-			break;
+			PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
+			psConstantBuffer.Bind(aGfx);
+		}
+		break;
 		case eShaderType::AnimPhong:
+		{
+			struct PSMaterialConstant
 			{
-				struct PSMaterialConstant
-				{
-					BOOL normalMapEnabled = FALSE;
-					BOOL materialEnabled = FALSE;
-					float specularIntensity = 0.1f;
-					float specularPower = 30.0f;
-				} pmc;
-				pmc.normalMapEnabled = texture.HasNormalMap();
-				pmc.materialEnabled = texture.HasMaterial();
-				pmc.specularIntensity = specularIntensity;
-				pmc.specularPower = specularPower;
+				BOOL normalMapEnabled = FALSE;
+				BOOL materialEnabled = FALSE;
+				float specularIntensity = 0.1f;
+				float specularPower = 30.0f;
+			} pmc;
+			pmc.normalMapEnabled = texture.HasNormalMap();
+			pmc.materialEnabled = texture.HasMaterial();
+			pmc.specularIntensity = specularIntensity;
+			pmc.specularPower = specularPower;
 
-				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-				psConstantBuffer.Bind(aGfx);
+			PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
+			psConstantBuffer.Bind(aGfx);
 
-				struct VSBoneConstant
-				{
-					DirectX::XMFLOAT4X4 bones[64u];
-				} vsb = {};
+			struct VSBoneConstant
+			{
+				DirectX::XMFLOAT4X4 bones[64u];
+			} vsb = {};
 
-				for (int i = 0; i < modelData.skeleton.bones.size(); ++i)
-				{
-					vsb.bones[i] = modelData.skeleton.bones[i].offsetMatrix;
-				}
-
-				VertexConstantBuffer<VSBoneConstant> vsConstantBuffer(aGfx, vsb, 1u);
-				vsConstantBuffer.Bind(aGfx);
+			for (int i = 0; i < modelData.skeleton.bones.size(); ++i)
+			{
+				vsb.bones[i] = modelData.skeleton.bones[i].offsetMatrix;
 			}
-			break;
+
+			VertexConstantBuffer<VSBoneConstant> vsConstantBuffer(aGfx, vsb, 1u);
+			vsConstantBuffer.Bind(aGfx);
+		}
+		break;
 		}
 
 		vertexShader.Bind(aGfx);
@@ -320,46 +320,46 @@ namespace Kaka
 			animationTime += aDeltaTime * animationSpeed;
 
 			// Wrap the animation time within the animation duration
-			float animationDuration = animation.keyframes.back().time;
+			float animationDuration = animation.keyframes.back().time - animation.keyframes.front().time;
 			animationTime = fmodf(animationTime, animationDuration);
 		}
 	}
 
-	DirectX::XMFLOAT3 TransformPosition(const DirectX::XMFLOAT3& aPosition, const DirectX::XMFLOAT4X4& aTransform)
-	{
-		DirectX::XMFLOAT4 transformedPosition;
-		DirectX::XMStoreFloat4(&transformedPosition,
-		                       DirectX::XMVector4Transform(DirectX::XMLoadFloat3(&aPosition),
-		                                                   DirectX::XMLoadFloat4x4(&aTransform)));
-		return DirectX::XMFLOAT3(transformedPosition.x, transformedPosition.y, transformedPosition.z);
-	}
+	//DirectX::XMFLOAT3 TransformPosition(const DirectX::XMFLOAT3& aPosition, const DirectX::XMFLOAT4X4& aTransform)
+	//{
+	//	DirectX::XMFLOAT4 transformedPosition;
+	//	DirectX::XMStoreFloat4(&transformedPosition,
+	//	                       DirectX::XMVector4Transform(DirectX::XMLoadFloat3(&aPosition),
+	//	                                                   DirectX::XMLoadFloat4x4(&aTransform)));
+	//	return DirectX::XMFLOAT3(transformedPosition.x, transformedPosition.y, transformedPosition.z);
+	//}
 
-	DirectX::XMFLOAT3 TransformNormal(const DirectX::XMFLOAT3& aNormal, const DirectX::XMFLOAT4X4& aTransform)
-	{
-		DirectX::XMFLOAT3 transformedNormal;
-		DirectX::XMStoreFloat3(&transformedNormal,
-		                       DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&aNormal),
-		                                                         DirectX::XMLoadFloat4x4(&aTransform)));
-		return transformedNormal;
-	}
+	//DirectX::XMFLOAT3 TransformNormal(const DirectX::XMFLOAT3& aNormal, const DirectX::XMFLOAT4X4& aTransform)
+	//{
+	//	DirectX::XMFLOAT3 transformedNormal;
+	//	DirectX::XMStoreFloat3(&transformedNormal,
+	//	                       DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&aNormal),
+	//	                                                         DirectX::XMLoadFloat4x4(&aTransform)));
+	//	return transformedNormal;
+	//}
 
-	DirectX::XMFLOAT3 TransformTangent(const DirectX::XMFLOAT3& aTangent, const DirectX::XMFLOAT4X4& aTransform)
-	{
-		DirectX::XMFLOAT3 transformedTangent;
-		DirectX::XMStoreFloat3(&transformedTangent,
-		                       DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&aTangent),
-		                                                         DirectX::XMLoadFloat4x4(&aTransform)));
-		return transformedTangent;
-	}
+	//DirectX::XMFLOAT3 TransformTangent(const DirectX::XMFLOAT3& aTangent, const DirectX::XMFLOAT4X4& aTransform)
+	//{
+	//	DirectX::XMFLOAT3 transformedTangent;
+	//	DirectX::XMStoreFloat3(&transformedTangent,
+	//	                       DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&aTangent),
+	//	                                                         DirectX::XMLoadFloat4x4(&aTransform)));
+	//	return transformedTangent;
+	//}
 
-	DirectX::XMFLOAT3 TransformBitangent(const DirectX::XMFLOAT3& aBitangent, const DirectX::XMFLOAT4X4& aTransform)
-	{
-		DirectX::XMFLOAT3 transformedBitangent;
-		DirectX::XMStoreFloat3(&transformedBitangent,
-		                       DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&aBitangent),
-		                                                         DirectX::XMLoadFloat4x4(&aTransform)));
-		return transformedBitangent;
-	}
+	//DirectX::XMFLOAT3 TransformBitangent(const DirectX::XMFLOAT3& aBitangent, const DirectX::XMFLOAT4X4& aTransform)
+	//{
+	//	DirectX::XMFLOAT3 transformedBitangent;
+	//	DirectX::XMStoreFloat3(&transformedBitangent,
+	//	                       DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&aBitangent),
+	//	                                                         DirectX::XMLoadFloat4x4(&aTransform)));
+	//	return transformedBitangent;
+	//}
 
 	void Model::Animate()
 	{
@@ -387,60 +387,52 @@ namespace Kaka
 					}
 				}
 
+				std::string time = "\nAnim time: " + std::to_string(animationTime);
+				OutputDebugStringA(time.c_str());
+
 				// Interpolate between the two keyframes
 				const Keyframe& keyframe1 = animation.keyframes[keyframeIndex1];
 				const Keyframe& keyframe2 = animation.keyframes[keyframeIndex2];
-				float t = (animationTime - keyframe1.time) / (keyframe2.time - keyframe1.time);
+				float t = std::clamp((animationTime - keyframe1.time) / (keyframe2.time - keyframe1.time), 0.0f, 1.0f);
+				// Calculate the inverse of the bind pose transformation matrices
+				std::vector<DirectX::XMFLOAT4X4> invBindPoseTransforms(modelData.skeleton.bones.size());
 
-				// Interpolate bone transforms for each vertex
-				for (auto& vertex : modelData.animMesh.vertices)
+				for (size_t i = 0; i < invBindPoseTransforms.size(); ++i)
 				{
-					// Apply bone transforms based on bone indices and weights
-					DirectX::XMFLOAT4X4 accumulatedTransform{};
-					DirectX::XMStoreFloat4x4(&accumulatedTransform, DirectX::XMMatrixIdentity());
+					const DirectX::XMFLOAT4X4& bindPoseTransform = modelData.bindPose[i];
+					DirectX::XMStoreFloat4x4(&invBindPoseTransforms[i], DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&bindPoseTransform)));
+				}
 
-					for (size_t i = 0; i < vertex.boneIndices.size(); ++i)
+				// Calculate the bone transforms for each keyframe bone
+				std::vector<DirectX::XMFLOAT4X4> interpolatedBoneTransforms(modelData.skeleton.bones.size());
+
+				for (size_t i = 0; i < interpolatedBoneTransforms.size(); ++i)
+				{
+					const DirectX::XMFLOAT4X4& transform1 = keyframe1.boneTransforms[i];
+					const DirectX::XMFLOAT4X4& transform2 = keyframe2.boneTransforms[i];
+
+					DirectX::XMFLOAT4X4 interpolatedTransform{};
+					for (int row = 0; row < 4; ++row)
 					{
-						if (i > 0 && vertex.boneIndices[i] == vertex.boneIndices[i - 1])
+						for (int col = 0; col < 4; ++col)
 						{
-							continue;
+							interpolatedTransform.m[row][col] = transform1.m[row][col] + t * (transform2.m[row][col] - transform1.m[row][col]);
 						}
-
-						unsigned int boneIndex = vertex.boneIndices[i];
-						float boneWeight = vertex.boneWeights[i];
-
-						// Interpolate the bone transforms between the two keyframes
-						const DirectX::XMFLOAT4X4& transform1 = keyframe1.boneTransforms[boneIndex];
-						const DirectX::XMFLOAT4X4& transform2 = keyframe2.boneTransforms[boneIndex];
-						DirectX::XMFLOAT4X4 interpolatedTransform{};
-						for (int row = 0; row < 4; ++row)
-						{
-							for (int col = 0; col < 4; ++col)
-							{
-								interpolatedTransform.m[row][col] = transform1.m[row][col] + t * (transform2.m[row][col]
-									- transform1.m[row][col]);
-							}
-						}
-
-						// Accumulate the interpolated bone transforms based on weights
-						DirectX::XMFLOAT4X4 transformedBone{};
-						DirectX::XMStoreFloat4x4(&transformedBone,
-						                         DirectX::XMLoadFloat4x4(&interpolatedTransform) * boneWeight);
-
-						DirectX::XMFLOAT4X4 newBoneTransform{};
-						DirectX::XMStoreFloat4x4(&newBoneTransform,
-						                         DirectX::XMMatrixMultiply(
-							                         DirectX::XMLoadFloat4x4(&accumulatedTransform),
-							                         DirectX::XMLoadFloat4x4(&transformedBone)));
-
-						accumulatedTransform = newBoneTransform;
 					}
 
-					// Apply the final bone transform to the vertex
-					vertex.position = TransformPosition(vertex.position, accumulatedTransform);
-					vertex.normal = TransformNormal(vertex.normal, accumulatedTransform);
-					vertex.tangent = TransformTangent(vertex.tangent, accumulatedTransform);
-					vertex.bitangent = TransformBitangent(vertex.bitangent, accumulatedTransform);
+					DirectX::XMFLOAT4X4 finalBoneTransform;
+					DirectX::XMStoreFloat4x4(&finalBoneTransform, DirectX::XMMatrixMultiply(
+						                         DirectX::XMLoadFloat4x4(&interpolatedTransform),
+						                         DirectX::XMLoadFloat4x4(&invBindPoseTransforms[i])));
+
+					interpolatedBoneTransforms[i] = finalBoneTransform;
+				}
+
+				// Update the bone transformations in the skeleton
+				for (size_t i = 0; i < modelData.skeleton.bones.size(); ++i)
+				{
+					DirectX::XMFLOAT4X4& boneTransform = modelData.skeleton.bones[i].offsetMatrix;
+					DirectX::XMStoreFloat4x4(&boneTransform, DirectX::XMLoadFloat4x4(&interpolatedBoneTransforms[i]));
 				}
 			}
 			else
@@ -450,119 +442,12 @@ namespace Kaka
 		}
 		else
 		{
-			//// Calculate the default pose bone transforms outside the loop
-			//std::vector<DirectX::XMFLOAT4X4> defaultPoseTransforms(modelData.skeleton.bones.size());
-
-			//for (size_t i = 0; i < defaultPoseTransforms.size(); ++i)
-			//{
-			//	defaultPoseTransforms[i] = modelData.defaultPose[i];
-			//}
-
-			//// Apply the default pose or any other static transformation when the animation is not playing
-			//for (int index = 0; index < modelData.animMesh.vertices.size(); ++index)
-			//{
-			//	BoneVertex& vertex = modelData.animMesh.vertices[index];
-
-			//	// Initialize the accumulated transform as the identity matrix
-			//	DirectX::XMFLOAT4X4 accumulatedTransform;
-			//	DirectX::XMStoreFloat4x4(&accumulatedTransform, DirectX::XMMatrixIdentity());
-
-			//	// Apply bone transforms based on bone indices and weights
-			//	for (size_t i = 0; i < vertex.boneIndices.size(); ++i)
-			//	{
-			//		unsigned int boneIndex = vertex.boneIndices[i];
-			//		float boneWeight = vertex.boneWeights[i];
-
-			//		if (boneWeight > 0.0f) // Consider only non-zero bone weights
-			//		{
-			//			// Use the default pose transform for the corresponding bone index
-			//			const DirectX::XMFLOAT4X4& defaultPoseTransform = defaultPoseTransforms[boneIndex];
-
-			//			// Scale the default pose transform by the bone weight
-			//			DirectX::XMFLOAT4X4 weightedTransform;
-			//			DirectX::XMStoreFloat4x4(&weightedTransform,
-			//			                         DirectX::XMMatrixScaling(boneWeight, boneWeight, boneWeight));
-
-			//			// Compute the weighted bone transform
-			//			DirectX::XMFLOAT4X4 weightedBoneTransform;
-			//			DirectX::XMStoreFloat4x4(&weightedBoneTransform, DirectX::XMMatrixMultiply(
-			//				                         DirectX::XMLoadFloat4x4(&weightedTransform),
-			//				                         DirectX::XMLoadFloat4x4(&defaultPoseTransform)));
-
-			//			// Accumulate the weighted bone transform
-			//			DirectX::XMStoreFloat4x4(&accumulatedTransform, DirectX::XMMatrixMultiply(
-			//				                         DirectX::XMLoadFloat4x4(&weightedBoneTransform),
-			//				                         DirectX::XMLoadFloat4x4(&accumulatedTransform)));
-			//		}
-			//	}
-
-			//	// Apply the final bone transform to the vertex
-			//	vertex.position = TransformPosition(vertex.position, accumulatedTransform);
-			//	vertex.normal = TransformNormal(vertex.normal, accumulatedTransform);
-			//	vertex.tangent = TransformTangent(vertex.tangent, accumulatedTransform);
-			//	vertex.bitangent = TransformBitangent(vertex.bitangent, accumulatedTransform);
-			//}
-			// Calculate the default pose bone transforms outside the loop
-			std::vector<DirectX::XMFLOAT4X4> defaultPoseTransforms(modelData.skeleton.bones.size());
-
-			for (size_t i = 0; i < defaultPoseTransforms.size(); ++i)
+			// Update the bone transformations in the skeleton
+			for (size_t i = 0; i < modelData.skeleton.bones.size(); ++i)
 			{
-				defaultPoseTransforms[i] = modelData.defaultPose[i];
-			}
-
-			// Apply the default pose or any other static transformation when the animation is not playing
-			//for (auto& vertex : modelData.animMesh.vertices)
-			for (int index = 0; index < modelData.animMesh.vertices.size(); ++index)
-			{
-				BoneVertex& vertex = modelData.animMesh.vertices[index];
-				// Initialize the bone transform as the identity matrix
-				DirectX::XMFLOAT4X4 boneTransform;
-				DirectX::XMStoreFloat4x4(&boneTransform, DirectX::XMMatrixIdentity());
-
-				// Apply bone transforms based on bone indices and weights
-				for (size_t i = 0; i < vertex.boneIndices.size(); ++i)
-				{
-					unsigned int boneIndex = vertex.boneIndices[i];
-					float boneWeight = vertex.boneWeights[i];
-
-					if (boneWeight > 0.0f) // Consider only non-zero bone weights
-					{
-						// Use the default pose transform for the corresponding bone index
-						const DirectX::XMFLOAT4X4& defaultPoseTransform = defaultPoseTransforms[boneIndex];
-
-						// Scale the default pose transform by the bone weight
-						DirectX::XMFLOAT4X4 weightedTransform;
-						DirectX::XMStoreFloat4x4(&weightedTransform,
-						                         DirectX::XMMatrixScaling(boneWeight, boneWeight, boneWeight));
-
-						// Compute the weighted bone transform
-						DirectX::XMFLOAT4X4 weightedBoneTransform;
-						DirectX::XMStoreFloat4x4(&weightedBoneTransform, DirectX::XMMatrixMultiply(
-							                         DirectX::XMLoadFloat4x4(&weightedTransform),
-							                         DirectX::XMLoadFloat4x4(&defaultPoseTransform)));
-
-						// Accumulate the weighted bone transform to the overall bone transform
-						for (int row = 0; row < 4; ++row)
-						{
-							for (int col = 0; col < 4; ++col)
-							{
-								boneTransform.m[row][col] += weightedBoneTransform.m[row][col] - defaultPoseTransform.m[
-									row][col];
-							}
-						}
-					}
-				}
-
-				// Apply the final bone transform to the vertex
-				auto newPos = TransformPosition(vertex.position, boneTransform);
-				auto newNor = TransformNormal(vertex.normal, boneTransform);
-				auto newTan = TransformTangent(vertex.tangent, boneTransform);
-				auto newBit = TransformBitangent(vertex.bitangent, boneTransform);
-
-				vertex.position = newPos;
-				vertex.normal = newNor;
-				vertex.tangent = newTan;
-				vertex.bitangent = newBit;
+				DirectX::XMFLOAT4X4& bindPoseTransform = modelData.bindPose[i];
+				DirectX::XMFLOAT4X4& boneTransform = modelData.skeleton.bones[i].offsetMatrix;
+				DirectX::XMStoreFloat4x4(&boneTransform, DirectX::XMLoadFloat4x4(&bindPoseTransform));
 			}
 		}
 	}
@@ -593,12 +478,12 @@ namespace Kaka
 
 	DirectX::XMFLOAT3 Model::GetPosition() const
 	{
-		return {transform.x, transform.y, transform.z};
+		return {transform.x,transform.y,transform.z};
 	}
 
 	DirectX::XMFLOAT3 Model::GetRotation() const
 	{
-		return {transform.roll, transform.pitch, transform.yaw};
+		return {transform.roll,transform.pitch,transform.yaw};
 	}
 
 	DirectX::XMMATRIX Model::GetTransform() const

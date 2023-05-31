@@ -38,21 +38,15 @@ namespace Kaka
 		{
 			ImGui::Text("Position");
 			ImGui::DragFloat3("XYZ", &pointLightData[index].position.x, 1.0f);
-			//ImGui::DragFloat("Y", &pointLightData[index].position.x, 1.0f);
-			//ImGui::DragFloat("Z", &pointLightData[index].position.x, 1.0f);
-			//ImGui::SliderFloat("Y", &pointLightData[index].position.y, -20.0f, 20.0f, "%.1f");
-			//ImGui::SliderFloat("Z", &pointLightData[index].position.z, -20.0f, 20.0f, "%.1f");
 
 			ImGui::Text("Intensity/Colour");
 			ImGui::SliderFloat("Intensity", &pointLightData[index].diffuseIntensity, 0.01f, 4.0f, "%.2f");
-			ImGui::ColorEdit3("Diffuse Colour", &pointLightData[index].diffuseColour.x);
+			ImGui::ColorEdit3("Diffuse Colour", &pointLightData[index].colour.x);
 
 			ImGui::Text("Falloff");
-			ImGui::SliderFloat("Constant", &pointLightData[index].attConst, 0.05f, 10.0f, "%.2f",
+			ImGui::SliderFloat("Radius", &pointLightData[index].radius, 0.05f, 250.0f, "%.2f",
 			                   ImGuiSliderFlags_Logarithmic);
-			ImGui::SliderFloat("Linear", &pointLightData[index].attLin, 0.0001f, 4.0f, "%.4f",
-			                   ImGuiSliderFlags_Logarithmic);
-			ImGui::SliderFloat("Quadratic", &pointLightData[index].attQuad, 0.0000001f, 10.0f, "%.7f",
+			ImGui::SliderFloat("Fall-Off", &pointLightData[index].falloff, 0.0001f, 40.0f, "%.4f",
 			                   ImGuiSliderFlags_Logarithmic);
 
 			if (ImGui::Button("Reset"))
@@ -78,7 +72,7 @@ namespace Kaka
 
 	void PointLight::SetColour(const DirectX::XMFLOAT3 aColour) const
 	{
-		pointLightData[index].diffuseColour = aColour;
+		pointLightData[index].colour = aColour;
 	}
 
 	void PointLight::SetIntensity(const float aIntensity) const
@@ -89,11 +83,10 @@ namespace Kaka
 	void PointLight::Reset() const
 	{
 		pointLightData[index].position = {0.0f,2.0f,0.0f};
-		pointLightData[index].diffuseColour = {1.0f,1.0f,1.0f};
+		pointLightData[index].colour = {1.0f,1.0f,1.0f};
 		pointLightData[index].diffuseIntensity = 2.0f;
-		pointLightData[index].attConst = 1.0f;
-		pointLightData[index].attLin = 0.02f;
-		pointLightData[index].attQuad = 0.00055f;
+		pointLightData[index].radius = 100.0f;
+		pointLightData[index].falloff = 1.5f;
 		pointLightData[index].active = true;
 	}
 
@@ -126,32 +119,21 @@ namespace Kaka
 		indexBuffer.Bind(aGfx);
 
 		// Create constant buffer for transformation matrix
-		struct ConstantBuffer
+		struct VSTransformBuffer
 		{
 			DirectX::XMMATRIX modelView;
 			DirectX::XMMATRIX modelProjection;
 		};
 		const DirectX::XMMATRIX modelView = GetTransform() * aGfx.GetCamera();
 
-		const ConstantBuffer cb =
+		const VSTransformBuffer vtb =
 		{
 			DirectX::XMMatrixTranspose(modelView),
 			DirectX::XMMatrixTranspose(modelView * aGfx.GetProjection())
 		};
-		Microsoft::WRL::ComPtr<ID3D11Buffer> pConstantBuffer;
-		D3D11_BUFFER_DESC cbd = {};
-		cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		cbd.Usage = D3D11_USAGE_DYNAMIC;
-		cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		cbd.MiscFlags = 0u;
-		cbd.ByteWidth = sizeof(cb);
-		cbd.StructureByteStride = 0u;
-		D3D11_SUBRESOURCE_DATA csd = {};
-		csd.pSysMem = &cb;
-		aGfx.pDevice->CreateBuffer(&cbd, &csd, &pConstantBuffer);
 
-		// Bind constant buffer to vertex shader
-		aGfx.pContext->VSSetConstantBuffers(0u, 1u, pConstantBuffer.GetAddressOf());
+		VertexConstantBuffer<VSTransformBuffer> vsConstantBuffer(aGfx, vtb, 0u);
+		vsConstantBuffer.Bind(aGfx);
 
 		PixelShader pixelShader(aGfx, L"Shaders\\Solid_PS.cso");
 		pixelShader.Bind(aGfx);
@@ -161,9 +143,9 @@ namespace Kaka
 			DirectX::XMFLOAT4 colour;
 		} pmc;
 		pmc.colour = {
-			pointLightData[index].diffuseColour.x,
-			pointLightData[index].diffuseColour.y,
-			pointLightData[index].diffuseColour.z,
+			pointLightData[index].colour.x,
+			pointLightData[index].colour.y,
+			pointLightData[index].colour.z,
 			1.0f
 		};
 
