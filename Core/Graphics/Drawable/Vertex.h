@@ -20,7 +20,7 @@ namespace Kaka
 		DirectX::XMFLOAT2 texCoord;
 		DirectX::XMFLOAT3 tangent;
 		DirectX::XMFLOAT3 bitangent;
-		std::array<unsigned int, 4> boneIndices{};
-		std::array<float, 4> boneWeights{};
+		unsigned int boneIndices[4] = {};
+		float boneWeights[4] = {};
 	};
 }

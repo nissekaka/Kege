@@ -158,11 +158,11 @@ namespace Kaka
 						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
 					},
 					{
-						"BLENDINDICES",0,DXGI_FORMAT_R8G8B8A8_UINT,0,
+						"BONEINDICES",0,DXGI_FORMAT_R8G8B8A8_UINT,0,
 						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
 					},
 					{
-						"BLENDWEIGHT",0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,
+						"BONEWEIGHT",0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,
 						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
 					},
 				};
@@ -189,7 +189,7 @@ namespace Kaka
 
 		if (modelData.modelType == eModelType::Skeletal)
 		{
-			vertexBuffer.Init(aGfx, modelData.animMesh.vertices);
+			//vertexBuffer.Init(aGfx, modelData.animMesh.vertices);
 		}
 
 		vertexBuffer.Bind(aGfx);
@@ -325,41 +325,35 @@ namespace Kaka
 		}
 	}
 
-	//DirectX::XMFLOAT3 TransformPosition(const DirectX::XMFLOAT3& aPosition, const DirectX::XMFLOAT4X4& aTransform)
-	//{
-	//	DirectX::XMFLOAT4 transformedPosition;
-	//	DirectX::XMStoreFloat4(&transformedPosition,
-	//	                       DirectX::XMVector4Transform(DirectX::XMLoadFloat3(&aPosition),
-	//	                                                   DirectX::XMLoadFloat4x4(&aTransform)));
-	//	return DirectX::XMFLOAT3(transformedPosition.x, transformedPosition.y, transformedPosition.z);
-	//}
+	void Model::TraverseBoneHierarchy(int aBoneIndex, const DirectX::XMMATRIX& aParentTransform,
+	                                  std::vector<DirectX::XMFLOAT4X4>& aInterpolatedBoneTransforms,
+	                                  const Keyframe& aKeyframe1, const Keyframe& aKeyframe2, const float aT)
+	{
+		// Calculate the interpolated transformation for the current bone using keyframe data
+		const DirectX::XMFLOAT4X4& transform1 = aKeyframe1.boneTransforms[aBoneIndex];
+		const DirectX::XMFLOAT4X4& transform2 = aKeyframe2.boneTransforms[aBoneIndex];
 
-	//DirectX::XMFLOAT3 TransformNormal(const DirectX::XMFLOAT3& aNormal, const DirectX::XMFLOAT4X4& aTransform)
-	//{
-	//	DirectX::XMFLOAT3 transformedNormal;
-	//	DirectX::XMStoreFloat3(&transformedNormal,
-	//	                       DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&aNormal),
-	//	                                                         DirectX::XMLoadFloat4x4(&aTransform)));
-	//	return transformedNormal;
-	//}
+		DirectX::XMFLOAT4X4 interpolatedTransform{};
+		for (int row = 0; row < 4; ++row)
+		{
+			for (int col = 0; col < 4; ++col)
+			{
+				interpolatedTransform.m[row][col] = transform1.m[row][col] + aT * (transform2.m[row][col] - transform1.m[row][col]);
+			}
+		}
 
-	//DirectX::XMFLOAT3 TransformTangent(const DirectX::XMFLOAT3& aTangent, const DirectX::XMFLOAT4X4& aTransform)
-	//{
-	//	DirectX::XMFLOAT3 transformedTangent;
-	//	DirectX::XMStoreFloat3(&transformedTangent,
-	//	                       DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&aTangent),
-	//	                                                         DirectX::XMLoadFloat4x4(&aTransform)));
-	//	return transformedTangent;
-	//}
+		// Calculate the final bone transform by multiplying with the parent's transform
+		const DirectX::XMMATRIX boneTransform = DirectX::XMLoadFloat4x4(&modelData.globalInverseMatrix) * DirectX::XMLoadFloat4x4(&interpolatedTransform) * aParentTransform;
 
-	//DirectX::XMFLOAT3 TransformBitangent(const DirectX::XMFLOAT3& aBitangent, const DirectX::XMFLOAT4X4& aTransform)
-	//{
-	//	DirectX::XMFLOAT3 transformedBitangent;
-	//	DirectX::XMStoreFloat3(&transformedBitangent,
-	//	                       DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&aBitangent),
-	//	                                                         DirectX::XMLoadFloat4x4(&aTransform)));
-	//	return transformedBitangent;
-	//}
+		// Store the bone transform in the interpolatedBoneTransforms array
+		DirectX::XMStoreFloat4x4(&aInterpolatedBoneTransforms[aBoneIndex], boneTransform);
+
+		const Bone& bone = modelData.skeleton.bones[aBoneIndex];
+		for (const int childIndex : bone.childIndices)
+		{
+			TraverseBoneHierarchy(childIndex, boneTransform, aInterpolatedBoneTransforms, aKeyframe1, aKeyframe2, aT);
+		}
+	}
 
 	void Model::Animate()
 	{
@@ -387,46 +381,16 @@ namespace Kaka
 					}
 				}
 
-				std::string time = "\nAnim time: " + std::to_string(animationTime);
-				OutputDebugStringA(time.c_str());
-
 				// Interpolate between the two keyframes
 				const Keyframe& keyframe1 = animation.keyframes[keyframeIndex1];
 				const Keyframe& keyframe2 = animation.keyframes[keyframeIndex2];
 				float t = std::clamp((animationTime - keyframe1.time) / (keyframe2.time - keyframe1.time), 0.0f, 1.0f);
-				// Calculate the inverse of the bind pose transformation matrices
-				std::vector<DirectX::XMFLOAT4X4> invBindPoseTransforms(modelData.skeleton.bones.size());
-
-				for (size_t i = 0; i < invBindPoseTransforms.size(); ++i)
-				{
-					const DirectX::XMFLOAT4X4& bindPoseTransform = modelData.bindPose[i];
-					DirectX::XMStoreFloat4x4(&invBindPoseTransforms[i], DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&bindPoseTransform)));
-				}
 
 				// Calculate the bone transforms for each keyframe bone
 				std::vector<DirectX::XMFLOAT4X4> interpolatedBoneTransforms(modelData.skeleton.bones.size());
 
-				for (size_t i = 0; i < interpolatedBoneTransforms.size(); ++i)
-				{
-					const DirectX::XMFLOAT4X4& transform1 = keyframe1.boneTransforms[i];
-					const DirectX::XMFLOAT4X4& transform2 = keyframe2.boneTransforms[i];
-
-					DirectX::XMFLOAT4X4 interpolatedTransform{};
-					for (int row = 0; row < 4; ++row)
-					{
-						for (int col = 0; col < 4; ++col)
-						{
-							interpolatedTransform.m[row][col] = transform1.m[row][col] + t * (transform2.m[row][col] - transform1.m[row][col]);
-						}
-					}
-
-					DirectX::XMFLOAT4X4 finalBoneTransform;
-					DirectX::XMStoreFloat4x4(&finalBoneTransform, DirectX::XMMatrixMultiply(
-						                         DirectX::XMLoadFloat4x4(&interpolatedTransform),
-						                         DirectX::XMLoadFloat4x4(&invBindPoseTransforms[i])));
-
-					interpolatedBoneTransforms[i] = finalBoneTransform;
-				}
+				// Traverse the bone hierarchy and calculate the interpolated bone transformations
+				TraverseBoneHierarchy(modelData.skeleton.rootBoneIndex, DirectX::XMMatrixIdentity(), interpolatedBoneTransforms, keyframe1, keyframe2, t);
 
 				// Update the bone transformations in the skeleton
 				for (size_t i = 0; i < modelData.skeleton.bones.size(); ++i)

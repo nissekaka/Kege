@@ -12,6 +12,8 @@ namespace Kaka
 	{
 		std::string name;
 		DirectX::XMFLOAT4X4 offsetMatrix{};
+		int parentIndex = -1;
+		std::vector<int> childIndices;
 	};
 
 	struct Keyframe
@@ -22,6 +24,7 @@ namespace Kaka
 
 	struct Skeleton
 	{
+		int rootBoneIndex = -1;  // Index of the root bone in the skeleton
 		std::vector<Bone> bones{};
 	};
 

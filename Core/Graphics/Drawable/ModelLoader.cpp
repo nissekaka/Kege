@@ -118,30 +118,23 @@ namespace Kaka
 							// Check if the vertex index matches the current vertex
 							if (vertexWeight.mVertexId == i)
 							{
-								// Find the smallest weight slot in boneWeights array
-								unsigned int minWeightIndex = 0;
-								float minWeight = boneWeights[0];
-
-								for (unsigned int l = 1; l < boneWeights.size(); ++l)
+								// Find the index for the bone in the boneIndices vector
+								auto it = std::find(boneIndices.begin(), boneIndices.end(), j);
+								if (it == boneIndices.end())
 								{
-									if (boneWeights[l] < minWeight)
-									{
-										minWeight = boneWeights[l];
-										minWeightIndex = l;
-									}
-								}
-
-								// Store the bone index and weight for the vertex if weight is larger than the smallest weight
-								if (vertexWeight.mWeight > minWeight)
-								{
-									boneIndices[minWeightIndex] = j;
-									boneWeights[minWeightIndex] = vertexWeight.mWeight;
-
-									// Increment the number of influences
+									// The bone index is not already in the boneIndices vector, add it
 									if (numInfluences < boneIndices.size())
 									{
+										boneIndices[numInfluences] = j;
+										boneWeights[numInfluences] = vertexWeight.mWeight;
 										numInfluences++;
 									}
+								}
+								else
+								{
+									// The bone index already exists in the boneIndices vector, update its weight
+									size_t index = std::distance(boneIndices.begin(), it);
+									boneWeights[index] = vertexWeight.mWeight;
 								}
 							}
 						}
@@ -164,9 +157,17 @@ namespace Kaka
 						}
 					}
 				}
+
 				aOutModelData.animMesh.vertices.push_back({
-					position,normal,texCoord,tangent,bitangent,boneIndices,boneWeights
+					position,normal,texCoord,tangent,bitangent,{boneIndices[0],boneIndices[1],boneIndices[2],boneIndices[3]},{boneWeights[0],boneWeights[1],boneWeights[2],boneWeights[3]}
 				});
+
+				//for (int k = 0; k < 4; ++k)
+				//{
+				//	std::string boneInfo = "\n Vertex: " + std::to_string(i) + " [" + std::to_string(k) + "] Bone: " + std::to_string(boneIndices[k]) + " Weight: " + std::to_string(boneWeights[k]);
+				//	OutputDebugStringA(boneInfo.c_str());
+				//}
+				//OutputDebugStringA("\n---");
 			}
 
 			aOutModelData.animMesh.indices.reserve(
@@ -235,23 +236,51 @@ namespace Kaka
 	{
 		Skeleton skeleton;
 
-		// Iterate through each mesh
 		for (unsigned int i = 0; i < aScene->mNumMeshes; ++i)
 		{
 			const aiMesh* mesh = aScene->mMeshes[i];
 
-			// Iterate through each bone in the mesh
 			for (unsigned int j = 0; j < mesh->mNumBones; ++j)
 			{
 				const aiBone* bone = mesh->mBones[j];
 
-				// Create a Bone struct and populate its properties
 				Bone skeletonBone;
 				skeletonBone.name = bone->mName.C_Str();
 				skeletonBone.offsetMatrix = AssimpToDirectXMatrix(bone->mOffsetMatrix);
 
-				// Add the bone to the skeleton
 				skeleton.bones.push_back(skeletonBone);
+			}
+		}
+
+		for (unsigned int i = 0; i < skeleton.bones.size(); ++i)
+		{
+			const aiNode* boneNode = aScene->mRootNode->FindNode(skeleton.bones[i].name.c_str());
+			if (boneNode)
+			{
+				const aiNode* parentNode = boneNode->mParent;
+				if (parentNode)
+				{
+					std::string parentName = parentNode->mName.C_Str();
+					for (unsigned int j = 0; j < skeleton.bones.size(); ++j)
+					{
+						if (skeleton.bones[j].name == parentName)
+						{
+							skeleton.bones[i].parentIndex = j;
+							skeleton.bones[j].childIndices.push_back(i);
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		// Find and set the rootBoneIndex
+		for (int i = 0; i < skeleton.bones.size(); ++i)
+		{
+			if (skeleton.bones[i].parentIndex == -1)
+			{
+				skeleton.rootBoneIndex = i;
+				break;
 			}
 		}
 
@@ -322,13 +351,12 @@ namespace Kaka
 
 					//const unsigned int keyframeIndex = FindKeyframeIndex(channel, keyframe.time);
 					const aiVectorKey& positionKey = channel->mPositionKeys[frameIndex];
-					//const aiQuatKey& rotationKey = channel->mRotationKeys[keyframeIndex];
-					//const aiVectorKey& scalingKey = channel->mScalingKeys[keyframeIndex];
+					//const aiQuatKey& rotationKey = channel->mRotationKeys[frameIndex];
+					//const aiVectorKey& scalingKey = channel->mScalingKeys[frameIndex];
 
 					// Create the bone transform matrix from the keyframe data
 					DirectX::XMFLOAT4X4 boneTransform{};
 					DirectX::XMStoreFloat4x4(&boneTransform, DirectX::XMMatrixIdentity());
-
 
 					DirectX::XMFLOAT3 position(positionKey.mValue.x, positionKey.mValue.y, positionKey.mValue.z);
 					std::string posKey = "\nIndex: " + std::to_string(frameIndex) + "  Pos: " + std::to_string(position.x) + ", " + std::to_string(position.y) + ", " + std::to_string(position.z);

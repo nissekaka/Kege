@@ -16,8 +16,8 @@ struct VertexInput
     float2 texCoord : TEXCOORD;
     float3 tan : TANGENT;
     float3 bitan : BITANGENT;
-    uint4 boneIndices : BLENDINDICES;
-    float4 boneWeights : BLENDWEIGHT;
+    uint4 boneIndices : BONEINDICES;
+    float4 boneWeights : BONEWEIGHT;
 };
 
 struct PixelInput

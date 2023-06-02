@@ -29,9 +29,9 @@ namespace Kaka
 	int Game::Go()
 	{
 		skybox.Init(wnd.Gfx(), "Assets\\Textures\\Skybox\\Miramar\\", "Assets\\Textures\\Skybox\\Kurt\\");
-		spy.LoadModel(wnd.Gfx(), "Assets\\Models\\spy\\spy.fbx", Model::eShaderType::Phong);
-		spy.SetPosition({228.4f,69.28f,-84.0});
-		spy.SetRotation({PI / 2,PI * 2 / 3,0.0f});
+		//spy.LoadModel(wnd.Gfx(), "Assets\\Models\\spy\\spy.fbx", Model::eShaderType::Phong);
+		//spy.SetPosition({228.4f,69.28f,-84.0});
+		//spy.SetRotation({PI / 2,PI * 2 / 3,0.0f});
 		//muzen.LoadModel(wnd.Gfx(), "Assets\\Models\\muzen\\MuzenSpeaker.fbx", Model::eShaderType::Phong);
 		//vamp.LoadModel(wnd.Gfx(), "Assets\\Models\\vamp\\vamp.fbx", Model::eShaderType::AnimPhong);
 		//vamp.SetPosition({230.0f,70.0f,-81.0f});
@@ -87,20 +87,20 @@ namespace Kaka
 		{
 			pointLights[i].Bind(wnd.Gfx(), camera.GetMatrix());
 
-			//constexpr float radius = 300.0f;
-			//constexpr float speed = 0.8f;
+			constexpr float radius = 300.0f;
+			constexpr float speed = 0.8f;
 
-			//pointLightAngles[i] += speed * aDeltaTime;
+			pointLightAngles[i] += speed * aDeltaTime;
 
-			//float posX = radius * std::cos(pointLightAngles[i]);
-			//float posZ = radius * std::sin(pointLightAngles[i]);
+			float posX = radius * std::cos(pointLightAngles[i]);
+			float posZ = radius * std::sin(pointLightAngles[i]);
 
-			//pointLights[i].SetPosition({posX,15.0f,posZ});
+			pointLights[i].SetPosition({posX,15.0f,posZ});
 
-			//if (pointLightAngles[i] > 2 * PI)
-			//{
-			//	pointLightAngles[i] -= 2 * PI;
-			//}
+			if (pointLightAngles[i] > 2 * PI)
+			{
+				pointLightAngles[i] -= 2 * PI;
+			}
 
 			if (drawLightDebug)
 			{
@@ -123,9 +123,9 @@ namespace Kaka
 		cubeTwoBones.Animate();
 		cubeTwoBones.Draw(wnd.Gfx());
 
-		//vamp.Update(aDeltaTime);
-		//vamp.Animate();
-		//vamp.Draw(wnd.Gfx());
+		vamp.Update(aDeltaTime);
+		vamp.Animate();
+		vamp.Draw(wnd.Gfx());
 		terrain.Draw(wnd.Gfx());
 
 		// ImGui windows
@@ -134,7 +134,7 @@ namespace Kaka
 			ImGui::ShowDemoWindow();
 			spy.ShowControlWindow("Spy");
 			//muzen.ShowControlWindow("Muzen");
-			//vamp.ShowControlWindow("Vamp");
+			vamp.ShowControlWindow("Vamp");
 			//cube.ShowControlWindow("Cube");
 			cubeTwoBones.ShowControlWindow("CubeTwoBones");
 			terrain.ShowControlWindow("Terrain");
