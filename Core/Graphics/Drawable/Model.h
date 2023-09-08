@@ -19,7 +19,7 @@ namespace Kaka
 		Model(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType);
 		~Model() override = default;
 		void LoadModel(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType);
-		void Draw(const Graphics& aGfx);
+		void Draw(Graphics& aGfx);
 		void Update(float aDeltaTime);
 		void TraverseBoneHierarchy(int aBoneIndex, const DirectX::XMMATRIX& aParentTransform, std::vector<DirectX::XMFLOAT4X4>& aInterpolatedBoneTransforms, const Keyframe& aKeyframe1,
 		                           const Keyframe& aKeyframe2,

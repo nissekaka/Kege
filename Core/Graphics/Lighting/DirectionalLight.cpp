@@ -60,7 +60,7 @@ namespace Kaka
 	{
 		bufferData.lightDirection = {-1.0f, -1.0f, 1.0f};
 		bufferData.lightColour = {0.6f, 0.6f, 0.6f};
-		bufferData.ambientLight = 0.1f;
+		bufferData.ambientLight = 1.0f;
 	}
 
 	DirectX::XMFLOAT3 DirectionalLight::GetDirection() const
@@ -105,7 +105,7 @@ namespace Kaka
 		SetDirection(direction);
 
 		// Calculate the color based on the vertical position of the light
-		float colorLerp = direction.y - colorLerpThreshold;
+		float colorLerp = -direction.y - colorLerpThreshold;
 		colorLerp = std::clamp(colorLerp, 0.0f, 1.0f);
 
 		// Interpolate between lowColor and highColor based on the colorLerp value

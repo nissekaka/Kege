@@ -31,7 +31,7 @@ namespace Kaka
 	{
 		position = {0.0f, 0.0f, -4.0f};
 		//position = {0.0f,140.0f,-450.0f};
-		//pitch = 0.0f;
+		pitch = 0.0f;
 		yaw = -PI * 2 / 5;
 	}
 

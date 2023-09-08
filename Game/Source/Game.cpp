@@ -4,8 +4,10 @@
 #include <DirectXMath.h>
 #include <random>
 
-constexpr int WINDOW_WIDTH = 2560;
-constexpr int WINDOW_HEIGHT = 1440;
+constexpr int WINDOW_WIDTH = 1920;
+constexpr int WINDOW_HEIGHT = 1080;
+constexpr int NUM_LIGHTS = 10;
+constexpr int TERRAIN_SIZE = 1200;
 
 namespace Kaka
 {
@@ -20,42 +22,49 @@ namespace Kaka
 				0.5f,
 				5000.0f));
 
-		for (int i = 0; i < 4; ++i)
+		for (int i = 0; i < NUM_LIGHTS; ++i)
 		{
-			pointLights.push_back(PointLight{wnd.Gfx(),2u});
+			pointLights.push_back(PointLight{wnd.Gfx(), 2u});
 		}
 	}
 
 	int Game::Go()
 	{
 		skybox.Init(wnd.Gfx(), "Assets\\Textures\\Skybox\\Miramar\\", "Assets\\Textures\\Skybox\\Kurt\\");
-		//spy.LoadModel(wnd.Gfx(), "Assets\\Models\\spy\\spy.fbx", Model::eShaderType::Phong);
-		//spy.SetPosition({228.4f,69.28f,-84.0});
-		//spy.SetRotation({PI / 2,PI * 2 / 3,0.0f});
-		//muzen.LoadModel(wnd.Gfx(), "Assets\\Models\\muzen\\MuzenSpeaker.fbx", Model::eShaderType::Phong);
-		//vamp.LoadModel(wnd.Gfx(), "Assets\\Models\\vamp\\vamp.fbx", Model::eShaderType::AnimPhong);
-		//vamp.SetPosition({230.0f,70.0f,-81.0f});
-		//vamp.SetRotation({PI / 2,PI * 2 / 3,0.0f});
 
-		//cube.LoadModel(wnd.Gfx(), "Assets\\Models\\cube\\animcube.fbx", Model::eShaderType::AnimPhong);
-		//cube.SetPosition({230.0f,71.0f,-82.0f});
+		reflectionPSBuffer.A = 0.7f;
+		reflectionPSBuffer.k0 = {-1.6f, 0.5f};
+		reflectionPSBuffer.k1 = {-1.1f, 0.8f};
 
-		cubeTwoBones.LoadModel(wnd.Gfx(), "Assets\\Models\\cube\\animcube_twobones.fbx", Model::eShaderType::AnimPhong);
-		cubeTwoBones.SetPosition({230.0f,71.0f,-81.0f});
+		constexpr float reflectPlaneHeight = -11.0f;
 
-		camera.SetPosition({232.0f,71.0f,-83.0f});
+		reflectionPlane.Init(wnd.Gfx(), TERRAIN_SIZE / 2.0f);
+		reflectionPlane.SetPosition({TERRAIN_SIZE / 2.0f, reflectPlaneHeight, TERRAIN_SIZE / 2.0f});
 
-		constexpr int terrainSize = 500;
-		terrain.Init(wnd.Gfx(), terrainSize);
-		terrain.SetPosition(DirectX::XMFLOAT3(-terrainSize / 2.0f, -25.0f, -terrainSize / 2.0f));
+		camera.SetPosition({845.0f, 222.0f, 218.0f});
 
-		//muzen.SetScale(0.002f);
-		//muzen.SetPosition({-1.0f,0.0f,0.0f});
+		terrain.Init(wnd.Gfx(), TERRAIN_SIZE);
 
-		pointLights[0].SetColour({0.0f,1.0f,1.0f});
-		pointLights[1].SetColour({1.0f,1.0f,0.0f});
-		pointLights[2].SetColour({0.0f,1.0f,0.0f});
-		pointLights[3].SetColour({1.0f,0.0f,0.0f});
+		std::random_device rd;
+		std::mt19937 mt(rd());
+		std::uniform_real_distribution<float> cDist(0.0f, 1.0f);
+		std::uniform_real_distribution<float> rDist(50.0f, 600.0f);
+		std::uniform_real_distribution<float> sDist(0.1f, 2.0f);
+
+		for (int i = 0; i < NUM_LIGHTS; ++i)
+		{
+			lightTravelRadiuses.push_back(rDist(mt));
+			lightTravelSpeeds.push_back(sDist(mt));
+			lightTravelAngles.push_back(PI);
+
+			pointLights[i].SetColour({cDist(mt), cDist(mt), cDist(mt)});
+			DirectX::XMFLOAT3 pos = terrain.GetRandomVertexPosition();
+			pos.y += 20.0f;
+			pointLights[i].SetPosition(pos);
+			pointLights[i].SetRadius(75.0f);
+			pointLights[i].SetFalloff(1.0f);
+			pointLights[i].SetIntensity(500.0f);
+		}
 
 		while (true)
 		{
@@ -87,19 +96,16 @@ namespace Kaka
 		{
 			pointLights[i].Bind(wnd.Gfx(), camera.GetMatrix());
 
-			constexpr float radius = 300.0f;
-			constexpr float speed = 0.8f;
+			lightTravelAngles[i] += lightTravelSpeeds[i] * aDeltaTime;
 
-			pointLightAngles[i] += speed * aDeltaTime;
+			float posX = lightTravelRadiuses[i] * std::cos(lightTravelAngles[i]) + TERRAIN_SIZE / 2.0f;
+			float posZ = lightTravelRadiuses[i] * std::sin(lightTravelAngles[i]) + TERRAIN_SIZE / 2.0f;
 
-			float posX = radius * std::cos(pointLightAngles[i]);
-			float posZ = radius * std::sin(pointLightAngles[i]);
+			pointLights[i].SetPosition({posX, 40.0f, posZ});
 
-			pointLights[i].SetPosition({posX,15.0f,posZ});
-
-			if (pointLightAngles[i] > 2 * PI)
+			if (lightTravelAngles[i] > 2 * PI)
 			{
-				pointLightAngles[i] -= 2 * PI;
+				lightTravelAngles[i] -= 2 * PI;
 			}
 
 			if (drawLightDebug)
@@ -107,44 +113,78 @@ namespace Kaka
 				pointLights[i].Draw(wnd.Gfx());
 			}
 		}
+
+		commonBuffer.cameraPosition = {camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z, 0.0f};
+		commonBuffer.resolution = wnd.Gfx().GetCurrentResolution();
+		commonBuffer.currentTime = timer.GetTotalTime();
+
+		PixelConstantBuffer<CommonBuffer> cb{wnd.Gfx(), 3u};
+		cb.Update(wnd.Gfx(), commonBuffer);
+		cb.Bind(wnd.Gfx());
+
+		PixelConstantBuffer<ReflectionWaveBuffer> rwpb{wnd.Gfx(), 10u};
+		rwpb.Update(wnd.Gfx(), reflectionPSBuffer);
+		rwpb.Bind(wnd.Gfx());
+
+		reflectionHeightPSBuffer.height = reflectionPlane.GetPosition().y;
+
+		PixelConstantBuffer<ReflectionHeightBuffer> rhpb{wnd.Gfx(), 11u};
+		rhpb.Update(wnd.Gfx(), reflectionHeightPSBuffer);
+		rhpb.Bind(wnd.Gfx());
+
+		reflectionVSBuffer.height = reflectionPlane.GetPosition().y;
+
+		VertexConstantBuffer<ReflectionHeightBuffer> rhvb{wnd.Gfx(), 1u};
+		rhvb.Update(wnd.Gfx(), reflectionVSBuffer);
+		rhvb.Bind(wnd.Gfx());
+
 		skyboxAngle.y += skyboxSpeed * aDeltaTime;
 		skybox.Rotate(skyboxAngle);
+
+		wnd.Gfx().SetWaterReflectTarget();
+
+		skybox.FlipScale();
+		terrain.FlipScale(reflectionPlane.GetPosition().y, false);
+		terrain.SetReflectShader(wnd.Gfx(), true);
+
 		skybox.Draw(wnd.Gfx());
-
-		//spy.SetRotation({spy.GetRotation().x,timer.GetTotalTime(),spy.GetRotation().z});
-		spy.Draw(wnd.Gfx());
-		//muzen.SetRotation({muzen.GetRotation().x,timer.GetTotalTime(),muzen.GetRotation().z});
-		//muzen.Draw(wnd.Gfx());
-
-		//cube.Update(aDeltaTime);
-		//cube.Animate();
-		//cube.Draw(wnd.Gfx());
-		cubeTwoBones.Update(aDeltaTime);
-		cubeTwoBones.Animate();
-		cubeTwoBones.Draw(wnd.Gfx());
-
-		vamp.Update(aDeltaTime);
-		vamp.Animate();
-		vamp.Draw(wnd.Gfx());
+		terrain.SetCullingMode(eCullingMode::Front);
 		terrain.Draw(wnd.Gfx());
+
+		skybox.FlipScale();
+		terrain.SetReflectShader(wnd.Gfx(), false);
+		terrain.FlipScale(reflectionPlane.GetPosition().y, true);
+		wnd.Gfx().SetDefaultTarget();
+
+		skybox.Draw(wnd.Gfx());
+		terrain.SetCullingMode(eCullingMode::Back);
+		terrain.Draw(wnd.Gfx());
+
+		wnd.Gfx().BindWaterReflectionTexture();
+		reflectionPlane.Draw(wnd.Gfx());
 
 		// ImGui windows
 		if (showImGui)
 		{
 			ImGui::ShowDemoWindow();
-			spy.ShowControlWindow("Spy");
-			//muzen.ShowControlWindow("Muzen");
-			vamp.ShowControlWindow("Vamp");
-			//cube.ShowControlWindow("Cube");
-			cubeTwoBones.ShowControlWindow("CubeTwoBones");
+
 			terrain.ShowControlWindow("Terrain");
+			reflectionPlane.ShowControlWindow("Reflection Plane");
 			directionalLight.ShowControlWindow("Directional Light");
 
-			for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
+			if (ImGui::Begin("Reflection"))
 			{
-				std::string name = "Point Light " + std::to_string(i);
-				pointLights[i].ShowControlWindow(name.c_str());
+				ImGui::DragFloat2("k0", &reflectionPSBuffer.k0.x, 0.01f, -100.0f, 100.0f, "%.1f");
+				ImGui::DragFloat2("k1", &reflectionPSBuffer.k1.x, 0.01f, -100.0f, 100.0f, "%.1f");
+				ImGui::DragFloat("A", &reflectionPSBuffer.A, 0.01f, -100.0f, 100.0f, "%.1f");
 			}
+			ImGui::End();
+
+			//for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
+			//{
+			//	std::string name = "Point Light " + std::to_string(i);
+			//	pointLights[i].ShowControlWindow(name.c_str());
+			//}
 
 			camera.ShowControlWindow();
 		}
@@ -202,32 +242,32 @@ namespace Kaka
 			}
 			else
 			{
-				cameraSpeed = cameraSpeedNormal;
+				cameraSpeed = cameraSpeedDefault;
 			}
 
 			if (wnd.keyboard.KeyIsPressed('W'))
 			{
-				camera.Translate({0.0f,0.0f,aDeltaTime * cameraSpeed});
+				camera.Translate({0.0f, 0.0f, aDeltaTime * cameraSpeed});
 			}
 			if (wnd.keyboard.KeyIsPressed('A'))
 			{
-				camera.Translate({-aDeltaTime * cameraSpeed,0.0f,0.0f});
+				camera.Translate({-aDeltaTime * cameraSpeed, 0.0f, 0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed('S'))
 			{
-				camera.Translate({0.0f,0.0f,-aDeltaTime * cameraSpeed});
+				camera.Translate({0.0f, 0.0f, -aDeltaTime * cameraSpeed});
 			}
 			if (wnd.keyboard.KeyIsPressed('D'))
 			{
-				camera.Translate({aDeltaTime * cameraSpeed,0.0f,0.0f});
+				camera.Translate({aDeltaTime * cameraSpeed, 0.0f, 0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed(VK_SPACE))
 			{
-				camera.Translate({0.0f,aDeltaTime * cameraSpeed,0.0f});
+				camera.Translate({0.0f, aDeltaTime * cameraSpeed, 0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed(VK_CONTROL))
 			{
-				camera.Translate({0.0f,-aDeltaTime * cameraSpeed,0.0f});
+				camera.Translate({0.0f, -aDeltaTime * cameraSpeed, 0.0f});
 			}
 		}
 
@@ -246,6 +286,8 @@ namespace Kaka
 		{
 			ImGui::Text("%.3f m/s", 1000.0f / ImGui::GetIO().Framerate);
 			ImGui::Text("%.0f FPS", ImGui::GetIO().Framerate);
+			const std::string drawcalls = "Drawcalls:" + std::to_string(wnd.Gfx().GetDrawcallCount());
+			ImGui::Text(drawcalls.c_str());
 		}
 		ImGui::End();
 	}

@@ -40,7 +40,7 @@ namespace Kaka
 			ImGui::DragFloat3("XYZ", &pointLightData[index].position.x, 1.0f);
 
 			ImGui::Text("Intensity/Colour");
-			ImGui::SliderFloat("Intensity", &pointLightData[index].diffuseIntensity, 0.01f, 4.0f, "%.2f");
+			ImGui::SliderFloat("Intensity", &pointLightData[index].diffuseIntensity, 0.01f, 10000.0f, "%.2f");
 			ImGui::ColorEdit3("Diffuse Colour", &pointLightData[index].colour.x);
 
 			ImGui::Text("Falloff");
@@ -80,6 +80,17 @@ namespace Kaka
 		pointLightData[index].diffuseIntensity = aIntensity;
 	}
 
+	void PointLight::SetRadius(const float aRadius) const
+	{
+		pointLightData[index].radius = aRadius;
+	}
+
+	void PointLight::SetFalloff(const float aFalloff) const
+	{
+		pointLightData[index].falloff = aFalloff;
+	}
+
+
 	void PointLight::Reset() const
 	{
 		pointLightData[index].position = {0.0f,2.0f,0.0f};
@@ -90,7 +101,7 @@ namespace Kaka
 		pointLightData[index].active = true;
 	}
 
-	void PointLight::Draw(const Graphics& aGfx) const
+	void PointLight::Draw(Graphics& aGfx) const
 	{
 		const std::vector<Vertex> vertices = {
 			{{-0.1f,0.0f,0.0f}},
@@ -170,6 +181,7 @@ namespace Kaka
 		Topology topology(aGfx, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		topology.Bind(aGfx);
 
-		aGfx.pContext->DrawIndexed(static_cast<UINT>(std::size(indices)), 0u, 0u);
+		aGfx.DrawIndexed(static_cast<UINT>(std::size(indices)));
+		//aGfx.pContext->DrawIndexed(static_cast<UINT>(std::size(indices)), 0u, 0u);
 	}
 }

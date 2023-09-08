@@ -10,6 +10,7 @@ namespace Kaka
 	public:
 		DirectionalLight(const Graphics& aGfx, const UINT aSlot = 0u);
 		void Bind(const Graphics& aGfx);
+
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
 		void Reset();
@@ -19,6 +20,7 @@ namespace Kaka
 		void EnableSimulation();
 		void DisableSimulation();
 		void Simulate(const float aDeltaTime);
+
 	private:
 		struct DirectionalLightBuffer
 		{
@@ -31,8 +33,9 @@ namespace Kaka
 	private:
 		DirectionalLightBuffer bufferData;
 		PixelConstantBuffer<DirectionalLightBuffer> cbuf;
+
 	private:
-		bool shouldSimulate = true;
+		bool shouldSimulate = false;
 		float sunAngle = 0.0f;
 		const float rotationSpeed = 0.8f;
 		const DirectX::XMFLOAT3 lowColor = {0.4f, 0.4f, 0.6f};

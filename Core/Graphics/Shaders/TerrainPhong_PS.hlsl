@@ -1,7 +1,9 @@
 #include "Light.hlsli"
-#include "ShaderOps.hlsl"
+//#include "ShaderOps.hlsl"
+#include "PBRFunctions.hlsli"
+#include "PostprocessTonemapPS.hlsl"
 
-static const uint MAX_LIGHTS = 16u; // Needs to be the same in PointLight
+static const uint MAX_LIGHTS = 50u; // Needs to be the same in PointLight
 
 cbuffer ModelBuffer : register(b0)
 {
@@ -16,7 +18,7 @@ cbuffer DirectionalLightBuffer : register(b1)
     float3 dLightDirection;
     float padding;
     float3 dLightColour;
-    float ambientLight;
+    float ambientLightPower;
 };
 
 cbuffer PointLightBuffer : register(b2)
@@ -25,66 +27,124 @@ cbuffer PointLightBuffer : register(b2)
     uint activeLights;
 }
 
+cbuffer Reflection : register(b11)
+{
+    float planeHeight;
+}
+
 struct PixelInput
 {
     float3 worldPos : WPOSITION;
     float3 worldNorm : WNORMAL;
     float3 viewPos : POSITION;
-    float4 position : SV_POSITION; // Not used
+    float4 position : SV_POSITION;
     float3 viewNormal : NORMAL;
     float2 texCoord : TEXCOORD;
-    float3 viewTan : TANGENT;
-    float3 viewBitan : BITANGENT;
+    float3 tangent : TANGENT;
+    float3 bitan : BITANGENT;
     matrix modelView : MODELVIEW;
 };
 
-Texture2D albedoTexGrass : register(t0);
-Texture2D normalTexGrass : register(t1);
+Texture2D albTexGrass : register(t2);
+Texture2D nrmTexGrass : register(t3);
+Texture2D matTexGrass : register(t4);
 
-Texture2D albedoTexDirt : register(t2);
-Texture2D normalTexDirt : register(t3);
+Texture2D albTexRock : register(t5);
+Texture2D nrmTexRock : register(t6);
+Texture2D matTexRock : register(t7);
 
-Texture2D albedoTexRock : register(t4);
-Texture2D normalTexRock : register(t5);
-
-Texture2D albedoTexSnow : register(t6);
-Texture2D normalTexSnow : register(t7);
-
-SamplerState splr;
+Texture2D albTexSnow : register(t8);
+Texture2D nrmTexSnow : register(t9);
+Texture2D matTexSnow : register(t10);
 
 float4 main(PixelInput aInput) : SV_TARGET
 {
-    const float3 groundColour = { 0.9f, 0.7f, 0.1f };
-    const float3 skyColour = { 0.6f, 0.6f, 0.8f };
+    const float3 grassColour = albTexGrass.Sample(splr, aInput.texCoord).rgb;
+    const float3 grassNormal = nrmTexGrass.Sample(splr, aInput.texCoord).wyz;
+    const float3 grassMaterial = matTexGrass.Sample(splr, aInput.texCoord).rgb;
 
-    const float3 grassColour = albedoTexGrass.Sample(splr, aInput.texCoord).rgb;
-    const float3 grassNormal = normalTexGrass.Sample(splr, aInput.texCoord).wyz /** 2.0f - 1.0f*/;
+    const float3 rockColour = albTexRock.Sample(splr, aInput.texCoord).rgb;
+    const float3 rockNormal = nrmTexRock.Sample(splr, aInput.texCoord).wyz;
+    const float3 rockMaterial = matTexRock.Sample(splr, aInput.texCoord).rgb;
 
-    const float3 dirtColour = albedoTexDirt.Sample(splr, aInput.texCoord).rgb;
-    const float3 dirtNormal = normalTexDirt.Sample(splr, aInput.texCoord).wyz /** 2.0f - 1.0f*/;
-
-    const float3 rockColour = albedoTexRock.Sample(splr, aInput.texCoord).rgb;
-    const float3 rockNormal = normalTexRock.Sample(splr, aInput.texCoord).wyz /** 2.0f - 1.0f*/;
-
-    const float3 snowColour = albedoTexSnow.Sample(splr, aInput.texCoord).rgb;
-    const float3 snowNormal = normalTexSnow.Sample(splr, aInput.texCoord).wyz/* * 2.0f - 1.0f*/;
+    const float3 snowColour = albTexSnow.Sample(splr, aInput.texCoord).rgb;
+    const float3 snowNormal = nrmTexSnow.Sample(splr, aInput.texCoord).wyz;
+    const float3 snowMaterial = matTexSnow.Sample(splr, aInput.texCoord).rgb;
 
     const float slopeBlend = smoothstep(0.6f, 0.8f, aInput.worldNorm.y);
-    const float lowBlend = smoothstep(-30.0f, -5.0f, aInput.worldPos.y);
     const float heightBlend = smoothstep(5.0f, 25.0f, aInput.worldPos.y);
 
-    const float3 colour = lerp(rockColour, lerp(lerp(grassColour, dirtColour, lowBlend), snowColour, heightBlend), slopeBlend).rgb;
-    const float3 normal = lerp(rockNormal, lerp(lerp(grassNormal, dirtNormal, lowBlend), snowNormal, heightBlend), slopeBlend);
+    float3 colour = lerp(rockColour, lerp(grassColour, snowColour, heightBlend), slopeBlend).rgb;
+    float3 normal = lerp(rockNormal, lerp(grassNormal, snowNormal, heightBlend), slopeBlend);
+    const float3 material = lerp(rockMaterial, lerp(grassMaterial, snowMaterial, heightBlend), slopeBlend);
 
-	// Sample normal from map if normal mapping enabled
-    if (normalMapEnabled)
+    if (cameraPosition.y <= planeHeight + 0.1f)
     {
-        const float3 mappedNormal = MapNormal(normalize(aInput.viewTan), normalize(aInput.viewBitan), aInput.viewNormal, aInput.texCoord, normal, splr);
-        aInput.viewNormal =  mappedNormal;
+        const float dist = sqrt((aInput.worldPos.x - cameraPosition.x) * (aInput.worldPos.x - cameraPosition.x) + (aInput.worldPos.y - cameraPosition.y) * (aInput.worldPos.y - cameraPosition.y) + (aInput.worldPos.z - cameraPosition.z) * (aInput.worldPos.z - cameraPosition.z));
+
+        const float viewBlend = smoothstep(30.0f, 75.0f, dist);
+        const float3 darkWater = float3(colour.x * 0.01f, colour.y * 0.02f, colour.z * 0.1f);
+        const float3 normWater = float3(colour.x * 0.2f, colour.y * 0.7f, colour.z);
+
+        colour = lerp(normWater, darkWater, viewBlend);
     }
 
-    float3 combinedLight = { 0, 0, 0 };
-    float3 specular = { 0, 0, 0 };
+    float3 ambientLight = { 0.0f, 0.0f, 0.0f };
+    float3 directionalLight = { 0.0f, 0.0f, 0.0f };
+    float3 pointLight = { 0.0f, 0.0f, 0.0f };
+    float3 specular = { 0.0f, 0.0f, 0.0f };
+    const float ambientOcclusion = normal.b;
+
+    float metalness = 0.0f;
+    float roughness = 0.0f;
+    float emissive = 0.0f;
+	
+    if (normalMapEnabled)
+    {
+        normal = 2.0f * normal - 1.0f;
+        normal.z = sqrt(1 - saturate(normal.x * normal.x + normal.y * normal.y));
+        normal = normalize(normal);
+
+        float3x3 TBN = float3x3(
+		normalize(aInput.tangent.xyz),
+		normalize(-aInput.bitan.xyz),
+		normalize(aInput.worldNorm.xyz)
+		);
+
+	    // Can save an instruction here by instead doing
+	    // normalize(mul(normal, TBN)); It works because
+	    // TBN is a 3x3 and therefore TBN^T is the same
+	    // as TBN^-1. However, it is considered good form to do this.
+        TBN = transpose(TBN);
+        normal = normalize(mul(TBN, normal));
+    }
+
+    if (materialEnabled)
+    {
+        metalness = material.r;
+        roughness = material.g;
+        emissive = material.b;
+
+        specular = lerp((float3) 0.04f, colour.rgb, metalness);
+        colour = lerp((float3) 0.0f, colour.rgb, 1 - metalness);
+    }
+
+    const float3 toEye = normalize(cameraPosition - aInput.worldPos);
+
+    // Lighting
+
+	// Day/night cycle
+    const float3 lightDir = normalize(dLightDirection);
+    const float dotProduct = dot(lightDir, float3(0.0f, 1.0f, 0.0f));
+    const float blendFactor = (dotProduct + 1.0) / 2.0f;
+
+    // Ambient light
+    ambientLight = EvaluateAmbianceDynamicSky(splr, dayTex, nightTex, blendFactor,
+    normal, aInput.worldNorm.xyz, toEye, roughness, ambientOcclusion, colour, specular);
+
+	// Directional light
+    directionalLight = EvaluateDirectionalLight(colour, specular, normal,
+    roughness, dLightColour, -dLightDirection, toEye);
 
     // Point lights
     for (uint i = 0; i < activeLights; ++i)
@@ -94,31 +154,15 @@ float4 main(PixelInput aInput) : SV_TARGET
             continue;
         }
 
-    	// Fragment to light vector data
-        const float3 vToL = plBuf[i].pLightPosition - aInput.viewPos;
-        const float distToL = length(vToL);
-        const float3 dirToL = vToL / distToL;
-
-		// Attenuation
-        const float att = Attenuate(plBuf[i].radius, plBuf[i].falloff, distToL);
-		// Diffuse
-        combinedLight += Diffuse(plBuf[i].pLightColour, plBuf[i].pLightIntensity, att, dirToL, aInput.viewNormal);;
-		// Specular reflected
-        specular += Speculate(plBuf[i].pLightColour * plBuf[i].pLightIntensity,
-        specularIntensity, aInput.viewNormal,
-        vToL, aInput.viewPos, att, specularPower);
+        pointLight += EvaluatePointLight(colour, specular, normal,
+        roughness, plBuf[i].pLightColour, plBuf[i].pLightIntensity,
+        plBuf[i].radius, plBuf[i].pLightPosition, toEye, aInput.viewPos);
     }
 
-    // Directional light
-    const float3 viewDirectionalLightDir = mul(dLightDirection, (float3x3) aInput.modelView);
-    combinedLight += max(0, dot(aInput.viewNormal, -viewDirectionalLightDir)) * dLightColour;
-    specular += Speculate(dLightColour,
-        specularIntensity, aInput.viewNormal,
-        -viewDirectionalLightDir, aInput.viewPos, 1.0f, specularPower);
+	// Final colour
+    const float3 emissiveColour = colour * emissive;
+    const float3 finalColour = saturate(ambientLight * ambientLightPower + directionalLight + pointLight + emissiveColour);
+    // Tonemap
+    return float4(tonemap_s_gamut3_cine(finalColour), 1.0f);
 
-    // Ambient light
-    const float3 twoDirAmbientLight = ambientLight * ((0.5f + 0.5f * aInput.viewNormal.y) * skyColour + (0.5f - 0.5f * aInput.viewNormal.y) * groundColour);
-
-	// Final color
-    return float4(saturate((combinedLight + twoDirAmbientLight) * colour + specular), 1.0f);
 }

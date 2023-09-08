@@ -17,6 +17,12 @@ namespace Kaka
 {
 	struct Mesh;
 
+	struct RenderTarget
+	{
+		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pTarget;
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pResource;
+	};
+
 	class Graphics
 	{
 		friend class Model;
@@ -25,6 +31,9 @@ namespace Kaka
 		friend class PointLight;
 		friend class Terrain;
 		friend class Skybox;
+		friend class ReflectionPlane;
+		friend class Game;
+
 	public:
 		Graphics(HWND aHWnd, UINT aWidth, UINT aHeight);
 		Graphics(const Graphics&) = delete;
@@ -37,27 +46,44 @@ namespace Kaka
 		DirectX::XMMATRIX GetProjection() const;
 		void SetCamera(DirectX::FXMMATRIX aCamera);
 		DirectX::XMMATRIX GetCamera() const;
+		UINT GetDrawcallCount() const;
+		//void SetRenderTarget(bool aUseDefaultRenderTarget, const bool aClearRender = false,
+		//                     const bool aClearDepth = false);
+		void SetWaterReflectTarget();
+		void SetDefaultTarget();
+
+		void BindWaterReflectionTexture();
+		DirectX::XMFLOAT2 GetCurrentResolution() const;
+
 	public:
 		void EnableImGui();
 		void DisableImGui();
 		bool IsImGuiEnabled() const;
 		UINT GetWidth() const;
 		UINT GetHeight() const;
+
 	private:
 		bool imGuiEnabled = true;
+		UINT drawcallCount;
+
 	public:
 		void DrawTestTriangle2D();
 		void DrawTestCube3D(const float aAngle, const DirectX::XMFLOAT3 aPos);
+
 	private:
 		DirectX::XMMATRIX projection{};
 		DirectX::XMMATRIX camera{};
 		Microsoft::WRL::ComPtr<ID3D11Device> pDevice;
 		Microsoft::WRL::ComPtr<IDXGISwapChain> pSwap;
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext;
+
+		RenderTarget renderWaterReflection;
 		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pTarget;
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pDepth;
+		Microsoft::WRL::ComPtr<ID3D11Texture2D> pWaterReflectionTex;
 		UINT width;
 		UINT height;
+
 	private:
 	};
 }

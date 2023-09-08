@@ -17,6 +17,7 @@ namespace Kaka
 		public:
 			static const wchar_t* GetName();
 			static HINSTANCE GetInstance();
+
 		private:
 			WindowClass();
 			~WindowClass();
@@ -37,6 +38,7 @@ namespace Kaka
 		bool CursorEnabled() const;
 		static std::optional<int> ProcessMessages();
 		Graphics& Gfx() const;
+
 	private:
 		void ConfineCursor() const;
 		void FreeCursor();
@@ -47,9 +49,11 @@ namespace Kaka
 		static LRESULT WINAPI HandleMsgSetup(HWND aHWnd, UINT aUMsg, WPARAM aWParam, LPARAM aLParam);
 		static LRESULT WINAPI HandleMsgThunk(HWND aHWnd, UINT aUMsg, WPARAM aWParam, LPARAM aLParam);
 		LRESULT HandleMsg(HWND aHWnd, UINT aUMsg, WPARAM aWParam, LPARAM aLParam);
+
 	public:
 		Keyboard keyboard;
 		Mouse mouse;
+
 	private:
 		bool cursorEnabled = true;
 		int width;

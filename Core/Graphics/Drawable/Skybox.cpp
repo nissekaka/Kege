@@ -20,11 +20,11 @@ namespace Kaka
 		inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
 		topology.Init(aGfx, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		rasterizer.Init(aGfx, true);
+		rasterizer.Init(aGfx, eCullingMode::None);
 		depthStencil.Init(aGfx, DepthStencil::Mode::DepthFirst);
 	}
 
-	void Skybox::Draw(const Graphics& aGfx)
+	void Skybox::Draw(Graphics& aGfx)
 	{
 		UNREFERENCED_PARAMETER(aGfx);
 
@@ -47,11 +47,11 @@ namespace Kaka
 		rasterizer.Bind(aGfx);
 		depthStencil.Bind(aGfx);
 
-		aGfx.pContext->DrawIndexed(static_cast<UINT>(std::size(indices)), 0u, 0u);
+		aGfx.DrawIndexed(static_cast<UINT>(std::size(indices)));
+
 		// Unbind shader resources
-		ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
-		aGfx.pContext->PSSetShaderResources(0, 1, nullSRVs);
-		aGfx.pContext->PSSetShaderResources(1, 1, nullSRVs);
+		//ID3D11ShaderResourceView* nullSRVs[2] = {nullptr};
+		//aGfx.pContext->PSSetShaderResources(0u, 2, nullSRVs);
 	}
 
 	void Skybox::Rotate(const DirectX::XMFLOAT3 aRotation)
@@ -61,9 +61,14 @@ namespace Kaka
 		transform.yaw = aRotation.z;
 	}
 
+	void Skybox::FlipScale()
+	{
+		transform.scale.y *= -1.0f;
+	}
+
 	DirectX::XMMATRIX Skybox::GetTransform() const
 	{
-		return DirectX::XMMatrixScaling(transform.scale, transform.scale, transform.scale) *
+		return DirectX::XMMatrixScaling(transform.scale.x, transform.scale.y, transform.scale.z) *
 			DirectX::XMMatrixRotationRollPitchYaw(transform.roll, transform.pitch, transform.roll) *
 			DirectX::XMMatrixTranslation(transform.x, transform.y, transform.z);
 	}

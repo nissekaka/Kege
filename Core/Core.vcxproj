@@ -93,6 +93,7 @@
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="Graphics\Bindable\CubeTexture.cpp" />
     <ClCompile Include="Graphics\Bindable\DepthStencil.cpp" />
+    <ClCompile Include="Graphics\Drawable\ReflectionPlane.cpp" />
     <ClCompile Include="Graphics\Drawable\Skybox.cpp" />
     <ClCompile Include="Graphics\Drawable\Terrain.cpp" />
     <ClCompile Include="Graphics\Lighting\PointLight.cpp" />
@@ -125,6 +126,7 @@
   <ItemGroup>
     <ClInclude Include="Graphics\Bindable\CubeTexture.h" />
     <ClInclude Include="Graphics\Bindable\DepthStencil.h" />
+    <ClInclude Include="Graphics\Drawable\ReflectionPlane.h" />
     <ClInclude Include="Graphics\Drawable\Skybox.h" />
     <ClInclude Include="Graphics\Drawable\Terrain.h" />
     <ClInclude Include="Graphics\Lighting\PointLight.h" />
@@ -196,6 +198,17 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
+    <FxCompile Include="Graphics\Shaders\PostprocessTonemapPS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Graphics\Shaders\ReflectionPlane_PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Graphics\Shaders\ReflectionPlane_VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="Graphics\Shaders\Skybox_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
@@ -219,6 +232,10 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Graphics\Shaders\TerrainPhong_VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Graphics\Shaders\TerrainReflect_VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>

@@ -49,9 +49,9 @@ namespace Kaka
 
 		// Calculate window size based on desired client region size
 		RECT wr = {};
-		wr.left = 100;
+		wr.left = 0;
 		wr.right = aWidth + wr.left;
-		wr.top = 100;
+		wr.top = 0;
 		wr.bottom = aHeight + wr.top;
 		AdjustWindowRect(&wr, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE);
 
@@ -74,6 +74,12 @@ namespace Kaka
 		// Show window
 		ShowWindow(hWnd, SW_SHOWDEFAULT);
 
+		RECT clientRect;
+		GetClientRect(hWnd, &clientRect);
+
+		width = clientRect.right - clientRect.left;
+		height = clientRect.bottom - clientRect.top;
+
 		// Create graphics object
 		pGfx = std::make_unique<Graphics>(hWnd, width, height);
 
@@ -87,6 +93,8 @@ namespace Kaka
 		rid.dwFlags = 0;
 		rid.hwndTarget = nullptr;
 		RegisterRawInputDevices(&rid, 1, sizeof(rid));
+		MoveWindow(hWnd, 1920, 0, aWidth, aHeight, TRUE);
+		ShowWindow(hWnd, SW_MAXIMIZE);
 	}
 
 	Window::~Window()
@@ -231,6 +239,7 @@ namespace Kaka
 			break;
 		}
 		case WM_ACTIVATE:
+		{
 			// Confine/free cursor on window to foreground/background if cursor disabled
 			if (!cursorEnabled)
 			{
@@ -246,7 +255,29 @@ namespace Kaka
 				}
 			}
 			break;
+		}
+		case WM_SYSCOMMAND:
+		{
+			std::string text = "\n" + std::to_string(aWParam);
+			OutputDebugStringA(text.c_str());
+			//if (aWParam == 61490 ||
+			//	aWParam == 61488 ||
+			//	aWParam == 61728 ||
+			//	aWParam == 61730 ||
+			//	aWParam == 61458)
+			//{
+			//	// Get the client area size of your Win32 window
+			//	RECT clientRect;
+			//	GetClientRect(aHWnd, &clientRect);
+			//	const int clientWidth = clientRect.right - clientRect.left;
+			//	const int clientHeight = clientRect.bottom - clientRect.top;
 
+			//	// Update ImGui's window size settings
+			//	ImGuiIO& io = ImGui::GetIO();
+			//	io.DisplaySize.x = static_cast<float>(clientWidth);
+			//	io.DisplaySize.y = static_cast<float>(clientHeight);
+			//}
+		}
 		/********** KEYBOARD MESSAGES **********/
 		case WM_KEYDOWN:
 		case WM_SYSKEYDOWN:

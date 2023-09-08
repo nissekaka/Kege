@@ -26,7 +26,7 @@ namespace Kaka
 		noiseGenerator.SetFractalGain(0.5f);
 
 		constexpr float heightMul = 100.0f;
-		constexpr float texCoordResFactor = 20.0f;
+		constexpr float uvFactor = 80.0f;
 
 		std::vector<Vertex> terrainVertices;
 		std::vector<unsigned short> terrainIndices;
@@ -40,8 +40,8 @@ namespace Kaka
 				vertex.position = DirectX::XMFLOAT3(static_cast<float>(x), noiseValue * heightMul,
 				                                    static_cast<float>(z));
 				vertex.normal = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
-				vertex.texCoord = DirectX::XMFLOAT2(static_cast<float>(x) / texCoordResFactor,
-				                                    static_cast<float>(z) / texCoordResFactor);
+				vertex.texCoord = DirectX::XMFLOAT2(static_cast<float>(x) / uvFactor,
+				                                    static_cast<float>(z) / uvFactor);
 				vertex.tangent = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 				vertex.bitangent = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 				terrainVertices.push_back(vertex);
@@ -50,7 +50,7 @@ namespace Kaka
 
 		OutputDebugStringA("\nDone generating...");
 
-		float smoothingFactor = 1.0f;
+		constexpr float smoothingFactor = 1.0f;
 		float heightThreshold = 0.0f;
 		int smoothingIterations = 15;
 
@@ -77,41 +77,31 @@ namespace Kaka
 
 					if (z > 0)
 					{
-						averagePosition.x += terrainVertices[indexTop].position.x;
 						averagePosition.y += terrainVertices[indexTop].position.y;
-						averagePosition.z += terrainVertices[indexTop].position.z;
 						numNeighbours++;
 					}
 					if (z < aSize - 1)
 					{
-						averagePosition.x += terrainVertices[indexBottom].position.x;
 						averagePosition.y += terrainVertices[indexBottom].position.y;
-						averagePosition.z += terrainVertices[indexBottom].position.z;
 						numNeighbours++;
 					}
 					if (x > 0)
 					{
-						averagePosition.x += terrainVertices[indexLeft].position.x;
 						averagePosition.y += terrainVertices[indexLeft].position.y;
-						averagePosition.z += terrainVertices[indexLeft].position.z;
 						numNeighbours++;
 					}
 					if (x < aSize - 1)
 					{
-						averagePosition.x += terrainVertices[indexRight].position.x;
 						averagePosition.y += terrainVertices[indexRight].position.y;
-						averagePosition.z += terrainVertices[indexRight].position.z;
 						numNeighbours++;
 					}
-					averagePosition.x /= numNeighbours;
 					averagePosition.y /= numNeighbours;
-					averagePosition.z /= numNeighbours;
 
 					DirectX::XMFLOAT3& currentPosition = terrainVertices[currentIndex].position;
 					DirectX::XMFLOAT3 smoothedPosition = DirectX::XMFLOAT3(
-						currentPosition.x + (averagePosition.x - currentPosition.x) * smoothingFactor,
+						currentPosition.x,
 						currentPosition.y + (averagePosition.y - currentPosition.y) * smoothingFactor,
-						currentPosition.z + (averagePosition.z - currentPosition.z) * smoothingFactor
+						currentPosition.z
 					);
 
 					// Update the vertex position
@@ -156,7 +146,7 @@ namespace Kaka
 
 				if (isBorder)
 				{
-					DirectX::XMStoreFloat3(&terrainVertices[currentIndex].normal, {0,1,0});
+					DirectX::XMStoreFloat3(&terrainVertices[currentIndex].normal, {0, 1, 0});
 				}
 				else
 				{
@@ -207,7 +197,6 @@ namespace Kaka
 		}
 
 		OutputDebugStringA("\nPushed indices...");
-
 
 		constexpr int subsetSize = 62500;
 		const int numVertices = static_cast<int>(terrainVertices.size());
@@ -267,14 +256,17 @@ namespace Kaka
 
 		OutputDebugStringA("\nMoved to subsets...");
 
-		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Grass\\Stylized_Grass_003_BaseColor.jpg");
-		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Grass\\Stylized_Grass_003_Normal.jpg");
-		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Dirt\\Stylized_Dry_Mud_001_BaseColor.jpg");
-		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Dirt\\Stylized_Dry_Mud_001_Normal.jpg");
-		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Rock\\peter-larsen-stylizedrockdiffuse.jpg");
-		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Rock\\peter-larsen-stylizedrocknormal-png.jpg");
-		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Snow\\Snow_001_BaseColor.jpg");
-		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Snow\\Snow_001_Normal.jpg");
+		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Grass\\Grass_c.png");
+		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Grass\\Grass_n.png");
+		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Grass\\Grass_m.png");
+		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Rock\\Rock_c.png");
+		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Rock\\Rock_n.png");
+		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Rock\\Rock_m.png");
+		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Snow\\Snow_c.png");
+		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Snow\\Snow_n.png");
+		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Snow\\Snow_m.png");
+
+		OutputDebugStringA("\nLoaded textures...");
 
 		sampler.Init(aGfx, 0u);
 
@@ -285,23 +277,22 @@ namespace Kaka
 		}
 
 		pixelShader.Init(aGfx, L"Shaders\\TerrainPhong_PS.cso");
-		vertexShader.Init(aGfx, L"Shaders\\TerrainPhong_VS.cso");
+		vertexShader.Init(aGfx, L"Shaders\\TerrainReflect_VS.cso");
 
 		inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
 		topology.Init(aGfx, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		rasterizer.Init(aGfx, false);
+		rasterizer.Init(aGfx);
 		depthStencil.Init(aGfx, DepthStencil::Mode::Write);
 
 		OutputDebugStringA("\nDone!");
 	}
 
-	void Terrain::Draw(const Graphics& aGfx)
+	void Terrain::Draw(Graphics& aGfx)
 	{
 		for (auto& subset : terrainSubsets)
 		{
 			sampler.Bind(aGfx);
-
 			texture.Bind(aGfx);
 
 			subset.vertexBuffer.Bind(aGfx);
@@ -321,18 +312,11 @@ namespace Kaka
 			rasterizer.Bind(aGfx);
 			depthStencil.Bind(aGfx);
 
-			aGfx.pContext->DrawIndexed(static_cast<UINT>(std::size(subset.indices)), 0u, 0u);
+			aGfx.DrawIndexed(static_cast<UINT>(std::size(subset.indices)));
 
 			// Unbind shader resources
-			ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
-			aGfx.pContext->PSSetShaderResources(0, 1, nullSRVs); // albedoTexGrass
-			aGfx.pContext->PSSetShaderResources(1, 1, nullSRVs); // normalTexGrass
-			aGfx.pContext->PSSetShaderResources(2, 1, nullSRVs); // albedoTexDirt
-			aGfx.pContext->PSSetShaderResources(3, 1, nullSRVs); // normalTexDirt
-			aGfx.pContext->PSSetShaderResources(4, 1, nullSRVs); // albedoTexRock
-			aGfx.pContext->PSSetShaderResources(5, 1, nullSRVs); // normalTexRock
-			aGfx.pContext->PSSetShaderResources(6, 1, nullSRVs); // albedoTexSnow
-			aGfx.pContext->PSSetShaderResources(7, 1, nullSRVs); // normalTexSnow
+			ID3D11ShaderResourceView* nullSRVs[9] = {nullptr};
+			aGfx.pContext->PSSetShaderResources(2u, 9u, nullSRVs);
 		}
 	}
 
@@ -343,9 +327,61 @@ namespace Kaka
 		transform.z = aPosition.z;
 	}
 
+	void Terrain::Move(const DirectX::XMFLOAT3 aDistance)
+	{
+		transform.x += aDistance.x;
+		transform.y += aDistance.y;
+		transform.z += aDistance.z;
+	}
+
+	void Terrain::FlipScale(const float aHeight, const bool aReset)
+	{
+		transform.scale.y *= -1.0f;
+		if (aReset)
+		{
+			transform.y -= aHeight * 2.0f;
+		}
+		else
+		{
+			transform.y += aHeight * 2.0f;
+		}
+	}
+
+	void Terrain::SetReflectShader(const Graphics& aGfx, const bool aValue)
+	{
+		if (aValue)
+		{
+			vertexShader.Init(aGfx, L"Shaders\\TerrainReflect_VS.cso");
+		}
+		else
+		{
+			vertexShader.Init(aGfx, L"Shaders\\TerrainPhong_VS.cso");
+		}
+	}
+
+	void Terrain::SetCullingMode(const eCullingMode aMode)
+	{
+		rasterizer.SetCullingMode(aMode);
+	}
+
+	DirectX::XMFLOAT3 Terrain::GetRandomVertexPosition() const
+	{
+		std::random_device rd;
+		std::mt19937 mt(rd());
+		std::uniform_int_distribution<> sDist(0, (int)terrainSubsets.size() - 1);
+		const int subsetIndex = sDist(mt);
+		std::uniform_int_distribution<> vDist(0, (int)terrainSubsets[subsetIndex].vertices.size() - 1);
+		const int vertIndex = vDist(mt);
+
+		float x = terrainSubsets[subsetIndex].vertices[vertIndex].position.x + transform.x;
+		float y = terrainSubsets[subsetIndex].vertices[vertIndex].position.y + transform.y;
+		float z = terrainSubsets[subsetIndex].vertices[vertIndex].position.z + transform.z;
+		return {x, y, z};
+	}
+
 	DirectX::XMMATRIX Terrain::GetTransform() const
 	{
-		return DirectX::XMMatrixScaling(transform.scale, transform.scale, transform.scale) *
+		return DirectX::XMMatrixScaling(transform.scale.x, transform.scale.y, transform.scale.z) *
 			DirectX::XMMatrixRotationRollPitchYaw(transform.roll, transform.pitch, transform.roll) *
 			DirectX::XMMatrixTranslation(transform.x, transform.y, transform.z);
 	}
@@ -363,7 +399,7 @@ namespace Kaka
 			ImGui::Text("Position");
 			ImGui::DragFloat3("XYZ", &transform.x);
 			ImGui::Text("Scale");
-			ImGui::DragFloat("XYZ", &transform.scale, 0.1f, 0.0f, 10.0f, "%.1f");
+			ImGui::DragFloat("XYZ", &transform.scale.x, 0.1f, 0.0f, 10.0f, "%.1f");
 			ImGui::Text("Specular");
 			ImGui::SliderFloat("Intensity", &pmc.specularIntensity, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
 			ImGui::DragFloat("Power", &pmc.specularPower);

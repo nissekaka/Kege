@@ -13,7 +13,7 @@ namespace Kaka
 	{
 		isLoaded = ModelLoader::LoadModel(aFilePath, modelData);
 		texture.LoadTextureFromModel(aGfx, aFilePath);
-		solidColour = {1.0f,1.0f,1.0f,1.0f};
+		solidColour = {1.0f, 1.0f, 1.0f, 1.0f};
 	}
 
 	void Model::LoadModel(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType)
@@ -22,7 +22,7 @@ namespace Kaka
 
 		isLoaded = ModelLoader::LoadModel(aFilePath, modelData);
 		texture.LoadTextureFromModel(aGfx, aFilePath);
-		solidColour = {1.0f,1.0f,1.0f,1.0f};
+		solidColour = {1.0f, 1.0f, 1.0f, 1.0f};
 
 		if (isLoaded)
 		{
@@ -63,8 +63,8 @@ namespace Kaka
 				ied =
 				{
 					{
-						"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+						"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 					},
 				};
 			}
@@ -77,24 +77,24 @@ namespace Kaka
 				ied =
 				{
 					{
-						"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+						"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 					},
 					{
-						"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+						"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 					},
 					{
-						"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,
-						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+						"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 					},
 					{
-						"TANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+						"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 					},
 					{
-						"BITANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+						"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 					},
 				};
 			}
@@ -107,24 +107,24 @@ namespace Kaka
 				ied =
 				{
 					{
-						"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+						"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 					},
 					{
-						"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+						"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 					},
 					{
-						"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,
-						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+						"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 					},
 					{
-						"TANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+						"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 					},
 					{
-						"BITANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+						"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 					},
 				};
 				inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
@@ -138,32 +138,32 @@ namespace Kaka
 				ied =
 				{
 					{
-						"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+						"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 					},
 					{
-						"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+						"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 					},
 					{
-						"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,
-						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+						"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 					},
 					{
-						"TANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+						"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 					},
 					{
-						"BITANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+						"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 					},
 					{
-						"BONEINDICES",0,DXGI_FORMAT_R8G8B8A8_UINT,0,
-						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+						"BONEINDICES", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 					},
 					{
-						"BONEWEIGHT",0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,
-						D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+						"BONEWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 					},
 				};
 			}
@@ -172,12 +172,12 @@ namespace Kaka
 
 			inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
 			topology.Init(aGfx, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			rasterizer.Init(aGfx, false);
+			rasterizer.Init(aGfx);
 			depthStencil.Init(aGfx, DepthStencil::Mode::Write);
 		}
 	}
 
-	void Model::Draw(const Graphics& aGfx)
+	void Model::Draw(Graphics& aGfx)
 	{
 		if (!isLoaded)
 		{
@@ -298,12 +298,11 @@ namespace Kaka
 			break;
 		}
 
-		aGfx.pContext->DrawIndexed(static_cast<UINT>(std::size(indices)), 0u, 0u);
+		aGfx.DrawIndexed(static_cast<UINT>(std::size(indices)));
+		//aGfx.pContext->DrawIndexed(static_cast<UINT>(std::size(indices)), 0u, 0u);
 		// Unbind shader resources
-		ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
-		aGfx.pContext->PSSetShaderResources(0, 1, nullSRVs);
-		aGfx.pContext->PSSetShaderResources(1, 1, nullSRVs);
-		aGfx.pContext->PSSetShaderResources(2, 1, nullSRVs);
+		ID3D11ShaderResourceView* nullSRVs[3] = {nullptr};
+		aGfx.pContext->PSSetShaderResources(0u, 3u, nullSRVs);
 	}
 
 	void Model::Update(const float aDeltaTime)
@@ -338,12 +337,14 @@ namespace Kaka
 		{
 			for (int col = 0; col < 4; ++col)
 			{
-				interpolatedTransform.m[row][col] = transform1.m[row][col] + aT * (transform2.m[row][col] - transform1.m[row][col]);
+				interpolatedTransform.m[row][col] = transform1.m[row][col] + aT * (transform2.m[row][col] - transform1.m
+					[row][col]);
 			}
 		}
 
 		// Calculate the final bone transform by multiplying with the parent's transform
-		const DirectX::XMMATRIX boneTransform = DirectX::XMLoadFloat4x4(&modelData.globalInverseMatrix) * DirectX::XMLoadFloat4x4(&interpolatedTransform) * aParentTransform;
+		const DirectX::XMMATRIX boneTransform = DirectX::XMLoadFloat4x4(&modelData.globalInverseMatrix) *
+			DirectX::XMLoadFloat4x4(&interpolatedTransform) * aParentTransform;
 
 		// Store the bone transform in the interpolatedBoneTransforms array
 		DirectX::XMStoreFloat4x4(&aInterpolatedBoneTransforms[aBoneIndex], boneTransform);
@@ -390,7 +391,8 @@ namespace Kaka
 				std::vector<DirectX::XMFLOAT4X4> interpolatedBoneTransforms(modelData.skeleton.bones.size());
 
 				// Traverse the bone hierarchy and calculate the interpolated bone transformations
-				TraverseBoneHierarchy(modelData.skeleton.rootBoneIndex, DirectX::XMMatrixIdentity(), interpolatedBoneTransforms, keyframe1, keyframe2, t);
+				TraverseBoneHierarchy(modelData.skeleton.rootBoneIndex, DirectX::XMMatrixIdentity(),
+				                      interpolatedBoneTransforms, keyframe1, keyframe2, t);
 
 				// Update the bone transformations in the skeleton
 				for (size_t i = 0; i < modelData.skeleton.bones.size(); ++i)
@@ -442,12 +444,12 @@ namespace Kaka
 
 	DirectX::XMFLOAT3 Model::GetPosition() const
 	{
-		return {transform.x,transform.y,transform.z};
+		return {transform.x, transform.y, transform.z};
 	}
 
 	DirectX::XMFLOAT3 Model::GetRotation() const
 	{
-		return {transform.roll,transform.pitch,transform.yaw};
+		return {transform.roll, transform.pitch, transform.yaw};
 	}
 
 	DirectX::XMMATRIX Model::GetTransform() const
