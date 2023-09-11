@@ -78,6 +78,13 @@ float4 main(PixelInput aInput) : SV_TARGET
     float3 normal = lerp(rockNormal, lerp(grassNormal, snowNormal, heightBlend), slopeBlend);
     const float3 material = lerp(rockMaterial, lerp(grassMaterial, snowMaterial, heightBlend), slopeBlend);
 
+    const float waterBlend = smoothstep(-5.0f, 5.0f, aInput.worldPos.y - planeHeight);
+
+    const float3 beachColour = float3(0.25f, 0.16f, 0.07f);
+    //const float3 beachColour = float3(1.0f, 0.85f, 0.5f);
+    //const float3 beachColour = float3(0.6f, 1.0f, 1.0f);
+    colour = lerp(beachColour, colour, waterBlend);
+
     if (cameraPosition.y <= planeHeight + 0.1f)
     {
         const float dist = sqrt((aInput.worldPos.x - cameraPosition.x) * (aInput.worldPos.x - cameraPosition.x) + (aInput.worldPos.y - cameraPosition.y) * (aInput.worldPos.y - cameraPosition.y) + (aInput.worldPos.z - cameraPosition.z) * (aInput.worldPos.z - cameraPosition.z));

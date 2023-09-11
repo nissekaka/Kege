@@ -21,7 +21,9 @@ namespace Kaka
 		void LoadModel(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType);
 		void Draw(Graphics& aGfx);
 		void Update(float aDeltaTime);
-		void TraverseBoneHierarchy(int aBoneIndex, const DirectX::XMMATRIX& aParentTransform, std::vector<DirectX::XMFLOAT4X4>& aInterpolatedBoneTransforms, const Keyframe& aKeyframe1,
+		void TraverseBoneHierarchy(int aBoneIndex, const DirectX::XMMATRIX& aParentTransform,
+		                           std::vector<DirectX::XMFLOAT4X4>& aInterpolatedBoneTransforms,
+		                           const Keyframe& aKeyframe1,
 		                           const Keyframe& aKeyframe2,
 		                           float aT);
 		void Animate();
@@ -34,8 +36,10 @@ namespace Kaka
 		DirectX::XMMATRIX GetTransform() const override;
 		float GetScale() const;
 		bool IsLoaded() const;
+
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
+
 	private:
 		Sampler sampler = {};
 		VertexBuffer vertexBuffer = {};
@@ -47,8 +51,10 @@ namespace Kaka
 		Topology topology = {};
 		Rasterizer rasterizer = {};
 		DepthStencil depthStencil = {};
+
 	private:
-		eShaderType shaderType;
+		eShaderType shaderType = {};
+
 	private:
 		struct TransformParameters
 		{
@@ -63,7 +69,7 @@ namespace Kaka
 
 		TransformParameters transform;
 
-		DirectX::XMFLOAT4 solidColour;
+		DirectX::XMFLOAT4 solidColour = {};
 		float specularIntensity = 0.1f;
 		float specularPower = 2.0f;
 

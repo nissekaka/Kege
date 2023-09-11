@@ -6,8 +6,8 @@
 
 constexpr int WINDOW_WIDTH = 1920;
 constexpr int WINDOW_HEIGHT = 1080;
-constexpr int NUM_LIGHTS = 10;
-constexpr int TERRAIN_SIZE = 1200;
+constexpr int NUM_LIGHTS = 0;
+constexpr int TERRAIN_SIZE = 1000;
 
 namespace Kaka
 {
@@ -33,15 +33,15 @@ namespace Kaka
 		skybox.Init(wnd.Gfx(), "Assets\\Textures\\Skybox\\Miramar\\", "Assets\\Textures\\Skybox\\Kurt\\");
 
 		reflectionPSBuffer.A = 0.7f;
-		reflectionPSBuffer.k0 = {-1.6f, 0.5f};
-		reflectionPSBuffer.k1 = {-1.1f, 0.8f};
+		reflectionPSBuffer.k0 = {-0.9f, 0.5f};
+		reflectionPSBuffer.k1 = {-0.2f, 0.5f};
 
-		constexpr float reflectPlaneHeight = -11.0f;
+		constexpr float reflectPlaneHeight = -8.0f;
 
 		reflectionPlane.Init(wnd.Gfx(), TERRAIN_SIZE / 2.0f);
 		reflectionPlane.SetPosition({TERRAIN_SIZE / 2.0f, reflectPlaneHeight, TERRAIN_SIZE / 2.0f});
 
-		camera.SetPosition({845.0f, 222.0f, 218.0f});
+		camera.SetPosition({742.75f, 0.16f, 395.95f});
 
 		terrain.Init(wnd.Gfx(), TERRAIN_SIZE);
 
@@ -141,6 +141,7 @@ namespace Kaka
 		skyboxAngle.y += skyboxSpeed * aDeltaTime;
 		skybox.Rotate(skyboxAngle);
 
+		// Reflective plane and terrain
 		wnd.Gfx().SetWaterReflectTarget();
 
 		skybox.FlipScale();
@@ -161,7 +162,9 @@ namespace Kaka
 		terrain.Draw(wnd.Gfx());
 
 		wnd.Gfx().BindWaterReflectionTexture();
+		wnd.Gfx().SetAlpha();
 		reflectionPlane.Draw(wnd.Gfx());
+		wnd.Gfx().ResetAlpha();
 
 		// ImGui windows
 		if (showImGui)

@@ -38,7 +38,13 @@ PixelInput main(VertexInput aInput)
     PixelInput output;
 
 	// Accumulate bone transformations based on bone indices and weights
-    matrix finalTransform;
+    matrix finalTransform =
+    {
+        { 1, 0, 0, 0 },
+        { 0, 1, 0, 0 },
+        { 0, 0, 1, 0 },
+        { 0, 0, 0, 1 }
+    };
     for (int i = 0; i < 4; ++i)
     {
         uint boneIndex = aInput.boneIndices[i];

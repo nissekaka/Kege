@@ -18,18 +18,18 @@ namespace Kaka
 		scd.BufferDesc.Width = width;
 		scd.BufferDesc.Height = height;
 		scd.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-		scd.BufferDesc.RefreshRate.Numerator = 0;
-		scd.BufferDesc.RefreshRate.Denominator = 0;
+		scd.BufferDesc.RefreshRate.Numerator = 0u;
+		scd.BufferDesc.RefreshRate.Denominator = 0u;
 		scd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 		scd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-		scd.SampleDesc.Count = 1; // Anti-aliasing
-		scd.SampleDesc.Quality = 0; // Anti-aliasing
+		scd.SampleDesc.Count = 1u; // Anti-aliasing
+		scd.SampleDesc.Quality = 0u; // Anti-aliasing
 		scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		scd.BufferCount = 1; // 1 back buffer and 1 front buffer
+		scd.BufferCount = 1u; // 1 back buffer and 1 front buffer
 		scd.OutputWindow = aHWnd;
 		scd.Windowed = true;
 		scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-		scd.Flags = 0;
+		scd.Flags = 0u;
 
 		UINT swapCreateFlags = 0u;
 #ifndef NDEBUG
@@ -53,7 +53,7 @@ namespace Kaka
 
 		// Gain access to texture subresource in swap chains (back buffer)
 		WRL::ComPtr<ID3D11Resource> pBackBuffer;
-		pSwap->GetBuffer(0, __uuidof(ID3D11Resource), &pBackBuffer);
+		pSwap->GetBuffer(0u, __uuidof(ID3D11Resource), &pBackBuffer);
 		pDevice->CreateRenderTargetView(pBackBuffer.Get(), nullptr, &pTarget);
 
 		// Create depth stencil state
@@ -95,40 +95,49 @@ namespace Kaka
 		D3D11_VIEWPORT vp = {};
 		vp.Width = static_cast<FLOAT>(width);
 		vp.Height = static_cast<FLOAT>(height);
-		vp.MinDepth = 0;
-		vp.MaxDepth = 1;
-		vp.TopLeftX = 0;
-		vp.TopLeftY = 0;
+		vp.MinDepth = 0.0f;
+		vp.MaxDepth = 1.0f;
+		vp.TopLeftX = 0.0f;
+		vp.TopLeftY = 0.0f;
 		pContext->RSSetViewports(1u, &vp);
 
 		HRESULT result;
 
+		ID3D11Texture2D* texture;
 		// Reflection texture
 		D3D11_TEXTURE2D_DESC desc = {0};
 		desc.Width = width;
 		desc.Height = height;
-		desc.MipLevels = 1;
-		desc.ArraySize = 1;
+		desc.MipLevels = 1u;
+		desc.ArraySize = 1u;
 		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-		desc.SampleDesc.Count = 1;
-		desc.SampleDesc.Quality = 0;
+		desc.SampleDesc.Count = 1u;
+		desc.SampleDesc.Quality = 0u;
 		desc.Usage = D3D11_USAGE_DEFAULT;
 		desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-		desc.CPUAccessFlags = 0;
-		desc.MiscFlags = 0;
-		result = pDevice->CreateTexture2D(&desc, nullptr, pWaterReflectionTex.GetAddressOf());
+		desc.CPUAccessFlags = 0u;
+		desc.MiscFlags = 0u;
+		result = pDevice->CreateTexture2D(&desc, nullptr, &texture);
 		assert(SUCCEEDED(result));
-		result = pDevice->
-			CreateShaderResourceView(pWaterReflectionTex.Get(), nullptr, &renderWaterReflection.pResource);
+		result = pDevice->CreateShaderResourceView(texture, nullptr, &renderWaterReflect.pResource);
 		assert(SUCCEEDED(result));
-		result = pDevice->CreateRenderTargetView(pWaterReflectionTex.Get(), nullptr, &renderWaterReflection.pTarget);
+		result = pDevice->CreateRenderTargetView(texture, nullptr, &renderWaterReflect.pTarget);
+		assert(SUCCEEDED(result));
 
-		//// Rasterizer State
-		//D3D11_RASTERIZER_DESC rasterizerDesc = {};
-		//rasterizerDesc.CullMode = D3D11_CULL_FRONT;
-		//rasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
-		//rasterizerDesc.FrontCounterClockwise = FALSE;
-		//result = pDevice->CreateRasterizerState(&rasterizerDesc, &pFrontFaceCullRasState);
+		texture->Release();
+
+		// Blend state
+		D3D11_BLEND_DESC omDesc = {0};
+		omDesc.RenderTarget[0].BlendEnable = true;
+		omDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+		omDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+		omDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+		omDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+		omDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+		omDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		omDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		result = pDevice->CreateBlendState(&omDesc, &pBlend);
+		assert(SUCCEEDED(result));
 
 		// Init imgui d3d impl
 		ImGui_ImplDX11_Init(pDevice.Get(), pContext.Get());
@@ -177,7 +186,7 @@ namespace Kaka
 		pContext->DrawIndexed(aCount, 0u, 0u);
 	}
 
-	void Graphics::SetProjection(DirectX::FXMMATRIX aProjection)
+	void Graphics::SetProjection(DirectX::FXMMATRIX& aProjection)
 	{
 		projection = aProjection;
 	}
@@ -187,7 +196,7 @@ namespace Kaka
 		return projection;
 	}
 
-	void Graphics::SetCamera(DirectX::FXMMATRIX aCamera)
+	void Graphics::SetCamera(DirectX::FXMMATRIX& aCamera)
 	{
 		camera = aCamera;
 	}
@@ -206,8 +215,8 @@ namespace Kaka
 	{
 		constexpr float colour[] = KAKA_BG_COLOUR;
 
-		pContext->OMSetRenderTargets(1u, renderWaterReflection.pTarget.GetAddressOf(), pDepth.Get());
-		pContext->ClearRenderTargetView(renderWaterReflection.pTarget.Get(), colour);
+		pContext->OMSetRenderTargets(1u, renderWaterReflect.pTarget.GetAddressOf(), pDepth.Get());
+		pContext->ClearRenderTargetView(renderWaterReflect.pTarget.Get(), colour);
 		pContext->ClearDepthStencilView(pDepth.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	}
 
@@ -215,15 +224,25 @@ namespace Kaka
 	{
 		constexpr float colour[] = KAKA_BG_COLOUR;
 
-		pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pDepth.Get());
+		pContext->OMSetRenderTargets(1u, pTarget.GetAddressOf(), pDepth.Get());
 		pContext->ClearRenderTargetView(pTarget.Get(), colour);
 		pContext->ClearDepthStencilView(pDepth.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	}
+
+	void Graphics::SetAlpha() const
+	{
+		pContext->OMSetBlendState(pBlend.Get(), nullptr, 0x0f);
+	}
+
+	void Graphics::ResetAlpha() const
+	{
+		pContext->OMSetBlendState(nullptr, nullptr, 0x0f);
 	}
 
 	void Graphics::BindWaterReflectionTexture()
 	{
 		pContext->PSSetShaderResources(2u, 1u,
-		                               renderWaterReflection.pResource.GetAddressOf());
+		                               renderWaterReflect.pResource.GetAddressOf());
 	}
 
 	DirectX::XMFLOAT2 Graphics::GetCurrentResolution() const

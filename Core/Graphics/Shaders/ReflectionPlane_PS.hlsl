@@ -101,7 +101,7 @@ float4 main(PixelInput aInput) : SV_TARGET
         colour = lerp((float3) 0.0f, colour.rgb, 1 - metalness);
     }
 
-    const float3 toEye = normalize(cameraPosition - aInput.worldPos);
+    const float3 toEye = normalize((float3) cameraPosition - aInput.worldPos);
 
     // Lighting
 
@@ -136,7 +136,6 @@ float4 main(PixelInput aInput) : SV_TARGET
     const float3 finalColour = saturate(ambientLight * ambientLightPower + directionalLight + pointLight + emissiveColour);
     
     // Reflection
-
     const float dist = abs(dot(toEye, cameraPosition.xyz));
     const float2 p = aInput.worldPos.xz;
 	// Derivative with respect to x and z of height sin(dot(p, k0) + time) + sin(dot(p, k1) + time)
@@ -151,5 +150,5 @@ float4 main(PixelInput aInput) : SV_TARGET
     const float3 result = lerp(reflection, finalColour, 0.3f);
 
     // Tonemap
-    return float4(tonemap_s_gamut3_cine(result), 0.4f);
+    return float4(tonemap_s_gamut3_cine(result), 0.5f);
 }

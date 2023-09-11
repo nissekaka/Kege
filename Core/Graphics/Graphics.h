@@ -42,15 +42,17 @@ namespace Kaka
 		void BeginFrame();
 		void EndFrame();
 		void DrawIndexed(UINT aCount);
-		void SetProjection(DirectX::FXMMATRIX aProjection);
+		void SetProjection(DirectX::FXMMATRIX& aProjection);
 		DirectX::XMMATRIX GetProjection() const;
-		void SetCamera(DirectX::FXMMATRIX aCamera);
+		void SetCamera(DirectX::FXMMATRIX& aCamera);
 		DirectX::XMMATRIX GetCamera() const;
 		UINT GetDrawcallCount() const;
 		//void SetRenderTarget(bool aUseDefaultRenderTarget, const bool aClearRender = false,
 		//                     const bool aClearDepth = false);
 		void SetWaterReflectTarget();
 		void SetDefaultTarget();
+		void SetAlpha() const;
+		void ResetAlpha() const;
 
 		void BindWaterReflectionTexture();
 		DirectX::XMFLOAT2 GetCurrentResolution() const;
@@ -77,10 +79,11 @@ namespace Kaka
 		Microsoft::WRL::ComPtr<IDXGISwapChain> pSwap;
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext;
 
-		RenderTarget renderWaterReflection;
+		Microsoft::WRL::ComPtr<ID3D11BlendState> pBlend;
+
+		RenderTarget renderWaterReflect;
 		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pTarget;
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pDepth;
-		Microsoft::WRL::ComPtr<ID3D11Texture2D> pWaterReflectionTex;
 		UINT width;
 		UINT height;
 

@@ -69,7 +69,7 @@ namespace Kaka
 			float padding[3];
 		};
 
-		ReflectionWaveBuffer reflectionPSBuffer;
+		ReflectionWaveBuffer reflectionPSBuffer = {};
 
 		struct ReflectionHeightBuffer
 		{
@@ -77,8 +77,8 @@ namespace Kaka
 			float padding[3];
 		};
 
-		ReflectionHeightBuffer reflectionVSBuffer;
-		ReflectionHeightBuffer reflectionHeightPSBuffer;
+		ReflectionHeightBuffer reflectionVSBuffer = {};
+		ReflectionHeightBuffer reflectionHeightPSBuffer = {};
 
 		struct CommonBuffer
 		{
@@ -88,6 +88,6 @@ namespace Kaka
 			float padding;
 		};
 
-		CommonBuffer commonBuffer;
+		CommonBuffer commonBuffer = {};
 	};
 }
