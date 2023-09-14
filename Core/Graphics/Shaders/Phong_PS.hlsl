@@ -72,16 +72,16 @@ float4 main(PixelInput aInput) : SV_TARGET
         }
 
     	// Fragment to light vector data
-        const float3 vToL = plBuf[i].pLightPosition - aInput.viewPos;
+        const float3 vToL = plBuf[i].position - aInput.viewPos;
         const float distToL = length(vToL);
         const float3 dirToL = vToL / distToL;
 
 		// Attenuation
         const float att = Attenuate(plBuf[i].radius, plBuf[i].falloff, distToL);
 		// Diffuse
-        combinedLight += Diffuse(plBuf[i].pLightColour, plBuf[i].pLightIntensity, att, dirToL, aInput.viewNormal);;
+        combinedLight += Diffuse(plBuf[i].colour, plBuf[i].intensity, att, dirToL, aInput.viewNormal);;
 		// Specular reflected
-        specular += Speculate(plBuf[i].pLightColour * plBuf[i].pLightIntensity,
+        specular += Speculate(plBuf[i].colour * plBuf[i].intensity,
         specularIntensity, aInput.viewNormal,
         vToL, aInput.viewPos, att, specularPower);
     }

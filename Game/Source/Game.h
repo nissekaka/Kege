@@ -6,6 +6,7 @@
 #include <Core/Utility/KakaMath.h>
 #include "Core/Graphics/Lighting/DirectionalLight.h"
 #include "Core/Graphics/Lighting/PointLight.h"
+#include "Core/Graphics/Lighting/SpotLight.h"
 #include "Core/Graphics/Drawable/Model.h"
 #include "Core/Graphics/Drawable/Terrain.h"
 #include "Core/Graphics/Drawable/Skybox.h"
@@ -33,6 +34,7 @@ namespace Kaka
 
 		DirectionalLight directionalLight{wnd.Gfx(), 1u};
 		std::vector<PointLight> pointLights = {};
+		std::vector<SpotLight> spotLights = {};
 		//float pointLightAngles[] = PI;
 		//float pointLightAngles[4] = {0.0f,PI / 2,PI,PI * 1.5f};
 
@@ -57,9 +59,13 @@ namespace Kaka
 		ReflectionPlane reflectionPlane{};
 		float skyboxSpeed = 0.005f;
 		DirectX::XMFLOAT3 skyboxAngle = {};
-		std::vector<float> lightTravelRadiuses = {};
-		std::vector<float> lightTravelSpeeds = {};
-		std::vector<float> lightTravelAngles = {};
+		std::vector<float> pointLightTravelRadiuses = {};
+		std::vector<float> pointLightTravelSpeeds = {};
+		std::vector<float> pointLightTravelAngles = {};
+
+		std::vector<float> spotLightTravelRadiuses = {};
+		std::vector<float> spotLightTravelSpeeds = {};
+		std::vector<float> spotLightTravelAngles = {};
 
 		struct ReflectionWaveBuffer
 		{

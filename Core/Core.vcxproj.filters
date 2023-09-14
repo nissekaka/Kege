@@ -111,6 +111,9 @@
     <ClCompile Include="Graphics\Drawable\ReflectionPlane.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Graphics\Lighting\SpotLight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Windows\KakaWin.h">
@@ -236,6 +239,8 @@
     <FxCompile Include="Graphics\Shaders\ReflectionPlane_PS.hlsl" />
     <FxCompile Include="Graphics\Shaders\TerrainReflect_VS.hlsl" />
     <FxCompile Include="Graphics\Shaders\TerrainPhong_PS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\Solid_PS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\Solid_VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Todo.txt" />

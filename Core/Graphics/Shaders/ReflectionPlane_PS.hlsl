@@ -24,6 +24,12 @@ cbuffer PointLight : register(b2)
     uint activeLights;
 }
 
+cbuffer SpotLightBuffer : register(b3)
+{
+    SpotLightData slBuf[MAX_LIGHTS];
+    uint activeSpotLights;
+}
+
 struct PixelInput
 {
     float3 worldPos : WPOSITION;
@@ -64,6 +70,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     float3 ambientLight = { 0.0f, 0.0f, 0.0f };
     float3 directionalLight = { 0.0f, 0.0f, 0.0f };
     float3 pointLight = { 0.0f, 0.0f, 0.0f };
+    float3 spotLight = { 0.0f, 0.0f, 0.0f };
     float3 specular = { 0.0f, 0.0f, 0.0f };
     const float ambientOcclusion = normal.b;
 
@@ -127,13 +134,25 @@ float4 main(PixelInput aInput) : SV_TARGET
         }
 
         pointLight += EvaluatePointLight(colour, specular, normal,
-        roughness, plBuf[i].pLightColour, plBuf[i].pLightIntensity,
-        plBuf[i].radius, plBuf[i].pLightPosition, toEye, aInput.viewPos);
+        roughness, plBuf[i].colour, plBuf[i].intensity,
+        plBuf[i].radius, plBuf[i].position, toEye, aInput.viewPos);
+    }
+
+	// Spot lights
+    for (uint i = 0; i < activeSpotLights; ++i)
+    {
+        if (!slBuf[i].active)
+        {
+            continue;
+        }
+
+        spotLight += EvaluateSpotLight(colour, specular, normal, roughness, slBuf[i].colour, slBuf[i].intensity,
+        slBuf[i].range, slBuf[i].position, slBuf[i].direction, slBuf[i].outerAngle, slBuf[i].innerAngle, toEye, aInput.worldPos);
     }
 
 	// Final colour
     const float3 emissiveColour = colour * emissive;
-    const float3 finalColour = saturate(ambientLight * ambientLightPower + directionalLight + pointLight + emissiveColour);
+    const float3 finalColour = saturate(ambientLight * ambientLightPower + directionalLight + pointLight + spotLight + emissiveColour);
     
     // Reflection
     const float dist = abs(dot(toEye, cameraPosition.xyz));

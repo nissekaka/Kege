@@ -3,7 +3,7 @@
 //#define USE_LIGHTS
 //#define USE_NOISE
 
-cbuffer CommonBuffer : register(b3)
+cbuffer CommonBuffer : register(b4)
 {
     float4 cameraPosition;
     float2 clientResolution;

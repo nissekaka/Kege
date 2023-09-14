@@ -18,13 +18,14 @@ namespace Kaka
 
 	void PointLight::Bind(const Graphics& aGfx, DirectX::FXMMATRIX aView)
 	{
+		aView;
 		PointLightBuffer dataCopy;
 		dataCopy.activeLights = sharedIndex;
 		for (UINT i = 0; i < dataCopy.activeLights; ++i)
 		{
 			dataCopy.plb[i] = pointLightData[i];
 			const DirectX::XMVECTOR pos = DirectX::XMLoadFloat3(&pointLightData[i].position);
-			XMStoreFloat3(&dataCopy.plb[i].position, XMVector3Transform(pos, aView));
+			XMStoreFloat3(&dataCopy.plb[i].position, pos);
 		}
 		cBuffer.Update(aGfx, dataCopy);
 		cBuffer.Bind(aGfx);
@@ -93,8 +94,8 @@ namespace Kaka
 
 	void PointLight::Reset() const
 	{
-		pointLightData[index].position = {0.0f,2.0f,0.0f};
-		pointLightData[index].colour = {1.0f,1.0f,1.0f};
+		pointLightData[index].position = {0.0f, 2.0f, 0.0f};
+		pointLightData[index].colour = {1.0f, 1.0f, 1.0f};
 		pointLightData[index].diffuseIntensity = 2.0f;
 		pointLightData[index].radius = 100.0f;
 		pointLightData[index].falloff = 1.5f;
@@ -104,26 +105,26 @@ namespace Kaka
 	void PointLight::Draw(Graphics& aGfx) const
 	{
 		const std::vector<Vertex> vertices = {
-			{{-0.1f,0.0f,0.0f}},
-			{{0.1f,0.0f,0.0f}},
-			{{0.0f,-0.1f,0.0f}},
-			{{0.0f,0.1f,0.0f}},
-			{{0.0f,0.0f,-0.1f}},
-			{{0.0f,0.0f,0.1f}}
+			{{-0.1f, 0.0f, 0.0f}},
+			{{0.1f, 0.0f, 0.0f}},
+			{{0.0f, -0.1f, 0.0f}},
+			{{0.0f, 0.1f, 0.0f}},
+			{{0.0f, 0.0f, -0.1f}},
+			{{0.0f, 0.0f, 0.1f}}
 		};
 		VertexBuffer vertexBuffer(aGfx, vertices);
 		vertexBuffer.Bind(aGfx);
 
 		const std::vector<unsigned short> indices =
 		{
-			0,2,4,
-			0,4,3,
-			0,3,5,
-			0,5,2,
-			1,4,2,
-			1,3,4,
-			1,5,3,
-			1,2,5
+			0, 2, 4,
+			0, 4, 3,
+			0, 3, 5,
+			0, 5, 2,
+			1, 4, 2,
+			1, 3, 4,
+			1, 5, 3,
+			1, 2, 5
 		};
 
 		IndexBuffer indexBuffer(aGfx, indices);
@@ -170,8 +171,8 @@ namespace Kaka
 		const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 		{
 			{
-				"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
-				D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0
+				"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+				D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 			},
 		};
 		InputLayout inputLayout(aGfx, ied, vertexShader.GetBytecode());

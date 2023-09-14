@@ -24,7 +24,13 @@ cbuffer DirectionalLightBuffer : register(b1)
 cbuffer PointLightBuffer : register(b2)
 {
     PointLightData plBuf[MAX_LIGHTS];
-    uint activeLights;
+    uint activePointLights;
+}
+
+cbuffer SpotLightBuffer : register(b3)
+{
+    SpotLightData slBuf[MAX_LIGHTS];
+    uint activeSpotLights;
 }
 
 cbuffer Reflection : register(b11)
@@ -81,8 +87,6 @@ float4 main(PixelInput aInput) : SV_TARGET
     const float waterBlend = smoothstep(-5.0f, 5.0f, aInput.worldPos.y - planeHeight);
 
     const float3 beachColour = float3(0.25f, 0.16f, 0.07f);
-    //const float3 beachColour = float3(1.0f, 0.85f, 0.5f);
-    //const float3 beachColour = float3(0.6f, 1.0f, 1.0f);
     colour = lerp(beachColour, colour, waterBlend);
 
     if (cameraPosition.y <= planeHeight + 0.1f)
@@ -99,6 +103,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     float3 ambientLight = { 0.0f, 0.0f, 0.0f };
     float3 directionalLight = { 0.0f, 0.0f, 0.0f };
     float3 pointLight = { 0.0f, 0.0f, 0.0f };
+    float3 spotLight = { 0.0f, 0.0f, 0.0f };
     float3 specular = { 0.0f, 0.0f, 0.0f };
     const float ambientOcclusion = normal.b;
 
@@ -154,7 +159,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     roughness, dLightColour, -dLightDirection, toEye);
 
     // Point lights
-    for (uint i = 0; i < activeLights; ++i)
+    for (uint i = 0; i < activePointLights; ++i)
     {
         if (!plBuf[i].active)
         {
@@ -162,13 +167,25 @@ float4 main(PixelInput aInput) : SV_TARGET
         }
 
         pointLight += EvaluatePointLight(colour, specular, normal,
-        roughness, plBuf[i].pLightColour, plBuf[i].pLightIntensity,
-        plBuf[i].radius, plBuf[i].pLightPosition, toEye, aInput.viewPos);
+        roughness, plBuf[i].colour, plBuf[i].intensity,
+        plBuf[i].radius, plBuf[i].position, toEye, aInput.worldPos);
+    }
+
+	// Spot lights
+    for (uint i = 0; i < activeSpotLights; ++i)
+    {
+        if (!slBuf[i].active)
+        {
+            continue;
+        }
+
+        spotLight += EvaluateSpotLight(colour, specular, normal, roughness, slBuf[i].colour, slBuf[i].intensity,
+        slBuf[i].range, slBuf[i].position, slBuf[i].direction, slBuf[i].outerAngle, slBuf[i].innerAngle, toEye, aInput.worldPos);
     }
 
 	// Final colour
     const float3 emissiveColour = colour * emissive;
-    const float3 finalColour = saturate(ambientLight * ambientLightPower + directionalLight + pointLight + emissiveColour);
+    const float3 finalColour = saturate(ambientLight * ambientLightPower + directionalLight + pointLight + spotLight + emissiveColour);
     // Tonemap
     return float4(tonemap_s_gamut3_cine(finalColour), 1.0f);
 

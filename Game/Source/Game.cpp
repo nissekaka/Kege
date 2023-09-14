@@ -6,7 +6,8 @@
 
 constexpr int WINDOW_WIDTH = 1920;
 constexpr int WINDOW_HEIGHT = 1080;
-constexpr int NUM_LIGHTS = 0;
+constexpr int NUM_POINT_LIGHTS = 10;
+constexpr int NUM_SPOT_LIGHTS = 10;
 constexpr int TERRAIN_SIZE = 1000;
 
 namespace Kaka
@@ -22,9 +23,14 @@ namespace Kaka
 				0.5f,
 				5000.0f));
 
-		for (int i = 0; i < NUM_LIGHTS; ++i)
+		for (int i = 0; i < NUM_POINT_LIGHTS; ++i)
 		{
-			pointLights.push_back(PointLight{wnd.Gfx(), 2u});
+			pointLights.emplace_back(PointLight{wnd.Gfx(), 2u});
+		}
+
+		for (int i = 0; i < NUM_SPOT_LIGHTS; ++i)
+		{
+			spotLights.emplace_back(SpotLight{wnd.Gfx(), 3u});
 		}
 	}
 
@@ -51,11 +57,11 @@ namespace Kaka
 		std::uniform_real_distribution<float> rDist(50.0f, 600.0f);
 		std::uniform_real_distribution<float> sDist(0.1f, 2.0f);
 
-		for (int i = 0; i < NUM_LIGHTS; ++i)
+		for (int i = 0; i < NUM_POINT_LIGHTS; ++i)
 		{
-			lightTravelRadiuses.push_back(rDist(mt));
-			lightTravelSpeeds.push_back(sDist(mt));
-			lightTravelAngles.push_back(PI);
+			pointLightTravelRadiuses.push_back(rDist(mt));
+			pointLightTravelSpeeds.push_back(sDist(mt));
+			pointLightTravelAngles.push_back(PI);
 
 			pointLights[i].SetColour({cDist(mt), cDist(mt), cDist(mt)});
 			DirectX::XMFLOAT3 pos = terrain.GetRandomVertexPosition();
@@ -64,6 +70,19 @@ namespace Kaka
 			pointLights[i].SetRadius(75.0f);
 			pointLights[i].SetFalloff(1.0f);
 			pointLights[i].SetIntensity(500.0f);
+		}
+
+		for (int i = 0; i < NUM_SPOT_LIGHTS; ++i)
+		{
+			spotLightTravelRadiuses.push_back(rDist(mt));
+			spotLightTravelSpeeds.push_back(sDist(mt));
+			spotLightTravelAngles.push_back(PI);
+
+			spotLights[i].SetColour({cDist(mt), cDist(mt), cDist(mt)});
+			DirectX::XMFLOAT3 pos = terrain.GetRandomVertexPosition();
+			pos.y += 20.0f;
+			spotLights[i].SetPosition(pos);
+			spotLights[i].SetIntensity(3000.0f);
 		}
 
 		while (true)
@@ -92,33 +111,11 @@ namespace Kaka
 		directionalLight.Bind(wnd.Gfx());
 		directionalLight.Simulate(aDeltaTime);
 
-		for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
-		{
-			pointLights[i].Bind(wnd.Gfx(), camera.GetMatrix());
-
-			lightTravelAngles[i] += lightTravelSpeeds[i] * aDeltaTime;
-
-			float posX = lightTravelRadiuses[i] * std::cos(lightTravelAngles[i]) + TERRAIN_SIZE / 2.0f;
-			float posZ = lightTravelRadiuses[i] * std::sin(lightTravelAngles[i]) + TERRAIN_SIZE / 2.0f;
-
-			pointLights[i].SetPosition({posX, 40.0f, posZ});
-
-			if (lightTravelAngles[i] > 2 * PI)
-			{
-				lightTravelAngles[i] -= 2 * PI;
-			}
-
-			if (drawLightDebug)
-			{
-				pointLights[i].Draw(wnd.Gfx());
-			}
-		}
-
 		commonBuffer.cameraPosition = {camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z, 0.0f};
 		commonBuffer.resolution = wnd.Gfx().GetCurrentResolution();
 		commonBuffer.currentTime = timer.GetTotalTime();
 
-		PixelConstantBuffer<CommonBuffer> cb{wnd.Gfx(), 3u};
+		PixelConstantBuffer<CommonBuffer> cb{wnd.Gfx(), 4u};
 		cb.Update(wnd.Gfx(), commonBuffer);
 		cb.Bind(wnd.Gfx());
 
@@ -157,6 +154,52 @@ namespace Kaka
 		terrain.FlipScale(reflectionPlane.GetPosition().y, true);
 		wnd.Gfx().SetDefaultTarget();
 
+		// Draw normal
+
+		for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
+		{
+			pointLights[i].Bind(wnd.Gfx(), camera.GetMatrix());
+
+			pointLightTravelAngles[i] += pointLightTravelSpeeds[i] * aDeltaTime;
+
+			float posX = pointLightTravelRadiuses[i] * std::cos(pointLightTravelAngles[i]) + TERRAIN_SIZE / 2.0f;
+			float posZ = pointLightTravelRadiuses[i] * std::sin(pointLightTravelAngles[i]) + TERRAIN_SIZE / 2.0f;
+
+			pointLights[i].SetPosition({posX, 40.0f, posZ});
+
+			if (pointLightTravelAngles[i] > 2 * PI)
+			{
+				pointLightTravelAngles[i] -= 2 * PI;
+			}
+
+			if (drawLightDebug)
+			{
+				pointLights[i].Draw(wnd.Gfx());
+			}
+		}
+
+		for (int i = 0; i < static_cast<int>(spotLights.size()); ++i)
+		{
+			spotLights[i].Bind(wnd.Gfx(), camera.GetMatrix());
+
+			spotLightTravelAngles[i] -= spotLightTravelSpeeds[i] * aDeltaTime;
+
+			float posX = spotLightTravelRadiuses[i] * std::cos(spotLightTravelAngles[i]) + TERRAIN_SIZE / 2.0f;
+			float posZ = spotLightTravelRadiuses[i] * std::sin(spotLightTravelAngles[i]) + TERRAIN_SIZE / 2.0f;
+
+			spotLights[i].SetPosition({posX, 40.0f, posZ});
+
+			if (spotLightTravelAngles[i] > 2 * PI)
+			{
+				spotLightTravelAngles[i] -= 2 * PI;
+			}
+
+			if (drawLightDebug)
+			{
+				spotLights[i].Draw(wnd.Gfx());
+			}
+		}
+
 		skybox.Draw(wnd.Gfx());
 		terrain.SetCullingMode(eCullingMode::Back);
 		terrain.Draw(wnd.Gfx());
@@ -183,11 +226,17 @@ namespace Kaka
 			}
 			ImGui::End();
 
-			//for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
-			//{
-			//	std::string name = "Point Light " + std::to_string(i);
-			//	pointLights[i].ShowControlWindow(name.c_str());
-			//}
+			for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
+			{
+				std::string name = "Point Light " + std::to_string(i);
+				pointLights[i].ShowControlWindow(name.c_str());
+			}
+
+			for (int i = 0; i < static_cast<int>(spotLights.size()); ++i)
+			{
+				std::string name = "Spot Light " + std::to_string(i);
+				spotLights[i].ShowControlWindow(name.c_str());
+			}
 
 			camera.ShowControlWindow();
 		}
