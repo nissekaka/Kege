@@ -10,6 +10,7 @@ namespace Kaka
 	private:
 		struct Transforms
 		{
+			DirectX::XMMATRIX model;
 			DirectX::XMMATRIX view;
 			DirectX::XMMATRIX projection;
 		};

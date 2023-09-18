@@ -12,7 +12,7 @@ namespace Kaka
 	class Model : public Drawable
 	{
 	public:
-		enum class eShaderType { Solid, Light, Phong, AnimPhong };
+		enum class eShaderType { Solid, Light, Phong, AnimPhong, PBR };
 
 	public:
 		Model() = default;
@@ -75,7 +75,7 @@ namespace Kaka
 
 	private:
 		ModelData modelData;
-		Texture texture;
+		Texture texture{2u};
 		std::vector<std::unique_ptr<Bindable>> bindablePtrs;
 		bool isLoaded = false;
 		int selectedAnimationIndex = -1;

@@ -232,15 +232,17 @@
     <FxCompile Include="Graphics\Shaders\Phong_PS.hlsl" />
     <FxCompile Include="Graphics\Shaders\Phong_VS.hlsl" />
     <FxCompile Include="Graphics\Shaders\AnimPhong_VS.hlsl" />
-    <FxCompile Include="Graphics\Shaders\TerrainPhong_VS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\TerrainPBR_VS.hlsl" />
     <FxCompile Include="Graphics\Shaders\Skybox_VS.hlsl" />
     <FxCompile Include="Graphics\Shaders\Skybox_PS.hlsl" />
     <FxCompile Include="Graphics\Shaders\ReflectionPlane_VS.hlsl" />
     <FxCompile Include="Graphics\Shaders\ReflectionPlane_PS.hlsl" />
     <FxCompile Include="Graphics\Shaders\TerrainReflect_VS.hlsl" />
-    <FxCompile Include="Graphics\Shaders\TerrainPhong_PS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\TerrainPBR_PS.hlsl" />
     <FxCompile Include="Graphics\Shaders\Solid_PS.hlsl" />
     <FxCompile Include="Graphics\Shaders\Solid_VS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\ModelPBR_VS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\ModelPBR_PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Todo.txt" />

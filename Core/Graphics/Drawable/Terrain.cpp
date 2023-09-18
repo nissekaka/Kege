@@ -276,7 +276,7 @@ namespace Kaka
 			subset.indexBuffer.Init(aGfx, subset.indices);
 		}
 
-		pixelShader.Init(aGfx, L"Shaders\\TerrainPhong_PS.cso");
+		pixelShader.Init(aGfx, L"Shaders\\TerrainPBR_PS.cso");
 		vertexShader.Init(aGfx, L"Shaders\\TerrainReflect_VS.cso");
 
 		inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
@@ -355,7 +355,7 @@ namespace Kaka
 		}
 		else
 		{
-			vertexShader.Init(aGfx, L"Shaders\\TerrainPhong_VS.cso");
+			vertexShader.Init(aGfx, L"Shaders\\TerrainPBR_VS.cso");
 		}
 	}
 

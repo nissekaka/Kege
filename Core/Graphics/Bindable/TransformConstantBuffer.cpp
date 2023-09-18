@@ -27,6 +27,7 @@ namespace Kaka
 	{
 		const DirectX::XMMATRIX modelView = parent.GetTransform() * aGfx.GetCamera();
 		return {
+			DirectX::XMMatrixTranspose(parent.GetTransform()),
 			DirectX::XMMatrixTranspose(modelView),
 			DirectX::XMMatrixTranspose(modelView * aGfx.GetProjection())
 		};

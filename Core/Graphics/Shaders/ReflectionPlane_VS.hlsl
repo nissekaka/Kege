@@ -1,5 +1,6 @@
 cbuffer Transform : register(b0)
 {
+    matrix model;
     matrix modelView;
     matrix modelViewProj;
 }
@@ -32,7 +33,7 @@ PixelInput main(VertexInput aInput)
 
     output.worldPos = aInput.position;
     output.worldNorm = aInput.normal;
-    output.viewPos = (float3) mul(float4(aInput.position, 1.0f), modelView);
+    output.viewPos = (float3) mul(float4(aInput.position, 1.0f), model);
     output.viewNormal = mul(aInput.normal, (float3x3) modelView);
     output.tangent = aInput.tan;
     output.bitan = aInput.bitan;

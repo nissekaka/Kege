@@ -26,6 +26,7 @@ namespace Kaka
 			dataCopy.plb[i] = pointLightData[i];
 			const DirectX::XMVECTOR pos = DirectX::XMLoadFloat3(&pointLightData[i].position);
 			XMStoreFloat3(&dataCopy.plb[i].position, pos);
+			//XMStoreFloat3(&dataCopy.plb[i].position, XMVector3Transform(pos, aView));
 		}
 		cBuffer.Update(aGfx, dataCopy);
 		cBuffer.Bind(aGfx);

@@ -38,6 +38,9 @@ namespace Kaka
 	{
 		skybox.Init(wnd.Gfx(), "Assets\\Textures\\Skybox\\Miramar\\", "Assets\\Textures\\Skybox\\Kurt\\");
 
+		ken.LoadModel(wnd.Gfx(), "Assets\\Models\\ken\\ken.fbx", Model::eShaderType::PBR);
+		ken.SetPosition({652.0f, 10.0f, 400.0f});
+
 		reflectionPSBuffer.A = 0.7f;
 		reflectionPSBuffer.k0 = {-0.9f, 0.5f};
 		reflectionPSBuffer.k1 = {-0.2f, 0.5f};
@@ -155,7 +158,6 @@ namespace Kaka
 		wnd.Gfx().SetDefaultTarget();
 
 		// Draw normal
-
 		for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
 		{
 			pointLights[i].Bind(wnd.Gfx(), camera.GetMatrix());
@@ -200,6 +202,7 @@ namespace Kaka
 			}
 		}
 
+		ken.Draw(wnd.Gfx());
 		skybox.Draw(wnd.Gfx());
 		terrain.SetCullingMode(eCullingMode::Back);
 		terrain.Draw(wnd.Gfx());
@@ -217,6 +220,7 @@ namespace Kaka
 			terrain.ShowControlWindow("Terrain");
 			reflectionPlane.ShowControlWindow("Reflection Plane");
 			directionalLight.ShowControlWindow("Directional Light");
+			ken.ShowControlWindow("Ken");
 
 			if (ImGui::Begin("Reflection"))
 			{
@@ -226,17 +230,17 @@ namespace Kaka
 			}
 			ImGui::End();
 
-			for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
-			{
-				std::string name = "Point Light " + std::to_string(i);
-				pointLights[i].ShowControlWindow(name.c_str());
-			}
+			//for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
+			//{
+			//	std::string name = "Point Light " + std::to_string(i);
+			//	pointLights[i].ShowControlWindow(name.c_str());
+			//}
 
-			for (int i = 0; i < static_cast<int>(spotLights.size()); ++i)
-			{
-				std::string name = "Spot Light " + std::to_string(i);
-				spotLights[i].ShowControlWindow(name.c_str());
-			}
+			//for (int i = 0; i < static_cast<int>(spotLights.size()); ++i)
+			//{
+			//	std::string name = "Spot Light " + std::to_string(i);
+			//	spotLights[i].ShowControlWindow(name.c_str());
+			//}
 
 			camera.ShowControlWindow();
 		}

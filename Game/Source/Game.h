@@ -50,7 +50,7 @@ namespace Kaka
 
 	private:
 		Model spy{};
-		Model muzen{};
+		Model ken{};
 		Model vamp{};
 		Model cube{};
 		Model cubeTwoBones{};
