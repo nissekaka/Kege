@@ -17,13 +17,13 @@ namespace Kaka
 		binds.push_back(std::move(aIndexBuffer));
 	}
 
-	void Drawable::Draw(Graphics& aGfx)
-	{
-		for (const auto& bindable : binds)
-		{
-			bindable->Bind(aGfx);
-		}
+	//void Drawable::Draw(Graphics& aGfx)
+	//{
+	//	for (const auto& bindable : binds)
+	//	{
+	//		bindable->Bind(aGfx);
+	//	}
 
-		aGfx.DrawIndexed(pIndexBuffer->GetCount());
-	}
+	//	aGfx.DrawIndexed(pIndexBuffer->GetCount());
+	//}
 }

@@ -13,7 +13,7 @@ namespace Kaka
 	protected:
 		void AddBind(std::unique_ptr<Bindable> aBind);
 		void AddIndexBuffer(std::unique_ptr<class IndexBuffer> aIndexBuffer);
-		void Draw(Graphics& aGfx);
+		//virtual void Draw(Graphics& aGfx);
 	private:
 		const IndexBuffer* pIndexBuffer = nullptr;
 		std::vector<std::unique_ptr<Bindable>> binds;

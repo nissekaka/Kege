@@ -10,10 +10,13 @@ namespace Kaka
 		Skybox() = default;
 		~Skybox() override = default;
 		void Init(const Graphics& aGfx, const std::string& aDayPath, const std::string& aNightPath);
-		void Draw(const Graphics& aGfx);
+		void Draw(Graphics& aGfx);
 		void Rotate(DirectX::XMFLOAT3 aRotation);
+		void FlipScale();
+
 	public:
 		DirectX::XMMATRIX GetTransform() const override;
+
 	private:
 		struct TransformParameters
 		{
@@ -23,7 +26,7 @@ namespace Kaka
 			float x = 0.0f;
 			float y = 0.0f;
 			float z = 0.0f;
-			float scale = 1.0f;
+			DirectX::XMFLOAT3 scale = {1.0f, 1.0f, 1.0f};
 		};
 
 		TransformParameters transform;
@@ -80,6 +83,7 @@ namespace Kaka
 			0, 4, 2, 2, 4, 6,
 			0, 1, 4, 1, 5, 4
 		};
+
 	private:
 		CubeTexture dayTexture{0u};
 		CubeTexture nightTexture{1u};

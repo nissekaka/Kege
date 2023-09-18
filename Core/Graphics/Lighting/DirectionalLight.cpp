@@ -58,9 +58,9 @@ namespace Kaka
 
 	void DirectionalLight::Reset()
 	{
-		bufferData.lightDirection = {-1.0f, -1.0f, 1.0f};
-		bufferData.lightColour = {0.6f, 0.6f, 0.6f};
-		bufferData.ambientLight = 0.1f;
+		bufferData.lightDirection = {0.6f, -0.6f, 0.2f};
+		bufferData.lightColour = {1.0f, 0.8f, 0.6f};
+		bufferData.ambientLight = 1.0f;
 	}
 
 	DirectX::XMFLOAT3 DirectionalLight::GetDirection() const
@@ -97,19 +97,19 @@ namespace Kaka
 		// Update the angle based on time and speed
 		sunAngle += rotationSpeed * aDeltaTime;
 
-		DirectX::XMFLOAT3 direction;
+		DirectX::XMFLOAT3 direction = {};
 		direction.x = std::cos(sunAngle);
 		direction.y = std::sin(sunAngle);
-		direction.z = 0.0f; // Assuming the light is pointing straight down
+		direction.z = 0.4f; // Assuming the light is pointing straight down
 
 		SetDirection(direction);
 
 		// Calculate the color based on the vertical position of the light
-		float colorLerp = direction.y - colorLerpThreshold;
+		float colorLerp = -direction.y - colorLerpThreshold;
 		colorLerp = std::clamp(colorLerp, 0.0f, 1.0f);
 
 		// Interpolate between lowColor and highColor based on the colorLerp value
-		DirectX::XMFLOAT3 currentColor;
+		DirectX::XMFLOAT3 currentColor = {};
 		currentColor.x = lowColor.x + colorLerp * (highColor.x - lowColor.x);
 		currentColor.y = lowColor.y + colorLerp * (highColor.y - lowColor.y);
 		currentColor.z = lowColor.z + colorLerp * (highColor.z - lowColor.z);

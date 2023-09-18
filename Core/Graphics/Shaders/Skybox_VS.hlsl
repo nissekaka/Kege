@@ -21,7 +21,7 @@ PixelInput main(VertexInput aInput)
     output.worldPosition = aInput.position;
     // 0.0f cancels out translation to only give rotation
     output.position = mul(float4(aInput.position, 0.0f), viewProj);
-    // Make sure the depth after w divice will be 1.0
+    // Make sure the depth after w divide will be 1.0
     output.position.z = output.position.w;
     
     return output;

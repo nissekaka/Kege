@@ -17,10 +17,12 @@ namespace Kaka
 		void SetPosition(DirectX::XMFLOAT3 aPosition) const;
 		void SetColour(DirectX::XMFLOAT3 aColour) const;
 		void SetIntensity(float aIntensity) const;
+		void SetRadius(float aRadius) const;
+		void SetFalloff(float aFalloff) const;
 		void Reset() const;
-		void Draw(const Graphics& aGfx) const;
+		void Draw(Graphics& aGfx) const;
 	private:
-		static constexpr UINT MAX_LIGHTS = 16u; // Needs to be the same in PixelShader
+		static constexpr UINT MAX_LIGHTS = 50u; // Needs to be the same in PixelShader
 
 		struct Transforms
 		{

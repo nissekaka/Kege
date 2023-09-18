@@ -108,6 +108,12 @@
     <ClCompile Include="Graphics\Bindable\DepthStencil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Graphics\Drawable\ReflectionPlane.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Lighting\SpotLight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Windows\KakaWin.h">
@@ -218,21 +224,23 @@
     <ClInclude Include="Graphics\Lighting\SpotLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\Drawable\ReflectionPlane.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Graphics\Shaders\3D_PS.hlsl" />
-    <FxCompile Include="Graphics\Shaders\3D_VS.hlsl" />
-    <FxCompile Include="Graphics\Shaders\Light_PS.hlsl" />
-    <FxCompile Include="Graphics\Shaders\Light_VS.hlsl" />
     <FxCompile Include="Graphics\Shaders\Phong_PS.hlsl" />
     <FxCompile Include="Graphics\Shaders\Phong_VS.hlsl" />
-    <FxCompile Include="Graphics\Shaders\Solid_VS.hlsl" />
-    <FxCompile Include="Graphics\Shaders\Solid_PS.hlsl" />
     <FxCompile Include="Graphics\Shaders\AnimPhong_VS.hlsl" />
-    <FxCompile Include="Graphics\Shaders\TerrainPhong_PS.hlsl" />
     <FxCompile Include="Graphics\Shaders\TerrainPhong_VS.hlsl" />
     <FxCompile Include="Graphics\Shaders\Skybox_VS.hlsl" />
     <FxCompile Include="Graphics\Shaders\Skybox_PS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\ReflectionPlane_VS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\ReflectionPlane_PS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\TerrainReflect_VS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\TerrainPhong_PS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\Solid_PS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\Solid_VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Todo.txt" />

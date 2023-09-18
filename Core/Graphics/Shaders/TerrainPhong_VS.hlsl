@@ -21,8 +21,8 @@ struct PixelInput
     float4 position : SV_POSITION;
     float3 viewNormal : NORMAL;
     float2 texCoord : TEXCOORD;
-    float3 viewTan : TANGENT;
-    float3 viewBitan : BITANGENT;
+    float3 tangent : TANGENT;
+    float3 bitan : BITANGENT;
     matrix modelView : MODELVIEW;
 };
 
@@ -34,8 +34,8 @@ PixelInput main(VertexInput aInput)
     output.worldNorm = aInput.normal;
     output.viewPos = (float3) mul(float4(aInput.position, 1.0f), modelView);
     output.viewNormal = mul(aInput.normal, (float3x3) modelView);
-    output.viewTan = mul(aInput.tan, (float3x3) modelView);
-    output.viewBitan = mul(aInput.bitan, (float3x3) modelView);
+    output.tangent = aInput.tan;
+    output.bitan = aInput.bitan;
     output.position = mul(float4(aInput.position, 1.0f), modelViewProj);
     output.texCoord = aInput.texCoord;
     output.modelView = modelView;

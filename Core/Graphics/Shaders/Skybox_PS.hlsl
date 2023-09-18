@@ -1,3 +1,5 @@
+#include "common.hlsli"
+
 cbuffer DirectionalLightBuffer : register(b1)
 {
     float3 dLightDirection;
@@ -11,11 +13,6 @@ struct PixelInput
     float3 worldPosition : POSITION;
     float4 position : SV_POSITION;
 };
-
-TextureCube dayTex : register(t0);
-TextureCube nightTex : register(t1);
-
-SamplerState splr : register(s0);
 
 float4 main(const PixelInput aInput) : SV_TARGET
 {
