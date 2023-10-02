@@ -38,10 +38,6 @@ namespace Kaka
 	{
 		skybox.Init(wnd.Gfx(), "Assets\\Textures\\Skybox\\Miramar\\", "Assets\\Textures\\Skybox\\Kurt\\");
 
-		models.emplace_back();
-		models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\ken\\ken.fbx", Model::eShaderType::PBR);
-		models.back().SetPosition({652.0f, 10.0f, 400.0f});
-
 		reflectionPSBuffer.A = 0.7f;
 		reflectionPSBuffer.k0 = {-0.9f, 0.5f};
 		reflectionPSBuffer.k1 = {-0.2f, 0.5f};
@@ -54,6 +50,15 @@ namespace Kaka
 		camera.SetPosition({742.75f, 0.16f, 395.95f});
 
 		terrain.Init(wnd.Gfx(), TERRAIN_SIZE);
+
+		for (int i = 0; i < 50; ++i)
+		{
+			models.emplace_back();
+			models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\ken\\ken.fbx", Model::eShaderType::PBR);
+			DirectX::XMFLOAT3 pos = terrain.GetRandomVertexPosition();
+			pos.y += 10.0f;
+			models.back().SetPosition(pos);
+		}
 
 		std::random_device rd;
 		std::mt19937 mt(rd());
