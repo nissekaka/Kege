@@ -9,6 +9,10 @@ cbuffer ModelBuffer : register(b0)
 {
     bool normalMapEnabled;
     bool materialEnabled;
+    uint packedDataPointA;
+    uint packedDataPointB;
+    uint packedDataSpotA;
+    uint packedDataSpotB;
 };
 
 cbuffer DirectionalLightBuffer : register(b1)
@@ -51,6 +55,34 @@ Texture2D materialTex : register(t4);
 
 float4 main(PixelInput aInput) : SV_TARGET
 {
+    // Unpack light data
+    bool nearbyPointLights[MAX_LIGHTS];
+    bool nearbySpotLights[MAX_LIGHTS];
+    
+    for (int pIndex = 0; pIndex < MAX_LIGHTS; ++pIndex)
+    {
+        if (pIndex < 32)
+        {
+            nearbyPointLights[pIndex] = (packedDataPointA & (1u << pIndex)) != 0;
+        }
+        else
+        {
+            nearbyPointLights[pIndex] = (packedDataPointB & (1u << (pIndex - 32))) != 0;
+        }
+    }
+    
+    for (int sIndex = 0; sIndex < MAX_LIGHTS; ++sIndex)
+    {
+        if (sIndex < 32)
+        {
+            nearbySpotLights[sIndex] = (packedDataSpotA & (1u << sIndex)) != 0;
+        }
+        else
+        {
+            nearbySpotLights[sIndex] = (packedDataSpotB & (1u << (sIndex - 32))) != 0;
+        }
+    }
+
     float3 colour = albedoTex.Sample(splr, aInput.texCoord).rgb;
     float3 normal = normalTex.Sample(splr, aInput.texCoord).wyz;
     float3 material = materialTex.Sample(splr, aInput.texCoord).rgb;
@@ -116,7 +148,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     // Point lights
     for (uint i = 0; i < activePointLights; ++i)
     {
-        if (!plBuf[i].active)
+        if (!plBuf[i].active || !nearbyPointLights[i])
         {
             continue;
         }
@@ -127,15 +159,15 @@ float4 main(PixelInput aInput) : SV_TARGET
     }
 
 	// Spot lights
-    for (uint y = 0; y < activeSpotLights; ++y)
+    for (uint j = 0; j < activeSpotLights; ++j)
     {
-        if (!slBuf[y].active)
+        if (!slBuf[j].active || !nearbySpotLights[j])
         {
             continue;
         }
 
-        spotLight += EvaluateSpotLight(colour, specular, normal, roughness, slBuf[y].colour, slBuf[y].intensity,
-        slBuf[y].range, slBuf[y].position, slBuf[y].direction, slBuf[y].outerAngle, slBuf[y].innerAngle, toEye, aInput.viewPos);
+        spotLight += EvaluateSpotLight(colour, specular, normal, roughness, slBuf[j].colour, slBuf[j].intensity,
+        slBuf[j].range, slBuf[j].position, slBuf[j].direction, slBuf[j].outerAngle, slBuf[j].innerAngle, toEye, aInput.viewPos);
     }
 
 	// Final colour

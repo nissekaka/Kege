@@ -38,8 +38,9 @@ namespace Kaka
 	{
 		skybox.Init(wnd.Gfx(), "Assets\\Textures\\Skybox\\Miramar\\", "Assets\\Textures\\Skybox\\Kurt\\");
 
-		ken.LoadModel(wnd.Gfx(), "Assets\\Models\\ken\\ken.fbx", Model::eShaderType::PBR);
-		ken.SetPosition({652.0f, 10.0f, 400.0f});
+		models.emplace_back();
+		models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\ken\\ken.fbx", Model::eShaderType::PBR);
+		models.back().SetPosition({652.0f, 10.0f, 400.0f});
 
 		reflectionPSBuffer.A = 0.7f;
 		reflectionPSBuffer.k0 = {-0.9f, 0.5f};
@@ -202,7 +203,50 @@ namespace Kaka
 			}
 		}
 
-		ken.Draw(wnd.Gfx());
+		for (Model model : models)
+		{
+			// Point light range
+			bool nearbyPointLights[50u] = {};
+
+			for (int i = 0; i < 50u; ++i)
+			{
+				if (i >= spotLights.size())
+				{
+					nearbyPointLights[i] = false;
+				}
+				else if (GetDistanceBetweenObjects(model.GetPosition(), pointLights[i].GetPosition()) <= pointLights[i].
+					GetRadius())
+				{
+					nearbyPointLights[i] = true;
+				}
+				else
+				{
+					nearbyPointLights[i] = false;
+				}
+			}
+
+			bool nearbySpotLights[50u] = {};
+
+			// Spot light range
+			for (int i = 0; i < 50u; ++i)
+			{
+				if (i >= spotLights.size())
+				{
+					nearbySpotLights[i] = false;
+				}
+				else if (GetDistanceBetweenObjects(model.GetPosition(), spotLights[i].GetPosition()) <= spotLights[i].
+					GetRange())
+				{
+					nearbySpotLights[i] = true;
+				}
+				else
+				{
+					nearbySpotLights[i] = false;
+				}
+			}
+			model.SetNearbyLights(nearbyPointLights, nearbySpotLights);
+			model.Draw(wnd.Gfx());
+		}
 		skybox.Draw(wnd.Gfx());
 		terrain.SetCullingMode(eCullingMode::Back);
 		terrain.Draw(wnd.Gfx());
@@ -220,7 +264,7 @@ namespace Kaka
 			terrain.ShowControlWindow("Terrain");
 			reflectionPlane.ShowControlWindow("Reflection Plane");
 			directionalLight.ShowControlWindow("Directional Light");
-			ken.ShowControlWindow("Ken");
+			//ken.ShowControlWindow("Ken");
 
 			if (ImGui::Begin("Reflection"))
 			{
@@ -346,5 +390,15 @@ namespace Kaka
 			ImGui::Text(drawcalls.c_str());
 		}
 		ImGui::End();
+	}
+
+	float Game::GetDistanceBetweenObjects(const DirectX::XMFLOAT3 aPosA, const DirectX::XMFLOAT3 aPosB) const
+	{
+		const float dx = aPosB.x - aPosA.x;
+		const float dy = aPosB.y - aPosA.y;
+		const float dz = aPosB.z - aPosA.z;
+
+		const float distance = std::sqrt(dx * dx + dy * dy + dz * dz);
+		return distance;
 	}
 }

@@ -12,6 +12,8 @@ namespace Kaka
 		void Bind(const Graphics& aGfx, DirectX::FXMMATRIX aView);
 		void ShowControlWindow(const char* aWindowName = nullptr);
 		DirectX::XMMATRIX GetTransform() const;
+		DirectX::XMFLOAT3 GetPosition() const;
+		float GetRange() const;
 		void SetPosition(DirectX::XMFLOAT3 aPosition) const;
 		void SetColour(DirectX::XMFLOAT3 aColour) const;
 		void SetIntensity(float aIntensity) const;
@@ -22,7 +24,7 @@ namespace Kaka
 		void Draw(Graphics& aGfx) const;
 
 	private:
-		static constexpr UINT MAX_LIGHTS = 50u;
+		static constexpr UINT MAX_LIGHTS = 50u; // Needs to be the same in PixelShader
 
 		struct Transforms
 		{

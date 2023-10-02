@@ -36,6 +36,7 @@ namespace Kaka
 		DirectX::XMMATRIX GetTransform() const override;
 		float GetScale() const;
 		bool IsLoaded() const;
+		void SetNearbyLights(bool aNearbyPointLights[], bool aNearbySpotLights[]);
 
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
@@ -76,11 +77,14 @@ namespace Kaka
 	private:
 		ModelData modelData;
 		Texture texture{2u};
-		std::vector<std::unique_ptr<Bindable>> bindablePtrs;
+		//std::vector<std::unique_ptr<Bindable>> bindablePtrs;
 		bool isLoaded = false;
 		int selectedAnimationIndex = -1;
 		float animationTime = 0.0f;
 		float animationSpeed = 1.0f;
 		bool isAnimationPlaying = false;
+
+		BOOL nearbyPointLights[50u];
+		BOOL nearbySpotLights[50u];
 	};
 }

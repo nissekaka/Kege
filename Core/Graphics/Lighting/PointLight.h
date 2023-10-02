@@ -14,6 +14,8 @@ namespace Kaka
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr) const;
 		DirectX::XMMATRIX GetTransform() const;
+		DirectX::XMFLOAT3 GetPosition() const;
+		float GetRadius() const;
 		void SetPosition(DirectX::XMFLOAT3 aPosition) const;
 		void SetColour(DirectX::XMFLOAT3 aColour) const;
 		void SetIntensity(float aIntensity) const;

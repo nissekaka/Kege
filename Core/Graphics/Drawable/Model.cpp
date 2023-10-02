@@ -7,6 +7,8 @@
 
 namespace Kaka
 {
+	static constexpr UINT MAX_LIGHTS = 50u;
+
 	Model::Model(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType)
 		:
 		shaderType(aShaderType)
@@ -316,10 +318,27 @@ namespace Kaka
 				{
 					BOOL normalMapEnabled = FALSE;
 					BOOL materialEnabled = FALSE;
-					float padding[2] = {};
+					unsigned int packedNearbyPointLightDataA = 0u;
+					unsigned int packedNearbyPointLightDataB = 0u;
+					unsigned int packedNearbySpotLightDataA = 0u;
+					unsigned int packedNearbySpotLightDataB = 0u;
+					float padding[2];
 				} pmc;
 				pmc.normalMapEnabled = texture.HasNormalMap();
 				pmc.materialEnabled = texture.HasMaterial();
+				for (int i = 0; i < MAX_LIGHTS; ++i)
+				{
+					if (i < 32)
+					{
+						pmc.packedNearbyPointLightDataA |= (nearbyPointLights[i] ? (1u << i) : 0u);
+						pmc.packedNearbySpotLightDataA |= (nearbySpotLights[i] ? (1u << i) : 0u);
+					}
+					else
+					{
+						pmc.packedNearbyPointLightDataA |= (nearbyPointLights[i - 32] ? (1u << (i - 32)) : 0u);
+						pmc.packedNearbySpotLightDataA |= (nearbySpotLights[i - 32] ? (1u << (i - 32)) : 0u);
+					}
+				}
 
 				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
 				psConstantBuffer.Bind(aGfx);
@@ -514,6 +533,15 @@ namespace Kaka
 	bool Model::IsLoaded() const
 	{
 		return isLoaded;
+	}
+
+	void Model::SetNearbyLights(bool aNearbyPointLights[50], bool aNearbySpotLights[50])
+	{
+		for (int i = 0; i < MAX_LIGHTS; ++i)
+		{
+			nearbyPointLights[i] = aNearbyPointLights[i];
+			nearbySpotLights[i] = aNearbySpotLights[i];
+		}
 	}
 
 	void Model::ShowControlWindow(const char* aWindowName)

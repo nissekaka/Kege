@@ -25,6 +25,7 @@ namespace Kaka
 		void Update(const float aDeltaTime);
 		void HandleInput(const float aDeltaTime);
 		void ShowStatsWindow();
+		float GetDistanceBetweenObjects(DirectX::XMFLOAT3 aPosA, DirectX::XMFLOAT3 aPosB) const;
 
 	private:
 		ImGuiManager imGui;
@@ -49,11 +50,12 @@ namespace Kaka
 		float cameraSpeedBoost = 2.0f;
 
 	private:
-		Model spy{};
-		Model ken{};
-		Model vamp{};
-		Model cube{};
-		Model cubeTwoBones{};
+		std::vector<Model> models;
+		//Model spy{};
+		//Model ken{};
+		//Model vamp{};
+		//Model cube{};
+		//Model cubeTwoBones{};
 		Terrain terrain{};
 		Skybox skybox{};
 		ReflectionPlane reflectionPlane{};

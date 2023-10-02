@@ -80,6 +80,16 @@ namespace Kaka
 			                             spotLightData[index].position.z);
 	}
 
+	DirectX::XMFLOAT3 SpotLight::GetPosition() const
+	{
+		return spotLightData[index].position;
+	}
+
+	float SpotLight::GetRange() const
+	{
+		return spotLightData[index].range;
+	}
+
 	void SpotLight::SetPosition(const DirectX::XMFLOAT3 aPosition) const
 	{
 		spotLightData[index].position = aPosition;

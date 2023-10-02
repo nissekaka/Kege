@@ -67,6 +67,16 @@ namespace Kaka
 			                             pointLightData[index].position.z);
 	}
 
+	DirectX::XMFLOAT3 PointLight::GetPosition() const
+	{
+		return pointLightData[index].position;
+	}
+
+	float PointLight::GetRadius() const
+	{
+		return pointLightData[index].radius;
+	}
+
 	void PointLight::SetPosition(const DirectX::XMFLOAT3 aPosition) const
 	{
 		pointLightData[index].position = aPosition;

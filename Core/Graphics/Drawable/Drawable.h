@@ -16,6 +16,6 @@ namespace Kaka
 		//virtual void Draw(Graphics& aGfx);
 	private:
 		const IndexBuffer* pIndexBuffer = nullptr;
-		std::vector<std::unique_ptr<Bindable>> binds;
+		//std::vector<std::unique_ptr<Bindable>> binds;
 	};
 }
