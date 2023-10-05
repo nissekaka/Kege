@@ -198,61 +198,134 @@ namespace Kaka
 
 		OutputDebugStringA("\nPushed indices...");
 
-		constexpr int subsetSize = 62500;
+		constexpr int subsetSize = 8192; // Number of vertices in each subset
 		const int numVertices = static_cast<int>(terrainVertices.size());
-		const int numSubsets = (numVertices + subsetSize - 1) / subsetSize; // Round up
 
-		terrainSubsets.resize(numSubsets);
+		const int verticesPerSubsetRow = static_cast<int>(std::sqrt(subsetSize));
+		const int numSubsets = (aSize + verticesPerSubsetRow - 1) / verticesPerSubsetRow;
+		// Calculate the number of subsets in one dimension
 
-		for (int i = 0; i < numSubsets; ++i)
+		terrainSubsets.resize(numSubsets * numSubsets);
+
+		for (int i = 0; i < 2; ++i)
 		{
-			const int startIndex = i * subsetSize;
-			const int endIndex = (std::min)(startIndex + subsetSize, numVertices);
-
-			// Add the last row's vertices to the next subset's first row
-			if (i < numSubsets - 1)
+			for (int j = 0; j < 2; ++j)
 			{
-				const int nextSubsetStartIndex = (i + 1) * subsetSize;
+				const int startZ = i * verticesPerSubsetRow;
+				const int startX = j * verticesPerSubsetRow;
+				const int endZ = (std::min)(startZ + verticesPerSubsetRow, aSize);
+				const int endX = (std::min)(startX + verticesPerSubsetRow, aSize);
 
-				for (int j = endIndex - aSize - 1; j <= endIndex; ++j)
+				for (int z = startZ; z < endZ; ++z)
 				{
-					terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].position = terrainVertices[j].
-						position;
-					terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].normal = terrainVertices[j].normal;
-					terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].texCoord = terrainVertices[j].
-						texCoord;
-					terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].tangent = terrainVertices[j].tangent;
-					terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].bitangent = terrainVertices[j].
-						bitangent;
-				}
-			}
-
-			terrainSubsets[i].vertices.assign(terrainVertices.begin() + startIndex, terrainVertices.begin() + endIndex);
-
-			// Adjust the indices to be relative to the subset
-			for (int z = 0; z < aSize - 1; ++z)
-			{
-				for (int x = 0; x < aSize - 1; ++x)
-				{
-					const int topLeftIndex = z * aSize + x;
-					const int topRightIndex = topLeftIndex + 1;
-					const int bottomLeftIndex = (z + 1) * aSize + x;
-					const int bottomRightIndex = bottomLeftIndex + 1;
-
-					// Check if all indices are within the subset range
-					if (topLeftIndex >= startIndex && bottomRightIndex < endIndex)
+					for (int x = startX; x < endX; ++x)
 					{
-						// Adjust the indices relative to the subset
-						terrainSubsets[i].indices.push_back(static_cast<unsigned short>(topLeftIndex - startIndex));
-						terrainSubsets[i].indices.push_back(static_cast<unsigned short>(bottomLeftIndex - startIndex));
-						terrainSubsets[i].indices.push_back(static_cast<unsigned short>(topRightIndex - startIndex));
-						terrainSubsets[i].indices.push_back(static_cast<unsigned short>(topRightIndex - startIndex));
-						terrainSubsets[i].indices.push_back(static_cast<unsigned short>(bottomLeftIndex - startIndex));
-						terrainSubsets[i].indices.push_back(static_cast<unsigned short>(bottomRightIndex - startIndex));
+						const int index = z * aSize + x;
+
+						// Check if the index is within the terrain range
+						if (index < numVertices)
+						{
+							terrainSubsets[i * numSubsets + j].vertices.push_back(terrainVertices[index]);
+						}
+
+						//if (z == endZ - 1 && (i < numSubsets - 1 || j < numSubsets - 1))
+						//{
+						//	if (index < numVertices)
+						//	{
+						//		terrainSubsets[i * numSubsets + j].vertices.push_back(terrainVertices[index + 1]);
+						//	}
+						//}
+					}
+				}
+
+				for (int z = 0; z < verticesPerSubsetRow - 1; ++z)
+				{
+					for (int x = 0; x < verticesPerSubsetRow - 1; ++x)
+					{
+						const int topLeftIndex = z * verticesPerSubsetRow + x;
+						const int topRightIndex = topLeftIndex + 1;
+						const int bottomLeftIndex = (z + 1) * verticesPerSubsetRow + x;
+						const int bottomRightIndex = bottomLeftIndex + 1;
+
+						// Check if all indices are within the subset range
+						if (topLeftIndex < terrainSubsets[i * numSubsets + j].vertices.size() &&
+							topRightIndex < terrainSubsets[i * numSubsets + j].vertices.size() &&
+							bottomLeftIndex < terrainSubsets[i * numSubsets + j].vertices.size() &&
+							bottomRightIndex < terrainSubsets[i * numSubsets + j].vertices.size())
+						{
+							terrainSubsets[i * numSubsets + j].indices.push_back(
+								static_cast<unsigned short>(topLeftIndex));
+							terrainSubsets[i * numSubsets + j].indices.push_back(
+								static_cast<unsigned short>(bottomLeftIndex));
+							terrainSubsets[i * numSubsets + j].indices.push_back(
+								static_cast<unsigned short>(topRightIndex));
+
+							terrainSubsets[i * numSubsets + j].indices.push_back(
+								static_cast<unsigned short>(topRightIndex));
+							terrainSubsets[i * numSubsets + j].indices.push_back(
+								static_cast<unsigned short>(bottomLeftIndex));
+							terrainSubsets[i * numSubsets + j].indices.push_back(
+								static_cast<unsigned short>(bottomRightIndex));
+						}
 					}
 				}
 			}
 		}
+		//constexpr int subsetSize = 8192;
+		//const int numVertices = static_cast<int>(terrainVertices.size());
+		//const int numSubsets = (numVertices + subsetSize - 1) / subsetSize; // Round up
+
+		//terrainSubsets.resize(numSubsets);
+
+		//for (int i = 0; i < numSubsets; ++i)
+		//{
+		//	const int startIndex = i * subsetSize;
+		//	const int endIndex = (std::min)(startIndex + subsetSize, numVertices);
+
+		//// Add the last row's vertices to the next subset's first row
+		//if (i < numSubsets - 1)
+		//{
+		//	const int nextSubsetStartIndex = (i + 1) * subsetSize;
+
+		//	for (int j = endIndex - aSize - 1; j <= endIndex; ++j)
+		//	{
+		//		terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].position = terrainVertices[j].
+		//			position;
+		//		terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].normal = terrainVertices[j].normal;
+		//		terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].texCoord = terrainVertices[j].
+		//			texCoord;
+		//		terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].tangent = terrainVertices[j].tangent;
+		//		terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].bitangent = terrainVertices[j].
+		//			bitangent;
+		//	}
+		//}
+
+		//	terrainSubsets[i].vertices.assign(terrainVertices.begin() + startIndex, terrainVertices.begin() + endIndex);
+
+		//	// Adjust the indices to be relative to the subset
+		//	for (int z = 0; z < aSize - 1; ++z)
+		//	{
+		//		for (int x = 0; x < aSize - 1; ++x)
+		//		{
+		//			const int topLeftIndex = z * aSize + x;
+		//			const int topRightIndex = topLeftIndex + 1;
+		//			const int bottomLeftIndex = (z + 1) * aSize + x;
+		//			const int bottomRightIndex = bottomLeftIndex + 1;
+
+		//			// Check if all indices are within the subset range
+		//			if (topLeftIndex >= startIndex && bottomRightIndex < endIndex)
+		//			{
+		//				// Adjust the indices relative to the subset
+		//				terrainSubsets[i].indices.push_back(static_cast<unsigned short>(topLeftIndex - startIndex));
+		//				terrainSubsets[i].indices.push_back(static_cast<unsigned short>(bottomLeftIndex - startIndex));
+		//				terrainSubsets[i].indices.push_back(static_cast<unsigned short>(topRightIndex - startIndex));
+		//				terrainSubsets[i].indices.push_back(static_cast<unsigned short>(topRightIndex - startIndex));
+		//				terrainSubsets[i].indices.push_back(static_cast<unsigned short>(bottomLeftIndex - startIndex));
+		//				terrainSubsets[i].indices.push_back(static_cast<unsigned short>(bottomRightIndex - startIndex));
+		//			}
+		//		}
+		//	}
+		//}
 
 		OutputDebugStringA("\nMoved to subsets...");
 
@@ -290,34 +363,34 @@ namespace Kaka
 
 	void Terrain::Draw(Graphics& aGfx)
 	{
+		sampler.Bind(aGfx);
+		texture.Bind(aGfx);
+
+		pixelShader.Bind(aGfx);
+
+		PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
+		psConstantBuffer.Bind(aGfx);
+
+		vertexShader.Bind(aGfx);
+		inputLayout.Bind(aGfx);
+		topology.Bind(aGfx);
+		rasterizer.Bind(aGfx);
+		depthStencil.Bind(aGfx);
+
 		for (auto& subset : terrainSubsets)
 		{
-			sampler.Bind(aGfx);
-			texture.Bind(aGfx);
-
 			subset.vertexBuffer.Bind(aGfx);
 			subset.indexBuffer.Bind(aGfx);
 
 			TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
 			transformConstantBuffer.Bind(aGfx);
 
-			pixelShader.Bind(aGfx);
-
-			PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-			psConstantBuffer.Bind(aGfx);
-
-			vertexShader.Bind(aGfx);
-			inputLayout.Bind(aGfx);
-			topology.Bind(aGfx);
-			rasterizer.Bind(aGfx);
-			depthStencil.Bind(aGfx);
-
 			aGfx.DrawIndexed(static_cast<UINT>(std::size(subset.indices)));
-
-			// Unbind shader resources
-			ID3D11ShaderResourceView* nullSRVs[9] = {nullptr};
-			aGfx.pContext->PSSetShaderResources(2u, 9u, nullSRVs);
 		}
+
+		// Unbind shader resources
+		ID3D11ShaderResourceView* nullSRVs[9] = {nullptr};
+		aGfx.pContext->PSSetShaderResources(2u, 9u, nullSRVs);
 	}
 
 	void Terrain::SetPosition(const DirectX::XMFLOAT3 aPosition)

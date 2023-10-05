@@ -203,7 +203,7 @@ namespace Kaka
 
 	DirectX::XMMATRIX Graphics::GetCamera() const
 	{
-		return camera;
+		return DirectX::XMMatrixInverse(nullptr, camera);
 	}
 
 	UINT Graphics::GetDrawcallCount() const

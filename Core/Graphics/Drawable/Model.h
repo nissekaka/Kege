@@ -37,6 +37,7 @@ namespace Kaka
 		float GetScale() const;
 		bool IsLoaded() const;
 		void SetNearbyLights(bool aNearbyPointLights[], bool aNearbySpotLights[]);
+		void BindPixelShader(const Graphics& aGfx);
 
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);

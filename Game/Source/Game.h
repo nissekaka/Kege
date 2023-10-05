@@ -45,9 +45,9 @@ namespace Kaka
 		bool drawLightDebug = false;
 
 	private:
-		float cameraSpeed = 1.0f;
-		float cameraSpeedDefault = 1.0f;
-		float cameraSpeedBoost = 2.0f;
+		float cameraSpeed = 0.0f;
+		float cameraSpeedDefault = 3.0f;
+		float cameraSpeedBoost = 6.0f;
 
 	private:
 		std::vector<Model> models;

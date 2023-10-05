@@ -36,7 +36,7 @@ namespace Kaka
 			ImGui::Text("Colour");
 			ImGui::ColorEdit3("R", &bufferData.lightColour.x);
 			ImGui::Text("Ambient");
-			ImGui::SliderFloat("Intensity", &bufferData.ambientLight, 0.0f, 1.0f);
+			ImGui::DragFloat("Intensity", &bufferData.ambientLight, 0.0f, 100.0f);
 			if (ImGui::Button("Simulate On/Off"))
 			{
 				if (shouldSimulate)
@@ -60,7 +60,7 @@ namespace Kaka
 	{
 		bufferData.lightDirection = {0.6f, -0.6f, 0.2f};
 		bufferData.lightColour = {1.0f, 0.8f, 0.6f};
-		bufferData.ambientLight = 1.0f;
+		bufferData.ambientLight = 50.0f;
 	}
 
 	DirectX::XMFLOAT3 DirectionalLight::GetDirection() const

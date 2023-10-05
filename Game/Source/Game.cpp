@@ -6,9 +6,9 @@
 
 constexpr int WINDOW_WIDTH = 1920;
 constexpr int WINDOW_HEIGHT = 1080;
-constexpr int NUM_POINT_LIGHTS = 10;
-constexpr int NUM_SPOT_LIGHTS = 10;
-constexpr int TERRAIN_SIZE = 1000;
+constexpr int NUM_POINT_LIGHTS = 0;
+constexpr int NUM_SPOT_LIGHTS = 0;
+constexpr int TERRAIN_SIZE = 900;
 
 namespace Kaka
 {
@@ -51,7 +51,7 @@ namespace Kaka
 
 		terrain.Init(wnd.Gfx(), TERRAIN_SIZE);
 
-		for (int i = 0; i < 50; ++i)
+		for (int i = 0; i < 0; ++i)
 		{
 			models.emplace_back();
 			models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\ken\\ken.fbx", Model::eShaderType::PBR);
@@ -208,7 +208,7 @@ namespace Kaka
 			}
 		}
 
-		for (Model model : models)
+		for (Model& model : models)
 		{
 			// Point light range
 			bool nearbyPointLights[50u] = {};
@@ -219,7 +219,8 @@ namespace Kaka
 				{
 					nearbyPointLights[i] = false;
 				}
-				else if (GetDistanceBetweenObjects(model.GetPosition(), pointLights[i].GetPosition()) <= pointLights[i].
+				else if (GetDistanceBetweenObjects(model.GetPosition(), pointLights[i].GetPosition()) <=
+					pointLights[i].
 					GetRadius())
 				{
 					nearbyPointLights[i] = true;
@@ -239,7 +240,8 @@ namespace Kaka
 				{
 					nearbySpotLights[i] = false;
 				}
-				else if (GetDistanceBetweenObjects(model.GetPosition(), spotLights[i].GetPosition()) <= spotLights[i].
+				else if (GetDistanceBetweenObjects(model.GetPosition(), spotLights[i].GetPosition()) <=
+					spotLights[i].
 					GetRange())
 				{
 					nearbySpotLights[i] = true;
@@ -389,7 +391,7 @@ namespace Kaka
 	{
 		if (ImGui::Begin("Stats"))
 		{
-			ImGui::Text("%.3f m/s", 1000.0f / ImGui::GetIO().Framerate);
+			ImGui::Text("%.3f ms", 1000.0f / ImGui::GetIO().Framerate);
 			ImGui::Text("%.0f FPS", ImGui::GetIO().Framerate);
 			const std::string drawcalls = "Drawcalls:" + std::to_string(wnd.Gfx().GetDrawcallCount());
 			ImGui::Text(drawcalls.c_str());

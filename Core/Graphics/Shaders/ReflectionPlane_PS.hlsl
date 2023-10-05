@@ -32,15 +32,12 @@ cbuffer SpotLightBuffer : register(b3)
 
 struct PixelInput
 {
-    float3 worldPos : WPOSITION;
-    float3 worldNorm : WNORMAL;
-    float3 viewPos : POSITION;
+    float3 worldPos : POSITION;
     float4 position : SV_POSITION;
-    float3 viewNormal : NORMAL;
     float2 texCoord : TEXCOORD;
+    float3 normal : NORMAL;
     float3 tangent : TANGENT;
     float3 bitan : BITANGENT;
-    matrix modelView : MODELVIEW;
 };
 
 cbuffer Reflection : register(b10)
@@ -72,7 +69,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     float3 pointLight = { 0.0f, 0.0f, 0.0f };
     float3 spotLight = { 0.0f, 0.0f, 0.0f };
     float3 specular = { 0.0f, 0.0f, 0.0f };
-    const float ambientOcclusion = normal.b;
+    float ambientOcclusion = 0.0f;
 
     float metalness = 0.0f;
     float roughness = 0.0f;
@@ -87,7 +84,7 @@ float4 main(PixelInput aInput) : SV_TARGET
         float3x3 TBN = float3x3(
 		normalize(aInput.tangent.xyz),
 		normalize(-aInput.bitan.xyz),
-		normalize(aInput.worldNorm.xyz)
+		normalize(aInput.normal.xyz)
 		);
 
 	    // Can save an instruction here by instead doing
@@ -100,9 +97,10 @@ float4 main(PixelInput aInput) : SV_TARGET
 
     if (materialEnabled)
     {
-        metalness = material.r;
+        ambientOcclusion = material.r;
         roughness = material.g;
-        emissive = material.b;
+        metalness = material.b;
+        //emissive = material.b;
 
         specular = lerp((float3) 0.64f, colour.rgb, metalness);
         colour = lerp((float3) 0.0f, colour.rgb, 1 - metalness);
@@ -119,7 +117,7 @@ float4 main(PixelInput aInput) : SV_TARGET
 
     // Ambient light
     ambientLight = EvaluateAmbianceDynamicSky(splr, dayTex, nightTex, blendFactor,
-    normal, aInput.worldNorm.xyz, toEye, roughness, ambientOcclusion, colour, specular);
+    normal, aInput.normal.xyz, toEye, roughness, ambientOcclusion, colour, specular);
 
 	// Directional light
     directionalLight = EvaluateDirectionalLight(colour, specular, normal,
@@ -135,7 +133,7 @@ float4 main(PixelInput aInput) : SV_TARGET
 
         pointLight += EvaluatePointLight(colour, specular, normal,
         roughness, plBuf[i].colour, plBuf[i].intensity,
-        plBuf[i].radius, plBuf[i].position, toEye, aInput.viewPos);
+        plBuf[i].radius, plBuf[i].position, toEye, aInput.worldPos);
     }
 
 	// Spot lights
@@ -151,8 +149,8 @@ float4 main(PixelInput aInput) : SV_TARGET
     }
 
 	// Final colour
-    const float3 emissiveColour = colour * emissive;
-    const float3 finalColour = saturate(ambientLight * ambientLightPower + directionalLight + pointLight + spotLight + emissiveColour);
+    //const float3 emissiveColour = colour * emissive;
+    const float3 finalColour = saturate(ambientLight * ambientLightPower + directionalLight + pointLight + spotLight);
     
     // Reflection
     const float dist = abs(dot(toEye, cameraPosition.xyz));

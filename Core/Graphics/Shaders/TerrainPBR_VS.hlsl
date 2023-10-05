@@ -1,45 +1,40 @@
 cbuffer Transform : register(b0)
 {
-    matrix model;
-    matrix modelView;
-    matrix modelViewProj;
+    matrix objectToWorld;
+    matrix objectToClip;
 }
 
 struct VertexInput
 {
     float3 position : POSITION;
-    float3 normal : NORMAL;
     float2 texCoord : TEXCOORD;
+    float3 normal : NORMAL;
     float3 tan : TANGENT;
     float3 bitan : BITANGENT;
 };
 
 struct PixelInput
 {
-    float3 worldPos : WPOSITION;
-    float3 worldNorm : WNORMAL;
-    float3 viewPos : POSITION;
+    float3 worldPos : POSITION;
     float4 position : SV_POSITION;
-    float3 viewNormal : NORMAL;
     float2 texCoord : TEXCOORD;
+    float3 normal : NORMAL;
     float3 tangent : TANGENT;
     float3 bitan : BITANGENT;
-    matrix modelView : MODELVIEW;
 };
 
-PixelInput main(VertexInput aInput)
+PixelInput main(const VertexInput aInput)
 {
     PixelInput output;
 
-    output.worldPos = aInput.position;
-    output.worldNorm = aInput.normal;
-    output.viewPos = (float3) mul(float4(aInput.position, 1.0f), model);
-    output.viewNormal = mul(aInput.normal, (float3x3) modelView);
-    output.tangent = aInput.tan;
-    output.bitan = aInput.bitan;
-    output.position = mul(float4(aInput.position, 1.0f), modelViewProj);
+    const float3x3 objectRotationMatrix = objectToWorld;
+    const float4 position = { aInput.position, 1.0f };
+    output.worldPos = mul(objectToWorld, position).xyz;
+    output.position = mul(objectToClip, position);
     output.texCoord = aInput.texCoord;
-    output.modelView = modelView;
+    output.normal = mul(objectRotationMatrix, aInput.normal);
+    output.tangent = mul(objectRotationMatrix, aInput.tan);
+    output.bitan = mul(objectRotationMatrix, aInput.bitan);
     
     return output;
 }
