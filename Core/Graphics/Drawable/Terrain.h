@@ -5,7 +5,24 @@
 
 namespace Kaka
 {
+	static constexpr UINT MAX_LIGHTS = 50u;
+
 	struct Vertex;
+
+	struct Bounds
+	{
+		DirectX::XMFLOAT3 min = {FLT_MAX, FLT_MAX, FLT_MAX};
+		DirectX::XMFLOAT3 max = {FLT_MIN, FLT_MIN, FLT_MIN};
+	};
+
+	struct PackedLightData
+	{
+		unsigned int packedNearbyPointLightDataA = 0u;
+		unsigned int packedNearbyPointLightDataB = 0u;
+		unsigned int packedNearbySpotLightDataA = 0u;
+		unsigned int packedNearbySpotLightDataB = 0u;
+		float padding[4];
+	};
 
 	struct TerrainSubset
 	{
@@ -13,6 +30,26 @@ namespace Kaka
 		std::vector<unsigned short> indices = {};
 		VertexBuffer vertexBuffer;
 		IndexBuffer indexBuffer;
+		DirectX::XMFLOAT3 center;
+		Bounds bounds;
+		PackedLightData packedLightData;
+
+		void SetNearbyLights(bool aNearbyPointLights[], bool aNearbySpotLights[])
+		{
+			for (int i = 0; i < MAX_LIGHTS; ++i)
+			{
+				if (i < 32)
+				{
+					packedLightData.packedNearbyPointLightDataA |= (aNearbyPointLights[i] ? (1u << i) : 0u);
+					packedLightData.packedNearbySpotLightDataA |= (aNearbySpotLights[i] ? (1u << i) : 0u);
+				}
+				else
+				{
+					packedLightData.packedNearbyPointLightDataA |= (aNearbyPointLights[i - 32] ? (1u << (i - 32)) : 0u);
+					packedLightData.packedNearbySpotLightDataA |= (aNearbySpotLights[i - 32] ? (1u << (i - 32)) : 0u);
+				}
+			}
+		}
 	};
 
 	class Terrain : public Drawable
@@ -27,6 +64,7 @@ namespace Kaka
 		void SetCullingMode(eCullingMode aMode);
 		DirectX::XMFLOAT3 GetRandomVertexPosition() const;
 		DirectX::XMMATRIX GetTransform() const override;
+		std::vector<TerrainSubset>& GetTerrainSubsets();
 
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);

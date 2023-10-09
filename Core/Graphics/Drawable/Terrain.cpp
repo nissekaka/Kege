@@ -210,6 +210,7 @@ namespace Kaka
 		{
 			for (int j = 0; j < numSubsets; ++j)
 			{
+				int currentIndex = i * numSubsets + j;
 				const bool isLastZ = i == numSubsets - 1;
 				const bool isLastX = j == numSubsets - 1;
 
@@ -252,10 +253,53 @@ namespace Kaka
 						// Check if the index is within the terrain range
 						if (index < numVertices)
 						{
-							terrainSubsets[i * numSubsets + j].vertices.push_back(terrainVertices[index]);
+							terrainSubsets[currentIndex].vertices.push_back(terrainVertices[index]);
+
+							if (terrainSubsets[currentIndex].vertices.back().position.x < terrainSubsets[currentIndex].
+								bounds.min.x)
+							{
+								terrainSubsets[currentIndex].bounds.min.x = terrainSubsets[currentIndex].vertices.back()
+									.position.x;
+							}
+							if (terrainSubsets[currentIndex].vertices.back().position.x > terrainSubsets[currentIndex].
+								bounds.max.x)
+							{
+								terrainSubsets[currentIndex].bounds.max.x = terrainSubsets[currentIndex].vertices.back()
+									.position.x;
+							}
+
+							if (terrainSubsets[currentIndex].vertices.back().position.y < terrainSubsets[currentIndex].
+								bounds.min.y)
+							{
+								terrainSubsets[currentIndex].bounds.min.y = terrainSubsets[currentIndex].vertices.back()
+									.position.y;
+							}
+							if (terrainSubsets[currentIndex].vertices.back().position.y > terrainSubsets[currentIndex].
+								bounds.max.y)
+							{
+								terrainSubsets[currentIndex].bounds.max.y = terrainSubsets[currentIndex].vertices.back()
+									.position.y;
+							}
+
+							if (terrainSubsets[currentIndex].vertices.back().position.z < terrainSubsets[currentIndex].
+								bounds.min.z)
+							{
+								terrainSubsets[currentIndex].bounds.min.z = terrainSubsets[currentIndex].vertices.back()
+									.position.z;
+							}
+							if (terrainSubsets[currentIndex].vertices.back().position.z > terrainSubsets[currentIndex].
+								bounds.max.z)
+							{
+								terrainSubsets[currentIndex].bounds.max.z = terrainSubsets[currentIndex].vertices.back()
+									.position.z;
+							}
 						}
 					}
 				}
+
+				int centerIndex = static_cast<int>(terrainSubsets[currentIndex].vertices.size()) / 2;
+				terrainSubsets[currentIndex].center = terrainSubsets[currentIndex].vertices[centerIndex].
+					position;
 
 				int vertZ = verticesPerSubsetRow;
 				int vertX = verticesPerSubsetRow;
@@ -283,23 +327,23 @@ namespace Kaka
 						const int bottomRightIndex = bottomLeftIndex + 1;
 
 						// Check if all indices are within the subset range
-						if (topLeftIndex < terrainSubsets[i * numSubsets + j].vertices.size() &&
-							topRightIndex < terrainSubsets[i * numSubsets + j].vertices.size() &&
-							bottomLeftIndex < terrainSubsets[i * numSubsets + j].vertices.size() &&
-							bottomRightIndex < terrainSubsets[i * numSubsets + j].vertices.size())
+						if (topLeftIndex < terrainSubsets[currentIndex].vertices.size() &&
+							topRightIndex < terrainSubsets[currentIndex].vertices.size() &&
+							bottomLeftIndex < terrainSubsets[currentIndex].vertices.size() &&
+							bottomRightIndex < terrainSubsets[currentIndex].vertices.size())
 						{
-							terrainSubsets[i * numSubsets + j].indices.push_back(
+							terrainSubsets[currentIndex].indices.push_back(
 								static_cast<unsigned short>(topLeftIndex));
-							terrainSubsets[i * numSubsets + j].indices.push_back(
+							terrainSubsets[currentIndex].indices.push_back(
 								static_cast<unsigned short>(bottomLeftIndex));
-							terrainSubsets[i * numSubsets + j].indices.push_back(
+							terrainSubsets[currentIndex].indices.push_back(
 								static_cast<unsigned short>(topRightIndex));
 
-							terrainSubsets[i * numSubsets + j].indices.push_back(
+							terrainSubsets[currentIndex].indices.push_back(
 								static_cast<unsigned short>(topRightIndex));
-							terrainSubsets[i * numSubsets + j].indices.push_back(
+							terrainSubsets[currentIndex].indices.push_back(
 								static_cast<unsigned short>(bottomLeftIndex));
-							terrainSubsets[i * numSubsets + j].indices.push_back(
+							terrainSubsets[currentIndex].indices.push_back(
 								static_cast<unsigned short>(bottomRightIndex));
 						}
 					}
@@ -357,15 +401,22 @@ namespace Kaka
 		rasterizer.Bind(aGfx);
 		depthStencil.Bind(aGfx);
 
-		for (auto& subset : terrainSubsets)
+		for (int i = 0; i < terrainSubsets.size(); ++i)
 		{
-			subset.vertexBuffer.Bind(aGfx);
-			subset.indexBuffer.Bind(aGfx);
+			if (!aGfx.IsBoundingBoxInFrustum(terrainSubsets[i].bounds.min, terrainSubsets[i].bounds.max))
+			{
+				continue;
+			}
+			PixelConstantBuffer<PackedLightData> packedLightBuffer(aGfx, terrainSubsets[i].packedLightData, 10u);
+			packedLightBuffer.Bind(aGfx);
+
+			terrainSubsets[i].vertexBuffer.Bind(aGfx);
+			terrainSubsets[i].indexBuffer.Bind(aGfx);
 
 			TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
 			transformConstantBuffer.Bind(aGfx);
 
-			aGfx.DrawIndexed(static_cast<UINT>(std::size(subset.indices)));
+			aGfx.DrawIndexed(static_cast<UINT>(std::size(terrainSubsets[i].indices)));
 		}
 
 		// Unbind shader resources
@@ -437,6 +488,11 @@ namespace Kaka
 		return DirectX::XMMatrixScaling(transform.scale.x, transform.scale.y, transform.scale.z) *
 			DirectX::XMMatrixRotationRollPitchYaw(transform.roll, transform.pitch, transform.roll) *
 			DirectX::XMMatrixTranslation(transform.x, transform.y, transform.z);
+	}
+
+	std::vector<TerrainSubset>& Terrain::GetTerrainSubsets()
+	{
+		return terrainSubsets;
 	}
 
 	void Terrain::ShowControlWindow(const char* aWindowName)

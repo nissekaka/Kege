@@ -31,6 +31,14 @@ cbuffer SpotLightBuffer : register(b3)
     uint activeSpotLights;
 }
 
+cbuffer LightDataBuffer : register(b10)
+{
+    uint packedDataPointA;
+    uint packedDataPointB;
+    uint packedDataSpotA;
+    uint packedDataSpotB;
+};
+
 cbuffer Reflection : register(b11)
 {
     float planeHeight;
@@ -60,6 +68,34 @@ Texture2D matTexSnow : register(t10);
 
 float4 main(PixelInput aInput) : SV_TARGET
 {
+	// Unpack light data
+    bool nearbyPointLights[MAX_LIGHTS];
+    bool nearbySpotLights[MAX_LIGHTS];
+    
+    for (int pIndex = 0; pIndex < MAX_LIGHTS; ++pIndex)
+    {
+        if (pIndex < 32)
+        {
+            nearbyPointLights[pIndex] = (packedDataPointA & (1u << pIndex)) != 0;
+        }
+        else
+        {
+            nearbyPointLights[pIndex] = (packedDataPointB & (1u << (pIndex - 32))) != 0;
+        }
+    }
+    
+    for (int sIndex = 0; sIndex < MAX_LIGHTS; ++sIndex)
+    {
+        if (sIndex < 32)
+        {
+            nearbySpotLights[sIndex] = (packedDataSpotA & (1u << sIndex)) != 0;
+        }
+        else
+        {
+            nearbySpotLights[sIndex] = (packedDataSpotB & (1u << (sIndex - 32))) != 0;
+        }
+    }
+
     const float3 grassColour = albedoTex.Sample(splr, aInput.texCoord).rgb;
     const float3 grassNormal = normalTex.Sample(splr, aInput.texCoord).wyz;
     const float3 grassMaterial = materialTex.Sample(splr, aInput.texCoord).rgb;
@@ -157,7 +193,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     // Point lights
     for (uint i = 0; i < activePointLights; ++i)
     {
-        if (!plBuf[i].active)
+        if (!plBuf[i].active || !nearbyPointLights[i])
         {
             continue;
         }
@@ -170,7 +206,7 @@ float4 main(PixelInput aInput) : SV_TARGET
 	// Spot lights
     for (uint j = 0; j < activeSpotLights; ++j)
     {
-        if (!slBuf[j].active)
+        if (!slBuf[j].active || !nearbySpotLights[j])
         {
             continue;
         }

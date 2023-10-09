@@ -55,7 +55,8 @@ namespace Kaka
 		{
 			models.emplace_back();
 			models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\ken\\ken.fbx", Model::eShaderType::PBR);
-			DirectX::XMFLOAT3 pos = terrain.GetRandomVertexPosition();
+			//DirectX::XMFLOAT3 pos = terrain.GetRandomVertexPosition();
+			DirectX::XMFLOAT3 pos = terrain.GetTerrainSubsets()[i].center;
 			pos.y += 10.0f;
 			models.back().SetPosition(pos);
 		}
@@ -151,6 +152,7 @@ namespace Kaka
 		wnd.Gfx().SetWaterReflectTarget();
 
 		skybox.FlipScale();
+
 		terrain.FlipScale(reflectionPlane.GetPosition().y, false);
 		terrain.SetReflectShader(wnd.Gfx(), true);
 
@@ -212,43 +214,20 @@ namespace Kaka
 		{
 			// Point light range
 			bool nearbyPointLights[50u] = {};
-
-			for (int i = 0; i < 50u; ++i)
-			{
-				if (i >= spotLights.size())
-				{
-					nearbyPointLights[i] = false;
-				}
-				else if (GetDistanceBetweenObjects(model.GetPosition(), pointLights[i].GetPosition()) <=
-					pointLights[i].
-					GetRadius())
-				{
-					nearbyPointLights[i] = true;
-				}
-				else
-				{
-					nearbyPointLights[i] = false;
-				}
-			}
-
 			bool nearbySpotLights[50u] = {};
 
-			// Spot light range
 			for (int i = 0; i < 50u; ++i)
 			{
 				if (i >= spotLights.size())
 				{
+					nearbyPointLights[i] = false;
 					nearbySpotLights[i] = false;
-				}
-				else if (GetDistanceBetweenObjects(model.GetPosition(), spotLights[i].GetPosition()) <=
-					spotLights[i].
-					GetRange())
-				{
-					nearbySpotLights[i] = true;
 				}
 				else
 				{
-					nearbySpotLights[i] = false;
+					const float distance = GetDistanceBetweenObjects(model.GetPosition(), pointLights[i].GetPosition());
+					nearbyPointLights[i] = (distance <= pointLights[i].GetRadius());
+					nearbySpotLights[i] = (distance <= spotLights[i].GetRange());
 				}
 			}
 			model.SetNearbyLights(nearbyPointLights, nearbySpotLights);
@@ -256,6 +235,28 @@ namespace Kaka
 		}
 		skybox.Draw(wnd.Gfx());
 		terrain.SetCullingMode(eCullingMode::Back);
+		for (TerrainSubset& subset : terrain.GetTerrainSubsets())
+		{
+			// Point light range
+			bool nearbyPointLights[50u] = {};
+			bool nearbySpotLights[50u] = {};
+
+			for (int i = 0; i < 50u; ++i)
+			{
+				if (i >= spotLights.size())
+				{
+					nearbyPointLights[i] = false;
+					nearbySpotLights[i] = false;
+				}
+				else
+				{
+					const float distance = GetDistanceBetweenObjects(subset.center, pointLights[i].GetPosition());
+					nearbyPointLights[i] = (distance <= pointLights[i].GetRadius());
+					nearbySpotLights[i] = (distance <= spotLights[i].GetRange());
+				}
+			}
+			subset.SetNearbyLights(nearbyPointLights, nearbySpotLights);
+		}
 		terrain.Draw(wnd.Gfx());
 
 		wnd.Gfx().BindWaterReflectionTexture();

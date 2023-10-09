@@ -2,6 +2,7 @@
 #include "Game/Source/Game.h"
 #include <External/include/imgui/imgui_impl_dx11.h>
 #include <External/include/imgui/imgui_impl_win32.h>
+#include <complex>
 
 namespace WRL = Microsoft::WRL;
 
@@ -559,5 +560,80 @@ namespace Kaka
 		pContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		pContext->DrawIndexed(static_cast<UINT>(std::size(indices)), 0u, 0u);
+	}
+
+	Graphics::FrustumPlanes Graphics::ExtractFrustumPlanes() const
+	{
+		FrustumPlanes frustum;
+
+		// Extract the rows of the view-projection matrix
+		DirectX::XMFLOAT4X4 VP;
+		auto viewProjectionMatrix = GetCamera() * projection;
+		DirectX::XMStoreFloat4x4(&VP, viewProjectionMatrix);
+
+		// Extract the frustum planes from the view-projection matrix
+		frustum.planes[0] = DirectX::XMFLOAT4(VP._14 + VP._11, VP._24 + VP._21, VP._34 + VP._31, VP._44 + VP._41);
+		// Left plane
+		frustum.planes[1] = DirectX::XMFLOAT4(VP._14 - VP._11, VP._24 - VP._21, VP._34 - VP._31, VP._44 - VP._41);
+		// Right plane
+		frustum.planes[2] = DirectX::XMFLOAT4(VP._14 - VP._12, VP._24 - VP._22, VP._34 - VP._32, VP._44 - VP._42);
+		// Top plane
+		frustum.planes[3] = DirectX::XMFLOAT4(VP._14 + VP._12, VP._24 + VP._22, VP._34 + VP._32, VP._44 + VP._42);
+		// Bottom plane
+		frustum.planes[4] = DirectX::XMFLOAT4(VP._13, VP._23, VP._33, VP._43); // Near plane
+		frustum.planes[5] = DirectX::XMFLOAT4(VP._14 - VP._13, VP._24 - VP._23, VP._34 - VP._33, VP._44 - VP._43);
+		// Far plane
+
+		// Normalize the frustum planes
+		for (int i = 0; i < 6; ++i)
+		{
+			float length = std::sqrt(frustum.planes[i].x * frustum.planes[i].x +
+				frustum.planes[i].y * frustum.planes[i].y +
+				frustum.planes[i].z * frustum.planes[i].z);
+			frustum.planes[i] = DirectX::XMFLOAT4(frustum.planes[i].x / length,
+			                                      frustum.planes[i].y / length,
+			                                      frustum.planes[i].z / length,
+			                                      frustum.planes[i].w / length);
+		}
+
+		return frustum;
+	}
+
+	bool Graphics::IsBoundingBoxInFrustum(const DirectX::XMFLOAT3& aMin, const DirectX::XMFLOAT3& aMax) const
+	{
+		const FrustumPlanes frustum = ExtractFrustumPlanes();
+		for (int i = 0; i < 6; ++i)
+		{
+			if (frustum.planes[i].x * aMin.x + frustum.planes[i].y * aMin.y + frustum.planes[i].z * aMin.z + frustum.
+				planes[i].w > 0.0f)
+				continue;
+			if (frustum.planes[i].x * aMax.x + frustum.planes[i].y * aMin.y + frustum.planes[i].z * aMin.z + frustum.
+				planes[i].w > 0.0f)
+				continue;
+			if (frustum.planes[i].x * aMin.x + frustum.planes[i].y * aMax.y + frustum.planes[i].z * aMin.z + frustum.
+				planes[i].w > 0.0f)
+				continue;
+			if (frustum.planes[i].x * aMax.x + frustum.planes[i].y * aMax.y + frustum.planes[i].z * aMin.z + frustum.
+				planes[i].w > 0.0f)
+				continue;
+			if (frustum.planes[i].x * aMin.x + frustum.planes[i].y * aMin.y + frustum.planes[i].z * aMax.z + frustum.
+				planes[i].w > 0.0f)
+				continue;
+			if (frustum.planes[i].x * aMax.x + frustum.planes[i].y * aMin.y + frustum.planes[i].z * aMax.z + frustum.
+				planes[i].w > 0.0f)
+				continue;
+			if (frustum.planes[i].x * aMin.x + frustum.planes[i].y * aMax.y + frustum.planes[i].z * aMax.z + frustum.
+				planes[i].w > 0.0f)
+				continue;
+			if (frustum.planes[i].x * aMax.x + frustum.planes[i].y * aMax.y + frustum.planes[i].z * aMax.z + frustum.
+				planes[i].w > 0.0f)
+				continue;
+
+			// If the bounding box is completely outside any frustum plane, it is not visible
+			return false;
+		}
+
+		// If the bounding box is not completely outside any frustum plane, it is visible
+		return true;
 	}
 }

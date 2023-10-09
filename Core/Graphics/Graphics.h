@@ -72,6 +72,15 @@ namespace Kaka
 	public:
 		void DrawTestTriangle2D();
 		void DrawTestCube3D(const float aAngle, const DirectX::XMFLOAT3 aPos);
+	private:
+		struct FrustumPlanes
+		{
+			DirectX::XMFLOAT4 planes[6];
+		};
+
+		FrustumPlanes ExtractFrustumPlanes() const;
+	public:
+		bool IsBoundingBoxInFrustum(const DirectX::XMFLOAT3& aMin, const DirectX::XMFLOAT3& aMax) const;
 
 	private:
 		DirectX::XMMATRIX projection{};

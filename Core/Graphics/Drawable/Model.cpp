@@ -36,22 +36,22 @@ namespace Kaka
 			switch (modelData.modelType)
 			{
 			case eModelType::None:
-			{
-				assert("No model type!");
-			}
-			break;
+				{
+					assert("No model type!");
+				}
+				break;
 			case eModelType::Static:
-			{
-				vertexBuffer.Init(aGfx, modelData.mesh.vertices);
-				indexBuffer.Init(aGfx, modelData.mesh.indices);
-			}
-			break;
+				{
+					vertexBuffer.Init(aGfx, modelData.mesh.vertices);
+					indexBuffer.Init(aGfx, modelData.mesh.indices);
+				}
+				break;
 			case eModelType::Skeletal:
-			{
-				vertexBuffer.Init(aGfx, modelData.animMesh.vertices);
-				indexBuffer.Init(aGfx, modelData.animMesh.indices);
-			}
-			break;
+				{
+					vertexBuffer.Init(aGfx, modelData.animMesh.vertices);
+					indexBuffer.Init(aGfx, modelData.animMesh.indices);
+				}
+				break;
 			default:
 				assert("Error!");
 			}
@@ -60,148 +60,148 @@ namespace Kaka
 			switch (shaderType)
 			{
 			case eShaderType::Solid:
-			{
-				pixelShader.Init(aGfx, L"Shaders\\Solid_PS.cso");
-				vertexShader.Init(aGfx, L"Shaders\\Solid_VS.cso");
-
-				ied =
 				{
+					pixelShader.Init(aGfx, L"Shaders\\Solid_PS.cso");
+					vertexShader.Init(aGfx, L"Shaders\\Solid_VS.cso");
+
+					ied =
 					{
-						"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-				};
-			}
-			break;
+						{
+							"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+					};
+				}
+				break;
 			case eShaderType::Light:
-			{
-				pixelShader.Init(aGfx, L"Shaders\\Light_PS.cso");
-				vertexShader.Init(aGfx, L"Shaders\\Light_VS.cso");
-
-				ied =
 				{
+					pixelShader.Init(aGfx, L"Shaders\\Light_PS.cso");
+					vertexShader.Init(aGfx, L"Shaders\\Light_VS.cso");
+
+					ied =
 					{
-						"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-					{
-						"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-					{
-						"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-					{
-						"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-					{
-						"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-				};
-			}
-			break;
+						{
+							"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+						{
+							"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+						{
+							"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+						{
+							"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+						{
+							"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+					};
+				}
+				break;
 			case eShaderType::Phong:
-			{
-				pixelShader.Init(aGfx, L"Shaders\\Phong_PS.cso");
-				vertexShader.Init(aGfx, L"Shaders\\Phong_VS.cso");
-
-				ied =
 				{
+					pixelShader.Init(aGfx, L"Shaders\\Phong_PS.cso");
+					vertexShader.Init(aGfx, L"Shaders\\Phong_VS.cso");
+
+					ied =
 					{
-						"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-					{
-						"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-					{
-						"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-					{
-						"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-					{
-						"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-				};
-				inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
-			}
-			break;
+						{
+							"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+						{
+							"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+						{
+							"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+						{
+							"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+						{
+							"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+					};
+					inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
+				}
+				break;
 			case eShaderType::AnimPhong:
-			{
-				pixelShader.Init(aGfx, L"Shaders\\Phong_PS.cso");
-				vertexShader.Init(aGfx, L"Shaders\\AnimPhong_VS.cso");
-
-				ied =
 				{
+					pixelShader.Init(aGfx, L"Shaders\\Phong_PS.cso");
+					vertexShader.Init(aGfx, L"Shaders\\AnimPhong_VS.cso");
+
+					ied =
 					{
-						"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-					{
-						"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-					{
-						"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-					{
-						"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-					{
-						"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-					{
-						"BONEINDICES", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-					{
-						"BONEWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-				};
-			}
+						{
+							"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+						{
+							"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+						{
+							"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+						{
+							"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+						{
+							"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+						{
+							"BONEINDICES", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+						{
+							"BONEWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+					};
+				}
 			case eShaderType::PBR:
-			{
-				pixelShader.Init(aGfx, L"Shaders\\ModelPBR_PS.cso");
-				vertexShader.Init(aGfx, L"Shaders\\ModelPBR_VS.cso");
-
-				ied =
 				{
+					pixelShader.Init(aGfx, L"Shaders\\ModelPBR_PS.cso");
+					vertexShader.Init(aGfx, L"Shaders\\ModelPBR_VS.cso");
+
+					ied =
 					{
-						"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-					{
-						"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-					{
-						"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-					{
-						"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-					{
-						"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-					},
-				};
-				inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
-			}
-			break;
+						{
+							"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+						{
+							"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+						{
+							"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+						{
+							"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+						{
+							"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+						},
+					};
+					inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
+				}
+				break;
 			}
 
 			inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
@@ -213,6 +213,11 @@ namespace Kaka
 
 	void Model::Draw(Graphics& aGfx)
 	{
+		if (!aGfx.IsBoundingBoxInFrustum(GetPosition(), GetPosition()))
+		{
+			return;
+		}
+
 		if (!isLoaded)
 		{
 			return;
@@ -236,113 +241,113 @@ namespace Kaka
 		switch (shaderType)
 		{
 		case eShaderType::Solid:
-		{
-			struct PSMaterialConstant
 			{
-				DirectX::XMFLOAT4 colour;
-			} pmc = {};
-			pmc.colour = solidColour;
+				struct PSMaterialConstant
+				{
+					DirectX::XMFLOAT4 colour;
+				} pmc = {};
+				pmc.colour = solidColour;
 
-			PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-			psConstantBuffer.Bind(aGfx);
-		}
-		break;
+				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
+				psConstantBuffer.Bind(aGfx);
+			}
+			break;
 		case eShaderType::Light:
-		{
-			struct PSMaterialConstant
 			{
-				BOOL normalMapEnabled = FALSE;
-				BOOL materialEnabled = FALSE;
-				BOOL padding1 = {};
-				BOOL padding2 = {};
-			} pmc;
-			pmc.normalMapEnabled = texture.HasNormalMap();
-			pmc.materialEnabled = texture.HasMaterial();
+				struct PSMaterialConstant
+				{
+					BOOL normalMapEnabled = FALSE;
+					BOOL materialEnabled = FALSE;
+					BOOL padding1 = {};
+					BOOL padding2 = {};
+				} pmc;
+				pmc.normalMapEnabled = texture.HasNormalMap();
+				pmc.materialEnabled = texture.HasMaterial();
 
-			PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-			psConstantBuffer.Bind(aGfx);
-		}
-		break;
+				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
+				psConstantBuffer.Bind(aGfx);
+			}
+			break;
 		case eShaderType::Phong:
-		{
-			struct PSMaterialConstant
 			{
-				BOOL normalMapEnabled = FALSE;
-				BOOL materialEnabled = FALSE;
-				float specularIntensity = 0.1f;
-				float specularPower = 30.0f;
-			} pmc;
-			pmc.normalMapEnabled = texture.HasNormalMap();
-			pmc.materialEnabled = texture.HasMaterial();
-			pmc.specularIntensity = specularIntensity;
-			pmc.specularPower = specularPower;
+				struct PSMaterialConstant
+				{
+					BOOL normalMapEnabled = FALSE;
+					BOOL materialEnabled = FALSE;
+					float specularIntensity = 0.1f;
+					float specularPower = 30.0f;
+				} pmc;
+				pmc.normalMapEnabled = texture.HasNormalMap();
+				pmc.materialEnabled = texture.HasMaterial();
+				pmc.specularIntensity = specularIntensity;
+				pmc.specularPower = specularPower;
 
-			PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-			psConstantBuffer.Bind(aGfx);
-		}
-		break;
+				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
+				psConstantBuffer.Bind(aGfx);
+			}
+			break;
 		case eShaderType::AnimPhong:
-		{
-			struct PSMaterialConstant
 			{
-				BOOL normalMapEnabled = FALSE;
-				BOOL materialEnabled = FALSE;
-				float specularIntensity = 0.1f;
-				float specularPower = 30.0f;
-			} pmc;
-			pmc.normalMapEnabled = texture.HasNormalMap();
-			pmc.materialEnabled = texture.HasMaterial();
-			pmc.specularIntensity = specularIntensity;
-			pmc.specularPower = specularPower;
+				struct PSMaterialConstant
+				{
+					BOOL normalMapEnabled = FALSE;
+					BOOL materialEnabled = FALSE;
+					float specularIntensity = 0.1f;
+					float specularPower = 30.0f;
+				} pmc;
+				pmc.normalMapEnabled = texture.HasNormalMap();
+				pmc.materialEnabled = texture.HasMaterial();
+				pmc.specularIntensity = specularIntensity;
+				pmc.specularPower = specularPower;
 
-			PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-			psConstantBuffer.Bind(aGfx);
+				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
+				psConstantBuffer.Bind(aGfx);
 
-			struct VSBoneConstant
-			{
-				DirectX::XMFLOAT4X4 bones[64u];
-			} vsb = {};
+				struct VSBoneConstant
+				{
+					DirectX::XMFLOAT4X4 bones[64u];
+				} vsb = {};
 
-			for (int i = 0; i < modelData.skeleton.bones.size(); ++i)
-			{
-				vsb.bones[i] = modelData.skeleton.bones[i].offsetMatrix;
+				for (int i = 0; i < modelData.skeleton.bones.size(); ++i)
+				{
+					vsb.bones[i] = modelData.skeleton.bones[i].offsetMatrix;
+				}
+
+				VertexConstantBuffer<VSBoneConstant> vsConstantBuffer(aGfx, vsb, 1u);
+				vsConstantBuffer.Bind(aGfx);
 			}
-
-			VertexConstantBuffer<VSBoneConstant> vsConstantBuffer(aGfx, vsb, 1u);
-			vsConstantBuffer.Bind(aGfx);
-		}
-		break;
+			break;
 		case eShaderType::PBR:
-		{
-			struct PSMaterialConstant
 			{
-				BOOL normalMapEnabled = FALSE;
-				BOOL materialEnabled = FALSE;
-				unsigned int packedNearbyPointLightDataA = 0u;
-				unsigned int packedNearbyPointLightDataB = 0u;
-				unsigned int packedNearbySpotLightDataA = 0u;
-				unsigned int packedNearbySpotLightDataB = 0u;
-				float padding[2];
-			} pmc;
-			pmc.normalMapEnabled = texture.HasNormalMap();
-			pmc.materialEnabled = texture.HasMaterial();
-			for (int i = 0; i < MAX_LIGHTS; ++i)
-			{
-				if (i < 32)
+				struct PSMaterialConstant
 				{
-					pmc.packedNearbyPointLightDataA |= (nearbyPointLights[i] ? (1u << i) : 0u);
-					pmc.packedNearbySpotLightDataA |= (nearbySpotLights[i] ? (1u << i) : 0u);
-				}
-				else
+					BOOL normalMapEnabled = FALSE;
+					BOOL materialEnabled = FALSE;
+					unsigned int packedNearbyPointLightDataA = 0u;
+					unsigned int packedNearbyPointLightDataB = 0u;
+					unsigned int packedNearbySpotLightDataA = 0u;
+					unsigned int packedNearbySpotLightDataB = 0u;
+					float padding[2];
+				} pmc;
+				pmc.normalMapEnabled = texture.HasNormalMap();
+				pmc.materialEnabled = texture.HasMaterial();
+				for (int i = 0; i < MAX_LIGHTS; ++i)
 				{
-					pmc.packedNearbyPointLightDataA |= (nearbyPointLights[i - 32] ? (1u << (i - 32)) : 0u);
-					pmc.packedNearbySpotLightDataA |= (nearbySpotLights[i - 32] ? (1u << (i - 32)) : 0u);
+					if (i < 32)
+					{
+						pmc.packedNearbyPointLightDataA |= (nearbyPointLights[i] ? (1u << i) : 0u);
+						pmc.packedNearbySpotLightDataA |= (nearbySpotLights[i] ? (1u << i) : 0u);
+					}
+					else
+					{
+						pmc.packedNearbyPointLightDataA |= (nearbyPointLights[i - 32] ? (1u << (i - 32)) : 0u);
+						pmc.packedNearbySpotLightDataA |= (nearbySpotLights[i - 32] ? (1u << (i - 32)) : 0u);
+					}
 				}
-			}
 
-			PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-			psConstantBuffer.Bind(aGfx);
-		}
+				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
+				psConstantBuffer.Bind(aGfx);
+			}
 		}
 
 		vertexShader.Bind(aGfx);
