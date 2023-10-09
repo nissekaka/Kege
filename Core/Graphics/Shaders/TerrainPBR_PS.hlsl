@@ -9,8 +9,6 @@ cbuffer ModelBuffer : register(b0)
 {
     bool normalMapEnabled;
     bool materialEnabled;
-    float specularIntensity;
-    float specularPower;
 };
 
 cbuffer DirectionalLightBuffer : register(b1)

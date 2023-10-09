@@ -6,8 +6,8 @@
 
 constexpr int WINDOW_WIDTH = 1920;
 constexpr int WINDOW_HEIGHT = 1080;
-constexpr int NUM_POINT_LIGHTS = 0;
-constexpr int NUM_SPOT_LIGHTS = 0;
+constexpr int NUM_POINT_LIGHTS = 10;
+constexpr int NUM_SPOT_LIGHTS = 10;
 constexpr int TERRAIN_SIZE = 900;
 
 namespace Kaka

@@ -83,8 +83,7 @@ namespace Kaka
 		{
 			BOOL normalMapEnabled = TRUE;
 			BOOL materialEnabled = TRUE;
-			float specularIntensity = 0.1f;
-			float specularPower = 2.0f;
+			float padding[2] = {};
 		};
 
 		PSMaterialConstant pmc;

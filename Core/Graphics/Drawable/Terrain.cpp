@@ -198,23 +198,50 @@ namespace Kaka
 
 		OutputDebugStringA("\nPushed indices...");
 
-		constexpr int subsetSize = 8192; // Number of vertices in each subset
+		constexpr int subsetSize = 8192; // Number of indices in each subset
 		const int numVertices = static_cast<int>(terrainVertices.size());
-
 		const int verticesPerSubsetRow = static_cast<int>(std::sqrt(subsetSize));
 		const int numSubsets = (aSize + verticesPerSubsetRow - 1) / verticesPerSubsetRow;
-		// Calculate the number of subsets in one dimension
+		constexpr bool shouldFillGaps = true;
 
 		terrainSubsets.resize(numSubsets * numSubsets);
 
-		for (int i = 0; i < 2; ++i)
+		for (int i = 0; i < numSubsets; ++i)
 		{
-			for (int j = 0; j < 2; ++j)
+			for (int j = 0; j < numSubsets; ++j)
 			{
+				const bool isLastZ = i == numSubsets - 1;
+				const bool isLastX = j == numSubsets - 1;
+
 				const int startZ = i * verticesPerSubsetRow;
 				const int startX = j * verticesPerSubsetRow;
-				const int endZ = (std::min)(startZ + verticesPerSubsetRow, aSize);
-				const int endX = (std::min)(startX + verticesPerSubsetRow, aSize);
+				int endZ = 0;
+				int endX = 0;
+
+				int verticesPerZ = verticesPerSubsetRow;
+				int verticesPerX = verticesPerSubsetRow;
+
+				if (shouldFillGaps)
+				{
+					if (isLastZ && !isLastX)
+					{
+						verticesPerX++;
+					}
+
+					if (!isLastZ && isLastX)
+					{
+						verticesPerZ++;
+					}
+
+					if (!isLastZ && !isLastX)
+					{
+						verticesPerZ++;
+						verticesPerX++;
+					}
+				}
+
+				endZ = (std::min)(startZ + verticesPerZ, aSize);
+				endX = (std::min)(startX + verticesPerX, aSize);
 
 				for (int z = startZ; z < endZ; ++z)
 				{
@@ -227,24 +254,32 @@ namespace Kaka
 						{
 							terrainSubsets[i * numSubsets + j].vertices.push_back(terrainVertices[index]);
 						}
-
-						//if (z == endZ - 1 && (i < numSubsets - 1 || j < numSubsets - 1))
-						//{
-						//	if (index < numVertices)
-						//	{
-						//		terrainSubsets[i * numSubsets + j].vertices.push_back(terrainVertices[index + 1]);
-						//	}
-						//}
 					}
 				}
 
-				for (int z = 0; z < verticesPerSubsetRow - 1; ++z)
+				int vertZ = verticesPerSubsetRow;
+				int vertX = verticesPerSubsetRow;
+
+				if (shouldFillGaps)
 				{
-					for (int x = 0; x < verticesPerSubsetRow - 1; ++x)
+					if (!isLastZ)
 					{
-						const int topLeftIndex = z * verticesPerSubsetRow + x;
+						vertZ++;
+					}
+
+					if (!isLastX)
+					{
+						vertX++;
+					}
+				}
+
+				for (int z = 0; z < vertZ - 1; ++z)
+				{
+					for (int x = 0; x < vertX - 1; ++x)
+					{
+						const int topLeftIndex = z * vertX + x;
 						const int topRightIndex = topLeftIndex + 1;
-						const int bottomLeftIndex = (z + 1) * verticesPerSubsetRow + x;
+						const int bottomLeftIndex = (z + 1) * vertX + x;
 						const int bottomRightIndex = bottomLeftIndex + 1;
 
 						// Check if all indices are within the subset range
@@ -271,61 +306,6 @@ namespace Kaka
 				}
 			}
 		}
-		//constexpr int subsetSize = 8192;
-		//const int numVertices = static_cast<int>(terrainVertices.size());
-		//const int numSubsets = (numVertices + subsetSize - 1) / subsetSize; // Round up
-
-		//terrainSubsets.resize(numSubsets);
-
-		//for (int i = 0; i < numSubsets; ++i)
-		//{
-		//	const int startIndex = i * subsetSize;
-		//	const int endIndex = (std::min)(startIndex + subsetSize, numVertices);
-
-		//// Add the last row's vertices to the next subset's first row
-		//if (i < numSubsets - 1)
-		//{
-		//	const int nextSubsetStartIndex = (i + 1) * subsetSize;
-
-		//	for (int j = endIndex - aSize - 1; j <= endIndex; ++j)
-		//	{
-		//		terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].position = terrainVertices[j].
-		//			position;
-		//		terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].normal = terrainVertices[j].normal;
-		//		terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].texCoord = terrainVertices[j].
-		//			texCoord;
-		//		terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].tangent = terrainVertices[j].tangent;
-		//		terrainVertices[nextSubsetStartIndex + (j - endIndex + aSize)].bitangent = terrainVertices[j].
-		//			bitangent;
-		//	}
-		//}
-
-		//	terrainSubsets[i].vertices.assign(terrainVertices.begin() + startIndex, terrainVertices.begin() + endIndex);
-
-		//	// Adjust the indices to be relative to the subset
-		//	for (int z = 0; z < aSize - 1; ++z)
-		//	{
-		//		for (int x = 0; x < aSize - 1; ++x)
-		//		{
-		//			const int topLeftIndex = z * aSize + x;
-		//			const int topRightIndex = topLeftIndex + 1;
-		//			const int bottomLeftIndex = (z + 1) * aSize + x;
-		//			const int bottomRightIndex = bottomLeftIndex + 1;
-
-		//			// Check if all indices are within the subset range
-		//			if (topLeftIndex >= startIndex && bottomRightIndex < endIndex)
-		//			{
-		//				// Adjust the indices relative to the subset
-		//				terrainSubsets[i].indices.push_back(static_cast<unsigned short>(topLeftIndex - startIndex));
-		//				terrainSubsets[i].indices.push_back(static_cast<unsigned short>(bottomLeftIndex - startIndex));
-		//				terrainSubsets[i].indices.push_back(static_cast<unsigned short>(topRightIndex - startIndex));
-		//				terrainSubsets[i].indices.push_back(static_cast<unsigned short>(topRightIndex - startIndex));
-		//				terrainSubsets[i].indices.push_back(static_cast<unsigned short>(bottomLeftIndex - startIndex));
-		//				terrainSubsets[i].indices.push_back(static_cast<unsigned short>(bottomRightIndex - startIndex));
-		//			}
-		//		}
-		//	}
-		//}
 
 		OutputDebugStringA("\nMoved to subsets...");
 
@@ -473,9 +453,6 @@ namespace Kaka
 			ImGui::DragFloat3("XYZ", &transform.x);
 			ImGui::Text("Scale");
 			ImGui::DragFloat("XYZ", &transform.scale.x, 0.1f, 0.0f, 10.0f, "%.1f");
-			ImGui::Text("Specular");
-			ImGui::SliderFloat("Intensity", &pmc.specularIntensity, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
-			ImGui::DragFloat("Power", &pmc.specularPower);
 		}
 		ImGui::End();
 	}
