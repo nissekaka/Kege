@@ -164,7 +164,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     const float2 offset = A * (maxValue + heightDerivative) / dist;
     const float3 reflection = reflectTex.Sample(splr, aInput.position.xy / clientResolution + offset).rgb;
 
-    const float3 result = lerp(reflection, finalColour, 0.3f);
+    const float3 result = lerp(reflection, finalColour, 0.35f);
 
     // Tonemap
     return float4(tonemap_s_gamut3_cine(result), 0.5f);

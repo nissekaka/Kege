@@ -6,9 +6,9 @@
 
 constexpr int WINDOW_WIDTH = 1920;
 constexpr int WINDOW_HEIGHT = 1080;
-constexpr int NUM_POINT_LIGHTS = 10;
-constexpr int NUM_SPOT_LIGHTS = 10;
-constexpr int TERRAIN_SIZE = 900;
+constexpr int NUM_POINT_LIGHTS = 25;
+constexpr int NUM_SPOT_LIGHTS = 25;
+constexpr int TERRAIN_SIZE = 1000;
 
 namespace Kaka
 {
@@ -44,19 +44,19 @@ namespace Kaka
 
 		constexpr float reflectPlaneHeight = -8.0f;
 
-		reflectionPlane.Init(wnd.Gfx(), TERRAIN_SIZE / 2.0f);
-		reflectionPlane.SetPosition({TERRAIN_SIZE / 2.0f, reflectPlaneHeight, TERRAIN_SIZE / 2.0f});
+		terrain.Init(wnd.Gfx(), TERRAIN_SIZE);
+
+		reflectionPlane.Init(wnd.Gfx(), terrain.GetSize() / 2.0f);
+		reflectionPlane.SetPosition({terrain.GetSize() / 2.0f, reflectPlaneHeight, terrain.GetSize() / 2.0f});
 
 		camera.SetPosition({742.75f, 0.16f, 395.95f});
 
-		terrain.Init(wnd.Gfx(), TERRAIN_SIZE);
-
-		for (int i = 0; i < 0; ++i)
+		for (int i = 0; i < 50; ++i)
 		{
 			models.emplace_back();
 			models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\ken\\ken.fbx", Model::eShaderType::PBR);
-			//DirectX::XMFLOAT3 pos = terrain.GetRandomVertexPosition();
-			DirectX::XMFLOAT3 pos = terrain.GetTerrainSubsets()[i].center;
+			DirectX::XMFLOAT3 pos = terrain.GetRandomVertexPosition();
+			//DirectX::XMFLOAT3 pos = terrain.GetTerrainSubsets()[i].center;
 			pos.y += 10.0f;
 			models.back().SetPosition(pos);
 		}
@@ -251,8 +251,8 @@ namespace Kaka
 				else
 				{
 					const float distance = GetDistanceBetweenObjects(subset.center, pointLights[i].GetPosition());
-					nearbyPointLights[i] = (distance <= pointLights[i].GetRadius());
-					nearbySpotLights[i] = (distance <= spotLights[i].GetRange());
+					nearbyPointLights[i] = distance <= pointLights[i].GetRadius() * 2;
+					nearbySpotLights[i] = distance <= spotLights[i].GetRange() * 2;
 				}
 			}
 			subset.SetNearbyLights(nearbyPointLights, nearbySpotLights);

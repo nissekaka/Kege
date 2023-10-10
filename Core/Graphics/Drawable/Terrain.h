@@ -65,6 +65,7 @@ namespace Kaka
 		DirectX::XMFLOAT3 GetRandomVertexPosition() const;
 		DirectX::XMMATRIX GetTransform() const override;
 		std::vector<TerrainSubset>& GetTerrainSubsets();
+		int GetSize() const;
 
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
@@ -103,6 +104,7 @@ namespace Kaka
 
 	private:
 		std::vector<TerrainSubset> terrainSubsets = {};
+		int terrainSize = {};
 
 		struct TransformParameters
 		{

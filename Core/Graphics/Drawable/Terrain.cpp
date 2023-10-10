@@ -31,9 +31,26 @@ namespace Kaka
 		std::vector<Vertex> terrainVertices;
 		std::vector<unsigned short> terrainIndices;
 
-		for (int z = 0; z < aSize; ++z)
+		// Setup subsets
+		constexpr int subsetSize = 8192; // Number of indices in each subset
+		const int verticesPerSubsetRow = static_cast<int>(std::sqrt(subsetSize));
+		constexpr bool shouldFillGaps = true;
+
+		terrainSize = aSize;
+
+		// Make terrain size smaller to create perfect squares of subsets
+		while (true)
 		{
-			for (int x = 0; x < aSize; ++x)
+			if ((terrainSize + verticesPerSubsetRow - 1) % verticesPerSubsetRow == 0)
+			{
+				break;
+			}
+			--terrainSize;
+		}
+
+		for (int z = 0; z < terrainSize; ++z)
+		{
+			for (int x = 0; x < terrainSize; ++x)
 			{
 				Vertex vertex = {};
 				float noiseValue = noiseGenerator.GetNoise(static_cast<float>(x), static_cast<float>(z));
@@ -56,15 +73,15 @@ namespace Kaka
 
 		for (int i = 0; i < smoothingIterations; ++i)
 		{
-			for (int z = 0; z < aSize; ++z)
+			for (int z = 0; z < terrainSize; ++z)
 			{
-				for (int x = 0; x < aSize; ++x)
+				for (int x = 0; x < terrainSize; ++x)
 				{
-					const int currentIndex = z * aSize + x;
-					const int indexTop = (z - 1) * aSize + x;
-					const int indexBottom = (z + 1) * aSize + x;
-					const int indexLeft = z * aSize + (x - 1);
-					const int indexRight = z * aSize + (x + 1);
+					const int currentIndex = z * terrainSize + x;
+					const int indexTop = (z - 1) * terrainSize + x;
+					const int indexBottom = (z + 1) * terrainSize + x;
+					const int indexLeft = z * terrainSize + (x - 1);
+					const int indexRight = z * terrainSize + (x + 1);
 
 					if (terrainVertices[currentIndex].position.y > heightThreshold)
 					{
@@ -80,7 +97,7 @@ namespace Kaka
 						averagePosition.y += terrainVertices[indexTop].position.y;
 						numNeighbours++;
 					}
-					if (z < aSize - 1)
+					if (z < terrainSize - 1)
 					{
 						averagePosition.y += terrainVertices[indexBottom].position.y;
 						numNeighbours++;
@@ -90,7 +107,7 @@ namespace Kaka
 						averagePosition.y += terrainVertices[indexLeft].position.y;
 						numNeighbours++;
 					}
-					if (x < aSize - 1)
+					if (x < terrainSize - 1)
 					{
 						averagePosition.y += terrainVertices[indexRight].position.y;
 						numNeighbours++;
@@ -113,25 +130,25 @@ namespace Kaka
 		OutputDebugStringA("\nDone smoothing...");
 
 		// Calculate normals
-		for (int z = 0; z < aSize; ++z)
+		for (int z = 0; z < terrainSize; ++z)
 		{
-			for (int x = 0; x < aSize; ++x)
+			for (int x = 0; x < terrainSize; ++x)
 			{
-				const int currentIndex = z * aSize + x;
-				const int indexTop = (z - 1) * aSize + x;
-				const int indexBottom = (z + 1) * aSize + x;
-				const int indexLeft = z * aSize + (x - 1);
-				const int indexRight = z * aSize + (x + 1);
+				const int currentIndex = z * terrainSize + x;
+				const int indexTop = (z - 1) * terrainSize + x;
+				const int indexBottom = (z + 1) * terrainSize + x;
+				const int indexLeft = z * terrainSize + (x - 1);
+				const int indexRight = z * terrainSize + (x + 1);
 
-				const bool isBorder = (x == 0 || x == aSize - 1 || z == 0 || z == aSize - 1);
+				const bool isBorder = (x == 0 || x == terrainSize - 1 || z == 0 || z == terrainSize - 1);
 
 				DirectX::XMFLOAT3& currentPosition = terrainVertices[currentIndex].position;
 				DirectX::XMFLOAT3 topPosition = (z > 0) ? terrainVertices[indexTop].position : currentPosition;
-				DirectX::XMFLOAT3 bottomPosition = (z < aSize - 1)
+				DirectX::XMFLOAT3 bottomPosition = (z < terrainSize - 1)
 					                                   ? terrainVertices[indexBottom].position
 					                                   : currentPosition;
 				DirectX::XMFLOAT3 leftPosition = (x > 0) ? terrainVertices[indexLeft].position : currentPosition;
-				DirectX::XMFLOAT3 rightPosition = (x < aSize - 1)
+				DirectX::XMFLOAT3 rightPosition = (x < terrainSize - 1)
 					                                  ? terrainVertices[indexRight].position
 					                                  : currentPosition;
 
@@ -180,29 +197,26 @@ namespace Kaka
 
 		OutputDebugStringA("\nDone with normals...");
 
-		for (int z = 0; z < aSize - 1; ++z)
+		for (int z = 0; z < terrainSize - 1; ++z)
 		{
-			for (int x = 0; x < aSize - 1; ++x)
+			for (int x = 0; x < terrainSize - 1; ++x)
 			{
-				const int index = z * aSize + x;
+				const int index = z * terrainSize + x;
 
 				terrainIndices.push_back(static_cast<unsigned short>(index));
-				terrainIndices.push_back(static_cast<unsigned short>(index + aSize));
+				terrainIndices.push_back(static_cast<unsigned short>(index + terrainSize));
 				terrainIndices.push_back(static_cast<unsigned short>(index + 1));
 
-				terrainIndices.push_back(static_cast<unsigned short>(index + aSize));
-				terrainIndices.push_back(static_cast<unsigned short>(index + aSize + 1));
+				terrainIndices.push_back(static_cast<unsigned short>(index + terrainSize));
+				terrainIndices.push_back(static_cast<unsigned short>(index + terrainSize + 1));
 				terrainIndices.push_back(static_cast<unsigned short>(index + 1));
 			}
 		}
 
 		OutputDebugStringA("\nPushed indices...");
 
-		constexpr int subsetSize = 8192; // Number of indices in each subset
+		const int numSubsets = (terrainSize + verticesPerSubsetRow - 1) / verticesPerSubsetRow;
 		const int numVertices = static_cast<int>(terrainVertices.size());
-		const int verticesPerSubsetRow = static_cast<int>(std::sqrt(subsetSize));
-		const int numSubsets = (aSize + verticesPerSubsetRow - 1) / verticesPerSubsetRow;
-		constexpr bool shouldFillGaps = true;
 
 		terrainSubsets.resize(numSubsets * numSubsets);
 
@@ -241,14 +255,14 @@ namespace Kaka
 					}
 				}
 
-				endZ = (std::min)(startZ + verticesPerZ, aSize);
-				endX = (std::min)(startX + verticesPerX, aSize);
+				endZ = (std::min)(startZ + verticesPerZ, terrainSize);
+				endX = (std::min)(startX + verticesPerX, terrainSize);
 
 				for (int z = startZ; z < endZ; ++z)
 				{
 					for (int x = startX; x < endX; ++x)
 					{
-						const int index = z * aSize + x;
+						const int index = z * terrainSize + x;
 
 						// Check if the index is within the terrain range
 						if (index < numVertices)
@@ -493,6 +507,11 @@ namespace Kaka
 	std::vector<TerrainSubset>& Terrain::GetTerrainSubsets()
 	{
 		return terrainSubsets;
+	}
+
+	int Terrain::GetSize() const
+	{
+		return terrainSize;
 	}
 
 	void Terrain::ShowControlWindow(const char* aWindowName)
