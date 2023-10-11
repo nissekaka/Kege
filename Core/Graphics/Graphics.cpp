@@ -56,7 +56,7 @@ namespace Kaka
 		WRL::ComPtr<ID3D11Resource> pBackBuffer;
 		pSwap->GetBuffer(0u, __uuidof(ID3D11Resource), &pBackBuffer);
 		pDevice->CreateRenderTargetView(pBackBuffer.Get(), nullptr, &pDefaultTarget);
-		pDevice->CreateShaderResourceView(pBackBuffer.Get(), nullptr, &pDefaultShaderResourceView);
+		//pDevice->CreateShaderResourceView(pBackBuffer.Get(), nullptr, &pDefaultShaderResourceView);
 
 		// Create depth stencil state
 		D3D11_DEPTH_STENCIL_DESC dsDesc = {};
@@ -138,7 +138,7 @@ namespace Kaka
 			ppDesc.Height = height;
 			ppDesc.MipLevels = 1u;
 			ppDesc.ArraySize = 1u;
-			ppDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R16G16B16A16_FLOAT;
+			ppDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
 			ppDesc.SampleDesc.Count = 1u;
 			ppDesc.SampleDesc.Quality = 0u;
 			ppDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -153,6 +153,40 @@ namespace Kaka
 			assert(SUCCEEDED(result));
 
 			postTexture->Release();
+		}
+
+		// Bloom
+		{
+			UINT bloomWidth = width;
+			UINT bloomHeight = height;
+
+			for (int i = 0; i < bloomSteps; ++i)
+			{
+				ID3D11Texture2D* bloomTexture;
+				bloomWidth /= 2;
+				bloomHeight /= 2;
+				bloomDownscale.emplace_back();
+
+				D3D11_TEXTURE2D_DESC ppDesc = {0};
+				ppDesc.Width = bloomWidth;
+				ppDesc.Height = bloomHeight;
+				ppDesc.MipLevels = 1u;
+				ppDesc.ArraySize = 1u;
+				ppDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+				ppDesc.SampleDesc.Count = 1u;
+				ppDesc.SampleDesc.Quality = 0u;
+				ppDesc.Usage = D3D11_USAGE_DEFAULT;
+				ppDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+				ppDesc.CPUAccessFlags = 0u;
+				ppDesc.MiscFlags = 0u;
+				result = pDevice->CreateTexture2D(&ppDesc, nullptr, &bloomTexture);
+				assert(SUCCEEDED(result));
+				result = pDevice->CreateShaderResourceView(bloomTexture, nullptr, &bloomDownscale.back().pResource);
+				assert(SUCCEEDED(result));
+				result = pDevice->CreateRenderTargetView(bloomTexture, nullptr, &bloomDownscale.back().pTarget);
+				assert(SUCCEEDED(result));
+				bloomTexture->Release();
+			}
 		}
 
 		// Blend state
@@ -285,6 +319,35 @@ namespace Kaka
 		pContext->OMSetBlendState(nullptr, nullptr, 0x0f);
 	}
 
+	void Graphics::HandleBloomScaling(PostProcessing& aPostProcessor)
+	{
+		//constexpr float colour[] = KAKA_BG_COLOUR;
+		pContext->OMSetRenderTargets(1u, bloomDownscale[0].pTarget.GetAddressOf(), pDepth.Get());
+		pContext->PSSetShaderResources(0u, 1u, postProcessing.pResource.GetAddressOf());
+
+		aPostProcessor.Draw(*this);
+
+		for (int i = 1; i < bloomDownscale.size(); ++i)
+		{
+			pContext->OMSetRenderTargets(1u, bloomDownscale[i].pTarget.GetAddressOf(), pDepth.Get());
+			pContext->PSSetShaderResources(0u, 1u, bloomDownscale[i - 1].pResource.GetAddressOf());
+
+			aPostProcessor.Draw(*this);
+		}
+
+		SetAlpha();
+
+		for (int i = (int)bloomDownscale.size() - 1; i > 0; --i)
+		{
+			pContext->OMSetRenderTargets(1u, bloomDownscale[i - 1].pTarget.GetAddressOf(), pDepth.Get());
+			pContext->PSSetShaderResources(0u, 1u, bloomDownscale[i].pResource.GetAddressOf());
+
+			aPostProcessor.Draw(*this);
+		}
+
+		ResetAlpha();
+	}
+
 	void Graphics::BindWaterReflectionTexture()
 	{
 		pContext->PSSetShaderResources(2u, 1u,
@@ -293,8 +356,14 @@ namespace Kaka
 
 	void Graphics::BindPostProcessingTexture()
 	{
-		pContext->PSSetShaderResources(1u, 1u,
+		pContext->PSSetShaderResources(0u, 1u,
 		                               postProcessing.pResource.GetAddressOf());
+	}
+
+	void Graphics::BindBloomDownscaleTexture(const int aIndex)
+	{
+		pContext->PSSetShaderResources(0u, 1u,
+		                               bloomDownscale[aIndex].pResource.GetAddressOf());
 	}
 
 	DirectX::XMFLOAT2 Graphics::GetCurrentResolution() const

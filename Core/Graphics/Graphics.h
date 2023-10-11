@@ -60,8 +60,11 @@ namespace Kaka
 		void SetAlpha() const;
 		void ResetAlpha() const;
 
+		void HandleBloomScaling(PostProcessing& aPostProcessor);
+
 		void BindWaterReflectionTexture();
 		void BindPostProcessingTexture();
+		void BindBloomDownscaleTexture(const int aIndex);
 		DirectX::XMFLOAT2 GetCurrentResolution() const;
 
 	public:
@@ -101,6 +104,10 @@ namespace Kaka
 
 		RenderTarget renderWaterReflect;
 		RenderTarget postProcessing;
+
+		std::vector<RenderTarget> bloomDownscale = {};
+		int bloomSteps = 5;
+
 		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pDefaultTarget;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pDefaultShaderResourceView;
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pDepth;

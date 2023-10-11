@@ -3,15 +3,11 @@
 
 struct PixelInput
 {
-    float4 worldPos : POSITION;
     float4 position : SV_POSITION;
     float2 texCoord : TEXCOORD;
-    float4 normal : NORMAL;
-    float4 tangent : TANGENT;
-    float4 bitan : BITANGENT;
 };
 
-Texture2D colourTex : register(t1);
+Texture2D colourTex : register(t0);
 
 cbuffer Parameters : register(b1)
 {

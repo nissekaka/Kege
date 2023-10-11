@@ -60,7 +60,7 @@ namespace Kaka
 
 		camera.SetPosition({742.75f, 0.16f, 395.95f});
 
-		for (int i = 0; i < 50; ++i)
+		for (int i = 0; i < 0; ++i)
 		{
 			models.emplace_back();
 			models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\ken\\ken.fbx", Model::eShaderType::PBR);
@@ -321,7 +321,24 @@ namespace Kaka
 			ShowStatsWindow();
 		}
 
+		// for each render target in bloom downscale vector, set render target
+
 		wnd.Gfx().SetRenderTarget(eRenderTargetType::Default);
+
+		struct BloomBuffer
+		{
+			float bloomThreshold;
+			float padding[3];
+		} bb;
+		bb.bloomThreshold = 0.5f;
+
+		PixelConstantBuffer<BloomBuffer> bloomBuffer{wnd.Gfx(), 1u};
+		bloomBuffer.Update(wnd.Gfx(), bb);
+		bloomBuffer.Bind(wnd.Gfx());
+
+		// bind to downscale pixelshader
+		wnd.Gfx().HandleBloomScaling(postProcessing);
+
 		wnd.Gfx().BindPostProcessingTexture();
 
 		PixelConstantBuffer<PostProcessingBuffer> ppb{wnd.Gfx(), 1u};

@@ -251,6 +251,8 @@
     <FxCompile Include="Graphics\Shaders\ModelPBR_PS.hlsl" />
     <FxCompile Include="Graphics\Shaders\PostProcessing_VS.hlsl" />
     <FxCompile Include="Graphics\Shaders\PostProcessing_PS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\Downsample_PS.hlsl" />
+    <FxCompile Include="Graphics\Shaders\Upsample_PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Todo.txt" />
