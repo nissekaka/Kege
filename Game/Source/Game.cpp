@@ -36,6 +36,15 @@ namespace Kaka
 
 	int Game::Go()
 	{
+		postProcessing.Init(wnd.Gfx());
+
+		//ppBuffer.bloomThreshold = 0.5f;
+		ppBuffer.tint = {1.0f, 1.0f, 1.0f};
+		ppBuffer.blackpoint = {0.0f, 0.0f, 0.0f};
+		ppBuffer.exposure = 0.0f;
+		ppBuffer.contrast = 1.0f;
+		ppBuffer.saturation = 1.0f;
+
 		skybox.Init(wnd.Gfx(), "Assets\\Textures\\Skybox\\Miramar\\", "Assets\\Textures\\Skybox\\Kurt\\");
 
 		reflectionPSBuffer.A = 0.7f;
@@ -149,7 +158,7 @@ namespace Kaka
 		skybox.Rotate(skyboxAngle);
 
 		// Reflective plane and terrain
-		wnd.Gfx().SetWaterReflectTarget();
+		wnd.Gfx().SetRenderTarget(eRenderTargetType::WaterReflect);
 
 		skybox.FlipScale();
 
@@ -163,7 +172,8 @@ namespace Kaka
 		skybox.FlipScale();
 		terrain.SetReflectShader(wnd.Gfx(), false);
 		terrain.FlipScale(reflectionPlane.GetPosition().y, true);
-		wnd.Gfx().SetDefaultTarget();
+		//wnd.Gfx().SetRenderTarget(eRenderTargetType::Default);
+		wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing);
 
 		// Draw normal
 		for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
@@ -282,6 +292,16 @@ namespace Kaka
 			}
 			ImGui::End();
 
+			if (ImGui::Begin("Post Processing"))
+			{
+				ImGui::ColorPicker3("Tint", &ppBuffer.tint.x);
+				ImGui::DragFloat3("Blackpoint", &ppBuffer.blackpoint.x, 0.01f, 0.0f, 1.0f, "%.2f");
+				ImGui::DragFloat("Exposure", &ppBuffer.exposure, 0.01f, -10.0f, 10.0f, "%.2f");
+				ImGui::DragFloat("Contrast", &ppBuffer.contrast, 0.01f, 0.0f, 10.0f, "%.2f");
+				ImGui::DragFloat("Saturation", &ppBuffer.saturation, 0.01f, 0.0f, 10.0f, "%.2f");
+			}
+			ImGui::End();
+
 			//for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
 			//{
 			//	std::string name = "Point Light " + std::to_string(i);
@@ -301,6 +321,15 @@ namespace Kaka
 			ShowStatsWindow();
 		}
 
+		wnd.Gfx().SetRenderTarget(eRenderTargetType::Default);
+		wnd.Gfx().BindPostProcessingTexture();
+
+		PixelConstantBuffer<PostProcessingBuffer> ppb{wnd.Gfx(), 1u};
+		ppb.Update(wnd.Gfx(), ppBuffer);
+		ppb.Bind(wnd.Gfx());
+
+		postProcessing.Draw(wnd.Gfx());
+
 		// End frame
 		wnd.Gfx().EndFrame();
 	}
@@ -318,27 +347,27 @@ namespace Kaka
 
 			switch (e->GetKeyCode())
 			{
-			case VK_ESCAPE:
-				if (wnd.CursorEnabled())
-				{
-					wnd.DisableCursor();
-					wnd.mouse.EnableRaw();
-				}
-				else
-				{
-					wnd.EnableCursor();
-					wnd.mouse.DisableRaw();
-				}
-				break;
-			case VK_F1:
-				showImGui = !showImGui;
-				break;
-			case VK_F2:
-				showStatsWindow = !showStatsWindow;
-				break;
-			case VK_F3:
-				drawLightDebug = !drawLightDebug;
-				break;
+				case VK_ESCAPE:
+					if (wnd.CursorEnabled())
+					{
+						wnd.DisableCursor();
+						wnd.mouse.EnableRaw();
+					}
+					else
+					{
+						wnd.EnableCursor();
+						wnd.mouse.DisableRaw();
+					}
+					break;
+				case VK_F1:
+					showImGui = !showImGui;
+					break;
+				case VK_F2:
+					showStatsWindow = !showStatsWindow;
+					break;
+				case VK_F3:
+					drawLightDebug = !drawLightDebug;
+					break;
 			}
 		}
 

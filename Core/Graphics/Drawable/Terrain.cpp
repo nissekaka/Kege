@@ -421,7 +421,7 @@ namespace Kaka
 			{
 				continue;
 			}
-			PixelConstantBuffer<PackedLightData> packedLightBuffer(aGfx, terrainSubsets[i].packedLightData, 10u);
+			PixelConstantBuffer<PackedLightData> packedLightBuffer(aGfx, terrainSubsets[i].packedLightData, 9u);
 			packedLightBuffer.Bind(aGfx);
 
 			terrainSubsets[i].vertexBuffer.Bind(aGfx);

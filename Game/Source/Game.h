@@ -4,6 +4,8 @@
 #include "Core/Utility/Timer.h"
 #include "Core/Utility/Camera.h"
 #include <Core/Utility/KakaMath.h>
+
+#include "Core/Graphics/Bindable/PostProcessing.h"
 #include "Core/Graphics/Lighting/DirectionalLight.h"
 #include "Core/Graphics/Lighting/PointLight.h"
 #include "Core/Graphics/Lighting/SpotLight.h"
@@ -97,5 +99,19 @@ namespace Kaka
 		};
 
 		CommonBuffer commonBuffer = {};
+
+		PostProcessing postProcessing;
+
+		struct PostProcessingBuffer
+		{
+			DirectX::XMFLOAT3 tint; // RGB values for tint adjustment
+			float exposure; // Exposure adjustment
+			DirectX::XMFLOAT3 blackpoint; // Blackpoint adjustment
+			float contrast; // Contrast adjustment
+			float saturation; // Saturation adjustment
+			float padding[3];
+		};
+
+		PostProcessingBuffer ppBuffer = {};
 	};
 }

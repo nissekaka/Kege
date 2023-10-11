@@ -1,6 +1,5 @@
 #include "Light.hlsli"
 #include "PBRFunctions.hlsli"
-#include "PostprocessTonemapPS.hlsl"
 
 static const uint MAX_LIGHTS = 50u; // Needs to be the same in PointLight
 
@@ -166,6 +165,5 @@ float4 main(PixelInput aInput) : SV_TARGET
 
     const float3 result = lerp(reflection, finalColour, 0.35f);
 
-    // Tonemap
-    return float4(tonemap_s_gamut3_cine(result), 0.5f);
+    return float4(result, 0.5f);
 }

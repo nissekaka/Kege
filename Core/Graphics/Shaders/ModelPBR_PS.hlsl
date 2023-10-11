@@ -1,7 +1,6 @@
 #include "Light.hlsli"
 //#include "ShaderOps.hlsl"
 #include "PBRFunctions.hlsli"
-#include "PostprocessTonemapPS.hlsl"
 
 static const uint MAX_LIGHTS = 50u; // Needs to be the same in PointLight
 
@@ -170,7 +169,6 @@ float4 main(PixelInput aInput) : SV_TARGET
 	// Final colour
     //const float3 emissiveColour = colour * emissive;
     const float3 finalColour = saturate(ambientLight * ambientLightPower + directionalLight + pointLight + spotLight);
-    // Tonemap
-    return float4(tonemap_s_gamut3_cine(finalColour), 1.0f);
 
+    return float4(finalColour, 1.0f);
 }

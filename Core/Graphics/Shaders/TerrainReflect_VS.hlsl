@@ -34,7 +34,7 @@ PixelInput main(const VertexInput aInput)
     PixelInput output;
     
     const float4 position = { aInput.position, 1.0f };
-    output.worldPos = mul(objectToWorld, aInput.position);
+    output.worldPos = aInput.position;
     output.position = mul(objectToClip, position);
     output.texCoord = aInput.texCoord;
     output.normal = aInput.normal;

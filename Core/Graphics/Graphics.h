@@ -17,6 +17,13 @@ namespace Kaka
 {
 	struct Mesh;
 
+	enum class eRenderTargetType
+	{
+		Default,
+		WaterReflect,
+		PostProcessing,
+	};
+
 	struct RenderTarget
 	{
 		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pTarget;
@@ -34,6 +41,7 @@ namespace Kaka
 		friend class Skybox;
 		friend class ReflectionPlane;
 		friend class Game;
+		friend class PostProcessing;
 
 	public:
 		Graphics(HWND aHWnd, UINT aWidth, UINT aHeight);
@@ -48,14 +56,12 @@ namespace Kaka
 		void SetCamera(DirectX::FXMMATRIX& aCamera);
 		DirectX::XMMATRIX GetCamera() const;
 		UINT GetDrawcallCount() const;
-		//void SetRenderTarget(bool aUseDefaultRenderTarget, const bool aClearRender = false,
-		//                     const bool aClearDepth = false);
-		void SetWaterReflectTarget();
-		void SetDefaultTarget();
+		void SetRenderTarget(eRenderTargetType aRenderTargetType) const;
 		void SetAlpha() const;
 		void ResetAlpha() const;
 
 		void BindWaterReflectionTexture();
+		void BindPostProcessingTexture();
 		DirectX::XMFLOAT2 GetCurrentResolution() const;
 
 	public:
@@ -72,6 +78,7 @@ namespace Kaka
 	public:
 		void DrawTestTriangle2D();
 		void DrawTestCube3D(const float aAngle, const DirectX::XMFLOAT3 aPos);
+
 	private:
 		struct FrustumPlanes
 		{
@@ -79,6 +86,7 @@ namespace Kaka
 		};
 
 		FrustumPlanes ExtractFrustumPlanes() const;
+
 	public:
 		bool IsBoundingBoxInFrustum(const DirectX::XMFLOAT3& aMin, const DirectX::XMFLOAT3& aMax) const;
 
@@ -92,7 +100,9 @@ namespace Kaka
 		Microsoft::WRL::ComPtr<ID3D11BlendState> pBlend;
 
 		RenderTarget renderWaterReflect;
-		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pTarget;
+		RenderTarget postProcessing;
+		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pDefaultTarget;
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pDefaultShaderResourceView;
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pDepth;
 		UINT width;
 		UINT height;
