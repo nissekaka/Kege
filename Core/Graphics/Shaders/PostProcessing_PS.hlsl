@@ -7,7 +7,8 @@ struct PixelInput
     float2 texCoord : TEXCOORD;
 };
 
-Texture2D colourTex : register(t0);
+Texture2D fullscreenTexture : register(t0);
+Texture2D bloomSampleTexture : register(t1);
 
 cbuffer Parameters : register(b1)
 {
@@ -18,13 +19,22 @@ cbuffer Parameters : register(b1)
     float saturation;
 };
 
-float4 main(PixelInput aInput) : SV_TARGET
+float4 main(const PixelInput aInput) : SV_TARGET
 {
-    float4 colour = colourTex.Sample(splr, aInput.texCoord).rgba;
+    const float4 colour = fullscreenTexture.Sample(splr, aInput.texCoord).rgba;
+
+	if (colour.a < 0.1f)
+    {
+        discard;
+    }
+
+	const float4 bloom = bloomSampleTexture.Sample(splr, aInput.texCoord).rgba;
+
+    float3 newColour = colour + bloom;
 
     // Saturation
     const float luminance = dot(float3(0.2126, 0.7152, 0.0722), colour.rgb);
-    float3 newColour = luminance + saturation * (colour.rgb - luminance);
+    newColour = luminance + saturation * (newColour - luminance);
 
 	// Exposure
     newColour = pow(2, exposure) * newColour;
@@ -37,11 +47,6 @@ float4 main(PixelInput aInput) : SV_TARGET
 
     // Tint
     newColour = newColour * tint;
-
-    if (colour.a < 0.1f)
-    {
-        discard;
-    }
 
     return float4(tonemap_s_gamut3_cine(newColour), 1.0f);
 }

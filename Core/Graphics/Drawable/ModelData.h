@@ -24,7 +24,7 @@ namespace Kaka
 
 	struct Skeleton
 	{
-		int rootBoneIndex = -1;  // Index of the root bone in the skeleton
+		int rootBoneIndex = -1; // Index of the root bone in the skeleton
 		std::vector<Bone> bones{};
 	};
 

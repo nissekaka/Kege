@@ -225,20 +225,20 @@ namespace Kaka
 
 		switch (aUMsg)
 		{
-		// We don't want the DefProc to handle this message because
-		// we want our destructor to destroy the window, so return 0 instead of break
-		case WM_CLOSE:
+			// We don't want the DefProc to handle this message because
+			// we want our destructor to destroy the window, so return 0 instead of break
+			case WM_CLOSE:
 			{
 				PostQuitMessage(0);
 				return 0;
 			}
-		// Clear keystates when window loses focus to prevent input getting stuck
-		case WM_KILLFOCUS:
+			// Clear keystates when window loses focus to prevent input getting stuck
+			case WM_KILLFOCUS:
 			{
 				keyboard.ClearKeyStates();
 				break;
 			}
-		case WM_ACTIVATE:
+			case WM_ACTIVATE:
 			{
 				// Confine/free cursor on window to foreground/background if cursor disabled
 				if (!cursorEnabled)
@@ -256,10 +256,8 @@ namespace Kaka
 				}
 				break;
 			}
-		case WM_SYSCOMMAND:
+			case WM_SYSCOMMAND:
 			{
-				std::string text = "\n" + std::to_string(aWParam);
-				OutputDebugStringA(text.c_str());
 				//if (aWParam == 61490 ||
 				//	aWParam == 61488 ||
 				//	aWParam == 61728 ||
@@ -278,9 +276,9 @@ namespace Kaka
 				//	io.DisplaySize.y = static_cast<float>(clientHeight);
 				//}
 			}
-		/********** KEYBOARD MESSAGES **********/
-		case WM_KEYDOWN:
-		case WM_SYSKEYDOWN:
+			/********** KEYBOARD MESSAGES **********/
+			case WM_KEYDOWN:
+			case WM_SYSKEYDOWN:
 			{
 				// Stifle this keyboard message if ImGui wants to capture
 				if (ImGui::GetIO().WantCaptureKeyboard)
@@ -293,8 +291,8 @@ namespace Kaka
 				}
 				break;
 			}
-		case WM_KEYUP:
-		case WM_SYSKEYUP:
+			case WM_KEYUP:
+			case WM_SYSKEYUP:
 			{
 				// Stifle this keyboard message if ImGui wants to capture
 				if (ImGui::GetIO().WantCaptureKeyboard)
@@ -304,7 +302,7 @@ namespace Kaka
 				keyboard.OnKeyReleased(static_cast<unsigned char>(aWParam));
 				break;
 			}
-		case WM_CHAR:
+			case WM_CHAR:
 			{
 				// Stifle this keyboard message if ImGui wants to capture
 				if (ImGui::GetIO().WantCaptureKeyboard)
@@ -314,10 +312,10 @@ namespace Kaka
 				keyboard.OnChar(static_cast<char>(aWParam));
 				break;
 			}
-		/********** END KEYBOARD MESSAGES **********/
+			/********** END KEYBOARD MESSAGES **********/
 
-		/********** MOUSE MESSAGES **********/
-		case WM_MOUSEMOVE:
+			/********** MOUSE MESSAGES **********/
+			case WM_MOUSEMOVE:
 			{
 				// Stifle this mouse message if ImGui wants to capture
 				if (ImGui::GetIO().WantCaptureMouse)
@@ -351,7 +349,7 @@ namespace Kaka
 				}
 				break;
 			}
-		case WM_LBUTTONDOWN:
+			case WM_LBUTTONDOWN:
 			{
 				// Bring window to foreground on left click in client region
 				SetForegroundWindow(hWnd);
@@ -370,7 +368,7 @@ namespace Kaka
 
 				break;
 			}
-		case WM_LBUTTONUP:
+			case WM_LBUTTONUP:
 			{
 				// Stifle this mouse message if ImGui wants to capture
 				if (ImGui::GetIO().WantCaptureMouse)
@@ -381,7 +379,7 @@ namespace Kaka
 				mouse.OnLeftReleased(x, y);
 				break;
 			}
-		case WM_RBUTTONDOWN:
+			case WM_RBUTTONDOWN:
 			{
 				// Stifle this mouse message if ImGui wants to capture
 				if (ImGui::GetIO().WantCaptureMouse)
@@ -392,7 +390,7 @@ namespace Kaka
 				mouse.OnRightPressed(x, y);
 				break;
 			}
-		case WM_RBUTTONUP:
+			case WM_RBUTTONUP:
 			{
 				// Stifle this mouse message if ImGui wants to capture
 				if (ImGui::GetIO().WantCaptureMouse)
@@ -403,7 +401,7 @@ namespace Kaka
 				mouse.OnRightReleased(x, y);
 				break;
 			}
-		case WM_MBUTTONDOWN:
+			case WM_MBUTTONDOWN:
 			{
 				// Stifle this mouse message if ImGui wants to capture
 				if (ImGui::GetIO().WantCaptureMouse)
@@ -414,7 +412,7 @@ namespace Kaka
 				mouse.OnMiddlePressed(x, y);
 				break;
 			}
-		case WM_MBUTTONUP:
+			case WM_MBUTTONUP:
 			{
 				// Stifle this mouse message if ImGui wants to capture
 				if (ImGui::GetIO().WantCaptureMouse)
@@ -425,7 +423,7 @@ namespace Kaka
 				mouse.OnMiddleReleased(x, y);
 				break;
 			}
-		case WM_MOUSEWHEEL:
+			case WM_MOUSEWHEEL:
 			{
 				// Stifle this mouse message if ImGui wants to capture
 				if (ImGui::GetIO().WantCaptureMouse)
@@ -437,10 +435,10 @@ namespace Kaka
 				mouse.OnWheelDelta(x, y, delta);
 				break;
 			}
-		/********** END MOUSE MESSAGES **********/
+			/********** END MOUSE MESSAGES **********/
 
-		/********** RAW MOUSE MESSAGES **********/
-		case WM_INPUT:
+			/********** RAW MOUSE MESSAGES **********/
+			case WM_INPUT:
 			{
 				if (!mouse.RawEnabled())
 				{
@@ -479,7 +477,7 @@ namespace Kaka
 				}
 				break;
 			}
-		/********** END RAW MOUSE MESSAGES **********/
+			/********** END RAW MOUSE MESSAGES **********/
 		}
 		return DefWindowProc(aHWnd, aUMsg, aWParam, aLParam);
 	}

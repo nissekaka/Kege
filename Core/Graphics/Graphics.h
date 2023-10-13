@@ -78,10 +78,6 @@ namespace Kaka
 		bool imGuiEnabled = true;
 		UINT drawcallCount;
 
-	public:
-		void DrawTestTriangle2D();
-		void DrawTestCube3D(const float aAngle, const DirectX::XMFLOAT3 aPos);
-
 	private:
 		struct FrustumPlanes
 		{
@@ -115,5 +111,15 @@ namespace Kaka
 		UINT height;
 
 	private:
+		struct DownSampleBuffer
+		{
+			float bloomBlending = 0.5f;
+			float bloomThreshold = 0.25f;
+			int uvScale = 2;
+			float padding;
+		} bb;
+
+		int bloomDivideFactor = 2;
+		bool useBloom = false;
 	};
 }

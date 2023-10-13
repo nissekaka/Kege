@@ -163,8 +163,8 @@ namespace Kaka
 			for (int i = 0; i < bloomSteps; ++i)
 			{
 				ID3D11Texture2D* bloomTexture;
-				bloomWidth /= 2;
-				bloomHeight /= 2;
+				bloomWidth /= bloomDivideFactor;
+				bloomHeight /= bloomDivideFactor;
 				bloomDownscale.emplace_back();
 
 				D3D11_TEXTURE2D_DESC ppDesc = {0};
@@ -223,6 +223,12 @@ namespace Kaka
 
 		constexpr float colour[] = KAKA_BG_COLOUR;
 		pContext->ClearRenderTargetView(pDefaultTarget.Get(), colour);
+		//pContext->ClearRenderTargetView(renderWaterReflect.pTarget.Get(), colour);
+		//pContext->ClearRenderTargetView(postProcessing.pTarget.Get(), colour);
+		//for (int i = 0; i < bloomSteps; ++i)
+		//{
+		//	pContext->ClearRenderTargetView(bloomDownscale[i].pTarget.Get(), colour);
+		//}
 		pContext->ClearDepthStencilView(pDepth.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0u);
 	}
 
@@ -233,6 +239,16 @@ namespace Kaka
 		//	ImGui::Image(renderWaterReflect.pResource.Get(), ImVec2(1600 / 4, 800 / 4));
 		//}
 		//ImGui::End();
+
+		if (ImGui::Begin("Bloom"))
+		{
+			ImGui::Checkbox("Use bloom", &useBloom);
+			ImGui::SetNextItemWidth(100);
+			ImGui::SliderFloat("Bloom blending", &bb.bloomBlending, 0.0f, 1.0f);
+			ImGui::SetNextItemWidth(100);
+			ImGui::SliderFloat("Bloom threshold", &bb.bloomThreshold, 0.0f, 1.0f);
+		}
+		ImGui::End();
 
 		// ImGui end frame
 		if (imGuiEnabled)
@@ -289,24 +305,19 @@ namespace Kaka
 			case eRenderTargetType::Default:
 			{
 				pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), pDepth.Get());
-				pContext->ClearRenderTargetView(pDefaultTarget.Get(), colour);
 				break;
 			}
 			case eRenderTargetType::WaterReflect:
 			{
 				pContext->OMSetRenderTargets(1u, renderWaterReflect.pTarget.GetAddressOf(), pDepth.Get());
-				pContext->ClearRenderTargetView(renderWaterReflect.pTarget.Get(), colour);
 				break;
 			}
 			case eRenderTargetType::PostProcessing:
 			{
 				pContext->OMSetRenderTargets(1u, postProcessing.pTarget.GetAddressOf(), pDepth.Get());
-				pContext->ClearRenderTargetView(postProcessing.pTarget.Get(), colour);
 				break;
 			}
 		}
-
-		pContext->ClearDepthStencilView(pDepth.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	}
 
 	void Graphics::SetAlpha() const
@@ -321,31 +332,63 @@ namespace Kaka
 
 	void Graphics::HandleBloomScaling(PostProcessing& aPostProcessor)
 	{
-		//constexpr float colour[] = KAKA_BG_COLOUR;
-		pContext->OMSetRenderTargets(1u, bloomDownscale[0].pTarget.GetAddressOf(), pDepth.Get());
-		pContext->PSSetShaderResources(0u, 1u, postProcessing.pResource.GetAddressOf());
-
-		aPostProcessor.Draw(*this);
-
-		for (int i = 1; i < bloomDownscale.size(); ++i)
+		if (useBloom)
 		{
-			pContext->OMSetRenderTargets(1u, bloomDownscale[i].pTarget.GetAddressOf(), pDepth.Get());
-			pContext->PSSetShaderResources(0u, 1u, bloomDownscale[i - 1].pResource.GetAddressOf());
+			pContext->OMSetRenderTargets(1u, bloomDownscale[0].pTarget.GetAddressOf(), nullptr);
+			pContext->PSSetShaderResources(0u, 1u, postProcessing.pResource.GetAddressOf());
+
+			aPostProcessor.SetDownsamplePS();
+
+			bb.uvScale = bloomDivideFactor;
+			PixelConstantBuffer<DownSampleBuffer> bloomBuffer{*this, 1u};
+			bloomBuffer.Update(*this, bb);
+			bloomBuffer.Bind(*this);
 
 			aPostProcessor.Draw(*this);
+
+			for (int i = 1; i < bloomDownscale.size(); ++i)
+			{
+				pContext->OMSetRenderTargets(1u, bloomDownscale[i].pTarget.GetAddressOf(), nullptr);
+				pContext->PSSetShaderResources(0u, 1u, bloomDownscale[i - 1].pResource.GetAddressOf());
+
+				bb.uvScale *= bloomDivideFactor;
+				bloomBuffer.Update(*this, bb);
+				bloomBuffer.Bind(*this);
+
+				aPostProcessor.Draw(*this);
+			}
+
+			SetAlpha();
+
+			aPostProcessor.SetUpsamplePS();
+
+			for (int i = (int)bloomDownscale.size() - 1; i > 0; --i)
+			{
+				pContext->OMSetRenderTargets(1u, bloomDownscale[i - 1].pTarget.GetAddressOf(), nullptr);
+				pContext->PSSetShaderResources(0u, 1u, bloomDownscale[i].pResource.GetAddressOf());
+
+				bb.uvScale /= bloomDivideFactor;
+				bloomBuffer.Update(*this, bb);
+				bloomBuffer.Bind(*this);
+
+				aPostProcessor.Draw(*this);
+			}
+
+			ResetAlpha();
+
+			aPostProcessor.SetPostProcessPS();
+
+			pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), nullptr);
+			pContext->PSSetShaderResources(0u, 1u, postProcessing.pResource.GetAddressOf());
+			pContext->PSSetShaderResources(1u, 1u, bloomDownscale[0].pResource.GetAddressOf());
 		}
-
-		SetAlpha();
-
-		for (int i = (int)bloomDownscale.size() - 1; i > 0; --i)
+		else
 		{
-			pContext->OMSetRenderTargets(1u, bloomDownscale[i - 1].pTarget.GetAddressOf(), pDepth.Get());
-			pContext->PSSetShaderResources(0u, 1u, bloomDownscale[i].pResource.GetAddressOf());
-
-			aPostProcessor.Draw(*this);
+			pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), nullptr);
+			pContext->PSSetShaderResources(0u, 1u, postProcessing.pResource.GetAddressOf());
+			ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
+			pContext->PSSetShaderResources(1u, 1, nullSRVs);
 		}
-
-		ResetAlpha();
 	}
 
 	void Graphics::BindWaterReflectionTexture()
@@ -394,292 +437,6 @@ namespace Kaka
 	UINT Graphics::GetHeight() const
 	{
 		return height;
-	}
-
-	void Graphics::DrawTestTriangle2D()
-	{
-		struct Vertex
-		{
-			struct
-			{
-				float x;
-				float y;
-			} pos;
-
-			struct
-			{
-				unsigned char r;
-				unsigned char g;
-				unsigned char b;
-				unsigned char a;
-			} colour;
-		};
-
-		const Vertex vertices[] = {
-			{{0.0f, 1.0f}, {255, 0, 0, 255}},
-			{{1.0f, -1.0f}, {0, 255, 0, 255}},
-			{{-1.0f, -1.0f}, {0, 0, 255, 255}},
-		};
-
-		// Create vertex buffer
-		WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
-		D3D11_BUFFER_DESC vbd = {};
-		vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		vbd.Usage = D3D11_USAGE_DEFAULT;
-		vbd.CPUAccessFlags = 0u;
-		vbd.MiscFlags = 0u;
-		vbd.ByteWidth = sizeof(vertices);
-		vbd.StructureByteStride = sizeof(Vertex);
-		D3D11_SUBRESOURCE_DATA vsd = {};
-		vsd.pSysMem = vertices;
-		pDevice->CreateBuffer(&vbd, &vsd, &pVertexBuffer);
-
-		// Bind vertex buffer to pipeline
-		const UINT stride = sizeof(Vertex);
-		const UINT offset = 0u;
-		pContext->IASetVertexBuffers(0u, 1u, pVertexBuffer.GetAddressOf(), &stride, &offset);
-
-		// Create index buffer
-		const unsigned short indices[] =
-		{
-			0, 1, 2,
-		};
-
-		WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
-		D3D11_BUFFER_DESC ibd = {};
-		ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-		ibd.Usage = D3D11_USAGE_DEFAULT;
-		ibd.CPUAccessFlags = 0u;
-		ibd.MiscFlags = 0u;
-		ibd.ByteWidth = sizeof(indices);
-		ibd.StructureByteStride = sizeof(unsigned short);
-		D3D11_SUBRESOURCE_DATA isd = {};
-		isd.pSysMem = indices;
-		pDevice->CreateBuffer(&ibd, &isd, &pIndexBuffer);
-
-		// Bind index buffer
-		pContext->IASetIndexBuffer(pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
-
-		// Create constant buffer for transformation matrix
-		struct ConstantBuffer
-		{
-			DirectX::XMMATRIX transform;
-		};
-		const ConstantBuffer cb =
-		{
-			{
-
-				DirectX::XMMatrixTranspose(
-					DirectX::XMMatrixRotationZ(0.0f) *
-					DirectX::XMMatrixRotationX(0.0f) *
-					DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f + 4.0f) *
-					DirectX::XMMatrixPerspectiveLH(1.0f, static_cast<float>(height) / static_cast<float>(width), 0.5f,
-					                               10.0f) *
-					DirectX::XMMatrixScaling(0.5f, 0.5f, 0.5f)
-				)
-			}
-		};
-		WRL::ComPtr<ID3D11Buffer> pConstantBuffer;
-		D3D11_BUFFER_DESC cbd = {};
-		cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		cbd.Usage = D3D11_USAGE_DYNAMIC;
-		cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		cbd.MiscFlags = 0u;
-		cbd.ByteWidth = sizeof(cb);
-		cbd.StructureByteStride = 0u;
-		D3D11_SUBRESOURCE_DATA csd = {};
-		csd.pSysMem = &cb;
-		pDevice->CreateBuffer(&cbd, &csd, &pConstantBuffer);
-
-		// Bind constant buffer to vertex shader
-		pContext->VSSetConstantBuffers(0u, 1u, pConstantBuffer.GetAddressOf());
-
-		// Create pixel shader
-		WRL::ComPtr<ID3D11PixelShader> pPixelShader;
-		WRL::ComPtr<ID3DBlob> pBlob;
-		D3DReadFileToBlob(L"Shaders\\3D_PS.cso", &pBlob);
-		pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader);
-
-		// Bind pixel shader
-		pContext->PSSetShader(pPixelShader.Get(), nullptr, 0u);
-
-		// Create vertex shader
-		WRL::ComPtr<ID3D11VertexShader> pVertexShader;
-		D3DReadFileToBlob(L"Shaders\\3D_VS.cso", &pBlob);
-		pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader);
-
-		// Bind vertex shader
-		pContext->VSSetShader(pVertexShader.Get(), nullptr, 0u);
-
-		// Input (vertex) layout (2D position only)
-		WRL::ComPtr<ID3D11InputLayout> pInputLayout;
-		const D3D11_INPUT_ELEMENT_DESC ied[] =
-		{
-			{"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0,D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-			{"COLOUR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0,D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		};
-		pDevice->CreateInputLayout(
-			ied,
-			static_cast<UINT>(std::size(ied)),
-			pBlob->GetBufferPointer(),
-			pBlob->GetBufferSize(),
-			&pInputLayout);
-
-		// Bind vertex layout
-		pContext->IASetInputLayout(pInputLayout.Get());
-
-		// Set primitive topology to triangle list (groups of 3 vertices)
-		pContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		pContext->DrawIndexed(static_cast<UINT>(std::size(indices)), 0u, 0u);
-	}
-
-	void Graphics::DrawTestCube3D(const float aAngle, const DirectX::XMFLOAT3 aPos)
-	{
-		struct Vertex
-		{
-			struct
-			{
-				float x;
-				float y;
-				float z;
-			} pos;
-
-			struct
-			{
-				unsigned char r;
-				unsigned char g;
-				unsigned char b;
-				unsigned char a;
-			} colour;
-		};
-
-		const Vertex vertices[] = {
-			{{-0.5f, -0.5f, -0.5f}, {255, 0, 0, 255}},
-			{{0.5f, -0.5f, -0.5f}, {0, 255, 0, 255}},
-			{{-0.5f, 0.5f, -0.5f}, {0, 0, 255, 255}},
-			{{0.5f, 0.5f, -0.5f}, {255, 0, 0, 255}},
-			{{-0.5f, -0.5f, 0.5f}, {0, 255, 0, 255}},
-			{{0.5f, -0.5f, 0.5f}, {0, 0, 255, 255}},
-			{{-0.5f, 0.5f, 0.5f}, {128, 128, 0, 255}},
-			{{0.5f, 0.5f, 0.5f}, {0, 128, 128, 255}},
-		};
-
-		// Create vertex buffer
-		WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
-		D3D11_BUFFER_DESC vbd = {};
-		vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		vbd.Usage = D3D11_USAGE_DEFAULT;
-		vbd.CPUAccessFlags = 0u;
-		vbd.MiscFlags = 0u;
-		vbd.ByteWidth = sizeof(vertices);
-		vbd.StructureByteStride = sizeof(Vertex);
-		D3D11_SUBRESOURCE_DATA vsd = {};
-		vsd.pSysMem = vertices;
-		pDevice->CreateBuffer(&vbd, &vsd, &pVertexBuffer);
-
-		// Bind vertex buffer to pipeline
-		const UINT stride = sizeof(Vertex);
-		const UINT offset = 0u;
-		pContext->IASetVertexBuffers(0u, 1u, pVertexBuffer.GetAddressOf(), &stride, &offset);
-
-		// Create index buffer
-		const unsigned short indices[] =
-		{
-			0, 2, 1, 2, 3, 1,
-			1, 3, 5, 3, 7, 5,
-			2, 6, 3, 3, 6, 7,
-			4, 5, 7, 4, 7, 6,
-			0, 4, 2, 2, 4, 6,
-			0, 1, 4, 1, 5, 4
-		};
-
-		WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
-		D3D11_BUFFER_DESC ibd = {};
-		ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-		ibd.Usage = D3D11_USAGE_DEFAULT;
-		ibd.CPUAccessFlags = 0u;
-		ibd.MiscFlags = 0u;
-		ibd.ByteWidth = sizeof(indices);
-		ibd.StructureByteStride = sizeof(unsigned short);
-		D3D11_SUBRESOURCE_DATA isd = {};
-		isd.pSysMem = indices;
-		pDevice->CreateBuffer(&ibd, &isd, &pIndexBuffer);
-
-		// Bind index buffer
-		pContext->IASetIndexBuffer(pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
-
-		// Create constant buffer for transformation matrix
-		struct ConstantBuffer
-		{
-			DirectX::XMMATRIX transform;
-		};
-		const ConstantBuffer cb =
-		{
-			DirectX::XMMatrixTranspose(
-				DirectX::XMMatrixRotationZ(aAngle) *
-				DirectX::XMMatrixRotationX(aAngle) *
-				DirectX::XMMatrixTranslation(aPos.x, aPos.y, aPos.z) *
-				GetCamera() *
-				GetProjection()
-			)
-		};
-		WRL::ComPtr<ID3D11Buffer> pConstantBuffer;
-		D3D11_BUFFER_DESC cbd = {};
-		cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		cbd.Usage = D3D11_USAGE_DYNAMIC;
-		cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		cbd.MiscFlags = 0u;
-		cbd.ByteWidth = sizeof(cb);
-		cbd.StructureByteStride = 0u;
-		D3D11_SUBRESOURCE_DATA csd = {};
-		csd.pSysMem = &cb;
-		pDevice->CreateBuffer(&cbd, &csd, &pConstantBuffer);
-
-		// Bind constant buffer to vertex shader
-		pContext->VSSetConstantBuffers(0u, 1u, pConstantBuffer.GetAddressOf());
-
-		// Create pixel shader
-		WRL::ComPtr<ID3D11PixelShader> pPixelShader;
-		WRL::ComPtr<ID3DBlob> pBlob;
-		D3DReadFileToBlob(L"Shaders\\3D_PS.cso", &pBlob);
-		pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader);
-
-		// Bind pixel shader
-		pContext->PSSetShader(pPixelShader.Get(), nullptr, 0u);
-
-		// Create vertex shader
-		WRL::ComPtr<ID3D11VertexShader> pVertexShader;
-		D3DReadFileToBlob(L"Shaders\\3D_VS.cso", &pBlob);
-		pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader);
-
-		// Bind vertex shader
-		pContext->VSSetShader(pVertexShader.Get(), nullptr, 0u);
-
-		// Input (vertex) layout (2D position only)
-		WRL::ComPtr<ID3D11InputLayout> pInputLayout;
-		const D3D11_INPUT_ELEMENT_DESC ied[] =
-		{
-			{
-				"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA,
-				0
-			},
-			{"COLOUR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0,D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		};
-		pDevice->CreateInputLayout(
-			ied,
-			static_cast<UINT>(std::size(ied)),
-			pBlob->GetBufferPointer(),
-			pBlob->GetBufferSize(),
-			&pInputLayout);
-
-		// Bind vertex layout
-		pContext->IASetInputLayout(pInputLayout.Get());
-
-		// Set primitive topology to triangle list (groups of 3 vertices)
-		pContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		pContext->DrawIndexed(static_cast<UINT>(std::size(indices)), 0u, 0u);
 	}
 
 	Graphics::FrustumPlanes Graphics::ExtractFrustumPlanes() const

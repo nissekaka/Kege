@@ -114,7 +114,7 @@
     <ClCompile Include="Graphics\Lighting\SpotLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\Bindable\PostProcessing.cpp">
+    <ClCompile Include="Graphics\PostProcessing\PostProcessing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -230,7 +230,7 @@
     <ClInclude Include="Graphics\Drawable\ReflectionPlane.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\Bindable\PostProcessing.h">
+    <ClInclude Include="Graphics\PostProcessing\PostProcessing.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

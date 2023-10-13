@@ -5,7 +5,7 @@
 #include "Core/Utility/Camera.h"
 #include <Core/Utility/KakaMath.h>
 
-#include "Core/Graphics/Bindable/PostProcessing.h"
+#include "Core/Graphics/PostProcessing/PostProcessing.h"
 #include "Core/Graphics/Lighting/DirectionalLight.h"
 #include "Core/Graphics/Lighting/PointLight.h"
 #include "Core/Graphics/Lighting/SpotLight.h"

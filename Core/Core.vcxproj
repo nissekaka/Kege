@@ -91,7 +91,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Core.cpp" />
-    <ClCompile Include="Graphics\Bindable\PostProcessing.cpp" />
+    <ClCompile Include="Graphics\PostProcessing\PostProcessing.cpp" />
     <ClCompile Include="Graphics\Bindable\CubeTexture.cpp" />
     <ClCompile Include="Graphics\Bindable\DepthStencil.cpp" />
     <ClCompile Include="Graphics\Drawable\ReflectionPlane.cpp" />
@@ -126,7 +126,7 @@
     <ClCompile Include="Windows\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Graphics\Bindable\PostProcessing.h" />
+    <ClInclude Include="Graphics\PostProcessing\PostProcessing.h" />
     <ClInclude Include="Graphics\Bindable\CubeTexture.h" />
     <ClInclude Include="Graphics\Bindable\DepthStencil.h" />
     <ClInclude Include="Graphics\Drawable\ReflectionPlane.h" />

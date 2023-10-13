@@ -383,6 +383,11 @@ namespace Kaka
 
 		for (auto& subset : terrainSubsets)
 		{
+			if (subset.indices.empty())
+			{
+				continue;
+			}
+
 			subset.vertexBuffer.Init(aGfx, subset.vertices);
 			subset.indexBuffer.Init(aGfx, subset.indices);
 		}
@@ -418,6 +423,10 @@ namespace Kaka
 		for (int i = 0; i < terrainSubsets.size(); ++i)
 		{
 			if (!aGfx.IsBoundingBoxInFrustum(terrainSubsets[i].bounds.min, terrainSubsets[i].bounds.max))
+			{
+				continue;
+			}
+			if (terrainSubsets[i].indices.empty())
 			{
 				continue;
 			}

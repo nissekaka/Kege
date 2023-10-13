@@ -323,23 +323,16 @@ namespace Kaka
 
 		// for each render target in bloom downscale vector, set render target
 
-		wnd.Gfx().SetRenderTarget(eRenderTargetType::Default);
+		//wnd.Gfx().SetRenderTarget(eRenderTargetType::Default);
 
-		struct BloomBuffer
-		{
-			float bloomThreshold;
-			float padding[3];
-		} bb;
-		bb.bloomThreshold = 0.5f;
-
-		PixelConstantBuffer<BloomBuffer> bloomBuffer{wnd.Gfx(), 1u};
-		bloomBuffer.Update(wnd.Gfx(), bb);
-		bloomBuffer.Bind(wnd.Gfx());
+		// Unbind SKYBOX shader resources
+		//ID3D11ShaderResourceView* nullSRVs[2] = {nullptr};
+		//wnd.Gfx().pContext->PSSetShaderResources(0u, 2, nullSRVs);
 
 		// bind to downscale pixelshader
 		wnd.Gfx().HandleBloomScaling(postProcessing);
 
-		wnd.Gfx().BindPostProcessingTexture();
+		//wnd.Gfx().BindPostProcessingTexture();
 
 		PixelConstantBuffer<PostProcessingBuffer> ppb{wnd.Gfx(), 1u};
 		ppb.Update(wnd.Gfx(), ppBuffer);

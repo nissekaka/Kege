@@ -1,7 +1,7 @@
 #include "PostProcessing.h"
 
-#include "PixelShader.h"
-#include "VertexShader.h"
+#include "Core/Graphics/Bindable/PixelShader.h"
+#include "Core/Graphics/Bindable/VertexShader.h"
 #include "Core/Graphics/Drawable/ModelData.h"
 #include "Core/Graphics/Drawable/Vertex.h"
 
@@ -11,43 +11,42 @@ namespace Kaka
 
 	void PostProcessing::Init(const Graphics& aGfx)
 	{
-		vertexShader.Init(aGfx, L"Shaders/PostProcessing_VS.cso");
-		pixelShader.Init(aGfx, L"Shaders/PostProcessing_PS.cso");
+		postProcessVS.Init(aGfx, L"Shaders/PostProcessing_VS.cso");
+		postProcessPS.Init(aGfx, L"Shaders/PostProcessing_PS.cso");
 
-		Vertex _vertices[4] = {
+		downsamplePS.Init(aGfx, L"Shaders/Downsample_PS.cso");
+		upsamplePS.Init(aGfx, L"Shaders/Upsample_PS.cso");
+
+		currentPS = &postProcessPS;
+
+		struct PVertex
+		{
+			DirectX::XMFLOAT3 pos;
+			DirectX::XMFLOAT2 tex;
+		};
+
+		PVertex _vertices[4] = {
 			{
 				{-1.0f, -1.0f, 0.0f},
 				{0, 1},
-				{0, 0, 0},
-				{0, 0, 0},
-				{0, 0, 0}
 			},
 			{
 				{-1.0f, 1.0f, 0.0f},
 				{0, 0},
-				{0, 0, 0},
-				{0, 0, 0},
-				{0, 0, 0}
 			},
 			{
 				{1.0f, -1.0f, 0.0f},
 				{1, 1},
-				{0, 0, 0},
-				{0, 0, 0},
-				{0, 0, 0}
 			},
 			{
 				{1.0f, 1.0f, 0.0f},
 				{1, 0},
-				{0, 0, 0},
-				{0, 0, 0},
-				{0, 0, 0}
 			}
 		};
 
 		unsigned short _indices[6] = {0, 1, 2, 2, 1, 3};
 
-		std::vector<Vertex> vertices;
+		std::vector<PVertex> vertices;
 		std::vector<unsigned short> indices;
 
 		for (int i = 0; i < 4; i++)
@@ -76,7 +75,7 @@ namespace Kaka
 				D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 			},
 		};
-		inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
+		inputLayout.Init(aGfx, ied, postProcessVS.GetBytecode());
 		topology.Init(aGfx, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 
@@ -85,8 +84,8 @@ namespace Kaka
 		//texture.Bind(aGfx);
 		vertexBuffer.Bind(aGfx);
 		indexBuffer.Bind(aGfx);
-		pixelShader.Bind(aGfx);
-		vertexShader.Bind(aGfx);
+		currentPS->Bind(aGfx);
+		postProcessVS.Bind(aGfx);
 		inputLayout.Bind(aGfx);
 		topology.Bind(aGfx);
 
@@ -94,5 +93,20 @@ namespace Kaka
 		// Unbind shader resources
 		ID3D11ShaderResourceView* nullSRVs[1u] = {nullptr};
 		aGfx.pContext->PSSetShaderResources(0u, 1u, nullSRVs);
+	}
+
+	void PostProcessing::SetDownsamplePS()
+	{
+		currentPS = &downsamplePS;
+	}
+
+	void PostProcessing::SetUpsamplePS()
+	{
+		currentPS = &upsamplePS;
+	}
+
+	void PostProcessing::SetPostProcessPS()
+	{
+		currentPS = &postProcessPS;
 	}
 }
