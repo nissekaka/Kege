@@ -372,3 +372,4 @@ Bin/*.dll
 !Premake/*
 Lib
 Temp
+*.sln

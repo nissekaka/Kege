@@ -16,17 +16,16 @@ local directories = {
 	assets          = basePath .. "/Bin/Assets/",
     temp         	= basePath .. "/Temp/",
 
-	engineCore      = basePath .. "/Core/",
+    source          = basePath .. "/Source/",
+	core            = basePath .. "/Source/Core/",
+    game            = basePath .. "/Source/Game/",
 
-    gameSource      = basePath .. "/Game/Source/",
-	game            = basePath .. "/Game/",
-
-	external        = basePath .. "/External/",
-    externalDLL     = basePath .. "/External/bin/",
-    externalInclude = basePath .. "/External/include/",
-    externalLib     = basePath .. "/External/lib/",
-    debugLib        = basePath .. "/External/lib/Debug/",
-    releaseLib      = basePath .. "/External/lib/Release/",
+	external        = basePath .. "/Source/External/",
+    externalDLL     = basePath .. "/Source/External/bin/",
+    externalInclude = basePath .. "/Source/External/include/",
+    externalLib     = basePath .. "/Source/External/lib/",
+    debugLib        = basePath .. "/Source/External/lib/Debug/",
+    releaseLib      = basePath .. "/Source/External/lib/Release/",
 	
     lib             = basePath .. "/Lib/",
 }
@@ -109,6 +108,9 @@ project(PROJECT_CORE)
     targetdir(directories.lib)
 	targetname(PROJECT_CORE.."_%{cfg.buildcfg}")
 	objdir(directories.temp.."/"..PROJECT_CORE.."/%{cfg.buildcfg}")
+
+    pchheader "stdafx.h"
+	pchsource("../Source/Core/stdafx.cpp")
     
     architecture("x64")
 
@@ -118,18 +120,18 @@ project(PROJECT_CORE)
 	}
 	
 	includedirs {
-        directories.root,
+        directories.source,
         directories.externalInclude,
-        directories.engineCore,
+        directories.core,
     }
 
 	files {
-        directories.engineCore.."**.h",
-        directories.engineCore.."**.hpp",
-        directories.engineCore.."**.cpp",
+        directories.core.."**.h",
+        directories.core.."**.hpp",
+        directories.core.."**.cpp",
 
-        directories.engineCore.."**.hlsl",
-        directories.engineCore.."**.hlsli",
+        directories.core.."**.hlsl",
+        directories.core.."**.hlsli",
     }
 
 	filter 	"configurations:Debug"
@@ -235,16 +237,16 @@ project(PROJECT_GAME)
     }
 
     includedirs {
-        directories.root,
-        directories.engineCore,
+        directories.source,
+        directories.core,
         directories.externalInclude,
-        directories.gameSource,
+        directories.game,
     }
 
 	files {
-        directories.gameSource.."**.h",
-        directories.gameSource.."**.hpp",
-        directories.gameSource.."**.cpp",
+        directories.game.."**.h",
+        directories.game.."**.hpp",
+        directories.game.."**.cpp",
     }
 	
 	filter 	"configurations:Debug"
