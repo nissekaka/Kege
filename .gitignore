@@ -369,5 +369,6 @@ Bin/Shaders
 Bin/*.dll
 *.idb
 *.exe
+!Premake/*
 Lib
 Temp
