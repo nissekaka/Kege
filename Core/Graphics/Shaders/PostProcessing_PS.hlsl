@@ -1,5 +1,5 @@
 #include "common.hlsli"
-#include "PostprocessTonemapPS.hlsl"
+#include "PostprocessTonemap.hlsli"
 
 struct PixelInput
 {

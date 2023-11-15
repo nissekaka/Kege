@@ -1,5 +1,5 @@
 #include "Light.hlsli"
-#include "ShaderOps.hlsl"
+#include "ShaderOps.hlsli"
 
 static const uint MAX_LIGHTS = 16u; // Needs to be the same in PointLight
 

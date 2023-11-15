@@ -3,10 +3,6 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-# Added by Anton
-# External libraries
-!External/lib/*
-
 # User-specific files
 *.rsuser
 *.suo
@@ -365,3 +361,13 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Added by Anton
+!External/lib/*
+!Bin
+Bin/Shaders
+Bin/*.dll
+*.idb
+*.exe
+Lib
+Temp
