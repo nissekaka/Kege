@@ -33,6 +33,24 @@ local directories = {
 local DO_LOGGING = true
 local LOG = DO_LOGGING and print or function() end
 
+local function Logo()
+	LOG(".-----------------.")
+    LOG("|    _  ____ _    |")
+    LOG("|   | |/ / _` |   |")
+    LOG("|   |   ( (_| |   |")
+    LOG("|   |_|\\_\\__,_|   |")
+    LOG("|   | |/ / _` |   |")
+    LOG("|   |   ( (_| |   |")
+    LOG("|   |_|\\_\\__,_|   |")
+    LOG("|                 |")
+    LOG("'-----------------'")
+    LOG("  Direct3D Engine  ")
+    LOG(" by Anton Eriksson ")
+    LOG("\n")
+end
+
+-- Find External Libraries
+
 local function FindExternalLibraries()
     LOG("\nFinding External Libraries to link:")
     local foundNames = {}
@@ -50,6 +68,8 @@ local function FindExternalLibraries()
     LOG("Successfully linked External Libraries!\n")
     return out
 end
+
+-- Find Libraries
 
 local function FindLibraries()
     LOG("\nFinding Libraries to link:")
@@ -76,6 +96,7 @@ local LIBRARY_LIST = FindLibraries()
 
  workspace(SOLUTION_NAME)
     LOG("\nBuilding solution "..SOLUTION_NAME)
+
     location(directories.root)
 	kind "WindowedApp"
 	language "C++"
@@ -295,3 +316,4 @@ end
 
 MakeFolderStructure()
 CopyDLLs()
+Logo()
