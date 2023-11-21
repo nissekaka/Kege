@@ -208,11 +208,42 @@ project(PROJECT_EXTERNAL)
     --    directories.lib,
     --}
 
+    includedirs {
+		directories.externalInclude.."TGAFBXImporter/FBXSDK/include",
+		directories.externalInclude.."TGAFBXImporter/source",
+    }
+
 	files {
         directories.external.."**.h",
         directories.external.."**.hpp",
         directories.external.."**.cpp",
     }
+
+	    filter "configurations:Debug"
+		defines {"_DEBUG", "FBXSDK_SHARED"}
+		runtime "Debug"
+		symbols "on"
+		
+		libdirs { directories.externalInclude.."TGAFBXImporter/FBXSDK/lib/debug" }
+		links {
+			"libfbxsdk",
+		}
+
+        filter "configurations:Release"
+		defines {"_RELEASE",  "FBXSDK_SHARED"}
+		runtime "Release"
+		optimize "on"
+
+		libdirs { directories.externalInclude.."TGAFBXImporter/FBXSDK/lib/release" }
+		links {
+			"libfbxsdk",
+		}
+		
+	filter 	"configurations:Release"
+        defines "_RELEASE"
+        runtime "Release"
+		optimize "on"
+        libdirs {directories.releaseLib}
 		
     filter "system:windows"
         kind "StaticLib"

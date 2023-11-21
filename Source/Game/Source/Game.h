@@ -53,6 +53,7 @@ namespace Kaka
 
 	private:
 		std::vector<Model> models;
+		Model animatedModel{};
 		//Model spy{};
 		//Model ken{};
 		//Model vamp{};

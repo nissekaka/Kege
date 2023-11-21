@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <unordered_map>
 
 #include "Core/Graphics/Drawable/Vertex.h"
 #include <vector>
@@ -27,11 +28,16 @@ namespace Kaka
 	{
 		int rootBoneIndex = -1; // Index of the root bone in the skeleton
 		std::vector<Bone> bones{};
+		std::unordered_map<std::string, int> boneIndexMap{};
+		std::vector<std::string> boneNames;
 	};
 
 	struct AnimationClip
 	{
 		std::string name = "None";
+		float length = 0.0f;
+		float fps = 0.0f;
+		float duration = 0.0f;
 		std::vector<Keyframe> keyframes{};
 	};
 
@@ -51,6 +57,7 @@ namespace Kaka
 	{
 		ModelData() = default;
 		Mesh mesh;
+		std::vector<AnimatedMesh> animMeshes;
 		AnimatedMesh animMesh;
 		Skeleton skeleton;
 		std::vector<AnimationClip> animations = {};

@@ -3,12 +3,15 @@
 #include <External/include/imgui/imgui.h>
 #include <DirectXMath.h>
 #include <random>
+#include <TGAFBXImporter/source/Internal.inl>
+
+#include "External/include/TGAFBXImporter/source/FBXImporter.h"
 
 constexpr int WINDOW_WIDTH = 1920;
 constexpr int WINDOW_HEIGHT = 1080;
-constexpr int NUM_POINT_LIGHTS = 25;
-constexpr int NUM_SPOT_LIGHTS = 25;
-constexpr int TERRAIN_SIZE = 1000;
+constexpr int NUM_POINT_LIGHTS = 0;
+constexpr int NUM_SPOT_LIGHTS = 0;
+constexpr int TERRAIN_SIZE = 10;
 
 namespace Kaka
 {
@@ -58,16 +61,71 @@ namespace Kaka
 		reflectionPlane.Init(wnd.Gfx(), terrain.GetSize() / 2.0f);
 		reflectionPlane.SetPosition({terrain.GetSize() / 2.0f, reflectPlaneHeight, terrain.GetSize() / 2.0f});
 
-		camera.SetPosition({742.75f, 0.16f, 395.95f});
+		camera.SetPosition({0.0f, 0.0f, 0.0f});
+		//camera.SetPosition({742.75f, 0.16f, 395.95f});
 
-		for (int i = 0; i < 0; ++i)
+		for (int i = 0; i < 1; ++i)
 		{
 			models.emplace_back();
-			models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\ken\\ken.fbx", Model::eShaderType::PBR);
+			models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\vamp\\vamp.fbx", Model::eShaderType::PBR);
 			DirectX::XMFLOAT3 pos = terrain.GetRandomVertexPosition();
 			//DirectX::XMFLOAT3 pos = terrain.GetTerrainSubsets()[i].center;
-			pos.y += 10.0f;
-			models.back().SetPosition(pos);
+			//pos.y += 10.0f;
+			//models.back().SetPosition(pos);
+			models.back().SetPosition({-5.0f, 2.0f, 5.0f});
+		}
+
+		animatedModel.LoadFBXModel(wnd.Gfx(), "Assets\\Models\\vamp\\vamp.fbx", Model::eShaderType::AnimPBR);
+
+		animatedModel.SetPosition({-5.0f, 0.0f, 5.0f});
+
+		TGA::FBXAnimation animation;
+
+		if (TGA::FBXImporter::LoadAnimation("Assets\\Models\\vamp\\jog_v_fw.fbx",
+		                                    animatedModel.GetModelData().skeleton.boneNames, animation))
+		{
+			animatedModel.GetModelData().animations.emplace_back();
+
+			auto& newAnimation = animatedModel.GetModelData().animations.back();
+			newAnimation.name = animation.Name;
+			newAnimation.length = animation.Length;
+			newAnimation.fps = animation.FramesPerSecond;
+			newAnimation.duration = animation.Duration;
+			newAnimation.keyframes.resize(animation.Frames.size());
+
+			for (size_t f = 0; f < newAnimation.keyframes.size(); f++)
+			{
+				newAnimation.keyframes[f].boneTransforms.resize(animation.Frames[f].LocalTransforms.size());
+
+				for (size_t t = 0; t < animation.Frames[f].LocalTransforms.size(); t++)
+				{
+					Matrix4x4f localMatrix;
+					memcpy(&localMatrix, &animation.Frames[f].LocalTransforms[t], sizeof(float) * 16);
+
+					Vector3f T, R, S;
+					localMatrix.DecomposeMatrix(T, R, S);
+					Quatf Rot(localMatrix);
+
+					DirectX::XMFLOAT3 T2 = {T.X, T.Y, T.Z};
+					DirectX::XMFLOAT4 Rot2 = {Rot.X, Rot.Y, Rot.Z, Rot.W};
+					DirectX::XMFLOAT3 S2 = {S.X, S.Y, S.Z};
+
+					// Make DirectX::XMMATRIX from translation, rotation and scale
+					DirectX::XMMATRIX matrix = DirectX::XMMatrixAffineTransformation(
+						DirectX::XMLoadFloat3(&S2),
+						DirectX::XMVectorZero(),
+						DirectX::XMLoadFloat4(&Rot2),
+						DirectX::XMLoadFloat3(&T2));
+
+					// DirectX::XMMATRIX to DirectX::XMFLOAT4X4
+					DirectX::XMStoreFloat4x4(&newAnimation.keyframes[f].boneTransforms[t], matrix);
+
+					if (f == 0)
+					{
+						animatedModel.GetModelData().bindPose.push_back(newAnimation.keyframes[f].boneTransforms[t]);
+					}
+				}
+			}
 		}
 
 		std::random_device rd;
@@ -243,6 +301,30 @@ namespace Kaka
 			model.SetNearbyLights(nearbyPointLights, nearbySpotLights);
 			model.Draw(wnd.Gfx());
 		}
+
+		//{
+		//	// Point light range
+		//	bool nearbyPointLights[50u] = {};
+		//	bool nearbySpotLights[50u] = {};
+
+		//	for (int i = 0; i < 50u; ++i)
+		//	{
+		//		if (i >= spotLights.size())
+		//		{
+		//			nearbyPointLights[i] = false;
+		//			nearbySpotLights[i] = false;
+		//		}
+		//		else
+		//		{
+		//			const float distance = GetDistanceBetweenObjects(animatedModel.GetPosition(),
+		//			                                                 pointLights[i].GetPosition());
+		//			nearbyPointLights[i] = distance <= pointLights[i].GetRadius() * 2;
+		//			nearbySpotLights[i] = distance <= spotLights[i].GetRange() * 2;
+		//		}
+		//	}
+		//	animatedModel.SetNearbyLights(nearbyPointLights, nearbySpotLights);
+		//}
+
 		skybox.Draw(wnd.Gfx());
 		terrain.SetCullingMode(eCullingMode::Back);
 		for (TerrainSubset& subset : terrain.GetTerrainSubsets())
@@ -274,6 +356,10 @@ namespace Kaka
 		reflectionPlane.Draw(wnd.Gfx());
 		wnd.Gfx().ResetAlpha();
 
+		animatedModel.Update(aDeltaTime);
+		//animatedModel.Animate();
+		animatedModel.DrawFBX(wnd.Gfx());
+
 		// ImGui windows
 		if (showImGui)
 		{
@@ -282,6 +368,7 @@ namespace Kaka
 			terrain.ShowControlWindow("Terrain");
 			reflectionPlane.ShowControlWindow("Reflection Plane");
 			directionalLight.ShowControlWindow("Directional Light");
+			animatedModel.ShowControlWindow("Animated Model");
 			//ken.ShowControlWindow("Ken");
 
 			if (ImGui::Begin("Reflection"))
@@ -357,27 +444,27 @@ namespace Kaka
 
 			switch (e->GetKeyCode())
 			{
-				case VK_ESCAPE:
-					if (wnd.CursorEnabled())
-					{
-						wnd.DisableCursor();
-						wnd.mouse.EnableRaw();
-					}
-					else
-					{
-						wnd.EnableCursor();
-						wnd.mouse.DisableRaw();
-					}
-					break;
-				case VK_F1:
-					showImGui = !showImGui;
-					break;
-				case VK_F2:
-					showStatsWindow = !showStatsWindow;
-					break;
-				case VK_F3:
-					drawLightDebug = !drawLightDebug;
-					break;
+			case VK_ESCAPE:
+				if (wnd.CursorEnabled())
+				{
+					wnd.DisableCursor();
+					wnd.mouse.EnableRaw();
+				}
+				else
+				{
+					wnd.EnableCursor();
+					wnd.mouse.DisableRaw();
+				}
+				break;
+			case VK_F1:
+				showImGui = !showImGui;
+				break;
+			case VK_F2:
+				showStatsWindow = !showStatsWindow;
+				break;
+			case VK_F3:
+				drawLightDebug = !drawLightDebug;
+				break;
 			}
 		}
 

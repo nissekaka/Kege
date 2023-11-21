@@ -13,14 +13,17 @@ namespace Kaka
 	class Model : public Drawable
 	{
 	public:
-		enum class eShaderType { Solid, Light, Phong, AnimPhong, PBR };
+		enum class eShaderType { Solid, Light, Phong, AnimPhong, PBR, AnimPBR };
 
 	public:
 		Model() = default;
 		Model(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType);
 		~Model() override = default;
 		void LoadModel(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType);
+		void LoadFBXModel(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType);
 		void Draw(Graphics& aGfx);
+		void DrawFBX(Graphics& aGfx);
+		void InitializeBindPose();
 		void Update(float aDeltaTime);
 		void TraverseBoneHierarchy(int aBoneIndex, const DirectX::XMMATRIX& aParentTransform,
 		                           std::vector<DirectX::XMFLOAT4X4>& aInterpolatedBoneTransforms,
@@ -39,6 +42,7 @@ namespace Kaka
 		bool IsLoaded() const;
 		void SetNearbyLights(bool aNearbyPointLights[], bool aNearbySpotLights[]);
 		void BindPixelShader(const Graphics& aGfx);
+		ModelData& GetModelData() { return modelData; }
 
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
@@ -88,5 +92,8 @@ namespace Kaka
 
 		BOOL nearbyPointLights[50u];
 		BOOL nearbySpotLights[50u];
+
+		std::vector<DirectX::XMFLOAT4X4> combinedTransforms;
+		std::vector<DirectX::XMFLOAT4X4> finalTransform;
 	};
 }

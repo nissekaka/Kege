@@ -363,7 +363,7 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # Added by Anton
-!External/lib/*
+!Source/External/lib/*
 !Bin
 Bin/Shaders
 Bin/*.dll
