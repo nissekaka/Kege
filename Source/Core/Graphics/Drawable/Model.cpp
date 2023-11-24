@@ -327,10 +327,6 @@ namespace Kaka
 					vertices[v].texCoord.x = fbxMesh.Vertices[v].UVs[0][0];
 					vertices[v].texCoord.y = fbxMesh.Vertices[v].UVs[0][1];
 
-					std::string texCoords = "\nTexture coords: " + std::to_string(vertices[v].texCoord.x) + ", " +
-						std::to_string(vertices[v].texCoord.y);
-					OutputDebugStringA(texCoords.c_str());
-
 					vertices[v].boneIndices[0] = fbxMesh.Vertices[v].BoneIDs[0];
 					vertices[v].boneIndices[1] = fbxMesh.Vertices[v].BoneIDs[1];
 					vertices[v].boneIndices[2] = fbxMesh.Vertices[v].BoneIDs[2];
@@ -719,9 +715,6 @@ namespace Kaka
 
 		// Update all animations
 		Skeleton* skeleton = &modelData.skeleton;
-
-		std::string text = "\n" + std::to_string(frame);
-		OutputDebugStringA(text.c_str());
 
 		// Interpolate between current and next frame
 		for (size_t i = 0; i < skeleton->bones.size(); i++)
