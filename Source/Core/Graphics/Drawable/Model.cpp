@@ -692,26 +692,19 @@ namespace Kaka
 	{
 		animationTime += aDeltaTime;
 
-		if (animationTime >= modelData.animations[0].duration)
+		// Ensure animationTime is within the valid range
+		while (animationTime >= modelData.animations[0].duration)
 		{
-			//if (true)
-			{
-				while (animationTime >= modelData.animations[0].duration)
-				{
-					animationTime -= modelData.animations[0].duration;
-				}
-			}
-			//else
-			//{
-			//	animationTime = GetAnimation()->Duration;
-			//	myState = AnimationState::Finished;
-			//}
+			animationTime -= modelData.animations[0].duration;
 		}
 
+		// Calculate the current frame and delta
 		const float frameRate = 1.0f / modelData.animations[0].fps;
 		const float result = animationTime / frameRate;
-		const size_t frame = static_cast<size_t>(std::floor(result)); // Which frame we're on
-		const float delta = result - static_cast<float>(frame); // How far we have progressed to the next frame.
+		const size_t frame = static_cast<size_t>(std::floor(result)); // Current frame
+		OutputDebugStringA("\n");
+		OutputDebugStringA(std::to_string(frame).c_str());
+		const float delta = result - static_cast<float>(frame); // Progress to the next frame
 
 		// Update all animations
 		Skeleton* skeleton = &modelData.skeleton;
@@ -719,12 +712,12 @@ namespace Kaka
 		// Interpolate between current and next frame
 		for (size_t i = 0; i < skeleton->bones.size(); i++)
 		{
-			//DirectX::XMMATRIX bindPose = DirectX::XMLoadFloat4x4(&modelData.bindPose[i]);
 			DirectX::XMMATRIX currentFramePose = DirectX::XMLoadFloat4x4(
 				&modelData.animations[0].keyframes[frame].boneTransforms[i]);
 			DirectX::XMMATRIX nextFramePose = DirectX::XMLoadFloat4x4(
 				&modelData.animations[0].keyframes[(frame + 1) % modelData.animations[0].keyframes.size()].boneTransforms[i]);
 
+			// Interpolate between current and next frame using delta
 			DirectX::XMMATRIX blendedPose = currentFramePose + delta * (nextFramePose - currentFramePose);
 
 			int parentIndex = skeleton->bones[i].parentIndex;
@@ -734,8 +727,7 @@ namespace Kaka
 				// Accumulate relative transformation
 				DirectX::XMStoreFloat4x4(&combinedTransforms[i],
 				                         DirectX::XMMatrixMultiply(blendedPose,
-				                                                   DirectX::XMLoadFloat4x4(
-					                                                   &combinedTransforms[parentIndex])));
+				                                                   DirectX::XMLoadFloat4x4(&combinedTransforms[parentIndex])));
 			}
 			else
 			{
