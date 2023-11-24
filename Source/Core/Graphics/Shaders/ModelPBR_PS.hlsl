@@ -79,7 +79,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     }
 
     float3 colour = albedoTex.Sample(splr, aInput.texCoord).rgb;
-    float3 normal = normalTex.Sample(splr, aInput.texCoord).wyz;
+    float3 normal = normalTex.Sample(splr, aInput.texCoord).rgb;
     float3 material = materialTex.Sample(splr, aInput.texCoord).rgb;
 
     float3 ambientLight = { 0.0f, 0.0f, 0.0f };

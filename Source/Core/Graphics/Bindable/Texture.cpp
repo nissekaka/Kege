@@ -4,6 +4,10 @@
 
 namespace Kaka
 {
+	const wchar_t* DEFAULT_DIFFUSE_TEXTURE_PATH = L"Assets/Textures/Default/Default_c.dds";
+	const wchar_t* DEFAULT_NORMAL_TEXTURE_PATH = L"Assets/Textures/Default/Default_n.dds";
+	const wchar_t* DEFAULT_MATERIAL_TEXTURE_PATH = L"Assets/Textures/Default/Default_m.dds";
+
 	Texture::Texture(const UINT aSlot)
 		:
 		slot(aSlot) {}
@@ -14,8 +18,6 @@ namespace Kaka
 
 		// Diffuse
 		{
-			//DirectX::ScratchImage image;
-
 			// Build the texture path by adding "_c.dds" suffix to the FBX file name
 			std::string texturePath = aFilePath;
 			const size_t lastDotIndex = texturePath.find_last_of('.');
@@ -37,48 +39,10 @@ namespace Kaka
 
 			if (SUCCEEDED(hr))
 			{
-				//if (metadata.format != DXGI_FORMAT_B8G8R8A8_UNORM)
-				//{
-				//	DirectX::ScratchImage decompressedImage;
-				//	// Decompress the texture to a new format (in this case, DXGI_FORMAT_R8G8B8A8_UNORM)
-				//	hr = DirectX::Decompress(image.GetImages(), image.GetImageCount(), image.GetMetadata(),
-				//	                         DXGI_FORMAT_R8G8B8A8_UNORM, decompressedImage);
-				//	image = std::move(decompressedImage);
-				//}
-
-				//// Create texture resource
-				//D3D11_TEXTURE2D_DESC textureDesc = {};
-				//textureDesc.Width = (UINT)metadata.width;
-				//textureDesc.Height = (UINT)metadata.height;
-				//textureDesc.MipLevels = 1u;
-				//textureDesc.ArraySize = 1u;
-				//textureDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-				//textureDesc.SampleDesc.Count = 1u;
-				//textureDesc.SampleDesc.Quality = 0u;
-				//textureDesc.Usage = D3D11_USAGE_DEFAULT;
-				//textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-				//textureDesc.CPUAccessFlags = 0u;
-				//textureDesc.MiscFlags = 0u;
-
-				//D3D11_SUBRESOURCE_DATA sd = {};
-				//sd.pSysMem = image.GetPixels();
-				//sd.SysMemPitch = (UINT)(image.GetPixelsSize() / metadata.height);
-				//Microsoft::WRL::ComPtr<ID3D11Texture2D> pTexture;
-				//GetDevice(aGfx)->CreateTexture2D(&textureDesc, &sd, &pTexture);
-
-				//// Create the resource view on the texture
-				//D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-				//srvDesc.Format = textureDesc.Format;
-				//srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-				//srvDesc.Texture2D.MostDetailedMip = 0;
-				//srvDesc.Texture2D.MipLevels = 1;
-
 				pTextures.emplace_back();
 				// Create the shader resource view from the loaded texture
 				hr = CreateShaderResourceView(GetDevice(aGfx), image.GetImages(), image.GetImageCount(), metadata,
 				                              pTextures.back().GetAddressOf());
-
-				//hr = GetDevice(aGfx)->CreateShaderResourceView(pTexture.Get(), &srvDesc, &pTextures.back());
 
 				const std::string text =
 					"\n+++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -90,19 +54,33 @@ namespace Kaka
 			}
 			if (FAILED(hr))
 			{
-				const std::string text =
+				std::string text =
 					"\n-------------------------------------------------"
 					"\nFailed to load diffuse texture!"
 					"\nModel: " + aFilePath +
 					"\nTexture: " + texturePath +
 					"\n-------------------------------------------------";
 				OutputDebugStringA(text.c_str());
+
+				text = "\n+++++++++++++++++++++++++++++++++++++++++++++++++"
+					"\nLoading default diffuse texture!"
+					"\n+++++++++++++++++++++++++++++++++++++++++++++++++";
+				OutputDebugStringA(text.c_str());
+
+				hr = DirectX::LoadFromDDSFile(DEFAULT_DIFFUSE_TEXTURE_PATH, DirectX::DDS_FLAGS_NONE, &metadata,
+				                              image);
+
+				if (FAILED(hr))
+				{
+					text = "\n-------------------------------------------------"
+						"\nFailed to load default diffuse texture!"
+						"\n-------------------------------------------------";
+					OutputDebugStringA(text.c_str());
+				}
 			}
 		}
 		// Normal
 		{
-			//DirectX::ScratchImage image;
-
 			// Build the texture path by adding "_c.dds" suffix to the FBX file name
 			std::string texturePath = aFilePath;
 			const size_t lastDotIndex = texturePath.find_last_of('.');
@@ -124,39 +102,10 @@ namespace Kaka
 
 			if (SUCCEEDED(hr))
 			{
-				//// Create texture resource
-				//D3D11_TEXTURE2D_DESC textureDesc = {};
-				//textureDesc.Width = (UINT)metadata.width;
-				//textureDesc.Height = (UINT)metadata.height;
-				//textureDesc.MipLevels = 1;
-				//textureDesc.ArraySize = 1;
-				//textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-				//textureDesc.SampleDesc.Count = 1;
-				//textureDesc.SampleDesc.Quality = 0;
-				//textureDesc.Usage = D3D11_USAGE_DEFAULT;
-				//textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-				//textureDesc.CPUAccessFlags = 0;
-				//textureDesc.MiscFlags = 0;
-
-				//D3D11_SUBRESOURCE_DATA sd = {};
-				//sd.pSysMem = image.GetPixels();
-				//sd.SysMemPitch = (UINT)(image.GetPixelsSize() / metadata.height);
-				//Microsoft::WRL::ComPtr<ID3D11Texture2D> pTexture;
-				//GetDevice(aGfx)->CreateTexture2D(&textureDesc, &sd, &pTexture);
-
-				//// Create the resource view on the texture
-				//D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-				//srvDesc.Format = textureDesc.Format;
-				//srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-				//srvDesc.Texture2D.MostDetailedMip = 0;
-				//srvDesc.Texture2D.MipLevels = 1;
-
 				pTextures.emplace_back();
 				// Create the shader resource view from the loaded texture
 				hr = CreateShaderResourceView(GetDevice(aGfx), image.GetImages(), image.GetImageCount(), metadata,
 				                              pTextures.back().GetAddressOf());
-
-				//hr = GetDevice(aGfx)->CreateShaderResourceView(pTexture.Get(), &srvDesc, &pTextures.back());
 
 				const std::string text =
 					"\n+++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -169,19 +118,36 @@ namespace Kaka
 			}
 			if (FAILED(hr))
 			{
-				const std::string text =
+				std::string text =
 					"\n-------------------------------------------------"
 					"\nFailed to load normal texture!"
 					"\nModel: " + aFilePath +
 					"\nTexture: " + texturePath +
 					"\n-------------------------------------------------";
 				OutputDebugStringA(text.c_str());
+
+				text = "\n+++++++++++++++++++++++++++++++++++++++++++++++++"
+					"\nLoading default normal texture!"
+					"\n+++++++++++++++++++++++++++++++++++++++++++++++++";
+				OutputDebugStringA(text.c_str());
+
+				hr = DirectX::LoadFromDDSFile(DEFAULT_NORMAL_TEXTURE_PATH, DirectX::DDS_FLAGS_NONE, &metadata, image);
+
+				if (SUCCEEDED(hr))
+				{
+					hasNormalMap = TRUE;
+				}
+				if (FAILED(hr))
+				{
+					text = "\n-------------------------------------------------"
+						"\nFailed to load default normal texture!"
+						"\n-------------------------------------------------";
+					OutputDebugStringA(text.c_str());
+				}
 			}
 		}
 		// Material
 		{
-			//DirectX::ScratchImage image;
-
 			// Build the texture path by adding "_c.dds" suffix to the FBX file name
 			std::string texturePath = aFilePath;
 			const size_t lastDotIndex = texturePath.find_last_of('.');
@@ -203,39 +169,10 @@ namespace Kaka
 
 			if (SUCCEEDED(hr))
 			{
-				//// Create texture resource
-				//D3D11_TEXTURE2D_DESC textureDesc = {};
-				//textureDesc.Width = (UINT)metadata.width;
-				//textureDesc.Height = (UINT)metadata.height;
-				//textureDesc.MipLevels = 1;
-				//textureDesc.ArraySize = 1;
-				//textureDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-				//textureDesc.SampleDesc.Count = 1;
-				//textureDesc.SampleDesc.Quality = 0;
-				//textureDesc.Usage = D3D11_USAGE_DEFAULT;
-				//textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-				//textureDesc.CPUAccessFlags = 0;
-				//textureDesc.MiscFlags = 0;
-
-				//D3D11_SUBRESOURCE_DATA sd = {};
-				//sd.pSysMem = image.GetPixels();
-				//sd.SysMemPitch = (UINT)(image.GetPixelsSize() / metadata.height);
-				//Microsoft::WRL::ComPtr<ID3D11Texture2D> pTexture;
-				//GetDevice(aGfx)->CreateTexture2D(&textureDesc, &sd, &pTexture);
-
-				//// Create the resource view on the texture
-				//D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-				//srvDesc.Format = textureDesc.Format;
-				//srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-				//srvDesc.Texture2D.MostDetailedMip = 0;
-				//srvDesc.Texture2D.MipLevels = 1;
-
 				pTextures.emplace_back();
 				// Create the shader resource view from the loaded texture
 				hr = CreateShaderResourceView(GetDevice(aGfx), image.GetImages(), image.GetImageCount(), metadata,
 				                              pTextures.back().GetAddressOf());
-
-				//hr = GetDevice(aGfx)->CreateShaderResourceView(pTexture.Get(), &srvDesc, &pTextures.back());
 
 				const std::string text =
 					"\n+++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -248,13 +185,33 @@ namespace Kaka
 			}
 			if (FAILED(hr))
 			{
-				const std::string text =
+				std::string text =
 					"\n-------------------------------------------------"
 					"\nFailed to load material texture!"
 					"\nModel: " + aFilePath +
 					"\nTexture: " + texturePath +
 					"\n-------------------------------------------------";
 				OutputDebugStringA(text.c_str());
+
+				text = "\n+++++++++++++++++++++++++++++++++++++++++++++++++"
+					"\nLoading default material texture!"
+					"\n+++++++++++++++++++++++++++++++++++++++++++++++++";
+				OutputDebugStringA(text.c_str());
+
+				hr = DirectX::LoadFromDDSFile(DEFAULT_MATERIAL_TEXTURE_PATH, DirectX::DDS_FLAGS_NONE, &metadata,
+				                              image);
+
+				if (SUCCEEDED(hr))
+				{
+					hasMaterial = TRUE;
+				}
+				if (FAILED(hr))
+				{
+					text = "\n-------------------------------------------------"
+						"\nFailed to load default material texture!"
+						"\n-------------------------------------------------";
+					OutputDebugStringA(text.c_str());
+				}
 			}
 		}
 	}
@@ -315,10 +272,6 @@ namespace Kaka
 
 	void Texture::Bind(const Graphics& aGfx)
 	{
-		//for (UINT i = 0; i < (UINT)pTextures.size(); ++i)
-		//{
-		//	GetContext(aGfx)->PSSetShaderResources(slot + i, 1u, pTextures[i].GetAddressOf());
-		//}
 		GetContext(aGfx)->PSSetShaderResources(slot, static_cast<UINT>(pTextures.size()),
 		                                       pTextures.data()->GetAddressOf());
 	}

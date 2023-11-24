@@ -23,14 +23,13 @@ namespace Kaka
 		void LoadFBXModel(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType);
 		void Draw(Graphics& aGfx);
 		void DrawFBX(Graphics& aGfx);
-		void InitializeBindPose();
 		void Update(float aDeltaTime);
-		void TraverseBoneHierarchy(int aBoneIndex, const DirectX::XMMATRIX& aParentTransform,
-		                           std::vector<DirectX::XMFLOAT4X4>& aInterpolatedBoneTransforms,
-		                           const Keyframe& aKeyframe1,
-		                           const Keyframe& aKeyframe2,
-		                           float aT);
-		void Animate();
+		//void TraverseBoneHierarchy(int aBoneIndex, const DirectX::XMMATRIX& aParentTransform,
+		//                           std::vector<DirectX::XMFLOAT4X4>& aInterpolatedBoneTransforms,
+		//                           const Keyframe& aKeyframe1,
+		//                           const Keyframe& aKeyframe2,
+		//                           float aT);
+		//void Animate();
 		void SetPosition(DirectX::XMFLOAT3 aPosition);
 		void SetRotation(DirectX::XMFLOAT3 aRotation);
 		void SetScale(float aScale);

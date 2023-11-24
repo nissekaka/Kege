@@ -364,6 +364,7 @@ FodyWeavers.xsd
 
 # Added by Anton
 !Source/External/lib/*
+!Source/External/include/TGAFBXImporter/FBXSDK/lib/*
 !Bin
 Bin/Shaders
 Bin/*.dll

@@ -34,10 +34,10 @@ namespace Kaka
 
 		const aiMesh* mesh = scene->mMeshes[0];
 
-		aOutModelData.globalInverseMatrix = AssimpToDirectXMatrix(scene->mRootNode->mTransformation);
-		DirectX::XMStoreFloat4x4(&aOutModelData.globalInverseMatrix,
-		                         DirectX::XMMatrixInverse(
-			                         nullptr, DirectX::XMLoadFloat4x4(&aOutModelData.globalInverseMatrix)));
+		//aOutModelData.globalInverseMatrix = AssimpToDirectXMatrix(scene->mRootNode->mTransformation);
+		//DirectX::XMStoreFloat4x4(&aOutModelData.globalInverseMatrix,
+		//                         DirectX::XMMatrixInverse(
+		//	                         nullptr, DirectX::XMLoadFloat4x4(&aOutModelData.globalInverseMatrix)));
 
 		// Check if scene contains animations
 		if (scene->mNumAnimations > 0)
@@ -52,10 +52,10 @@ namespace Kaka
 				DirectX::XMFLOAT4X4 bindPoseBoneTransform;
 				DirectX::XMStoreFloat4x4(&bindPoseBoneTransform,
 				                         DirectX::XMMatrixInverse(
-					                         nullptr, DirectX::XMLoadFloat4x4(&bone.offsetMatrix)));
+					                         nullptr, DirectX::XMLoadFloat4x4(&bone.bindPose)));
 
 				// Store the bind pose transformation matrix
-				aOutModelData.bindPose.push_back(bindPoseBoneTransform);
+				//aOutModelData.bindPose.push_back(bindPoseBoneTransform);
 			}
 
 			aOutModelData.modelType = eModelType::Skeletal;
@@ -160,7 +160,7 @@ namespace Kaka
 				}
 
 				aOutModelData.animMesh.vertices.push_back({
-					position, normal, texCoord, tangent, bitangent,
+					position, texCoord, normal, tangent, bitangent,
 					{boneIndices[0], boneIndices[1], boneIndices[2], boneIndices[3]},
 					{boneWeights[0], boneWeights[1], boneWeights[2], boneWeights[3]}
 				});
@@ -249,7 +249,7 @@ namespace Kaka
 
 				Bone skeletonBone;
 				skeletonBone.name = bone->mName.C_Str();
-				skeletonBone.offsetMatrix = AssimpToDirectXMatrix(bone->mOffsetMatrix);
+				skeletonBone.bindPose = AssimpToDirectXMatrix(bone->mOffsetMatrix);
 
 				skeleton.bones.push_back(skeletonBone);
 			}
@@ -269,7 +269,7 @@ namespace Kaka
 						if (skeleton.bones[j].name == parentName)
 						{
 							skeleton.bones[i].parentIndex = j;
-							skeleton.bones[j].childIndices.push_back(i);
+							//skeleton.bones[j].childIndices.push_back(i);
 							break;
 						}
 					}

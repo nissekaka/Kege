@@ -9,6 +9,29 @@ cbuffer SkeletonBuffer : register(b1)
     float4x4 boneTransforms[64u]; // Array of bone transforms
 };
 
+float3x3 invertMatrix(float3x3 m)
+{
+	// computes the inverse of a matrix m
+    float det = m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2]) -
+		m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) +
+		m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+
+    float invdet = 1 / det;
+
+    float3x3 minv; // inverse of matrix m
+    minv[0][0] = (m[1][1] * m[2][2] - m[2][1] * m[1][2]) * invdet;
+    minv[0][1] = (m[0][2] * m[2][1] - m[0][1] * m[2][2]) * invdet;
+    minv[0][2] = (m[0][1] * m[1][2] - m[0][2] * m[1][1]) * invdet;
+    minv[1][0] = (m[1][2] * m[2][0] - m[1][0] * m[2][2]) * invdet;
+    minv[1][1] = (m[0][0] * m[2][2] - m[0][2] * m[2][0]) * invdet;
+    minv[1][2] = (m[1][0] * m[0][2] - m[0][0] * m[1][2]) * invdet;
+    minv[2][0] = (m[1][0] * m[2][1] - m[2][0] * m[1][1]) * invdet;
+    minv[2][1] = (m[2][0] * m[0][1] - m[0][0] * m[2][1]) * invdet;
+    minv[2][2] = (m[0][0] * m[1][1] - m[1][0] * m[0][1]) * invdet;
+
+    return minv;
+}
+
 struct VertexInput
 {
     float3 position : POSITION;
@@ -37,16 +60,16 @@ PixelInput main(const VertexInput aInput)
     	// Accumulate bone transformations based on bone indices and weights
     matrix finalTransform =
     {
-        { 1, 0, 0, 0 },
-        { 0, 1, 0, 0 },
-        { 0, 0, 1, 0 },
-        { 0, 0, 0, 1 }
+        { 0, 0, 0, 0 },
+        { 0, 0, 0, 0 },
+        { 0, 0, 0, 0 },
+        { 0, 0, 0, 0 }
     };
 
     for (int i = 0; i < 4; ++i)
     {
         uint boneIndex = aInput.boneIndices[i];
-        float boneWeight = aInput.boneWeights[3-i];
+        float boneWeight = aInput.boneWeights[i];
 
 		// Fetch the bone transform from the skeleton buffer
         matrix boneTransform = boneTransforms[boneIndex];
@@ -59,13 +82,31 @@ PixelInput main(const VertexInput aInput)
     const float4 worldPosition = mul(finalTransform, float4(aInput.position, 1.0f));
 
     const float3x3 objectToWorldRotation = objectToWorld;
+    const float3x3 skinnedRotation = finalTransform;
+
+    const float3 vertexWorldNormal = mul(transpose(invertMatrix(objectToWorldRotation)), mul(transpose(invertMatrix(skinnedRotation)), aInput.normal));
+    const float3 vertexWorldTangent = mul(objectToWorldRotation, mul(skinnedRotation, aInput.tan));
+    const float3 vertexWorldBinormal = mul(objectToWorldRotation, mul(skinnedRotation, aInput.bitan));
+
     const float4 position = worldPosition;
     output.worldPos = mul(objectToWorld, position).xyz;
     output.position = mul(objectToClip, position);
     output.texCoord = aInput.texCoord;
-    output.normal = mul(objectToWorldRotation, aInput.normal);
-    output.tangent = mul(objectToWorldRotation, aInput.tan);
-    output.bitan = mul(objectToWorldRotation, aInput.bitan);
+    output.normal = vertexWorldNormal;
+    output.tangent = vertexWorldTangent;
+    output.bitan = vertexWorldBinormal;
+
+	//// Apply the final bone transform to the vertex position
+ //   const float4 worldPosition = mul(finalTransform, float4(aInput.position, 1.0f));
+
+ //   const float3x3 objectToWorldRotation = objectToWorld;
+ //   const float4 position = worldPosition;
+ //   output.worldPos = mul(objectToWorld, position).xyz;
+ //   output.position = mul(objectToClip, position);
+ //   output.texCoord = aInput.texCoord;
+ //   output.normal = mul(objectToWorldRotation, aInput.normal);
+ //   output.tangent = mul(objectToWorldRotation, aInput.tan);
+ //   output.bitan = mul(objectToWorldRotation, aInput.bitan);
     
     return output;
 }

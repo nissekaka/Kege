@@ -67,27 +67,41 @@ namespace Kaka
 		for (int i = 0; i < 1; ++i)
 		{
 			models.emplace_back();
-			models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\vamp\\vamp.fbx", Model::eShaderType::PBR);
-			DirectX::XMFLOAT3 pos = terrain.GetRandomVertexPosition();
+			models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\rex\\sk_rex.fbx", Model::eShaderType::PBR);
+			//DirectX::XMFLOAT3 pos = terrain.GetRandomVertexPosition();
 			//DirectX::XMFLOAT3 pos = terrain.GetTerrainSubsets()[i].center;
 			//pos.y += 10.0f;
 			//models.back().SetPosition(pos);
-			models.back().SetPosition({-5.0f, 2.0f, 5.0f});
+			models.back().SetPosition({-25.0f, 2.0f, 5.0f});
+			models.back().SetScale(0.1f);
 		}
 
-		animatedModel.LoadFBXModel(wnd.Gfx(), "Assets\\Models\\vamp\\vamp.fbx", Model::eShaderType::AnimPBR);
+		//for (int i = 0; i < 1; ++i)
+		//{
+		//	models.emplace_back();
+		//	models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\ken\\ken.fbx", Model::eShaderType::PBR);
+		//	//DirectX::XMFLOAT3 pos = terrain.GetRandomVertexPosition();
+		//	//DirectX::XMFLOAT3 pos = terrain.GetTerrainSubsets()[i].center;
+		//	//pos.y += 10.0f;
+		//	//models.back().SetPosition(pos);
+		//	models.back().SetPosition({25.0f, 2.0f, 5.0f});
+		//}
 
-		animatedModel.SetPosition({-5.0f, 0.0f, 5.0f});
+		animatedModel.LoadFBXModel(wnd.Gfx(), "Assets\\Models\\player\\sk_player.fbx", Model::eShaderType::AnimPBR);
+		//animatedModel.SetRotation({-PI / 2.0f, 0.0f, 0.0f});
+		animatedModel.SetPosition({0.0f, 0.0f, 0.0f});
+		animatedModel.SetScale(0.1f);
 
 		TGA::FBXAnimation animation;
 
-		if (TGA::FBXImporter::LoadAnimation("Assets\\Models\\vamp\\jog_v_fw.fbx",
+		if (TGA::FBXImporter::LoadAnimation("Assets\\Models\\player\\anim_playerRun.fbx",
 		                                    animatedModel.GetModelData().skeleton.boneNames, animation))
 		{
 			animatedModel.GetModelData().animations.emplace_back();
 
 			auto& newAnimation = animatedModel.GetModelData().animations.back();
 			newAnimation.name = animation.Name;
+
 			newAnimation.length = animation.Length;
 			newAnimation.fps = animation.FramesPerSecond;
 			newAnimation.duration = animation.Duration;
@@ -119,11 +133,6 @@ namespace Kaka
 
 					// DirectX::XMMATRIX to DirectX::XMFLOAT4X4
 					DirectX::XMStoreFloat4x4(&newAnimation.keyframes[f].boneTransforms[t], matrix);
-
-					if (f == 0)
-					{
-						animatedModel.GetModelData().bindPose.push_back(newAnimation.keyframes[f].boneTransforms[t]);
-					}
 				}
 			}
 		}
@@ -351,14 +360,14 @@ namespace Kaka
 		}
 		terrain.Draw(wnd.Gfx());
 
+		animatedModel.Update(aDeltaTime);
+		//animatedModel.Animate();
+		animatedModel.DrawFBX(wnd.Gfx());
+
 		wnd.Gfx().BindWaterReflectionTexture();
 		wnd.Gfx().SetAlpha();
 		reflectionPlane.Draw(wnd.Gfx());
 		wnd.Gfx().ResetAlpha();
-
-		animatedModel.Update(aDeltaTime);
-		//animatedModel.Animate();
-		animatedModel.DrawFBX(wnd.Gfx());
 
 		// ImGui windows
 		if (showImGui)
@@ -444,27 +453,27 @@ namespace Kaka
 
 			switch (e->GetKeyCode())
 			{
-			case VK_ESCAPE:
-				if (wnd.CursorEnabled())
-				{
-					wnd.DisableCursor();
-					wnd.mouse.EnableRaw();
-				}
-				else
-				{
-					wnd.EnableCursor();
-					wnd.mouse.DisableRaw();
-				}
-				break;
-			case VK_F1:
-				showImGui = !showImGui;
-				break;
-			case VK_F2:
-				showStatsWindow = !showStatsWindow;
-				break;
-			case VK_F3:
-				drawLightDebug = !drawLightDebug;
-				break;
+				case VK_ESCAPE:
+					if (wnd.CursorEnabled())
+					{
+						wnd.DisableCursor();
+						wnd.mouse.EnableRaw();
+					}
+					else
+					{
+						wnd.EnableCursor();
+						wnd.mouse.DisableRaw();
+					}
+					break;
+				case VK_F1:
+					showImGui = !showImGui;
+					break;
+				case VK_F2:
+					showStatsWindow = !showStatsWindow;
+					break;
+				case VK_F3:
+					drawLightDebug = !drawLightDebug;
+					break;
 			}
 		}
 
