@@ -229,10 +229,6 @@ namespace Kaka
 			// Copy bone data from FBXImporter to our own model data
 			for (auto& bone : fbxModel.Skeleton.Bones)
 			{
-				if (bone.Name == "character___rig:r_toe_jnt")
-				{
-					int a = 0;
-				}
 				modelData.skeleton.bones.emplace_back();
 				auto& newBone = modelData.skeleton.bones.back();
 
@@ -254,20 +250,10 @@ namespace Kaka
 				// Parent
 				newBone.parentIndex = bone.Parent;
 
-				// Children
-				//for (const auto& child : bone.Children)
-				//{
-				//	newBone.childIndices.push_back((int)child);
-				//}
-
-				// Add bone to the bone index map
-				//modelData.skeleton.boneIndexMap.insert({bone.Name, (int)modelData.skeleton.bones.size() - 1});
-
 				// Add bone name
 				modelData.skeleton.boneNames.push_back(bone.Name);
 
 				// Add bone offset matrix to bind pose
-				//modelData.bindPose.push_back(newBone.offsetMatrix);
 				combinedTransforms.push_back(newBone.bindPose);
 				finalTransforms.push_back(newBone.bindPose);
 			}
@@ -325,14 +311,6 @@ namespace Kaka
 					vertices[v].boneWeights[1] = fbxMesh.Vertices[v].BoneWeights[1];
 					vertices[v].boneWeights[2] = fbxMesh.Vertices[v].BoneWeights[2];
 					vertices[v].boneWeights[3] = fbxMesh.Vertices[v].BoneWeights[3];
-
-					//// Normalize bone weights
-					//float weightSum = vertices[v].boneWeights[0] + vertices[v].boneWeights[1] +
-					//	vertices[v].boneWeights[2] + vertices[v].boneWeights[3];
-					//for (int w = 0; w < 4; ++w)
-					//{
-					//	vertices[v].boneWeights[w] /= weightSum;
-					//}
 				}
 
 				mesh.vertices = vertices;

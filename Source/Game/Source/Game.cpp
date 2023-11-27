@@ -113,25 +113,13 @@ namespace Kaka
 
 				for (size_t t = 0; t < animation.Frames[f].LocalTransforms.size(); t++)
 				{
-					Matrix4x4f localMatrix;
+					DirectX::XMMATRIX localMatrix;
 					memcpy(&localMatrix, &animation.Frames[f].LocalTransforms[t], sizeof(float) * 16);
 
-					Vector3f T, R, S;
-					localMatrix.DecomposeMatrix(T, R, S);
-					Quatf Rot(localMatrix);
+					DirectX::XMVECTOR T, R, S;
+					XMMatrixDecompose(&S, &R, &T, localMatrix);
 
-					DirectX::XMFLOAT3 T2 = {T.X, T.Y, T.Z};
-					DirectX::XMFLOAT4 Rot2 = {Rot.X, Rot.Y, Rot.Z, Rot.W};
-					DirectX::XMFLOAT3 S2 = {S.X, S.Y, S.Z};
-
-					// Make DirectX::XMMATRIX from translation, rotation and scale
-					DirectX::XMMATRIX matrix = DirectX::XMMatrixAffineTransformation(
-						DirectX::XMLoadFloat3(&S2),
-						DirectX::XMVectorZero(),
-						DirectX::XMLoadFloat4(&Rot2),
-						DirectX::XMLoadFloat3(&T2));
-
-					newAnimation.keyframes[f].boneTransforms[t] = matrix;
+					newAnimation.keyframes[f].boneTransforms[t] = localMatrix;
 				}
 			}
 		}
