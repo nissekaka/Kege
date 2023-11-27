@@ -24,12 +24,6 @@ namespace Kaka
 		void Draw(Graphics& aGfx);
 		void DrawFBX(Graphics& aGfx);
 		void Update(float aDeltaTime);
-		//void TraverseBoneHierarchy(int aBoneIndex, const DirectX::XMMATRIX& aParentTransform,
-		//                           std::vector<DirectX::XMFLOAT4X4>& aInterpolatedBoneTransforms,
-		//                           const Keyframe& aKeyframe1,
-		//                           const Keyframe& aKeyframe2,
-		//                           float aT);
-		//void Animate();
 		void SetPosition(DirectX::XMFLOAT3 aPosition);
 		void SetRotation(DirectX::XMFLOAT3 aRotation);
 		void SetScale(float aScale);
@@ -88,11 +82,12 @@ namespace Kaka
 		float animationTime = 0.0f;
 		float animationSpeed = 1.0f;
 		bool isAnimationPlaying = false;
+		bool isAnimationLooping = false;
 
 		BOOL nearbyPointLights[50u];
 		BOOL nearbySpotLights[50u];
 
-		std::vector<DirectX::XMFLOAT4X4> combinedTransforms;
-		std::vector<DirectX::XMFLOAT4X4> finalTransform;
+		std::vector<DirectX::XMMATRIX> combinedTransforms;
+		std::vector<DirectX::XMMATRIX> finalTransforms;
 	};
 }

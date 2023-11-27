@@ -39,31 +39,31 @@ namespace Kaka
 			// Vertices and indices
 			switch (modelData.modelType)
 			{
-				case eModelType::None:
+			case eModelType::None:
 				{
 					assert("No model type!");
 				}
 				break;
-				case eModelType::Static:
+			case eModelType::Static:
 				{
 					vertexBuffer.Init(aGfx, modelData.mesh.vertices);
 					indexBuffer.Init(aGfx, modelData.mesh.indices);
 				}
 				break;
-				case eModelType::Skeletal:
+			case eModelType::Skeletal:
 				{
 					vertexBuffer.Init(aGfx, modelData.animMesh.vertices);
 					indexBuffer.Init(aGfx, modelData.animMesh.indices);
 				}
 				break;
-				default:
-					assert("Error!");
+			default:
+				assert("Error!");
 			}
 
 			// Shaders
 			switch (shaderType)
 			{
-				case eShaderType::Solid:
+			case eShaderType::Solid:
 				{
 					pixelShader.Init(aGfx, L"Shaders\\Solid_PS.cso");
 					vertexShader.Init(aGfx, L"Shaders\\Solid_VS.cso");
@@ -77,7 +77,7 @@ namespace Kaka
 					};
 				}
 				break;
-				case eShaderType::Light:
+			case eShaderType::Light:
 				{
 					pixelShader.Init(aGfx, L"Shaders\\Light_PS.cso");
 					vertexShader.Init(aGfx, L"Shaders\\Light_VS.cso");
@@ -107,7 +107,7 @@ namespace Kaka
 					};
 				}
 				break;
-				case eShaderType::Phong:
+			case eShaderType::Phong:
 				{
 					pixelShader.Init(aGfx, L"Shaders\\Phong_PS.cso");
 					vertexShader.Init(aGfx, L"Shaders\\Phong_VS.cso");
@@ -138,7 +138,7 @@ namespace Kaka
 					inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
 				}
 				break;
-				case eShaderType::AnimPhong:
+			case eShaderType::AnimPhong:
 				{
 					pixelShader.Init(aGfx, L"Shaders\\Phong_PS.cso");
 					vertexShader.Init(aGfx, L"Shaders\\AnimPhong_VS.cso");
@@ -175,7 +175,7 @@ namespace Kaka
 						},
 					};
 				}
-				case eShaderType::PBR:
+			case eShaderType::PBR:
 				{
 					pixelShader.Init(aGfx, L"Shaders\\ModelPBR_PS.cso");
 					vertexShader.Init(aGfx, L"Shaders\\ModelPBR_VS.cso");
@@ -241,26 +241,15 @@ namespace Kaka
 
 				// Matrix
 				const auto& boneMatrix = bone.BindPoseInverse;
-				newBone.bindPose._11 = boneMatrix.Data[0];
-				newBone.bindPose._12 = boneMatrix.Data[1];
-				newBone.bindPose._13 = boneMatrix.Data[2];
-				newBone.bindPose._14 = boneMatrix.Data[3];
-				newBone.bindPose._21 = boneMatrix.Data[4];
-				newBone.bindPose._22 = boneMatrix.Data[5];
-				newBone.bindPose._23 = boneMatrix.Data[6];
-				newBone.bindPose._24 = boneMatrix.Data[7];
-				newBone.bindPose._31 = boneMatrix.Data[8];
-				newBone.bindPose._32 = boneMatrix.Data[9];
-				newBone.bindPose._33 = boneMatrix.Data[10];
-				newBone.bindPose._34 = boneMatrix.Data[11];
-				newBone.bindPose._41 = boneMatrix.Data[12];
-				newBone.bindPose._42 = boneMatrix.Data[13];
-				newBone.bindPose._43 = boneMatrix.Data[14];
-				newBone.bindPose._44 = boneMatrix.Data[15];
+				newBone.bindPose = DirectX::XMMatrixSet(
+					boneMatrix.Data[0], boneMatrix.Data[1], boneMatrix.Data[2], boneMatrix.Data[3],
+					boneMatrix.Data[4], boneMatrix.Data[5], boneMatrix.Data[6], boneMatrix.Data[7],
+					boneMatrix.Data[8], boneMatrix.Data[9], boneMatrix.Data[10], boneMatrix.Data[11],
+					boneMatrix.Data[12], boneMatrix.Data[13], boneMatrix.Data[14], boneMatrix.Data[15]
+				);
 
 				// Transpose the matrix
-				DirectX::XMStoreFloat4x4(&newBone.bindPose,
-				                         DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&newBone.bindPose)));
+				newBone.bindPose = DirectX::XMMatrixTranspose(newBone.bindPose);
 
 				// Parent
 				newBone.parentIndex = bone.Parent;
@@ -280,7 +269,7 @@ namespace Kaka
 				// Add bone offset matrix to bind pose
 				//modelData.bindPose.push_back(newBone.offsetMatrix);
 				combinedTransforms.push_back(newBone.bindPose);
-				finalTransform.push_back(newBone.bindPose);
+				finalTransforms.push_back(newBone.bindPose);
 			}
 
 			// Copy model data from FBXImporter to our own model data
@@ -368,31 +357,31 @@ namespace Kaka
 			// Vertices and indices
 			switch (modelData.modelType)
 			{
-				case eModelType::None:
+			case eModelType::None:
 				{
 					assert("No model type!");
 				}
 				break;
-				case eModelType::Static:
+			case eModelType::Static:
 				{
 					vertexBuffer.Init(aGfx, modelData.mesh.vertices);
 					indexBuffer.Init(aGfx, modelData.mesh.indices);
 				}
 				break;
-				case eModelType::Skeletal:
+			case eModelType::Skeletal:
 				{
 					//vertexBuffer.Init(aGfx, modelData.animMesh.vertices);
 					//indexBuffer.Init(aGfx, modelData.animMesh.indices);
 				}
 				break;
-				default:
-					assert("Error!");
+			default:
+				assert("Error!");
 			}
 
 			// Shaders
 			switch (shaderType)
 			{
-				case eShaderType::AnimPBR:
+			case eShaderType::AnimPBR:
 				{
 					pixelShader.Init(aGfx, L"Shaders\\ModelPBR_PS.cso");
 					vertexShader.Init(aGfx, L"Shaders\\AnimModelPBR_VS.cso");
@@ -464,7 +453,7 @@ namespace Kaka
 
 		switch (shaderType)
 		{
-			case eShaderType::Solid:
+		case eShaderType::Solid:
 			{
 				struct PSMaterialConstant
 				{
@@ -476,7 +465,7 @@ namespace Kaka
 				psConstantBuffer.Bind(aGfx);
 			}
 			break;
-			case eShaderType::Light:
+		case eShaderType::Light:
 			{
 				struct PSMaterialConstant
 				{
@@ -492,7 +481,7 @@ namespace Kaka
 				psConstantBuffer.Bind(aGfx);
 			}
 			break;
-			case eShaderType::Phong:
+		case eShaderType::Phong:
 			{
 				struct PSMaterialConstant
 				{
@@ -510,7 +499,7 @@ namespace Kaka
 				psConstantBuffer.Bind(aGfx);
 			}
 			break;
-			case eShaderType::AnimPhong:
+		case eShaderType::AnimPhong:
 			{
 				struct PSMaterialConstant
 				{
@@ -529,7 +518,7 @@ namespace Kaka
 
 				struct VSBoneConstant
 				{
-					DirectX::XMFLOAT4X4 bones[64u];
+					DirectX::XMMATRIX bones[64u];
 				} vsb = {};
 
 				for (int i = 0; i < modelData.skeleton.bones.size(); ++i)
@@ -541,7 +530,7 @@ namespace Kaka
 				vsConstantBuffer.Bind(aGfx);
 			}
 			break;
-			case eShaderType::PBR:
+		case eShaderType::PBR:
 			{
 				struct PSMaterialConstant
 				{
@@ -584,12 +573,12 @@ namespace Kaka
 
 		switch (modelData.modelType)
 		{
-			case eModelType::Static:
-				indices = modelData.mesh.indices;
-				break;
-			case eModelType::Skeletal:
-				indices = modelData.animMesh.indices;
-				break;
+		case eModelType::Static:
+			indices = modelData.mesh.indices;
+			break;
+		case eModelType::Skeletal:
+			indices = modelData.animMesh.indices;
+			break;
 		}
 
 		aGfx.DrawIndexed(static_cast<UINT>(std::size(indices)));
@@ -630,7 +619,7 @@ namespace Kaka
 
 			switch (shaderType)
 			{
-				case eShaderType::AnimPBR:
+			case eShaderType::AnimPBR:
 				{
 					struct PSMaterialConstant
 					{
@@ -664,12 +653,12 @@ namespace Kaka
 					// Bones
 					struct VSBoneConstant
 					{
-						DirectX::XMFLOAT4X4 bones[64u];
+						DirectX::XMMATRIX bones[64u];
 					} vsb = {};
 
-					for (int i = 0; i < finalTransform.size(); ++i)
+					for (int i = 0; i < finalTransforms.size(); ++i)
 					{
-						vsb.bones[i] = finalTransform[i];
+						vsb.bones[i] = finalTransforms[i];
 					}
 
 					VertexConstantBuffer<VSBoneConstant> vsConstantBuffer(aGfx, vsb, 1u);
@@ -690,154 +679,85 @@ namespace Kaka
 
 	void Model::Update(const float aDeltaTime)
 	{
-		animationTime += aDeltaTime;
-
-		// Ensure animationTime is within the valid range
-		while (animationTime >= modelData.animations[0].duration)
+		if (selectedAnimationIndex >= 0 && selectedAnimationIndex < modelData.animations.size())
 		{
-			animationTime -= modelData.animations[0].duration;
-		}
+			const AnimationClip& animation = modelData.animations[selectedAnimationIndex];
 
-		// Calculate the current frame and delta
-		const float frameRate = 1.0f / modelData.animations[0].fps;
-		const float result = animationTime / frameRate;
-		const size_t frame = static_cast<size_t>(std::floor(result)); // Current frame
-		OutputDebugStringA("\n");
-		OutputDebugStringA(std::to_string(frame).c_str());
-		const float delta = result - static_cast<float>(frame); // Progress to the next frame
-
-		// Update all animations
-		Skeleton* skeleton = &modelData.skeleton;
-
-		// Interpolate between current and next frame
-		for (size_t i = 0; i < skeleton->bones.size(); i++)
-		{
-			DirectX::XMMATRIX currentFramePose = DirectX::XMLoadFloat4x4(
-				&modelData.animations[0].keyframes[frame].boneTransforms[i]);
-			DirectX::XMMATRIX nextFramePose = DirectX::XMLoadFloat4x4(
-				&modelData.animations[0].keyframes[(frame + 1) % modelData.animations[0].keyframes.size()].boneTransforms[i]);
-
-			// Interpolate between current and next frame using delta
-			DirectX::XMMATRIX blendedPose = currentFramePose + delta * (nextFramePose - currentFramePose);
-
-			int parentIndex = skeleton->bones[i].parentIndex;
-
-			if (parentIndex >= 0)
+			// Apply animation transformation based on the current time
+			if (isAnimationPlaying)
 			{
-				// Accumulate relative transformation
-				DirectX::XMStoreFloat4x4(&combinedTransforms[i],
-				                         DirectX::XMMatrixMultiply(blendedPose,
-				                                                   DirectX::XMLoadFloat4x4(&combinedTransforms[parentIndex])));
+				animationTime += aDeltaTime * animationSpeed;
+
+				if (isAnimationLooping)
+				{
+					if (animationTime >= animation.duration)
+					{
+						animationTime = 0.0f;
+					}
+				}
+				else
+				{
+					if (animationTime >= animation.duration)
+					{
+						animationTime = animation.duration;
+						return;
+					}
+				}
+
+				// Calculate the current frame and delta
+				const float frameRate = 1.0f / animation.fps;
+				const float result = animationTime / frameRate;
+				const size_t frame = std::floor(result); // Current frame
+				const float delta = result - static_cast<float>(frame); // Progress to the next frame
+
+				// Update all animations
+				const Skeleton* skeleton = &modelData.skeleton;
+
+				// Interpolate between current and next frame
+				for (size_t i = 0; i < skeleton->bones.size(); i++)
+				{
+					DirectX::XMMATRIX currentFramePose = animation.keyframes[frame].boneTransforms[i];
+					DirectX::XMMATRIX nextFramePose = animation.keyframes[(frame + 1) % animation.keyframes.size()].
+						boneTransforms[i];
+
+					// Interpolate between current and next frame using delta
+					DirectX::XMMATRIX blendedPose = currentFramePose + delta * (nextFramePose - currentFramePose);
+
+					const int parentIndex = skeleton->bones[i].parentIndex;
+
+					if (parentIndex >= 0)
+					{
+						// Accumulate relative transformation
+						combinedTransforms[i] = blendedPose * combinedTransforms[parentIndex];
+					}
+					else
+					{
+						// Root bone, use absolute transformation
+						combinedTransforms[i] = blendedPose;
+					}
+
+					finalTransforms[i] = skeleton->bones[i].bindPose * combinedTransforms[i];
+				}
 			}
 			else
 			{
-				DirectX::XMStoreFloat4x4(&combinedTransforms[i], blendedPose);
+				// Play paused frame i.e do nothing
 			}
+		}
+		else
+		{
+			animationTime = 0.0f;
 
-			DirectX::XMStoreFloat4x4(&finalTransform[i],
-			                         DirectX::XMMatrixMultiply(
-				                         DirectX::XMLoadFloat4x4(&skeleton->bones[i].bindPose),
-				                         DirectX::XMLoadFloat4x4(&combinedTransforms[i])));
+			// Show bind pose (T-pose)
+			const Skeleton* skeleton = &modelData.skeleton;
+
+			for (size_t i = 0; i < skeleton->bones.size(); i++)
+			{
+				// Not sure why this works, but it does
+				finalTransforms[i] = DirectX::XMMatrixIdentity();
+			}
 		}
 	}
-
-	//void Model::TraverseBoneHierarchy(int aBoneIndex, const DirectX::XMMATRIX& aParentTransform,
-	//                                  std::vector<DirectX::XMFLOAT4X4>& aInterpolatedBoneTransforms,
-	//                                  const Keyframe& aKeyframe1, const Keyframe& aKeyframe2, const float aT)
-	//{
-	//	if (aBoneIndex < 0)
-	//	{
-	//		aBoneIndex++;
-	//	}
-	//	// Calculate the interpolated transformation for the current bone using keyframe data
-	//	const DirectX::XMFLOAT4X4& transform1 = aKeyframe1.boneTransforms[aBoneIndex];
-	//	const DirectX::XMFLOAT4X4& transform2 = aKeyframe2.boneTransforms[aBoneIndex];
-
-	//	DirectX::XMFLOAT4X4 interpolatedTransform{};
-	//	for (int row = 0; row < 4; ++row)
-	//	{
-	//		for (int col = 0; col < 4; ++col)
-	//		{
-	//			interpolatedTransform.m[row][col] = transform1.m[row][col] + aT * (transform2.m[row][col] - transform1.m
-	//				[row][col]);
-	//		}
-	//	}
-
-	//	// Calculate the final bone transform by multiplying with the parent's transform
-	//	const DirectX::XMMATRIX boneTransform = DirectX::XMLoadFloat4x4(&modelData.globalInverseMatrix) *
-	//		DirectX::XMLoadFloat4x4(&interpolatedTransform) * aParentTransform;
-
-	//	// Store the bone transform in the interpolatedBoneTransforms array
-	//	DirectX::XMStoreFloat4x4(&aInterpolatedBoneTransforms[aBoneIndex], boneTransform);
-
-	//	const Bone& bone = modelData.skeleton.bones[aBoneIndex];
-	//	for (const int childIndex : bone.childIndices)
-	//	{
-	//		TraverseBoneHierarchy(childIndex, boneTransform, aInterpolatedBoneTransforms, aKeyframe1, aKeyframe2, aT);
-	//	}
-	//}
-
-	//void Model::Animate()
-	//{
-	//	if (modelData.modelType != eModelType::Skeletal)
-	//	{
-	//		return;
-	//	}
-	//	if (selectedAnimationIndex >= 0 && selectedAnimationIndex < modelData.animations.size())
-	//	{
-	//		const AnimationClip& animation = modelData.animations[selectedAnimationIndex];
-
-	//		// Apply animation transformation based on the current time
-	//		if (isAnimationPlaying)
-	//		{
-	//			// Find the two keyframes for interpolation
-	//			size_t keyframeIndex1 = 0;
-	//			size_t keyframeIndex2 = 0;
-	//			for (size_t i = 0; i < animation.keyframes.size() - 1; ++i)
-	//			{
-	//				if (animation.keyframes[i + 1].time > animationTime)
-	//				{
-	//					keyframeIndex1 = i;
-	//					keyframeIndex2 = i + 1;
-	//					break;
-	//				}
-	//			}
-
-	//			// Interpolate between the two keyframes
-	//			const Keyframe& keyframe1 = animation.keyframes[keyframeIndex1];
-	//			const Keyframe& keyframe2 = animation.keyframes[keyframeIndex2];
-	//			float t = std::clamp((animationTime - keyframe1.time) / (keyframe2.time - keyframe1.time), 0.0f, 1.0f);
-
-	//			// Calculate the bone transforms for each keyframe bone
-	//			std::vector<DirectX::XMFLOAT4X4> interpolatedBoneTransforms(modelData.skeleton.bones.size());
-
-	//			// Traverse the bone hierarchy and calculate the interpolated bone transformations
-	//			TraverseBoneHierarchy(modelData.skeleton.rootBoneIndex, DirectX::XMMatrixIdentity(),
-	//			                      interpolatedBoneTransforms, keyframe1, keyframe2, t);
-
-	//			// Update the bone transformations in the skeleton
-	//			for (size_t i = 0; i < modelData.skeleton.bones.size(); ++i)
-	//			{
-	//				DirectX::XMFLOAT4X4& boneTransform = modelData.skeleton.bones[i].offsetMatrix;
-	//				DirectX::XMStoreFloat4x4(&boneTransform, DirectX::XMLoadFloat4x4(&interpolatedBoneTransforms[i]));
-	//			}
-	//		}
-	//		else
-	//		{
-	//			// Play paused frame
-	//		}
-	//	}
-	//	else
-	//	{
-	//		// Update the bone transformations in the skeleton
-	//		for (size_t i = 0; i < modelData.skeleton.bones.size(); ++i)
-	//		{
-	//			DirectX::XMFLOAT4X4& bindPoseTransform = modelData.bindPose[i];
-	//			DirectX::XMFLOAT4X4& boneTransform = modelData.skeleton.bones[i].offsetMatrix;
-	//			DirectX::XMStoreFloat4x4(&boneTransform, DirectX::XMLoadFloat4x4(&bindPoseTransform));
-	//		}
-	//	}
-	//}
 
 	void Model::SetPosition(const DirectX::XMFLOAT3 aPosition)
 	{
@@ -963,6 +883,7 @@ namespace Kaka
 					selectedAnimationIndex = -1;
 				}
 			}
+			if (ImGui::Checkbox("Loop", &isAnimationLooping)) { }
 
 			// Animation speed slider
 			ImGui::Text("Speed");

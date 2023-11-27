@@ -64,7 +64,7 @@ namespace Kaka
 		camera.SetPosition({0.0f, 0.0f, 0.0f});
 		//camera.SetPosition({742.75f, 0.16f, 395.95f});
 
-		for (int i = 0; i < 1; ++i)
+		for (int i = 0; i < 0; ++i)
 		{
 			models.emplace_back();
 			models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\rex\\sk_rex.fbx", Model::eShaderType::PBR);
@@ -131,8 +131,7 @@ namespace Kaka
 						DirectX::XMLoadFloat4(&Rot2),
 						DirectX::XMLoadFloat3(&T2));
 
-					// DirectX::XMMATRIX to DirectX::XMFLOAT4X4
-					DirectX::XMStoreFloat4x4(&newAnimation.keyframes[f].boneTransforms[t], matrix);
+					newAnimation.keyframes[f].boneTransforms[t] = matrix;
 				}
 			}
 		}
@@ -453,27 +452,27 @@ namespace Kaka
 
 			switch (e->GetKeyCode())
 			{
-				case VK_ESCAPE:
-					if (wnd.CursorEnabled())
-					{
-						wnd.DisableCursor();
-						wnd.mouse.EnableRaw();
-					}
-					else
-					{
-						wnd.EnableCursor();
-						wnd.mouse.DisableRaw();
-					}
-					break;
-				case VK_F1:
-					showImGui = !showImGui;
-					break;
-				case VK_F2:
-					showStatsWindow = !showStatsWindow;
-					break;
-				case VK_F3:
-					drawLightDebug = !drawLightDebug;
-					break;
+			case VK_ESCAPE:
+				if (wnd.CursorEnabled())
+				{
+					wnd.DisableCursor();
+					wnd.mouse.EnableRaw();
+				}
+				else
+				{
+					wnd.EnableCursor();
+					wnd.mouse.DisableRaw();
+				}
+				break;
+			case VK_F1:
+				showImGui = !showImGui;
+				break;
+			case VK_F2:
+				showStatsWindow = !showStatsWindow;
+				break;
+			case VK_F3:
+				drawLightDebug = !drawLightDebug;
+				break;
 			}
 		}
 

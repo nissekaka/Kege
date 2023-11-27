@@ -57,7 +57,7 @@ PixelInput main(const VertexInput aInput)
 {
     PixelInput output;
 
-    	// Accumulate bone transformations based on bone indices and weights
+	// Accumulate bone transformations based on bone indices and weights
     matrix finalTransform =
     {
         { 0, 0, 0, 0 },
@@ -68,11 +68,11 @@ PixelInput main(const VertexInput aInput)
 
     for (int i = 0; i < 4; ++i)
     {
-        uint boneIndex = aInput.boneIndices[i];
-        float boneWeight = aInput.boneWeights[i];
+        const uint boneIndex = aInput.boneIndices[i];
+        const float boneWeight = aInput.boneWeights[i];
 
 		// Fetch the bone transform from the skeleton buffer
-        matrix boneTransform = boneTransforms[boneIndex];
+        const matrix boneTransform = boneTransforms[boneIndex];
 
         // Accumulate the transformed contribution from each bone
         finalTransform += boneWeight * boneTransform;

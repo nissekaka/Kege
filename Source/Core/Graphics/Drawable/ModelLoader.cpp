@@ -49,10 +49,8 @@ namespace Kaka
 			for (const Bone& bone : aOutModelData.skeleton.bones)
 			{
 				// Compute the bind pose transformation matrix as the inverse of the bone's offset matrix
-				DirectX::XMFLOAT4X4 bindPoseBoneTransform;
-				DirectX::XMStoreFloat4x4(&bindPoseBoneTransform,
-				                         DirectX::XMMatrixInverse(
-					                         nullptr, DirectX::XMLoadFloat4x4(&bone.bindPose)));
+				DirectX::XMMATRIX bindPose = DirectX::XMMatrixInverse(nullptr, bone.bindPose);
+
 
 				// Store the bind pose transformation matrix
 				//aOutModelData.bindPose.push_back(bindPoseBoneTransform);
@@ -249,7 +247,7 @@ namespace Kaka
 
 				Bone skeletonBone;
 				skeletonBone.name = bone->mName.C_Str();
-				skeletonBone.bindPose = AssimpToDirectXMatrix(bone->mOffsetMatrix);
+				//skeletonBone.bindPose = AssimpToDirectXMatrix(bone->mOffsetMatrix);
 
 				skeleton.bones.push_back(skeletonBone);
 			}
@@ -359,9 +357,6 @@ namespace Kaka
 					//const aiQuatKey& rotationKey = channel->mRotationKeys[frameIndex];
 					//const aiVectorKey& scalingKey = channel->mScalingKeys[frameIndex];
 
-					// Create the bone transform matrix from the keyframe data
-					DirectX::XMFLOAT4X4 boneTransform{};
-					DirectX::XMStoreFloat4x4(&boneTransform, DirectX::XMMatrixIdentity());
 
 					DirectX::XMFLOAT3 position(positionKey.mValue.x, positionKey.mValue.y, positionKey.mValue.z);
 					std::string posKey = "\nIndex: " + std::to_string(frameIndex) + "  Pos: " +
@@ -381,10 +376,9 @@ namespace Kaka
 						DirectX::XMLoadFloat3(&scaling));
 
 					DirectX::XMMATRIX boneTransformMatrix = translationMatrix * rotationMatrix * scalingMatrix;
-					DirectX::XMStoreFloat4x4(&boneTransform, boneTransformMatrix);
 
 					// Add the bone transform to the keyframe
-					keyframe.boneTransforms.push_back(boneTransform);
+					keyframe.boneTransforms.push_back(boneTransformMatrix);
 				}
 
 				// Add the keyframe to the animation clip

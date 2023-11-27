@@ -13,7 +13,7 @@ namespace Kaka
 	struct Bone
 	{
 		std::string name;
-		DirectX::XMFLOAT4X4 bindPose{};
+		DirectX::XMMATRIX bindPose{};
 		int parentIndex = -1;
 		//std::vector<int> childIndices;
 	};
@@ -21,7 +21,7 @@ namespace Kaka
 	struct Keyframe
 	{
 		float time = 0.0f;
-		std::vector<DirectX::XMFLOAT4X4> boneTransforms{};
+		std::vector<DirectX::XMMATRIX> boneTransforms{};
 	};
 
 	struct Skeleton
@@ -61,8 +61,6 @@ namespace Kaka
 		AnimatedMesh animMesh;
 		Skeleton skeleton;
 		std::vector<AnimationClip> animations = {};
-		//std::vector<DirectX::XMFLOAT4X4> bindPose = {};
 		eModelType modelType = eModelType::None;
-		//DirectX::XMFLOAT4X4 globalInverseMatrix = {};
 	};
 }
