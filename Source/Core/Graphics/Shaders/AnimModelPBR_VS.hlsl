@@ -95,18 +95,6 @@ PixelInput main(const VertexInput aInput)
     output.normal = vertexWorldNormal;
     output.tangent = vertexWorldTangent;
     output.bitan = vertexWorldBinormal;
-
-	//// Apply the final bone transform to the vertex position
- //   const float4 worldPosition = mul(finalTransform, float4(aInput.position, 1.0f));
-
- //   const float3x3 objectToWorldRotation = objectToWorld;
- //   const float4 position = worldPosition;
- //   output.worldPos = mul(objectToWorld, position).xyz;
- //   output.position = mul(objectToClip, position);
- //   output.texCoord = aInput.texCoord;
- //   output.normal = mul(objectToWorldRotation, aInput.normal);
- //   output.tangent = mul(objectToWorldRotation, aInput.tan);
- //   output.bitan = mul(objectToWorldRotation, aInput.bitan);
     
     return output;
 }

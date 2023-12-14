@@ -21,9 +21,12 @@ namespace Kaka
 		~Model() override = default;
 		void LoadModel(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType);
 		void LoadFBXModel(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType);
+		bool LoadFBXAnimation(const std::string& aFilePath);
 		void Draw(Graphics& aGfx);
 		void DrawFBX(Graphics& aGfx);
+		void DrawFBXPtr(Graphics& aGfx);
 		void Update(float aDeltaTime);
+		void UpdatePtr(float aDeltaTime);
 		void SetPosition(DirectX::XMFLOAT3 aPosition);
 		void SetRotation(DirectX::XMFLOAT3 aRotation);
 		void SetScale(float aScale);
@@ -74,6 +77,7 @@ namespace Kaka
 		float specularPower = 2.0f;
 
 	private:
+		AnimatedModelDataPtr animatedModelData;
 		ModelData modelData;
 		Texture texture{2u};
 		//std::vector<std::unique_ptr<Bindable>> bindablePtrs;

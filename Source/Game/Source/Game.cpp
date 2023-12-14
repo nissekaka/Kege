@@ -92,37 +92,39 @@ namespace Kaka
 		animatedModel.SetPosition({0.0f, 0.0f, 0.0f});
 		animatedModel.SetScale(0.1f);
 
-		TGA::FBXAnimation animation;
+		animatedModel.LoadFBXAnimation("Assets\\Models\\player\\anim_playerRun.fbx");
 
-		if (TGA::FBXImporter::LoadAnimation("Assets\\Models\\player\\anim_playerRun.fbx",
-		                                    animatedModel.GetModelData().skeleton.boneNames, animation))
-		{
-			animatedModel.GetModelData().animations.emplace_back();
+		//TGA::FBXAnimation animation;
 
-			auto& newAnimation = animatedModel.GetModelData().animations.back();
-			newAnimation.name = animation.Name;
+		//if (TGA::FBXImporter::LoadAnimation("Assets\\Models\\player\\anim_playerRun.fbx",
+		//                                    animatedModel.GetModelData().skeleton.boneNames, animation))
+		//{
+		//	animatedModel.GetModelData().animations.emplace_back();
 
-			newAnimation.length = animation.Length;
-			newAnimation.fps = animation.FramesPerSecond;
-			newAnimation.duration = animation.Duration;
-			newAnimation.keyframes.resize(animation.Frames.size());
+		//	auto& newAnimation = animatedModel.GetModelData().animations.back();
+		//	newAnimation.name = animation.Name;
 
-			for (size_t f = 0; f < newAnimation.keyframes.size(); f++)
-			{
-				newAnimation.keyframes[f].boneTransforms.resize(animation.Frames[f].LocalTransforms.size());
+		//	newAnimation.length = animation.Length;
+		//	newAnimation.fps = animation.FramesPerSecond;
+		//	newAnimation.duration = animation.Duration;
+		//	newAnimation.keyframes.resize(animation.Frames.size());
 
-				for (size_t t = 0; t < animation.Frames[f].LocalTransforms.size(); t++)
-				{
-					DirectX::XMMATRIX localMatrix;
-					memcpy(&localMatrix, &animation.Frames[f].LocalTransforms[t], sizeof(float) * 16);
+		//	for (size_t f = 0; f < newAnimation.keyframes.size(); f++)
+		//	{
+		//		newAnimation.keyframes[f].boneTransforms.resize(animation.Frames[f].LocalTransforms.size());
 
-					DirectX::XMVECTOR T, R, S;
-					XMMatrixDecompose(&S, &R, &T, localMatrix);
+		//		for (size_t t = 0; t < animation.Frames[f].LocalTransforms.size(); t++)
+		//		{
+		//			DirectX::XMMATRIX localMatrix;
+		//			memcpy(&localMatrix, &animation.Frames[f].LocalTransforms[t], sizeof(float) * 16);
 
-					newAnimation.keyframes[f].boneTransforms[t] = localMatrix;
-				}
-			}
-		}
+		//			DirectX::XMVECTOR T, R, S;
+		//			XMMatrixDecompose(&S, &R, &T, localMatrix);
+
+		//			newAnimation.keyframes[f].boneTransforms[t] = localMatrix;
+		//		}
+		//	}
+		//}
 
 		std::random_device rd;
 		std::mt19937 mt(rd());
@@ -347,9 +349,9 @@ namespace Kaka
 		}
 		terrain.Draw(wnd.Gfx());
 
-		animatedModel.Update(aDeltaTime);
+		animatedModel.UpdatePtr(aDeltaTime);
 		//animatedModel.Animate();
-		animatedModel.DrawFBX(wnd.Gfx());
+		animatedModel.DrawFBXPtr(wnd.Gfx());
 
 		wnd.Gfx().BindWaterReflectionTexture();
 		wnd.Gfx().SetAlpha();
@@ -440,27 +442,27 @@ namespace Kaka
 
 			switch (e->GetKeyCode())
 			{
-			case VK_ESCAPE:
-				if (wnd.CursorEnabled())
-				{
-					wnd.DisableCursor();
-					wnd.mouse.EnableRaw();
-				}
-				else
-				{
-					wnd.EnableCursor();
-					wnd.mouse.DisableRaw();
-				}
-				break;
-			case VK_F1:
-				showImGui = !showImGui;
-				break;
-			case VK_F2:
-				showStatsWindow = !showStatsWindow;
-				break;
-			case VK_F3:
-				drawLightDebug = !drawLightDebug;
-				break;
+				case VK_ESCAPE:
+					if (wnd.CursorEnabled())
+					{
+						wnd.DisableCursor();
+						wnd.mouse.EnableRaw();
+					}
+					else
+					{
+						wnd.EnableCursor();
+						wnd.mouse.DisableRaw();
+					}
+					break;
+				case VK_F1:
+					showImGui = !showImGui;
+					break;
+				case VK_F2:
+					showStatsWindow = !showStatsWindow;
+					break;
+				case VK_F3:
+					drawLightDebug = !drawLightDebug;
+					break;
 			}
 		}
 

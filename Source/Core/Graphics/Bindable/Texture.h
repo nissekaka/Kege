@@ -25,4 +25,10 @@ namespace Kaka
 		BOOL hasNormalMap = FALSE;
 		BOOL hasMaterial = FALSE;
 	};
+
+	struct Material
+	{
+		std::string name;
+		Texture* textures[3u];
+	};
 }

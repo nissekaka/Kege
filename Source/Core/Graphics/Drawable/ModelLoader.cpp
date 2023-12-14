@@ -10,6 +10,8 @@
 #include <cassert>
 #include <vector>
 
+#include "TGAFBXImporter/source/FBXImporter.h"
+
 namespace Kaka
 {
 	bool ModelLoader::LoadModel(const std::string& aFilePath, ModelData& aOutModelData)
@@ -402,169 +404,190 @@ namespace Kaka
 		};
 	}
 
-	//bool Mesh::LoadMesh(const std::string& Filename)
-	//{
-	//	m_pScene = m_Importer.ReadFile(Filename.c_str(), aiProcess_Triangulate | aiProcess_GenSmoothNormals |
-	//		aiProcess_FlipUVs);
+	bool ModelLoader::LoadAnimatedModel(AnimatedModelDataPtr& aOutModelData, const std::string& aFilePath)
+	{
+		if (skeletons.contains(aFilePath))
+		{
+			aOutModelData.skeleton = &skeletons[aFilePath];
 
-	//	if (m_pScene)
-	//	{
-	//		m_GlobalInverseTransform = m_pScene->mRootNode->mTransformation;
-	//		m_GlobalInverseTransform = m_GlobalInverseTransform.Inverse();
-	//	}
-	//	else
-	//	{
-	//		printf("Error parsing '%s': '%s'\n", Filename.c_str(), m_Importer.GetErrorString());
-	//	}
+			if (animatedMeshLists.contains(aFilePath))
+			{
+				aOutModelData.meshList = &animatedMeshLists[aFilePath];
+			}
 
-	//	return Ret;
-	//}
+			aOutModelData.combinedTransforms.resize(aOutModelData.skeleton->bones.size());
+			aOutModelData.finalTransforms.resize(aOutModelData.skeleton->bones.size());
 
-	//void Mesh::LoadBones(uint MeshIndex, const aiMesh* pMesh, std::vector<BoneVertex>& Bones)
-	//{
-	//	for (uint i = 0; i < pMesh->mNumBones; i++)
-	//	{
-	//		uint BoneIndex = 0;
-	//		string BoneName(pMesh->mBones[i]->mName.data);
+			for (unsigned int i = 0; i < aOutModelData.skeleton->bones.size(); i++)
+			{
+				aOutModelData.combinedTransforms[i] = aOutModelData.skeleton->bones[i].bindPose;
+				aOutModelData.finalTransforms[i] = aOutModelData.skeleton->bones[i].bindPose;
+			}
 
-	//		if (m_BoneMapping.find(BoneName) == m_BoneMapping.end())
-	//		{
-	//			BoneIndex = m_NumBones;
-	//			m_NumBones++;
-	//			BoneInfo bi;
-	//			m_BoneInfo.push_back(bi);
-	//		}
-	//		else
-	//		{
-	//			BoneIndex = m_BoneMapping[BoneName];
-	//		}
+			return true;
+		}
 
-	//		m_BoneMapping[BoneName] = BoneIndex;
-	//		m_BoneInfo[BoneIndex].BoneOffset = AssimpToDirectXMatrix(pMesh->mBones[i]->mOffsetMatrix);
+		TGA::FBXModel fbxModel;
 
-	//		for (uint j = 0; j < pMesh->mBones[i]->mNumWeights; j++)
-	//		{
-	//			uint VertexID = m_Entries[MeshIndex].BaseVertex + pMesh->mBones[i]->mWeights[j].mVertexId;
-	//			float Weight = pMesh->mBones[i]->mWeights[j].mWeight;
-	//			Bones[VertexID].AddBoneData(BoneIndex, Weight);
-	//		}
-	//	}
-	//}
+		if (TGA::FBXImporter::LoadModel(aFilePath, fbxModel))
+		{
+			skeletons[aFilePath] = Skeleton();
+			Skeleton& skeleton = skeletons[aFilePath];
+			aOutModelData.skeleton = &skeleton;
 
-	//void Mesh::VertexBoneData::AddBoneData(uint BoneID, float Weight)
-	//{
-	//	for (uint i = 0; i < ARRAY_SIZE_IN_ELEMENTS(IDs); i++)
-	//	{
-	//		if (Weights[i] == 0.0f)
-	//		{
-	//			IDs[i] = BoneID;
-	//			Weights[i] = Weight;
-	//			return;
-	//		}
-	//	}
+			animatedMeshLists[aFilePath] = AnimatedMeshList();
+			AnimatedMeshList& animatedMeshList = animatedMeshLists[aFilePath];
+			aOutModelData.meshList = &animatedMeshList;
 
-	//	// Should never get here - more bones than we have space for
-	//	assert(0);
-	//}
+			// Copy bone data from FBXImporter to our own model data
+			for (auto& bone : fbxModel.Skeleton.Bones)
+			{
+				aOutModelData.skeleton->bones.emplace_back();
+				auto& newBone = aOutModelData.skeleton->bones.back();
 
-	//XMMATRIX Mesh::BoneTransform(float TimeInSeconds, vector<XMMATRIX>& Transforms)
-	//{
-	//	XMMATRIX Identity = XMMatrixIdentity();
+				// Name
+				newBone.name = bone.Name;
 
-	//	float TicksPerSecond = m_pScene->mAnimations[0]->mTicksPerSecond != 0 ?
-	//		m_pScene->mAnimations[0]->mTicksPerSecond : 25.0f;
-	//	float TimeInTicks = TimeInSeconds * TicksPerSecond;
-	//	float AnimationTime = fmod(TimeInTicks, m_pScene->mAnimations[0]->mDuration);
+				// Matrix
+				const auto& boneMatrix = bone.BindPoseInverse;
+				newBone.bindPose = DirectX::XMMatrixSet(
+					boneMatrix.Data[0], boneMatrix.Data[1], boneMatrix.Data[2], boneMatrix.Data[3],
+					boneMatrix.Data[4], boneMatrix.Data[5], boneMatrix.Data[6], boneMatrix.Data[7],
+					boneMatrix.Data[8], boneMatrix.Data[9], boneMatrix.Data[10], boneMatrix.Data[11],
+					boneMatrix.Data[12], boneMatrix.Data[13], boneMatrix.Data[14], boneMatrix.Data[15]
+				);
 
-	//	ReadNodeHierarchy(AnimationTime, m_pScene->mRootNode, Identity);
+				// Transpose the matrix
+				newBone.bindPose = DirectX::XMMatrixTranspose(newBone.bindPose);
 
-	//	Transforms.resize(m_NumBones);
+				// Parent
+				newBone.parentIndex = bone.Parent;
 
-	//	for (uint i = 0; i < m_NumBones; i++)
-	//	{
-	//		Transforms[i] = XMMatrixTranspose(XMLoadFloat4x4(&m_BoneInfo[i].FinalTransformation));
-	//	}
-	//}
+				// Add bone name
+				aOutModelData.skeleton->boneNames.push_back(bone.Name);
 
-	//void Mesh::ReadNodeHierarchy(float AnimationTime, const aiNode* pNode, const XMMATRIX& ParentTransform)
-	//{
-	//	string NodeName(pNode->mName.data);
+				// Add bone offset matrix to bind pose
+				aOutModelData.combinedTransforms.push_back(newBone.bindPose);
+				aOutModelData.finalTransforms.push_back(newBone.bindPose);
+			}
 
-	//	const aiAnimation* pAnimation = m_pScene->mAnimations[0];
+			animatedMeshLists[aFilePath].meshes.resize(fbxModel.Meshes.size());
 
-	//	XMMATRIX NodeTransformation = XMMatrixTranspose(XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4*>(&pNode->mTransformation)));
+			// Copy model data from FBXImporter to our own model data
+			aOutModelData.meshList = &animatedMeshLists[aFilePath];
+			for (size_t i = 0; i < aOutModelData.meshList->meshes.size(); ++i)
+			{
+				// Imported data
+				TGA::FBXModel::FBXMesh& fbxMesh = fbxModel.Meshes[i];
 
-	//	const aiNodeAnim* pNodeAnim = FindNodeAnim(pAnimation, NodeName);
+				// Our own data
+				AnimatedMesh& mesh = aOutModelData.meshList->meshes[i];
 
-	//	if (pNodeAnim)
-	//	{
-	//		// Interpolate scaling and generate scaling transformation matrix
-	//		aiVector3D Scaling;
-	//		CalcInterpolatedScaling(Scaling, AnimationTime, pNodeAnim);
-	//		XMMATRIX ScalingM = XMMatrixScaling(Scaling.x, Scaling.y, Scaling.z);
+				std::vector<BoneVertex> vertices;
+				vertices.resize(fbxMesh.Vertices.size());
 
-	//		// Interpolate rotation and generate rotation transformation matrix
-	//		aiQuaternion RotationQ;
-	//		CalcInterpolatedRotation(RotationQ, AnimationTime, pNodeAnim);
-	//		XMMATRIX RotationM = XMMatrixTranspose(XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4*>(&RotationQ.GetMatrix())));
+				// Copy vertex data
+				for (size_t v = 0; v < vertices.size(); ++v)
+				{
+					vertices[v].position = {
+						fbxMesh.Vertices[v].Position[0],
+						fbxMesh.Vertices[v].Position[1],
+						fbxMesh.Vertices[v].Position[2]
+					};
 
-	//		// Interpolate translation and generate translation transformation matrix
-	//		aiVector3D Translation;
-	//		CalcInterpolatedPosition(Translation, AnimationTime, pNodeAnim);
-	//		XMMATRIX TranslationM = XMMatrixTranslation(Translation.x, Translation.y, Translation.z);
+					vertices[v].normal = {
+						fbxMesh.Vertices[v].Normal[0],
+						fbxMesh.Vertices[v].Normal[1],
+						fbxMesh.Vertices[v].Normal[2]
+					};
 
-	//		// Combine the above transformations
-	//		NodeTransformation = TranslationM * RotationM * ScalingM;
-	//	}
+					vertices[v].tangent = {
+						fbxMesh.Vertices[v].Tangent[0],
+						fbxMesh.Vertices[v].Tangent[1],
+						fbxMesh.Vertices[v].Tangent[2]
+					};
 
-	//	XMMATRIX GlobalTransformation = ParentTransform * NodeTransformation;
+					vertices[v].bitangent = {
+						fbxMesh.Vertices[v].Binormal[0],
+						fbxMesh.Vertices[v].Binormal[1],
+						fbxMesh.Vertices[v].Binormal[2]
+					};
 
-	//	if (m_BoneMapping.find(NodeName) != m_BoneMapping.end())
-	//	{
-	//		uint BoneIndex = m_BoneMapping[NodeName];
-	//		XMMATRIX BoneOffset = XMMatrixTranspose(XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4*>(&m_BoneInfo[BoneIndex].BoneOffset)));
-	//		m_BoneInfo[BoneIndex].FinalTransformation = XMMatrixTranspose(XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4*>(&m_GlobalInverseTransform))) * GlobalTransformation * BoneOffset;
-	//	}
+					vertices[v].texCoord.x = fbxMesh.Vertices[v].UVs[0][0];
+					vertices[v].texCoord.y = fbxMesh.Vertices[v].UVs[0][1];
 
-	//	for (uint i = 0; i < pNode->mNumChildren; i++)
-	//	{
-	//		ReadNodeHierarchy(AnimationTime, pNode->mChildren[i], GlobalTransformation);
-	//	}
-	//}
+					vertices[v].boneIndices[0] = fbxMesh.Vertices[v].BoneIDs[0];
+					vertices[v].boneIndices[1] = fbxMesh.Vertices[v].BoneIDs[1];
+					vertices[v].boneIndices[2] = fbxMesh.Vertices[v].BoneIDs[2];
+					vertices[v].boneIndices[3] = fbxMesh.Vertices[v].BoneIDs[3];
 
-	//void Mesh::CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim)
-	//{
-	//	// We need at least two values to interpolate...
-	//	if (pNodeAnim->mNumRotationKeys == 1)
-	//	{
-	//		Out = pNodeAnim->mRotationKeys[0].mValue;
-	//		return;
-	//	}
+					vertices[v].boneWeights[0] = fbxMesh.Vertices[v].BoneWeights[0];
+					vertices[v].boneWeights[1] = fbxMesh.Vertices[v].BoneWeights[1];
+					vertices[v].boneWeights[2] = fbxMesh.Vertices[v].BoneWeights[2];
+					vertices[v].boneWeights[3] = fbxMesh.Vertices[v].BoneWeights[3];
+				}
 
-	//	uint RotationIndex = FindRotation(AnimationTime, pNodeAnim);
-	//	uint NextRotationIndex = (RotationIndex + 1);
-	//	assert(NextRotationIndex < pNodeAnim->mNumRotationKeys);
-	//	float DeltaTime = pNodeAnim->mRotationKeys[NextRotationIndex].mTime - pNodeAnim->mRotationKeys[RotationIndex].mTime;
-	//	float Factor = (AnimationTime - (float)pNodeAnim->mRotationKeys[RotationIndex].mTime) / DeltaTime;
-	//	assert(Factor >= 0.0f && Factor <= 1.0f);
-	//	const aiQuaternion& StartRotationQ = pNodeAnim->mRotationKeys[RotationIndex].mValue;
-	//	const aiQuaternion& EndRotationQ = pNodeAnim->mRotationKeys[NextRotationIndex].mValue;
-	//	aiQuaternion::Interpolate(Out, StartRotationQ, EndRotationQ, Factor);
-	//	Out = Out.Normalize();
-	//}
+				mesh.vertices = vertices;
 
-	//uint Mesh::FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim)
-	//{
-	//	assert(pNodeAnim->mNumRotationKeys > 0);
+				for (const auto& index : fbxMesh.Indices)
+				{
+					mesh.indices.push_back(index);
+				}
 
-	//	for (uint i = 0; i < pNodeAnim->mNumRotationKeys - 1; i++)
-	//	{
-	//		if (AnimationTime < (float)pNodeAnim->mRotationKeys[i + 1].mTime)
-	//		{
-	//			return i;
-	//		}
-	//	}
+				// Assign material name
+				aOutModelData.meshList->materialNames.push_back(fbxModel.Materials[fbxMesh.MaterialIndex].MaterialName);
+			}
+			return true;
+		}
+		return false;
+	}
 
-	//	assert(0);
-	//}
+	bool ModelLoader::LoadAnimation(AnimatedModelDataPtr& aOutModelData, const std::string& aFilePath)
+	{
+		if (animationClips.contains(aFilePath))
+		{
+			aOutModelData.animationClipMap[animationClips[aFilePath].name] = &animationClips[aFilePath];
+			aOutModelData.animationNames.push_back(animationClips[aFilePath].name);
+			return true;
+		}
+
+		TGA::FBXAnimation animation;
+
+		if (TGA::FBXImporter::LoadAnimation(aFilePath, aOutModelData.skeleton->boneNames, animation))
+		{
+			animationClips[aFilePath] = AnimationClip();
+			AnimationClip& newAnimation = animationClips[aFilePath];
+
+			newAnimation.name = animation.Name;
+
+			// Trim path from name
+			const size_t index = newAnimation.name.find_last_of('\\');
+			newAnimation.name.erase(newAnimation.name.begin(), newAnimation.name.begin() + index + 1);
+
+			newAnimation.length = animation.Length;
+			newAnimation.fps = animation.FramesPerSecond;
+			newAnimation.duration = (float)animation.Duration;
+			newAnimation.keyframes.resize(animation.Frames.size());
+
+			for (size_t f = 0; f < newAnimation.keyframes.size(); f++)
+			{
+				newAnimation.keyframes[f].boneTransforms.resize(animation.Frames[f].LocalTransforms.size());
+
+				for (size_t t = 0; t < animation.Frames[f].LocalTransforms.size(); t++)
+				{
+					DirectX::XMMATRIX localMatrix = {};
+					memcpy(&localMatrix, &animation.Frames[f].LocalTransforms[t], sizeof(float) * 16);
+
+					newAnimation.keyframes[f].boneTransforms[t] = localMatrix;
+				}
+			}
+
+			aOutModelData.animationClipMap[newAnimation.name] = &newAnimation;
+			aOutModelData.animationNames.push_back(newAnimation.name);
+
+			return true;
+		}
+
+		return false;
+	}
 }

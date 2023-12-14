@@ -39,31 +39,31 @@ namespace Kaka
 			// Vertices and indices
 			switch (modelData.modelType)
 			{
-			case eModelType::None:
+				case eModelType::None:
 				{
 					assert("No model type!");
 				}
 				break;
-			case eModelType::Static:
+				case eModelType::Static:
 				{
 					vertexBuffer.Init(aGfx, modelData.mesh.vertices);
 					indexBuffer.Init(aGfx, modelData.mesh.indices);
 				}
 				break;
-			case eModelType::Skeletal:
+				case eModelType::Skeletal:
 				{
 					vertexBuffer.Init(aGfx, modelData.animMesh.vertices);
 					indexBuffer.Init(aGfx, modelData.animMesh.indices);
 				}
 				break;
-			default:
-				assert("Error!");
+				default:
+					assert("Error!");
 			}
 
 			// Shaders
 			switch (shaderType)
 			{
-			case eShaderType::Solid:
+				case eShaderType::Solid:
 				{
 					pixelShader.Init(aGfx, L"Shaders\\Solid_PS.cso");
 					vertexShader.Init(aGfx, L"Shaders\\Solid_VS.cso");
@@ -77,7 +77,7 @@ namespace Kaka
 					};
 				}
 				break;
-			case eShaderType::Light:
+				case eShaderType::Light:
 				{
 					pixelShader.Init(aGfx, L"Shaders\\Light_PS.cso");
 					vertexShader.Init(aGfx, L"Shaders\\Light_VS.cso");
@@ -107,7 +107,7 @@ namespace Kaka
 					};
 				}
 				break;
-			case eShaderType::Phong:
+				case eShaderType::Phong:
 				{
 					pixelShader.Init(aGfx, L"Shaders\\Phong_PS.cso");
 					vertexShader.Init(aGfx, L"Shaders\\Phong_VS.cso");
@@ -138,7 +138,7 @@ namespace Kaka
 					inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
 				}
 				break;
-			case eShaderType::AnimPhong:
+				case eShaderType::AnimPhong:
 				{
 					pixelShader.Init(aGfx, L"Shaders\\Phong_PS.cso");
 					vertexShader.Init(aGfx, L"Shaders\\AnimPhong_VS.cso");
@@ -175,7 +175,7 @@ namespace Kaka
 						},
 					};
 				}
-			case eShaderType::PBR:
+				case eShaderType::PBR:
 				{
 					pixelShader.Init(aGfx, L"Shaders\\ModelPBR_PS.cso");
 					vertexShader.Init(aGfx, L"Shaders\\ModelPBR_VS.cso");
@@ -217,6 +217,14 @@ namespace Kaka
 
 	void Model::LoadFBXModel(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType)
 	{
+		isLoaded = ModelLoader::LoadAnimatedModel(animatedModelData, aFilePath);
+
+		if (isLoaded)
+		{
+			shaderType = aShaderType;
+			texture.LoadTextureFromModel(aGfx, aFilePath);
+		}
+
 		if (!isLoaded)
 		{
 			shaderType = aShaderType;
@@ -335,31 +343,31 @@ namespace Kaka
 			// Vertices and indices
 			switch (modelData.modelType)
 			{
-			case eModelType::None:
+				case eModelType::None:
 				{
 					assert("No model type!");
 				}
 				break;
-			case eModelType::Static:
+				case eModelType::Static:
 				{
 					vertexBuffer.Init(aGfx, modelData.mesh.vertices);
 					indexBuffer.Init(aGfx, modelData.mesh.indices);
 				}
 				break;
-			case eModelType::Skeletal:
+				case eModelType::Skeletal:
 				{
 					//vertexBuffer.Init(aGfx, modelData.animMesh.vertices);
 					//indexBuffer.Init(aGfx, modelData.animMesh.indices);
 				}
 				break;
-			default:
-				assert("Error!");
+				default:
+					assert("Error!");
 			}
 
 			// Shaders
 			switch (shaderType)
 			{
-			case eShaderType::AnimPBR:
+				case eShaderType::AnimPBR:
 				{
 					pixelShader.Init(aGfx, L"Shaders\\ModelPBR_PS.cso");
 					vertexShader.Init(aGfx, L"Shaders\\AnimModelPBR_VS.cso");
@@ -407,6 +415,11 @@ namespace Kaka
 		}
 	}
 
+	bool Model::LoadFBXAnimation(const std::string& aFilePath)
+	{
+		return ModelLoader::LoadAnimation(animatedModelData, aFilePath);
+	}
+
 	void Model::Draw(Graphics& aGfx)
 	{
 		//if (!aGfx.IsBoundingBoxInFrustum(GetPosition(), GetPosition()))
@@ -431,7 +444,7 @@ namespace Kaka
 
 		switch (shaderType)
 		{
-		case eShaderType::Solid:
+			case eShaderType::Solid:
 			{
 				struct PSMaterialConstant
 				{
@@ -443,7 +456,7 @@ namespace Kaka
 				psConstantBuffer.Bind(aGfx);
 			}
 			break;
-		case eShaderType::Light:
+			case eShaderType::Light:
 			{
 				struct PSMaterialConstant
 				{
@@ -459,7 +472,7 @@ namespace Kaka
 				psConstantBuffer.Bind(aGfx);
 			}
 			break;
-		case eShaderType::Phong:
+			case eShaderType::Phong:
 			{
 				struct PSMaterialConstant
 				{
@@ -477,7 +490,7 @@ namespace Kaka
 				psConstantBuffer.Bind(aGfx);
 			}
 			break;
-		case eShaderType::AnimPhong:
+			case eShaderType::AnimPhong:
 			{
 				struct PSMaterialConstant
 				{
@@ -508,7 +521,7 @@ namespace Kaka
 				vsConstantBuffer.Bind(aGfx);
 			}
 			break;
-		case eShaderType::PBR:
+			case eShaderType::PBR:
 			{
 				struct PSMaterialConstant
 				{
@@ -551,12 +564,12 @@ namespace Kaka
 
 		switch (modelData.modelType)
 		{
-		case eModelType::Static:
-			indices = modelData.mesh.indices;
-			break;
-		case eModelType::Skeletal:
-			indices = modelData.animMesh.indices;
-			break;
+			case eModelType::Static:
+				indices = modelData.mesh.indices;
+				break;
+			case eModelType::Skeletal:
+				indices = modelData.animMesh.indices;
+				break;
 		}
 
 		aGfx.DrawIndexed(static_cast<UINT>(std::size(indices)));
@@ -597,7 +610,7 @@ namespace Kaka
 
 			switch (shaderType)
 			{
-			case eShaderType::AnimPBR:
+				case eShaderType::AnimPBR:
 				{
 					struct PSMaterialConstant
 					{
@@ -637,6 +650,94 @@ namespace Kaka
 					for (int i = 0; i < finalTransforms.size(); ++i)
 					{
 						vsb.bones[i] = finalTransforms[i];
+					}
+
+					VertexConstantBuffer<VSBoneConstant> vsConstantBuffer(aGfx, vsb, 1u);
+					vsConstantBuffer.Bind(aGfx);
+				}
+				break;
+			}
+
+			std::vector<unsigned short> indices;
+			indices = mesh.indices;
+
+			aGfx.DrawIndexed(static_cast<UINT>(std::size(indices)));
+		}
+		// Unbind shader resources
+		ID3D11ShaderResourceView* nullSRVs[3] = {nullptr};
+		aGfx.pContext->PSSetShaderResources(0u, 3u, nullSRVs);
+	}
+
+	void Model::DrawFBXPtr(Graphics& aGfx)
+	{
+		if (!isLoaded)
+		{
+			return;
+		}
+
+		sampler.Bind(aGfx);
+		texture.Bind(aGfx);
+
+		TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
+		transformConstantBuffer.Bind(aGfx);
+
+		vertexShader.Bind(aGfx);
+		pixelShader.Bind(aGfx);
+		inputLayout.Bind(aGfx);
+		topology.Bind(aGfx);
+		rasterizer.Bind(aGfx);
+		depthStencil.Bind(aGfx);
+
+		for (AnimatedMesh& mesh : animatedModelData.meshList->meshes)
+		{
+			vertexBuffer.Init(aGfx, mesh.vertices);
+			indexBuffer.Init(aGfx, mesh.indices);
+
+			vertexBuffer.Bind(aGfx);
+			indexBuffer.Bind(aGfx);
+
+			switch (shaderType)
+			{
+				case eShaderType::AnimPBR:
+				{
+					struct PSMaterialConstant
+					{
+						BOOL normalMapEnabled = FALSE;
+						BOOL materialEnabled = FALSE;
+						unsigned int packedNearbyPointLightDataA = 0u;
+						unsigned int packedNearbyPointLightDataB = 0u;
+						unsigned int packedNearbySpotLightDataA = 0u;
+						unsigned int packedNearbySpotLightDataB = 0u;
+						float padding[2];
+					} pmc;
+					pmc.normalMapEnabled = texture.HasNormalMap();
+					pmc.materialEnabled = texture.HasMaterial();
+					for (int i = 0; i < MAX_LIGHTS; ++i)
+					{
+						if (i < 32)
+						{
+							pmc.packedNearbyPointLightDataA |= (nearbyPointLights[i] ? (1u << i) : 0u);
+							pmc.packedNearbySpotLightDataA |= (nearbySpotLights[i] ? (1u << i) : 0u);
+						}
+						else
+						{
+							pmc.packedNearbyPointLightDataA |= (nearbyPointLights[i - 32] ? (1u << (i - 32)) : 0u);
+							pmc.packedNearbySpotLightDataA |= (nearbySpotLights[i - 32] ? (1u << (i - 32)) : 0u);
+						}
+					}
+
+					PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
+					psConstantBuffer.Bind(aGfx);
+
+					// Bones
+					struct VSBoneConstant
+					{
+						DirectX::XMMATRIX bones[64u];
+					} vsb = {};
+
+					for (int i = 0; i < animatedModelData.finalTransforms.size(); ++i)
+					{
+						vsb.bones[i] = animatedModelData.finalTransforms[i];
 					}
 
 					VertexConstantBuffer<VSBoneConstant> vsConstantBuffer(aGfx, vsb, 1u);
@@ -731,8 +832,89 @@ namespace Kaka
 
 			for (size_t i = 0; i < skeleton->bones.size(); i++)
 			{
-				// Not sure why this works, but it does
 				finalTransforms[i] = DirectX::XMMatrixIdentity();
+			}
+		}
+	}
+
+	void Model::UpdatePtr(float aDeltaTime)
+	{
+		if (selectedAnimationIndex >= 0 && selectedAnimationIndex < animatedModelData.animationNames.size())
+		{
+			std::string selectedAnimationName = animatedModelData.animationNames[selectedAnimationIndex];
+			AnimationClip* animation = animatedModelData.animationClipMap[selectedAnimationName];
+
+			// Apply animation transformation based on the current time
+			if (isAnimationPlaying)
+			{
+				animationTime += aDeltaTime * animationSpeed;
+
+				if (isAnimationLooping)
+				{
+					if (animationTime >= animation->duration)
+					{
+						animationTime = 0.0f;
+					}
+				}
+				else
+				{
+					if (animationTime >= animation->duration)
+					{
+						animationTime = animation->duration;
+						return;
+					}
+				}
+
+				// Calculate the current frame and delta
+				const float frameRate = 1.0f / animation->fps;
+				const float result = animationTime / frameRate;
+				const size_t frame = std::floor(result); // Current frame
+				const float delta = result - static_cast<float>(frame); // Progress to the next frame
+
+				// Update all animations
+				const Skeleton* skeleton = animatedModelData.skeleton;
+
+				// Interpolate between current and next frame
+				for (size_t i = 0; i < skeleton->bones.size(); i++)
+				{
+					DirectX::XMMATRIX currentFramePose = animation->keyframes[frame].boneTransforms[i];
+					DirectX::XMMATRIX nextFramePose = animation->keyframes[(frame + 1) % animation->keyframes.size()].
+						boneTransforms[i];
+
+					// Interpolate between current and next frame using delta
+					DirectX::XMMATRIX blendedPose = currentFramePose + delta * (nextFramePose - currentFramePose);
+
+					const int parentIndex = skeleton->bones[i].parentIndex;
+
+					if (parentIndex >= 0)
+					{
+						// Accumulate relative transformation
+						animatedModelData.combinedTransforms[i] = blendedPose * animatedModelData.combinedTransforms[parentIndex];
+					}
+					else
+					{
+						// Root bone, use absolute transformation
+						animatedModelData.combinedTransforms[i] = blendedPose;
+					}
+
+					animatedModelData.finalTransforms[i] = skeleton->bones[i].bindPose * animatedModelData.combinedTransforms[i];
+				}
+			}
+			else
+			{
+				// Play paused frame i.e do nothing
+			}
+		}
+		else
+		{
+			animationTime = 0.0f;
+
+			// Show bind pose (T-pose)
+			const Skeleton* skeleton = animatedModelData.skeleton;
+
+			for (size_t i = 0; i < skeleton->bones.size(); i++)
+			{
+				animatedModelData.finalTransforms[i] = DirectX::XMMatrixIdentity();
 			}
 		}
 	}
@@ -819,13 +1001,13 @@ namespace Kaka
 			ImGui::Text("Animations");
 			if (ImGui::BeginCombo("##Animations",
 			                      selectedAnimationIndex >= 0
-				                      ? modelData.animations[selectedAnimationIndex].name.c_str()
+				                      ? animatedModelData.animationNames[selectedAnimationIndex].c_str()
 				                      : "Select Animation"))
 			{
-				for (int i = 0; i < modelData.animations.size(); ++i)
+				for (int i = 0; i < animatedModelData.animationNames.size(); ++i)
 				{
 					const bool isSelected = (selectedAnimationIndex == i);
-					if (ImGui::Selectable(modelData.animations[i].name.c_str(), isSelected))
+					if (ImGui::Selectable(animatedModelData.animationNames[i].c_str(), isSelected))
 					{
 						selectedAnimationIndex = i;
 					}

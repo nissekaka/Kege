@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <unordered_map>
+#include <map>
 
 #include "Core/Graphics/Drawable/Vertex.h"
 #include <vector>
@@ -8,6 +8,8 @@
 
 namespace Kaka
 {
+	struct Material;
+
 	enum class eModelType { None, Static, Skeletal };
 
 	struct Bone
@@ -45,12 +47,30 @@ namespace Kaka
 	{
 		std::vector<Vertex> vertices{};
 		std::vector<unsigned short> indices{};
+		Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
+		Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
+	};
+
+	struct MeshList
+	{
+		std::vector<Mesh> meshes;
+		std::vector<std::string> materialNames;
+		std::string filePath;
 	};
 
 	struct AnimatedMesh
 	{
 		std::vector<BoneVertex> vertices{};
 		std::vector<unsigned short> indices{};
+		Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
+		Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
+	};
+
+	struct AnimatedMeshList
+	{
+		std::vector<AnimatedMesh> meshes;
+		std::vector<std::string> materialNames;
+		std::string filePath;
 	};
 
 	struct ModelData
@@ -62,5 +82,38 @@ namespace Kaka
 		Skeleton skeleton;
 		std::vector<AnimationClip> animations = {};
 		eModelType modelType = eModelType::None;
+	};
+
+	struct RenderResources
+	{
+		VertexShader* myVertexShader;
+		PixelShader* myPixelShader;
+		Material* myMaterial;
+	};
+
+	struct ModelDataPtr
+	{
+		MeshList* meshList = nullptr;
+		Skeleton* skeleton = nullptr;
+
+		//std::vector<RenderResources> renderResources = {};
+
+		DirectX::XMMATRIX* transform = nullptr;
+	};
+
+	struct AnimatedModelDataPtr
+	{
+		AnimatedMeshList* meshList = nullptr;
+		Skeleton* skeleton = nullptr;
+
+		//std::vector<RenderResources> renderResources = {};
+
+		DirectX::XMMATRIX* transform = nullptr;
+
+		std::map<std::string, AnimationClip*> animationClipMap = {};
+		std::vector<std::string> animationNames = {};
+
+		std::vector<DirectX::XMMATRIX> combinedTransforms = {};
+		std::vector<DirectX::XMMATRIX> finalTransforms = {};
 	};
 }
