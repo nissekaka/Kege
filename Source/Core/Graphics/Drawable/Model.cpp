@@ -754,6 +754,45 @@ namespace Kaka
 		// Unbind shader resources
 		ID3D11ShaderResourceView* nullSRVs[3] = {nullptr};
 		aGfx.pContext->PSSetShaderResources(0u, 3u, nullSRVs);
+
+		DirectX::XMMATRIX viewproj = DirectX::XMMatrixIdentity();
+		viewproj = DirectX::XMMatrixMultiply(viewproj, DirectX::XMMatrixInverse(0, aGfx.GetCamera()));
+		viewproj = DirectX::XMMatrixMultiply(viewproj, aGfx.GetProjection());
+
+		// Draw ImGui lines between bones
+		for (int i = 0; i < animatedModelData.skeleton->bones.size(); ++i)
+		{
+			const int parentIndex = animatedModelData.skeleton->bones[i].parentIndex;
+
+			if (parentIndex >= 0)
+			{
+				DirectX::XMFLOAT3 parentPosition = {
+					animatedModelData.skeleton->bones[parentIndex].bindPose.r[3].m128_f32[0],
+					animatedModelData.skeleton->bones[parentIndex].bindPose.r[3].m128_f32[1],
+					animatedModelData.skeleton->bones[parentIndex].bindPose.r[3].m128_f32[2]
+				};
+				DirectX::XMFLOAT3 childPosition = {
+					animatedModelData.skeleton->bones[i].bindPose.r[3].m128_f32[0],
+					animatedModelData.skeleton->bones[i].bindPose.r[3].m128_f32[1],
+					animatedModelData.skeleton->bones[i].bindPose.r[3].m128_f32[2]
+				};
+
+				// Convert position to screen position by multiplying by view projection matrix
+				DirectX::XMVECTOR screenParentPos = DirectX::XMVector3Transform(DirectX::XMLoadFloat3(&parentPosition), viewproj);
+
+				ImGui::GetForegroundDrawList()->AddCircle(
+					ImVec2(screenParentPos.m128_f32[0], screenParentPos.m128_f32[1]),
+					10.0f,
+					IM_COL32(255, 255, 255, 255)
+				);
+
+				//ImGui::GetForegroundDrawList()->AddLine(
+				//	ImVec2(parentPosition.x, parentPosition.y),
+				//	ImVec2(childPosition.x, childPosition.y),
+				//	ImColor(255, 255, 255, 255)
+				//);
+			}
+		}
 	}
 
 	void Model::Update(const float aDeltaTime)
