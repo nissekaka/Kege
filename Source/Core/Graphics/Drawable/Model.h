@@ -88,6 +88,9 @@ namespace Kaka
 		bool isAnimationPlaying = false;
 		bool isAnimationLooping = false;
 
+		bool drawSkeleton = true;
+		bool drawBoneNames = true;
+
 		BOOL nearbyPointLights[50u];
 		BOOL nearbySpotLights[50u];
 

@@ -115,9 +115,9 @@ float4 main(PixelInput aInput) : SV_TARGET
 
     if (materialEnabled)
     {
-        ambientOcclusion = material.r;
-        roughness = material.g;
-        metalness = material.b;
+        ambientOcclusion = 0.0f; //material.r;
+        roughness = 1.0f; //material.g;
+        metalness = 0.0f; //material.b;
         //emissive = material.b;
 
         specular = lerp((float3) 0.04f, colour.rgb, metalness);

@@ -11,7 +11,7 @@ constexpr int WINDOW_WIDTH = 1920;
 constexpr int WINDOW_HEIGHT = 1080;
 constexpr int NUM_POINT_LIGHTS = 20;
 constexpr int NUM_SPOT_LIGHTS = 20;
-constexpr int TERRAIN_SIZE = 20;
+constexpr int TERRAIN_SIZE = 1000;
 
 namespace Kaka
 {
@@ -61,8 +61,8 @@ namespace Kaka
 		reflectionPlane.Init(wnd.Gfx(), terrain.GetSize() / 2.0f);
 		reflectionPlane.SetPosition({terrain.GetSize() / 2.0f, reflectPlaneHeight, terrain.GetSize() / 2.0f});
 
-		camera.SetPosition({0.0f, 0.0f, 0.0f});
-		//camera.SetPosition({742.75f, 0.16f, 395.95f});
+		//camera.SetPosition({0.0f, 0.0f, 0.0f});
+		camera.SetPosition({742.75f, 0.16f, 395.95f});
 
 		for (int i = 0; i < 0; ++i)
 		{
@@ -87,12 +87,15 @@ namespace Kaka
 		//	models.back().SetPosition({25.0f, 2.0f, 5.0f});
 		//}
 
-		animatedModel.LoadFBXModel(wnd.Gfx(), "Assets\\Models\\player\\sk_player.fbx", Model::eShaderType::AnimPBR);
+		animatedModel.LoadFBXModel(wnd.Gfx(), "Assets\\Models\\crawler\\CH_NPC_Crawler_01_22G3S_SK.fbx", Model::eShaderType::AnimPBR);
 		//animatedModel.SetRotation({-PI / 2.0f, 0.0f, 0.0f});
-		animatedModel.SetPosition({0.0f, 0.0f, 0.0f});
-		animatedModel.SetScale(0.1f);
+		animatedModel.SetPosition({500.0f, 0.0f, 500.0f});
+		animatedModel.SetScale(1.0f);
 
-		animatedModel.LoadFBXAnimation("Assets\\Models\\player\\anim_playerRun.fbx");
+		animatedModel.LoadFBXAnimation("Assets\\Models\\crawler\\CH_NPC_CrawlerIdle__22G3S_AN.fbx");
+		animatedModel.LoadFBXAnimation("Assets\\Models\\crawler\\CH_NPC_CrawlerRun__22G3S_AN.fbx");
+		animatedModel.LoadFBXAnimation("Assets\\Models\\crawler\\CH_NPC_CrawlerAttack__22G3S_AN.fbx");
+		animatedModel.LoadFBXAnimation("Assets\\Models\\crawler\\CH_NPC_CrawlerDeath__22G3S_AN.fbx");
 
 		//TGA::FBXAnimation animation;
 

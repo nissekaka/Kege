@@ -755,42 +755,129 @@ namespace Kaka
 		ID3D11ShaderResourceView* nullSRVs[3] = {nullptr};
 		aGfx.pContext->PSSetShaderResources(0u, 3u, nullSRVs);
 
-		DirectX::XMMATRIX viewproj = DirectX::XMMatrixIdentity();
-		viewproj = DirectX::XMMatrixMultiply(viewproj, DirectX::XMMatrixInverse(0, aGfx.GetCamera()));
-		viewproj = DirectX::XMMatrixMultiply(viewproj, aGfx.GetProjection());
+		if (!drawSkeleton)
+		{
+			return;
+		}
 
 		// Draw ImGui lines between bones
+		const std::vector<DirectX::XMMATRIX> transforms = animatedModelData.combinedTransforms;
 		for (int i = 0; i < animatedModelData.skeleton->bones.size(); ++i)
 		{
+			// Skip if bone is not in view frustum
+			DirectX::XMFLOAT3 bonePos = {
+				transforms[i].r[3].m128_f32[0],
+				transforms[i].r[3].m128_f32[1],
+				transforms[i].r[3].m128_f32[2]
+			};
+
+			// Bone pos in world space
+			bonePos = DirectX::XMFLOAT3(
+				GetPosition().x + bonePos.x * GetScale(),
+				GetPosition().y + bonePos.y * GetScale(),
+				GetPosition().z + bonePos.z * GetScale()
+			);
+
+			if (!aGfx.IsBoundingBoxInFrustum(bonePos, bonePos))
+			{
+				continue;
+			}
+
 			const int parentIndex = animatedModelData.skeleton->bones[i].parentIndex;
 
-			if (parentIndex >= 0)
+			if (parentIndex > 0)
 			{
-				DirectX::XMFLOAT3 parentPosition = {
-					animatedModelData.skeleton->bones[parentIndex].bindPose.r[3].m128_f32[0],
-					animatedModelData.skeleton->bones[parentIndex].bindPose.r[3].m128_f32[1],
-					animatedModelData.skeleton->bones[parentIndex].bindPose.r[3].m128_f32[2]
-				};
-				DirectX::XMFLOAT3 childPosition = {
-					animatedModelData.skeleton->bones[i].bindPose.r[3].m128_f32[0],
-					animatedModelData.skeleton->bones[i].bindPose.r[3].m128_f32[1],
-					animatedModelData.skeleton->bones[i].bindPose.r[3].m128_f32[2]
+				DirectX::XMFLOAT3 parentPos = {
+					transforms[parentIndex].r[3].m128_f32[0],
+					transforms[parentIndex].r[3].m128_f32[1],
+					transforms[parentIndex].r[3].m128_f32[2]
 				};
 
-				// Convert position to screen position by multiplying by view projection matrix
-				DirectX::XMVECTOR screenParentPos = DirectX::XMVector3Transform(DirectX::XMLoadFloat3(&parentPosition), viewproj);
+				DirectX::XMFLOAT3 childPos = {
+					transforms[i].r[3].m128_f32[0],
+					transforms[i].r[3].m128_f32[1],
+					transforms[i].r[3].m128_f32[2]
+				};
 
-				ImGui::GetForegroundDrawList()->AddCircle(
-					ImVec2(screenParentPos.m128_f32[0], screenParentPos.m128_f32[1]),
-					10.0f,
-					IM_COL32(255, 255, 255, 255)
+				const DirectX::XMMATRIX projectionMatrix = transformConstantBuffer.GetTransforms(aGfx).objectToClip;
+
+				// Transform bone positions to screen space
+				DirectX::XMFLOAT2 screenParentPos;
+				DirectX::XMFLOAT2 screenChildPos;
+
+				DirectX::XMStoreFloat2(
+					&screenParentPos,
+					DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&parentPos), projectionMatrix)
 				);
 
-				//ImGui::GetForegroundDrawList()->AddLine(
-				//	ImVec2(parentPosition.x, parentPosition.y),
-				//	ImVec2(childPosition.x, childPosition.y),
-				//	ImColor(255, 255, 255, 255)
-				//);
+				DirectX::XMStoreFloat2(
+					&screenChildPos,
+					DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&childPos), projectionMatrix)
+				);
+
+				screenParentPos.x = (screenParentPos.x + 1.0f) * 0.5f * ImGui::GetIO().DisplaySize.x;
+				screenParentPos.y = (1.0f - screenParentPos.y) * 0.5f * ImGui::GetIO().DisplaySize.y;
+				screenChildPos.x = (screenChildPos.x + 1.0f) * 0.5f * ImGui::GetIO().DisplaySize.x;
+				screenChildPos.y = (1.0f - screenChildPos.y) * 0.5f * ImGui::GetIO().DisplaySize.y;
+
+				ImGui::GetForegroundDrawList()->AddCircle(
+					ImVec2(screenChildPos.x, screenChildPos.y),
+					4.0f,
+					IM_COL32(0, 255, 0, 255)
+				);
+
+				ImGui::GetForegroundDrawList()->AddLine(
+					ImVec2(screenParentPos.x, screenParentPos.y),
+					ImVec2(screenChildPos.x, screenChildPos.y),
+					IM_COL32(0, 255, 255, 255)
+				);
+
+				if (drawBoneNames)
+				{
+					// Draw bone name text imgui
+					ImGui::GetForegroundDrawList()->AddText(
+						ImVec2(screenChildPos.x, screenChildPos.y),
+						IM_COL32(255, 255, 255, 255),
+						animatedModelData.skeleton->bones[i].name.c_str()
+					);
+				}
+			}
+			else
+			{
+				DirectX::XMFLOAT3 rootPosition = {
+					transforms[i].r[3].m128_f32[0],
+					transforms[i].r[3].m128_f32[1],
+					transforms[i].r[3].m128_f32[2]
+				};
+
+				const DirectX::XMMATRIX projectionMatrix = transformConstantBuffer.GetTransforms(aGfx).objectToClip;
+
+				// Transform bone positions to screen space
+				DirectX::XMFLOAT2 screenRootPos;
+
+				DirectX::XMStoreFloat2(
+					&screenRootPos,
+					DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&rootPosition), projectionMatrix)
+				);
+
+				screenRootPos.x = (screenRootPos.x + 1.0f) * 0.5f * ImGui::GetIO().DisplaySize.x;
+				screenRootPos.y = (1.0f - screenRootPos.y) * 0.5f * ImGui::GetIO().DisplaySize.y;
+
+				ImGui::GetForegroundDrawList()->AddCircle(
+					ImVec2(screenRootPos.x, screenRootPos.y),
+					4.0f,
+					IM_COL32(255, 255, 0, 255)
+				);
+
+				if (drawBoneNames)
+				{
+					// Draw bone name text imgui
+					ImGui::GetForegroundDrawList()->AddText(
+						ImVec2(screenRootPos.x, screenRootPos.y),
+						IM_COL32(255, 255, 255, 255),
+						animatedModelData.skeleton->bones[i].name.c_str()
+					);
+				}
 			}
 		}
 	}
@@ -953,6 +1040,7 @@ namespace Kaka
 
 			for (size_t i = 0; i < skeleton->bones.size(); i++)
 			{
+				animatedModelData.combinedTransforms[i] = DirectX::XMMatrixInverse(nullptr, animatedModelData.skeleton->bones[i].bindPose);
 				animatedModelData.finalTransforms[i] = DirectX::XMMatrixIdentity();
 			}
 		}
@@ -1100,6 +1188,8 @@ namespace Kaka
 			ImGui::Text("Specular");
 			ImGui::SliderFloat("Intensity", &specularIntensity, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
 			ImGui::DragFloat("Power", &specularPower);
+			ImGui::Checkbox("Draw Skeleton", &drawSkeleton);
+			ImGui::Checkbox("Draw Bone Names", &drawBoneNames);
 		}
 		ImGui::End();
 	}
