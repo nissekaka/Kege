@@ -5,6 +5,8 @@
 #include <DirectXMath.h>
 #include <string>
 
+#include "Graphics/Animation/AnimationPlayer.h"
+
 
 namespace Kaka
 {
@@ -82,11 +84,6 @@ namespace Kaka
 		Texture texture{2u};
 		//std::vector<std::unique_ptr<Bindable>> bindablePtrs;
 		bool isLoaded = false;
-		int selectedAnimationIndex = -1;
-		float animationTime = 0.0f;
-		float animationSpeed = 1.0f;
-		bool isAnimationPlaying = false;
-		bool isAnimationLooping = false;
 
 		bool drawSkeleton = true;
 		bool drawBoneNames = true;
@@ -96,5 +93,7 @@ namespace Kaka
 
 		std::vector<DirectX::XMMATRIX> combinedTransforms;
 		std::vector<DirectX::XMMATRIX> finalTransforms;
+
+		AnimationPlayer animationPlayer;
 	};
 }

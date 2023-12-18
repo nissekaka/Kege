@@ -39,31 +39,31 @@ namespace Kaka
 			// Vertices and indices
 			switch (modelData.modelType)
 			{
-				case eModelType::None:
+			case eModelType::None:
 				{
 					assert("No model type!");
 				}
 				break;
-				case eModelType::Static:
+			case eModelType::Static:
 				{
 					vertexBuffer.Init(aGfx, modelData.mesh.vertices);
 					indexBuffer.Init(aGfx, modelData.mesh.indices);
 				}
 				break;
-				case eModelType::Skeletal:
+			case eModelType::Skeletal:
 				{
 					vertexBuffer.Init(aGfx, modelData.animMesh.vertices);
 					indexBuffer.Init(aGfx, modelData.animMesh.indices);
 				}
 				break;
-				default:
-					assert("Error!");
+			default:
+				assert("Error!");
 			}
 
 			// Shaders
 			switch (shaderType)
 			{
-				case eShaderType::Solid:
+			case eShaderType::Solid:
 				{
 					pixelShader.Init(aGfx, L"Shaders\\Solid_PS.cso");
 					vertexShader.Init(aGfx, L"Shaders\\Solid_VS.cso");
@@ -77,7 +77,7 @@ namespace Kaka
 					};
 				}
 				break;
-				case eShaderType::Light:
+			case eShaderType::Light:
 				{
 					pixelShader.Init(aGfx, L"Shaders\\Light_PS.cso");
 					vertexShader.Init(aGfx, L"Shaders\\Light_VS.cso");
@@ -107,7 +107,7 @@ namespace Kaka
 					};
 				}
 				break;
-				case eShaderType::Phong:
+			case eShaderType::Phong:
 				{
 					pixelShader.Init(aGfx, L"Shaders\\Phong_PS.cso");
 					vertexShader.Init(aGfx, L"Shaders\\Phong_VS.cso");
@@ -138,7 +138,7 @@ namespace Kaka
 					inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
 				}
 				break;
-				case eShaderType::AnimPhong:
+			case eShaderType::AnimPhong:
 				{
 					pixelShader.Init(aGfx, L"Shaders\\Phong_PS.cso");
 					vertexShader.Init(aGfx, L"Shaders\\AnimPhong_VS.cso");
@@ -175,7 +175,7 @@ namespace Kaka
 						},
 					};
 				}
-				case eShaderType::PBR:
+			case eShaderType::PBR:
 				{
 					pixelShader.Init(aGfx, L"Shaders\\ModelPBR_PS.cso");
 					vertexShader.Init(aGfx, L"Shaders\\ModelPBR_VS.cso");
@@ -223,6 +223,9 @@ namespace Kaka
 		{
 			shaderType = aShaderType;
 			texture.LoadTextureFromModel(aGfx, aFilePath);
+
+			// TODO This should maybe not be here, idk
+			animationPlayer.Init(&animatedModelData);
 		}
 
 		if (!isLoaded)
@@ -343,31 +346,31 @@ namespace Kaka
 			// Vertices and indices
 			switch (modelData.modelType)
 			{
-				case eModelType::None:
+			case eModelType::None:
 				{
 					assert("No model type!");
 				}
 				break;
-				case eModelType::Static:
+			case eModelType::Static:
 				{
 					vertexBuffer.Init(aGfx, modelData.mesh.vertices);
 					indexBuffer.Init(aGfx, modelData.mesh.indices);
 				}
 				break;
-				case eModelType::Skeletal:
+			case eModelType::Skeletal:
 				{
 					//vertexBuffer.Init(aGfx, modelData.animMesh.vertices);
 					//indexBuffer.Init(aGfx, modelData.animMesh.indices);
 				}
 				break;
-				default:
-					assert("Error!");
+			default:
+				assert("Error!");
 			}
 
 			// Shaders
 			switch (shaderType)
 			{
-				case eShaderType::AnimPBR:
+			case eShaderType::AnimPBR:
 				{
 					pixelShader.Init(aGfx, L"Shaders\\ModelPBR_PS.cso");
 					vertexShader.Init(aGfx, L"Shaders\\AnimModelPBR_VS.cso");
@@ -444,7 +447,7 @@ namespace Kaka
 
 		switch (shaderType)
 		{
-			case eShaderType::Solid:
+		case eShaderType::Solid:
 			{
 				struct PSMaterialConstant
 				{
@@ -456,7 +459,7 @@ namespace Kaka
 				psConstantBuffer.Bind(aGfx);
 			}
 			break;
-			case eShaderType::Light:
+		case eShaderType::Light:
 			{
 				struct PSMaterialConstant
 				{
@@ -472,7 +475,7 @@ namespace Kaka
 				psConstantBuffer.Bind(aGfx);
 			}
 			break;
-			case eShaderType::Phong:
+		case eShaderType::Phong:
 			{
 				struct PSMaterialConstant
 				{
@@ -490,7 +493,7 @@ namespace Kaka
 				psConstantBuffer.Bind(aGfx);
 			}
 			break;
-			case eShaderType::AnimPhong:
+		case eShaderType::AnimPhong:
 			{
 				struct PSMaterialConstant
 				{
@@ -521,7 +524,7 @@ namespace Kaka
 				vsConstantBuffer.Bind(aGfx);
 			}
 			break;
-			case eShaderType::PBR:
+		case eShaderType::PBR:
 			{
 				struct PSMaterialConstant
 				{
@@ -564,12 +567,12 @@ namespace Kaka
 
 		switch (modelData.modelType)
 		{
-			case eModelType::Static:
-				indices = modelData.mesh.indices;
-				break;
-			case eModelType::Skeletal:
-				indices = modelData.animMesh.indices;
-				break;
+		case eModelType::Static:
+			indices = modelData.mesh.indices;
+			break;
+		case eModelType::Skeletal:
+			indices = modelData.animMesh.indices;
+			break;
 		}
 
 		aGfx.DrawIndexed(static_cast<UINT>(std::size(indices)));
@@ -610,7 +613,7 @@ namespace Kaka
 
 			switch (shaderType)
 			{
-				case eShaderType::AnimPBR:
+			case eShaderType::AnimPBR:
 				{
 					struct PSMaterialConstant
 					{
@@ -698,7 +701,7 @@ namespace Kaka
 
 			switch (shaderType)
 			{
-				case eShaderType::AnimPBR:
+			case eShaderType::AnimPBR:
 				{
 					struct PSMaterialConstant
 					{
@@ -884,166 +887,88 @@ namespace Kaka
 
 	void Model::Update(const float aDeltaTime)
 	{
-		if (selectedAnimationIndex >= 0 && selectedAnimationIndex < modelData.animations.size())
-		{
-			const AnimationClip& animation = modelData.animations[selectedAnimationIndex];
+		//if (selectedAnimationIndex >= 0 && selectedAnimationIndex < modelData.animations.size())
+		//{
+		//	const AnimationClip& animation = modelData.animations[selectedAnimationIndex];
 
-			// Apply animation transformation based on the current time
-			if (isAnimationPlaying)
-			{
-				animationTime += aDeltaTime * animationSpeed;
+		//	// Apply animation transformation based on the current time
+		//	if (isAnimationPlaying)
+		//	{
+		//		animationTime += aDeltaTime * animationSpeed;
 
-				if (isAnimationLooping)
-				{
-					if (animationTime >= animation.duration)
-					{
-						animationTime = 0.0f;
-					}
-				}
-				else
-				{
-					if (animationTime >= animation.duration)
-					{
-						animationTime = animation.duration;
-						return;
-					}
-				}
+		//		if (isAnimationLooping)
+		//		{
+		//			if (animationTime >= animation.duration)
+		//			{
+		//				animationTime = 0.0f;
+		//			}
+		//		}
+		//		else
+		//		{
+		//			if (animationTime >= animation.duration)
+		//			{
+		//				animationTime = animation.duration;
+		//				return;
+		//			}
+		//		}
 
-				// Calculate the current frame and delta
-				const float frameRate = 1.0f / animation.fps;
-				const float result = animationTime / frameRate;
-				const size_t frame = std::floor(result); // Current frame
-				const float delta = result - static_cast<float>(frame); // Progress to the next frame
+		//		// Calculate the current frame and delta
+		//		const float frameRate = 1.0f / animation.fps;
+		//		const float result = animationTime / frameRate;
+		//		const size_t frame = std::floor(result); // Current frame
+		//		const float delta = result - static_cast<float>(frame); // Progress to the next frame
 
-				// Update all animations
-				const Skeleton* skeleton = &modelData.skeleton;
+		//		// Update all animations
+		//		const Skeleton* skeleton = &modelData.skeleton;
 
-				// Interpolate between current and next frame
-				for (size_t i = 0; i < skeleton->bones.size(); i++)
-				{
-					DirectX::XMMATRIX currentFramePose = animation.keyframes[frame].boneTransforms[i];
-					DirectX::XMMATRIX nextFramePose = animation.keyframes[(frame + 1) % animation.keyframes.size()].
-						boneTransforms[i];
+		//		// Interpolate between current and next frame
+		//		for (size_t i = 0; i < skeleton->bones.size(); i++)
+		//		{
+		//			DirectX::XMMATRIX currentFramePose = animation.keyframes[frame].boneTransforms[i];
+		//			DirectX::XMMATRIX nextFramePose = animation.keyframes[(frame + 1) % animation.keyframes.size()].
+		//				boneTransforms[i];
 
-					// Interpolate between current and next frame using delta
-					DirectX::XMMATRIX blendedPose = currentFramePose + delta * (nextFramePose - currentFramePose);
+		//			// Interpolate between current and next frame using delta
+		//			DirectX::XMMATRIX blendedPose = currentFramePose + delta * (nextFramePose - currentFramePose);
 
-					const int parentIndex = skeleton->bones[i].parentIndex;
+		//			const int parentIndex = skeleton->bones[i].parentIndex;
 
-					if (parentIndex >= 0)
-					{
-						// Accumulate relative transformation
-						combinedTransforms[i] = blendedPose * combinedTransforms[parentIndex];
-					}
-					else
-					{
-						// Root bone, use absolute transformation
-						combinedTransforms[i] = blendedPose;
-					}
+		//			if (parentIndex >= 0)
+		//			{
+		//				// Accumulate relative transformation
+		//				combinedTransforms[i] = blendedPose * combinedTransforms[parentIndex];
+		//			}
+		//			else
+		//			{
+		//				// Root bone, use absolute transformation
+		//				combinedTransforms[i] = blendedPose;
+		//			}
 
-					finalTransforms[i] = skeleton->bones[i].bindPose * combinedTransforms[i];
-				}
-			}
-			else
-			{
-				// Play paused frame i.e do nothing
-			}
-		}
-		else
-		{
-			animationTime = 0.0f;
+		//			finalTransforms[i] = skeleton->bones[i].bindPose * combinedTransforms[i];
+		//		}
+		//	}
+		//	else
+		//	{
+		//		// Play paused frame i.e do nothing
+		//	}
+		//}
+		//else
+		//{
+		//	animationTime = 0.0f;
 
-			// Show bind pose (T-pose)
-			const Skeleton* skeleton = &modelData.skeleton;
+		//	// Show bind pose (T-pose)
+		//	const Skeleton* skeleton = &modelData.skeleton;
 
-			for (size_t i = 0; i < skeleton->bones.size(); i++)
-			{
-				finalTransforms[i] = DirectX::XMMatrixIdentity();
-			}
-		}
+		//	for (size_t i = 0; i < skeleton->bones.size(); i++)
+		//	{
+		//		finalTransforms[i] = DirectX::XMMatrixIdentity();
+		//	}
+		//}
 	}
 
 	void Model::UpdatePtr(float aDeltaTime)
 	{
-		if (selectedAnimationIndex >= 0 && selectedAnimationIndex < animatedModelData.animationNames.size())
-		{
-			std::string selectedAnimationName = animatedModelData.animationNames[selectedAnimationIndex];
-			AnimationClip* animation = animatedModelData.animationClipMap[selectedAnimationName];
-
-			// Apply animation transformation based on the current time
-			if (isAnimationPlaying)
-			{
-				animationTime += aDeltaTime * animationSpeed;
-
-				if (isAnimationLooping)
-				{
-					if (animationTime >= animation->duration)
-					{
-						animationTime = 0.0f;
-					}
-				}
-				else
-				{
-					if (animationTime >= animation->duration)
-					{
-						animationTime = animation->duration;
-						return;
-					}
-				}
-
-				// Calculate the current frame and delta
-				const float frameRate = 1.0f / animation->fps;
-				const float result = animationTime / frameRate;
-				const size_t frame = std::floor(result); // Current frame
-				const float delta = result - static_cast<float>(frame); // Progress to the next frame
-
-				// Update all animations
-				const Skeleton* skeleton = animatedModelData.skeleton;
-
-				// Interpolate between current and next frame
-				for (size_t i = 0; i < skeleton->bones.size(); i++)
-				{
-					DirectX::XMMATRIX currentFramePose = animation->keyframes[frame].boneTransforms[i];
-					DirectX::XMMATRIX nextFramePose = animation->keyframes[(frame + 1) % animation->keyframes.size()].
-						boneTransforms[i];
-
-					// Interpolate between current and next frame using delta
-					DirectX::XMMATRIX blendedPose = currentFramePose + delta * (nextFramePose - currentFramePose);
-
-					const int parentIndex = skeleton->bones[i].parentIndex;
-
-					if (parentIndex >= 0)
-					{
-						// Accumulate relative transformation
-						animatedModelData.combinedTransforms[i] = blendedPose * animatedModelData.combinedTransforms[parentIndex];
-					}
-					else
-					{
-						// Root bone, use absolute transformation
-						animatedModelData.combinedTransforms[i] = blendedPose;
-					}
-
-					animatedModelData.finalTransforms[i] = skeleton->bones[i].bindPose * animatedModelData.combinedTransforms[i];
-				}
-			}
-			else
-			{
-				// Play paused frame i.e do nothing
-			}
-		}
-		else
-		{
-			animationTime = 0.0f;
-
-			// Show bind pose (T-pose)
-			const Skeleton* skeleton = animatedModelData.skeleton;
-
-			for (size_t i = 0; i < skeleton->bones.size(); i++)
-			{
-				animatedModelData.combinedTransforms[i] = DirectX::XMMatrixInverse(nullptr, animatedModelData.skeleton->bones[i].bindPose);
-				animatedModelData.finalTransforms[i] = DirectX::XMMatrixIdentity();
-			}
-		}
+		animationPlayer.Animate(aDeltaTime);
 	}
 
 	void Model::SetPosition(const DirectX::XMFLOAT3 aPosition)
@@ -1120,61 +1045,45 @@ namespace Kaka
 		if (ImGui::Begin(aWindowName))
 		{
 			ImGui::Columns(2, nullptr, true);
-			// Dropdown animations
-			// Select and press button to play
-			// Change play speed
 
-			// Dropdown animations
 			ImGui::Text("Animations");
-			if (ImGui::BeginCombo("##Animations",
-			                      selectedAnimationIndex >= 0
-				                      ? animatedModelData.animationNames[selectedAnimationIndex].c_str()
-				                      : "Select Animation"))
+			for (int i = 0; i < animatedModelData.animationNames.size(); ++i)
 			{
-				for (int i = 0; i < animatedModelData.animationNames.size(); ++i)
+				if (ImGui::Button(animatedModelData.animationNames[i].c_str()))
 				{
-					const bool isSelected = (selectedAnimationIndex == i);
-					if (ImGui::Selectable(animatedModelData.animationNames[i].c_str(), isSelected))
-					{
-						selectedAnimationIndex = i;
-					}
-					if (isSelected)
-					{
-						ImGui::SetItemDefaultFocus();
-					}
+					animationPlayer.PlayAnimation(animatedModelData.animationNames[i]);
 				}
-				ImGui::EndCombo();
 			}
 
-			// Play button
-			if (selectedAnimationIndex >= 0)
+			if (animationPlayer.isAnimationPlaying)
 			{
-				ImGui::Text("Play");
-				if (isAnimationPlaying)
+				if (ImGui::Button("Pause"))
 				{
-					if (ImGui::Button("Pause"))
-					{
-						isAnimationPlaying = false;
-					}
-				}
-				else
-				{
-					if (ImGui::Button("Play"))
-					{
-						isAnimationPlaying = true;
-					}
-				}
-				if (ImGui::Button("Stop"))
-				{
-					isAnimationPlaying = false;
-					selectedAnimationIndex = -1;
+					animationPlayer.isAnimationPlaying = false;
 				}
 			}
-			if (ImGui::Checkbox("Loop", &isAnimationLooping)) { }
+			else
+			{
+				if (ImGui::Button("Resume"))
+				{
+					animationPlayer.isAnimationPlaying = true;
+				}
+			}
+
+			if (ImGui::Button("Stop"))
+			{
+				animationPlayer.isAnimationPlaying = false;
+			}
+
+			if (ImGui::Checkbox("Loop", &animationPlayer.currentAnimation.isLooping)) { }
 
 			// Animation speed slider
 			ImGui::Text("Speed");
-			ImGui::SliderFloat("##Speed", &animationSpeed, 0.0f, 2.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
+			ImGui::SliderFloat("##Speed", &animationPlayer.currentAnimation.speed, 0.0f, 2.0f, "%.2f",
+			                   ImGuiSliderFlags_Logarithmic);
+			ImGui::Text("Blend Time");
+			ImGui::SliderFloat("##BlendTime", &animationPlayer.blendTime, 0.0f, 1.0f, "%.2f",
+			                   ImGuiSliderFlags_Logarithmic);
 
 			ImGui::NextColumn();
 			ImGui::Text("Orientation");

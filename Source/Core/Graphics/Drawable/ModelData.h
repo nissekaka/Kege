@@ -1,10 +1,8 @@
 #pragma once
-#include <string>
 #include <map>
 
 #include "Core/Graphics/Drawable/Vertex.h"
-#include <vector>
-
+#include "Core/Graphics/Animation/AnimationData.h"
 
 namespace Kaka
 {
@@ -20,27 +18,12 @@ namespace Kaka
 		//std::vector<int> childIndices;
 	};
 
-	struct Keyframe
-	{
-		float time = 0.0f;
-		std::vector<DirectX::XMMATRIX> boneTransforms{};
-	};
-
 	struct Skeleton
 	{
 		int rootBoneIndex = -1; // Index of the root bone in the skeleton
 		std::vector<Bone> bones{};
 		//std::unordered_map<std::string, int> boneIndexMap{};
 		std::vector<std::string> boneNames;
-	};
-
-	struct AnimationClip
-	{
-		std::string name = "None";
-		float length = 0.0f;
-		float fps = 0.0f;
-		float duration = 0.0f;
-		std::vector<Keyframe> keyframes{};
 	};
 
 	struct Mesh
