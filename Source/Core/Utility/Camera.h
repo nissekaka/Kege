@@ -13,6 +13,7 @@ namespace Kaka
 		void Rotate(float aDx, float aDy);
 		void Translate(DirectX::XMFLOAT3 aTranslation);
 		void SetPosition(DirectX::XMFLOAT3 aPosition);
+		void SetRotationDegrees(float aPitch, float aYaw);
 		DirectX::XMMATRIX GetMatrix() const;
 		DirectX::XMFLOAT3 GetPosition() const;
 

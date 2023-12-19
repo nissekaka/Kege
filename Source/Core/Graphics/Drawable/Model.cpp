@@ -22,6 +22,11 @@ namespace Kaka
 		solidColour = {1.0f, 1.0f, 1.0f, 1.0f};
 	}
 
+	void Model::Init()
+	{
+		animationPlayer.Init(&animatedModelData);
+	}
+
 	void Model::LoadModel(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType)
 	{
 		if (!isLoaded)
@@ -223,9 +228,6 @@ namespace Kaka
 		{
 			shaderType = aShaderType;
 			texture.LoadTextureFromModel(aGfx, aFilePath);
-
-			// TODO This should maybe not be here, idk
-			animationPlayer.Init(&animatedModelData);
 		}
 
 		if (!isLoaded)
@@ -1046,44 +1048,55 @@ namespace Kaka
 		{
 			ImGui::Columns(2, nullptr, true);
 
-			ImGui::Text("Animations");
-			for (int i = 0; i < animatedModelData.animationNames.size(); ++i)
-			{
-				if (ImGui::Button(animatedModelData.animationNames[i].c_str()))
-				{
-					animationPlayer.PlayAnimation(animatedModelData.animationNames[i]);
-				}
-			}
+			//if (ImGui::Checkbox("1D Blend", &animationPlayer.useBlendTree)) {}
 
-			if (animationPlayer.isAnimationPlaying)
+			if (!animationPlayer.useBlendTree)
 			{
-				if (ImGui::Button("Pause"))
+				ImGui::Text("Animations");
+				for (int i = 0; i < animatedModelData.animationNames.size(); ++i)
 				{
-					animationPlayer.isAnimationPlaying = false;
+					if (ImGui::Button(animatedModelData.animationNames[i].c_str()))
+					{
+						animationPlayer.PlayAnimation(animatedModelData.animationNames[i]);
+					}
 				}
+
+				if (animationPlayer.currentAnimation.isPlaying)
+				{
+					if (ImGui::Button("Pause"))
+					{
+						//animationPlayer.isAnimationPlaying = false;
+						animationPlayer.PauseAnimation();
+					}
+				}
+				else
+				{
+					if (ImGui::Button("Resume"))
+					{
+						//animationPlayer.isAnimationPlaying = true;
+						animationPlayer.ResumeAnimation();
+					}
+				}
+
+				if (ImGui::Button("Stop"))
+				{
+					//animationPlayer.isAnimationPlaying = false;
+					animationPlayer.StopAnimation();
+				}
+
+				if (ImGui::Checkbox("Loop", &animationPlayer.currentAnimation.isLooping)) { }
+
+				// Animation speed slider
+				ImGui::Text("Speed");
+				ImGui::SliderFloat("##Speed", &animationPlayer.currentAnimation.speed, 0.0f, 2.0f, "%.2f");
+				ImGui::Text("Blend Time");
+				ImGui::SliderFloat("##BlendTime", &animationPlayer.blendTime, 0.0f, 1.0f, "%.2f");
 			}
 			else
 			{
-				if (ImGui::Button("Resume"))
-				{
-					animationPlayer.isAnimationPlaying = true;
-				}
+				ImGui::Text("Blend Factor");
+				ImGui::SliderFloat("##BlendFactor", &animationPlayer.blendFactor, 0.0f, 1.0f, "%.2f");
 			}
-
-			if (ImGui::Button("Stop"))
-			{
-				animationPlayer.isAnimationPlaying = false;
-			}
-
-			if (ImGui::Checkbox("Loop", &animationPlayer.currentAnimation.isLooping)) { }
-
-			// Animation speed slider
-			ImGui::Text("Speed");
-			ImGui::SliderFloat("##Speed", &animationPlayer.currentAnimation.speed, 0.0f, 2.0f, "%.2f",
-			                   ImGuiSliderFlags_Logarithmic);
-			ImGui::Text("Blend Time");
-			ImGui::SliderFloat("##BlendTime", &animationPlayer.blendTime, 0.0f, 1.0f, "%.2f",
-			                   ImGuiSliderFlags_Logarithmic);
 
 			ImGui::NextColumn();
 			ImGui::Text("Orientation");

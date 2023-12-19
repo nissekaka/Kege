@@ -62,7 +62,8 @@ namespace Kaka
 		reflectionPlane.SetPosition({terrain.GetSize() / 2.0f, reflectPlaneHeight, terrain.GetSize() / 2.0f});
 
 		//camera.SetPosition({0.0f, 0.0f, 0.0f});
-		camera.SetPosition({742.75f, 0.16f, 395.95f});
+		camera.SetPosition({690.0f, 160.0f, 740.0f});
+		camera.SetRotationDegrees(15.0f, -145.0f);
 
 		for (int i = 0; i < 0; ++i)
 		{
@@ -96,7 +97,7 @@ namespace Kaka
 		animatedModel.LoadFBXAnimation("Assets\\Models\\crawler\\CH_NPC_CrawlerRun__22G3S_AN.fbx");
 		animatedModel.LoadFBXAnimation("Assets\\Models\\crawler\\CH_NPC_CrawlerAttack__22G3S_AN.fbx");
 		animatedModel.LoadFBXAnimation("Assets\\Models\\crawler\\CH_NPC_CrawlerDeath__22G3S_AN.fbx");
-
+		animatedModel.Init();
 		//TGA::FBXAnimation animation;
 
 		//if (TGA::FBXImporter::LoadAnimation("Assets\\Models\\player\\anim_playerRun.fbx",
@@ -445,27 +446,27 @@ namespace Kaka
 
 			switch (e->GetKeyCode())
 			{
-				case VK_ESCAPE:
-					if (wnd.CursorEnabled())
-					{
-						wnd.DisableCursor();
-						wnd.mouse.EnableRaw();
-					}
-					else
-					{
-						wnd.EnableCursor();
-						wnd.mouse.DisableRaw();
-					}
-					break;
-				case VK_F1:
-					showImGui = !showImGui;
-					break;
-				case VK_F2:
-					showStatsWindow = !showStatsWindow;
-					break;
-				case VK_F3:
-					drawLightDebug = !drawLightDebug;
-					break;
+			case VK_ESCAPE:
+				if (wnd.CursorEnabled())
+				{
+					wnd.DisableCursor();
+					wnd.mouse.EnableRaw();
+				}
+				else
+				{
+					wnd.EnableCursor();
+					wnd.mouse.DisableRaw();
+				}
+				break;
+			case VK_F1:
+				showImGui = !showImGui;
+				break;
+			case VK_F2:
+				showStatsWindow = !showStatsWindow;
+				break;
+			case VK_F3:
+				drawLightDebug = !drawLightDebug;
+				break;
 			}
 		}
 

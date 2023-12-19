@@ -21,6 +21,7 @@ namespace Kaka
 		Model() = default;
 		Model(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType);
 		~Model() override = default;
+		void Init();
 		void LoadModel(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType);
 		void LoadFBXModel(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType);
 		bool LoadFBXAnimation(const std::string& aFilePath);

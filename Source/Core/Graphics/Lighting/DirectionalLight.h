@@ -21,7 +21,6 @@ namespace Kaka
 		void EnableSimulation();
 		void DisableSimulation();
 		void Simulate(const float aDeltaTime);
-
 	private:
 		struct DirectionalLightBuffer
 		{

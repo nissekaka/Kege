@@ -62,6 +62,12 @@ namespace Kaka
 		position = aPosition;
 	}
 
+	void Camera::SetRotationDegrees(const float aPitch, const float aYaw)
+	{
+		pitch = DegToRad(aPitch);
+		yaw = DegToRad(aYaw);
+	}
+
 	DirectX::XMMATRIX Camera::GetMatrix() const
 	{
 		//	using namespace DirectX;

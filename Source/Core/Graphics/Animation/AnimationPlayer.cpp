@@ -12,6 +12,12 @@ namespace Kaka
 		currentAnimation.finalTransforms.resize(modelData->skeleton->bones.size());
 		blendAnimation.combinedTransforms.resize(modelData->skeleton->bones.size());
 		blendAnimation.finalTransforms.resize(modelData->skeleton->bones.size());
+
+		if (useBlendTree)
+		{
+			StartAnimation(modelData->animationNames[0], currentAnimation);
+			StartAnimation(modelData->animationNames[1], blendAnimation);
+		}
 	}
 
 	void AnimationPlayer::Animate(const float aDeltaTime)
@@ -22,70 +28,39 @@ namespace Kaka
 		{
 			isAnimationPlaying = true;
 
-			modelData->combinedTransforms = currentAnimation.combinedTransforms;
-			modelData->finalTransforms = currentAnimation.finalTransforms;
-
-			if (isBlending)
+			if (useBlendTree)
 			{
 				if (UpdateAnimation(aDeltaTime, blendAnimation))
 				{
-					blendTimer += aDeltaTime;
-					const float blendFactor = (std::min)(1.0f, blendTimer / blendTime);
+					BlendPoses(currentAnimation, blendAnimation, blendFactor);
+				}
+			}
+			else
+			{
+				modelData->combinedTransforms = currentAnimation.combinedTransforms;
+				modelData->finalTransforms = currentAnimation.finalTransforms;
 
-					for (size_t i = 0; i < skeleton->bones.size(); i++)
+				if (isBlending)
+				{
+					if (UpdateAnimation(aDeltaTime, blendAnimation))
 					{
+						blendTimer += aDeltaTime;
+						const float blendFactor = (std::min)(1.0f, blendTimer / blendTime);
+
+						BlendPoses(currentAnimation, blendAnimation, blendFactor);
+
+						// If blending is complete, reset variables
+						if (blendFactor >= 1.0f)
 						{
-							const DirectX::XMMATRIX currentFramePose = currentAnimation.finalTransforms[i];
-							const DirectX::XMMATRIX blendFramePose = blendAnimation.finalTransforms[i];
-
-							// Blended pose needs to be multiplication of decomposed matrices
-							DirectX::XMVECTOR currentScale, currentRotation, currentTranslation;
-							DirectX::XMVECTOR blendScale, blendRotation, blendTranslation;
-							DirectX::XMMatrixDecompose(&currentScale, &currentRotation, &currentTranslation, currentFramePose);
-							DirectX::XMMatrixDecompose(&blendScale, &blendRotation, &blendTranslation, blendFramePose);
-
-							DirectX::XMMATRIX blendedPose = DirectX::XMMatrixAffineTransformation(
-								DirectX::XMVectorLerp(currentScale, blendScale, blendFactor),
-								DirectX::XMVectorZero(),
-								DirectX::XMQuaternionSlerp(currentRotation, blendRotation, blendFactor),
-								DirectX::XMVectorLerp(currentTranslation, blendTranslation, blendFactor)
-							);
-
-							modelData->finalTransforms[i] = blendedPose;
+							isBlending = false;
+							blendTimer = 0.0f;
+							currentAnimation.clip = blendAnimation.clip;
+							currentAnimation.time = blendAnimation.time;
+							currentAnimation.speed = blendAnimation.speed;
+							currentAnimation.isPlaying = blendAnimation.isPlaying;
+							currentAnimation.isLooping = blendAnimation.isLooping;
+							blendAnimation.clip = nullptr;
 						}
-
-						{
-							const DirectX::XMMATRIX currentFramePose = currentAnimation.combinedTransforms[i];
-							const DirectX::XMMATRIX blendFramePose = blendAnimation.combinedTransforms[i];
-
-							// Blended pose needs to be multiplication of decomposed matrices
-							DirectX::XMVECTOR currentScale, currentRotation, currentTranslation;
-							DirectX::XMVECTOR blendScale, blendRotation, blendTranslation;
-							DirectX::XMMatrixDecompose(&currentScale, &currentRotation, &currentTranslation, currentFramePose);
-							DirectX::XMMatrixDecompose(&blendScale, &blendRotation, &blendTranslation, blendFramePose);
-
-							DirectX::XMMATRIX blendedPose = DirectX::XMMatrixAffineTransformation(
-								DirectX::XMVectorLerp(currentScale, blendScale, blendFactor),
-								DirectX::XMVectorZero(),
-								DirectX::XMQuaternionSlerp(currentRotation, blendRotation, blendFactor),
-								DirectX::XMVectorLerp(currentTranslation, blendTranslation, blendFactor)
-							);
-
-							modelData->combinedTransforms[i] = blendedPose;
-						}
-					}
-
-					// If blending is complete, reset variables
-					if (blendFactor >= 1.0f)
-					{
-						isBlending = false;
-						blendTimer = 0.0f;
-						currentAnimation.clip = blendAnimation.clip;
-						currentAnimation.time = blendAnimation.time;
-						currentAnimation.speed = blendAnimation.speed;
-						currentAnimation.isPlaying = blendAnimation.isPlaying;
-						currentAnimation.isLooping = blendAnimation.isLooping;
-						blendAnimation.clip = nullptr;
 					}
 				}
 			}
@@ -103,7 +78,7 @@ namespace Kaka
 		}
 	}
 
-	bool AnimationPlayer::UpdateAnimation(const float aDeltaTime, Animation& aOutAnimation)
+	bool AnimationPlayer::UpdateAnimation(const float aDeltaTime, Animation& aOutAnimation) const
 	{
 		const Skeleton* skeleton = modelData->skeleton;
 
@@ -172,13 +147,56 @@ namespace Kaka
 		return false;
 	}
 
+	void AnimationPlayer::BlendPoses(Animation& aFromAnimation, Animation& aToAnimation, const float aBlendFactor) const
+	{
+		const Skeleton* skeleton = modelData->skeleton;
+
+		for (size_t i = 0; i < skeleton->bones.size(); i++)
+		{
+			{
+				const DirectX::XMMATRIX currentFramePose = aFromAnimation.finalTransforms[i];
+				const DirectX::XMMATRIX blendFramePose = aToAnimation.finalTransforms[i];
+
+				// Blended pose needs to be multiplication of decomposed matrices
+				DirectX::XMVECTOR currentScale, currentRotation, currentTranslation;
+				DirectX::XMVECTOR blendScale, blendRotation, blendTranslation;
+				DirectX::XMMatrixDecompose(&currentScale, &currentRotation, &currentTranslation, currentFramePose);
+				DirectX::XMMatrixDecompose(&blendScale, &blendRotation, &blendTranslation, blendFramePose);
+
+				DirectX::XMMATRIX blendedPose = DirectX::XMMatrixAffineTransformation(
+					DirectX::XMVectorLerp(currentScale, blendScale, aBlendFactor),
+					DirectX::XMVectorZero(),
+					DirectX::XMQuaternionSlerp(currentRotation, blendRotation, aBlendFactor),
+					DirectX::XMVectorLerp(currentTranslation, blendTranslation, aBlendFactor)
+				);
+
+				modelData->finalTransforms[i] = blendedPose;
+			}
+
+			{
+				const DirectX::XMMATRIX currentFramePose = aFromAnimation.combinedTransforms[i];
+				const DirectX::XMMATRIX blendFramePose = aToAnimation.combinedTransforms[i];
+
+				// Blended pose needs to be multiplication of decomposed matrices
+				DirectX::XMVECTOR currentScale, currentRotation, currentTranslation;
+				DirectX::XMVECTOR blendScale, blendRotation, blendTranslation;
+				DirectX::XMMatrixDecompose(&currentScale, &currentRotation, &currentTranslation, currentFramePose);
+				DirectX::XMMatrixDecompose(&blendScale, &blendRotation, &blendTranslation, blendFramePose);
+
+				DirectX::XMMATRIX blendedPose = DirectX::XMMatrixAffineTransformation(
+					DirectX::XMVectorLerp(currentScale, blendScale, aBlendFactor),
+					DirectX::XMVectorZero(),
+					DirectX::XMQuaternionSlerp(currentRotation, blendRotation, aBlendFactor),
+					DirectX::XMVectorLerp(currentTranslation, blendTranslation, aBlendFactor)
+				);
+
+				modelData->combinedTransforms[i] = blendedPose;
+			}
+		}
+	}
+
 	void AnimationPlayer::PlayAnimation(const std::string& aAnimationName, const bool aShouldLoop, const float aSpeed)
 	{
-		if (this == nullptr)
-		{
-			return;
-		}
-
 		if (isBlending)
 		{
 			isBlending = false;
@@ -213,13 +231,30 @@ namespace Kaka
 		currentAnimation.isLooping = aShouldLoop;
 	}
 
+	bool AnimationPlayer::StartAnimation(const std::string& aAnimationName, Animation& aAnimation, bool aShouldLoop, float aSpeed)
+	{
+		if (modelData->animationClipMap.empty())
+		{
+			return false;
+		}
+
+		if (aAnimation.clip != nullptr && aAnimation.clip->name == aAnimationName)
+		{
+			return false;
+		}
+
+		aAnimation.clip = modelData->animationClipMap[aAnimationName];
+		aAnimation.time = 0.0f;
+		aAnimation.speed = aSpeed;
+		aAnimation.isPlaying = true;
+		aAnimation.isLooping = aShouldLoop;
+
+		return true;
+	}
+
 	void AnimationPlayer::PlayAnimationBlend(const std::string& aAnimationName, const bool aShouldLoop,
 	                                         const float aSpeed, const float aBlendTime)
 	{
-		if (this == nullptr)
-		{
-			return;
-		}
 		if (modelData->animationClipMap.empty())
 		{
 			return;
@@ -248,6 +283,11 @@ namespace Kaka
 	void AnimationPlayer::ResumeAnimation()
 	{
 		currentAnimation.isPlaying = true;
+	}
+
+	void AnimationPlayer::StopAnimation()
+	{
+		currentAnimation.clip = nullptr;
 	}
 
 	void AnimationPlayer::SetAnimationShouldLoop(const bool aShouldLoop)
