@@ -25,6 +25,7 @@ namespace Kaka
 		void SetFalloff(float aFalloff) const;
 		void Reset() const;
 		void Draw(Graphics& aGfx) const;
+		void AttachToTransform(const DirectX::XMMATRIX aTransform) const;
 
 	private:
 		static constexpr UINT MAX_LIGHTS = 50u; // Needs to be the same in PixelShader
@@ -37,13 +38,13 @@ namespace Kaka
 
 		struct PointLightData
 		{
-			DirectX::XMFLOAT3 position;
+			DirectX::XMFLOAT3 position = {0, 0, 0};
 			float padding1;
-			DirectX::XMFLOAT3 colour;
+			DirectX::XMFLOAT3 colour = {0, 0, 0};
 			float padding2;
-			float diffuseIntensity;
-			float radius;
-			float falloff;
+			float diffuseIntensity = 0.0f;
+			float radius = 0.0f;
+			float falloff = 0.0f;
 			float padding3;
 			BOOL active = false;
 			float padding4[3];

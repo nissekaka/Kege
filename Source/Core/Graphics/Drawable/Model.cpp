@@ -1039,6 +1039,29 @@ namespace Kaka
 		pixelShader.Bind(aGfx);
 	}
 
+	DirectX::XMMATRIX& Model::GetBoneTransform(const int aBoneIndex)
+	{
+		return animatedModelData.finalTransforms[aBoneIndex];
+	}
+
+	DirectX::XMMATRIX& Model::GetBoneTransform(const std::string& aBoneName)
+	{
+		for (int i = 0; i < animatedModelData.skeleton->bones.size(); ++i)
+		{
+			if (animatedModelData.skeleton->bones[i].name == aBoneName)
+			{
+				return animatedModelData.finalTransforms[i];
+			}
+		}
+
+		return animatedModelData.finalTransforms[0];
+	}
+
+	DirectX::XMMATRIX Model::GetBoneWorldTransform(const int aBoneIndex) const
+	{
+		return animatedModelData.combinedTransforms[aBoneIndex] * GetTransform();
+	}
+
 	void Model::ShowControlWindow(const char* aWindowName)
 	{
 		// Window name defaults to "Model"

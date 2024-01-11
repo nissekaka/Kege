@@ -20,7 +20,7 @@ cbuffer DirectionalLight : register(b1)
 cbuffer PointLight : register(b2)
 {
     PointLightData plBuf[MAX_LIGHTS];
-    uint activeLights;
+    uint activePointLights;
 }
 
 cbuffer SpotLightBuffer : register(b3)
@@ -60,7 +60,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     const float2 texCoord = aInput.texCoord + float2(waveOffset, waveOffset);
 
     float3 colour = colourTex.Sample(splr, texCoord).rgb;
-    float3 normal = normalTex.Sample(splr, texCoord).wyz;
+    float3 normal = normalTex.Sample(splr, texCoord).xyz;
     const float3 material = materialTex.Sample(splr, texCoord).rgb;
 
     float3 ambientLight = { 0.0f, 0.0f, 0.0f };
@@ -105,7 +105,7 @@ float4 main(PixelInput aInput) : SV_TARGET
         colour = lerp((float3) 0.0f, colour.rgb, 1 - metalness);
     }
 
-    const float3 toEye = normalize((float3) cameraPosition - aInput.worldPos);
+    const float3 toEye = normalize(cameraPosition.xyz - aInput.worldPos.xyz);
 
     // Lighting
 
@@ -123,7 +123,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     roughness, dLightColour, -dLightDirection, toEye);
 
     // Point lights
-    for (uint i = 0; i < activeLights; ++i)
+    for (uint i = 0; i < activePointLights; ++i)
     {
         if (!plBuf[i].active)
         {

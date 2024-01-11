@@ -116,13 +116,14 @@ namespace Kaka
 
 	void PointLight::Draw(Graphics& aGfx) const
 	{
+		float size = 0.1f * pointLightData[index].radius;
 		const std::vector<Vertex> vertices = {
-			{{-0.1f, 0.0f, 0.0f}},
-			{{0.1f, 0.0f, 0.0f}},
-			{{0.0f, -0.1f, 0.0f}},
-			{{0.0f, 0.1f, 0.0f}},
-			{{0.0f, 0.0f, -0.1f}},
-			{{0.0f, 0.0f, 0.1f}}
+			{{-size, 0.0f, 0.0f}},
+			{{size, 0.0f, 0.0f}},
+			{{0.0f, -size, 0.0f}},
+			{{0.0f, size, 0.0f}},
+			{{0.0f, 0.0f, -size}},
+			{{0.0f, 0.0f, size}}
 		};
 		VertexBuffer vertexBuffer(aGfx, vertices);
 		vertexBuffer.Bind(aGfx);
@@ -196,5 +197,33 @@ namespace Kaka
 
 		aGfx.DrawIndexed(static_cast<UINT>(std::size(indices)));
 		//aGfx.pContext->DrawIndexed(static_cast<UINT>(std::size(indices)), 0u, 0u);
+
+		// Draw IMGUI debug circles
+		const DirectX::XMFLOAT3 lightPos = GetPosition();
+
+		// Transform bone positions to screen space
+		DirectX::XMFLOAT2 screenPos = {0.0f, 0.0f};
+
+		DirectX::XMStoreFloat2(
+			&screenPos,
+			DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&lightPos), modelView)
+		);
+
+		screenPos.x = (screenPos.x + 1.0f) * 0.5f * ImGui::GetIO().DisplaySize.x;
+		screenPos.y = (1.0f - screenPos.y) * 0.5f * ImGui::GetIO().DisplaySize.y;
+
+
+		ImGui::GetForegroundDrawList()->AddCircle(
+			ImVec2(screenPos.x, screenPos.y),
+			6.0f,
+			IM_COL32(0, 255, 255, 255)
+		);
+	}
+
+	void PointLight::AttachToTransform(const DirectX::XMMATRIX aTransform) const
+	{
+		const DirectX::XMFLOAT3 pos = {aTransform.r[3].m128_f32[0], aTransform.r[3].m128_f32[1], aTransform.r[3].m128_f32[2]};
+
+		SetPosition(pos);
 	}
 }

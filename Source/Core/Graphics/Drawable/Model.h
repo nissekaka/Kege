@@ -42,6 +42,10 @@ namespace Kaka
 		void SetNearbyLights(bool aNearbyPointLights[], bool aNearbySpotLights[]);
 		void BindPixelShader(const Graphics& aGfx);
 		ModelData& GetModelData() { return modelData; }
+		AnimatedModelDataPtr& GetAnimatedModelData() { return animatedModelData; }
+		DirectX::XMMATRIX& GetBoneTransform(int aBoneIndex);
+		DirectX::XMMATRIX& GetBoneTransform(const std::string& aBoneName);
+		DirectX::XMMATRIX GetBoneWorldTransform(int aBoneIndex) const;
 
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);

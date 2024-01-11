@@ -27,14 +27,14 @@ PixelInput main(const VertexInput aInput)
 {
     PixelInput output;
 
-    const float3x3 objectRotationMatrix = objectToWorld;
+    const float3x3 objectToWorldRotation = objectToWorld;
     const float4 position = { aInput.position, 1.0f };
-    output.worldPos = mul(objectToWorld, aInput.position);
+    output.worldPos = mul(objectToWorld, position).xyz;
     output.position = mul(objectToClip, position);
     output.texCoord = aInput.texCoord;
-    output.normal = mul(objectRotationMatrix, aInput.normal);
-    output.tangent = mul(objectRotationMatrix, aInput.tan);
-    output.bitan = mul(objectRotationMatrix, aInput.bitan);
+    output.normal = mul(objectToWorldRotation, aInput.normal);
+    output.tangent = mul(objectToWorldRotation, aInput.tan);
+    output.bitan = mul(objectToWorldRotation, aInput.bitan);
     
     return output;
 }

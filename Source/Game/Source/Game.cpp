@@ -9,8 +9,8 @@
 
 constexpr int WINDOW_WIDTH = 1920;
 constexpr int WINDOW_HEIGHT = 1080;
-constexpr int NUM_POINT_LIGHTS = 20;
-constexpr int NUM_SPOT_LIGHTS = 20;
+constexpr int NUM_POINT_LIGHTS = 10;
+constexpr int NUM_SPOT_LIGHTS = 10;
 constexpr int TERRAIN_SIZE = 1000;
 
 namespace Kaka
@@ -145,7 +145,7 @@ namespace Kaka
 			pointLights[i].SetColour({cDist(mt), cDist(mt), cDist(mt)});
 			DirectX::XMFLOAT3 pos = terrain.GetRandomVertexPosition();
 			pos.y += 20.0f;
-			pointLights[i].SetPosition(pos);
+			//pointLights[i].SetPosition(pos);
 			pointLights[i].SetRadius(75.0f);
 			pointLights[i].SetFalloff(1.0f);
 			pointLights[i].SetIntensity(500.0f);
@@ -235,8 +235,25 @@ namespace Kaka
 		//wnd.Gfx().SetRenderTarget(eRenderTargetType::Default);
 		wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing);
 
+		// Attach point lights to bones
+		pointLights[0].AttachToTransform(animatedModel.GetBoneWorldTransform(6));
+		pointLights[0].Bind(wnd.Gfx(), camera.GetMatrix());
+		pointLights[1].AttachToTransform(animatedModel.GetBoneWorldTransform(9));
+		pointLights[1].Bind(wnd.Gfx(), camera.GetMatrix());
+		pointLights[2].AttachToTransform(animatedModel.GetBoneWorldTransform(12));
+		pointLights[2].Bind(wnd.Gfx(), camera.GetMatrix());
+		pointLights[3].AttachToTransform(animatedModel.GetBoneWorldTransform(15));
+		pointLights[3].Bind(wnd.Gfx(), camera.GetMatrix());
+		//if (drawLightDebug)
+		//{
+		pointLights[0].Draw(wnd.Gfx());
+		pointLights[1].Draw(wnd.Gfx());
+		pointLights[2].Draw(wnd.Gfx());
+		pointLights[3].Draw(wnd.Gfx());
+		//}
+
 		// Draw normal
-		for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
+		for (int i = 4; i < static_cast<int>(pointLights.size()); ++i)
 		{
 			pointLights[i].Bind(wnd.Gfx(), camera.GetMatrix());
 
@@ -280,6 +297,36 @@ namespace Kaka
 			}
 		}
 
+		{
+			// Point light range
+			bool nearbyPointLights[50u] = {};
+			bool nearbySpotLights[50u] = {};
+
+			for (int i = 0; i < 50u; ++i)
+			{
+				if (i >= pointLights.size())
+				{
+					nearbyPointLights[i] = false;
+					nearbySpotLights[i] = false;
+				}
+				else
+				{
+					const float distance = GetDistanceBetweenObjects(animatedModel.GetPosition(), pointLights[i].GetPosition());
+					nearbyPointLights[i] = (distance <= pointLights[i].GetRadius());
+					if (i >= spotLights.size())
+					{
+						nearbySpotLights[i] = false;
+					}
+					else
+					{
+						nearbySpotLights[i] = (distance <= spotLights[i].GetRange());
+					}
+				}
+			}
+			animatedModel.SetNearbyLights(nearbyPointLights, nearbySpotLights);
+		}
+
+
 		for (Model& model : models)
 		{
 			// Point light range
@@ -288,7 +335,7 @@ namespace Kaka
 
 			for (int i = 0; i < 50u; ++i)
 			{
-				if (i >= spotLights.size())
+				if (i >= pointLights.size())
 				{
 					nearbyPointLights[i] = false;
 					nearbySpotLights[i] = false;
@@ -304,29 +351,6 @@ namespace Kaka
 			model.Draw(wnd.Gfx());
 		}
 
-		//{
-		//	// Point light range
-		//	bool nearbyPointLights[50u] = {};
-		//	bool nearbySpotLights[50u] = {};
-
-		//	for (int i = 0; i < 50u; ++i)
-		//	{
-		//		if (i >= spotLights.size())
-		//		{
-		//			nearbyPointLights[i] = false;
-		//			nearbySpotLights[i] = false;
-		//		}
-		//		else
-		//		{
-		//			const float distance = GetDistanceBetweenObjects(animatedModel.GetPosition(),
-		//			                                                 pointLights[i].GetPosition());
-		//			nearbyPointLights[i] = distance <= pointLights[i].GetRadius() * 2;
-		//			nearbySpotLights[i] = distance <= spotLights[i].GetRange() * 2;
-		//		}
-		//	}
-		//	animatedModel.SetNearbyLights(nearbyPointLights, nearbySpotLights);
-		//}
-
 		skybox.Draw(wnd.Gfx());
 		terrain.SetCullingMode(eCullingMode::Back);
 		for (TerrainSubset& subset : terrain.GetTerrainSubsets())
@@ -337,7 +361,7 @@ namespace Kaka
 
 			for (int i = 0; i < 50u; ++i)
 			{
-				if (i >= spotLights.size())
+				if (i >= pointLights.size())
 				{
 					nearbyPointLights[i] = false;
 					nearbySpotLights[i] = false;
@@ -346,7 +370,14 @@ namespace Kaka
 				{
 					const float distance = GetDistanceBetweenObjects(subset.center, pointLights[i].GetPosition());
 					nearbyPointLights[i] = distance <= pointLights[i].GetRadius() * 2;
-					nearbySpotLights[i] = distance <= spotLights[i].GetRange() * 2;
+					if (i >= spotLights.size())
+					{
+						nearbySpotLights[i] = false;
+					}
+					else
+					{
+						nearbySpotLights[i] = distance <= spotLights[i].GetRange() * 2;
+					}
 				}
 			}
 			subset.SetNearbyLights(nearbyPointLights, nearbySpotLights);
