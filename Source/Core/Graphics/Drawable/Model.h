@@ -86,7 +86,6 @@ namespace Kaka
 	private:
 		AnimatedModelDataPtr animatedModelData;
 		ModelData modelData;
-		Texture texture{2u};
 		//std::vector<std::unique_ptr<Bindable>> bindablePtrs;
 		bool isLoaded = false;
 

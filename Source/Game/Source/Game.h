@@ -24,6 +24,8 @@ namespace Kaka
 		int Go();
 
 	private:
+		void LoadModels();
+		void LoadModelThreaded(const std::string& aModelPath, Model& aModel);
 		void Update(const float aDeltaTime);
 		void HandleInput(const float aDeltaTime);
 		void ShowStatsWindow();
@@ -53,7 +55,8 @@ namespace Kaka
 
 	private:
 		std::vector<Model> models;
-		Model animatedModel{};
+		//Model animatedModel{};
+		std::vector<Model> threadedModels{};
 		//Model spy{};
 		//Model ken{};
 		//Model vamp{};
@@ -114,5 +117,13 @@ namespace Kaka
 		};
 
 		PostProcessingBuffer ppBuffer = {};
+
+		std::thread updateThread;
+		std::thread loadModelsThread;
+		std::vector<std::thread> modelLoadingThreads;
+		std::vector<bool> threadHasStarted = {};
+		std::mutex modelLoadingMutex;
+		float loadRadius = 100.0f;
+		float cameraMoveSpeed = 10.0f;
 	};
 }

@@ -20,6 +20,7 @@ namespace Kaka
 		static bool LoadModel(const std::string& aFilePath, ModelData& aOutModelData);
 
 		static bool LoadAnimatedModel(AnimatedModelDataPtr& aOutModelData, const std::string& aFilePath);
+		static bool LoadTexture(const Graphics& aGfx, AnimatedModelDataPtr& aOutModelData, const std::string& aFilePath);
 		static bool LoadAnimation(AnimatedModelDataPtr& aOutModelData, const std::string& aFilePath);
 
 	private:
@@ -31,5 +32,6 @@ namespace Kaka
 		inline static std::unordered_map<std::string, AnimatedMeshList> animatedMeshLists;
 		inline static std::unordered_map<std::string, Skeleton> skeletons;
 		inline static std::unordered_map<std::string, AnimationClip> animationClips;
+		inline static std::unordered_map<std::string, Texture> textures;
 	};
 }

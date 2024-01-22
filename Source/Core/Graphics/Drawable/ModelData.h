@@ -91,6 +91,8 @@ namespace Kaka
 
 		//std::vector<RenderResources> renderResources = {};
 
+		Texture* texture;
+
 		DirectX::XMMATRIX* transform = nullptr;
 
 		std::map<std::string, AnimationClip*> animationClipMap = {};

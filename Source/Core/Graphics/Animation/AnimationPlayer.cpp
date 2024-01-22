@@ -22,6 +22,16 @@ namespace Kaka
 
 	void AnimationPlayer::Animate(const float aDeltaTime)
 	{
+		if (modelData == nullptr)
+		{
+			return;
+		}
+
+		if (modelData->skeleton == nullptr)
+		{
+			return;
+		}
+
 		const Skeleton* skeleton = modelData->skeleton;
 
 		if (UpdateAnimation(aDeltaTime, currentAnimation))
