@@ -23,8 +23,8 @@ namespace Kaka
 
 	private:
 		Sampler sampler = {};
-		PixelShader pixelShader;
-		VertexShader vertexShader;
+		PixelShader* pixelShader = nullptr;
+		VertexShader* vertexShader = nullptr;
 		const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 		{
 			{

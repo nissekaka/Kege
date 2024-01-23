@@ -27,7 +27,7 @@ namespace Kaka
 	TransformConstantBuffer::Transforms TransformConstantBuffer::GetTransforms(const Graphics& aGfx) const
 	{
 		const DirectX::XMMATRIX objectToWorld = parent.GetTransform();
-		DirectX::XMMATRIX objectToClip = objectToWorld * aGfx.GetCamera();
+		DirectX::XMMATRIX objectToClip = objectToWorld * aGfx.GetCurrentCameraMatrix();
 		objectToClip = objectToClip * aGfx.GetProjection();
 		return {objectToWorld, objectToClip};
 

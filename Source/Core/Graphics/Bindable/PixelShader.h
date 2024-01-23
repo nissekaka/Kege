@@ -2,7 +2,6 @@
 #include "Bindable.h"
 #include <string>
 
-
 namespace Kaka
 {
 	class PixelShader : public Bindable

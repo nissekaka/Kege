@@ -9,6 +9,8 @@
 #include <cmath>
 #include <random>
 
+#include "Graphics/Shaders/ShaderFactory.h"
+
 namespace Kaka
 {
 	float GetHeight(const float aX, const float aZ)
@@ -271,42 +273,42 @@ namespace Kaka
 							terrainSubsets[currentIndex].vertices.push_back(terrainVertices[index]);
 
 							if (terrainSubsets[currentIndex].vertices.back().position.x < terrainSubsets[currentIndex].
-								bounds.min.x)
+							                                                              bounds.min.x)
 							{
 								terrainSubsets[currentIndex].bounds.min.x = terrainSubsets[currentIndex].vertices.back()
-									.position.x;
+								                                                                        .position.x;
 							}
 							if (terrainSubsets[currentIndex].vertices.back().position.x > terrainSubsets[currentIndex].
-								bounds.max.x)
+							                                                              bounds.max.x)
 							{
 								terrainSubsets[currentIndex].bounds.max.x = terrainSubsets[currentIndex].vertices.back()
-									.position.x;
+								                                                                        .position.x;
 							}
 
 							if (terrainSubsets[currentIndex].vertices.back().position.y < terrainSubsets[currentIndex].
-								bounds.min.y)
+							                                                              bounds.min.y)
 							{
 								terrainSubsets[currentIndex].bounds.min.y = terrainSubsets[currentIndex].vertices.back()
-									.position.y;
+								                                                                        .position.y;
 							}
 							if (terrainSubsets[currentIndex].vertices.back().position.y > terrainSubsets[currentIndex].
-								bounds.max.y)
+							                                                              bounds.max.y)
 							{
 								terrainSubsets[currentIndex].bounds.max.y = terrainSubsets[currentIndex].vertices.back()
-									.position.y;
+								                                                                        .position.y;
 							}
 
 							if (terrainSubsets[currentIndex].vertices.back().position.z < terrainSubsets[currentIndex].
-								bounds.min.z)
+							                                                              bounds.min.z)
 							{
 								terrainSubsets[currentIndex].bounds.min.z = terrainSubsets[currentIndex].vertices.back()
-									.position.z;
+								                                                                        .position.z;
 							}
 							if (terrainSubsets[currentIndex].vertices.back().position.z > terrainSubsets[currentIndex].
-								bounds.max.z)
+							                                                              bounds.max.z)
 							{
 								terrainSubsets[currentIndex].bounds.max.z = terrainSubsets[currentIndex].vertices.back()
-									.position.z;
+								                                                                        .position.z;
 							}
 						}
 					}
@@ -393,10 +395,10 @@ namespace Kaka
 			subset.indexBuffer.Init(aGfx, subset.indices);
 		}
 
-		pixelShader.Init(aGfx, L"Shaders\\TerrainPBR_PS.cso");
-		vertexShader.Init(aGfx, L"Shaders\\TerrainReflect_VS.cso");
+		pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\TerrainPBR_PS.cso");
+		vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\TerrainReflect_VS.cso");
 
-		inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
+		inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
 		topology.Init(aGfx, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		rasterizer.Init(aGfx);
@@ -410,12 +412,27 @@ namespace Kaka
 		sampler.Bind(aGfx);
 		texture.Bind(aGfx);
 
-		pixelShader.Bind(aGfx);
+		if (aGfx.HasPixelShaderOverride())
+		{
+			aGfx.GetPixelShaderOverride()->Bind(aGfx);
+		}
+		else
+		{
+			pixelShader->Bind(aGfx);
 
-		PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-		psConstantBuffer.Bind(aGfx);
+			PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
+			psConstantBuffer.Bind(aGfx);
+		}
 
-		vertexShader.Bind(aGfx);
+		if (aGfx.HasVertexShaderOverride())
+		{
+			aGfx.GetVertexShaderOverride()->Bind(aGfx);
+		}
+		else
+		{
+			vertexShader->Bind(aGfx);
+		}
+
 		inputLayout.Bind(aGfx);
 		topology.Bind(aGfx);
 		rasterizer.Bind(aGfx);
@@ -479,11 +496,11 @@ namespace Kaka
 	{
 		if (aValue)
 		{
-			vertexShader.Init(aGfx, L"Shaders\\TerrainReflect_VS.cso");
+			vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\TerrainReflect_VS.cso");
 		}
 		else
 		{
-			vertexShader.Init(aGfx, L"Shaders\\TerrainPBR_VS.cso");
+			vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\TerrainPBR_VS.cso");
 		}
 	}
 

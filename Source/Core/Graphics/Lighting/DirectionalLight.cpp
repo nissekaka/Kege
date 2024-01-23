@@ -79,6 +79,11 @@ namespace Kaka
 		bufferData.lightColour = aColour;
 	}
 
+	void DirectionalLight::SetShadowCamera(const DirectX::XMMATRIX aShadowCamera)
+	{
+		bufferData.shadowCamera = aShadowCamera;
+	}
+
 	void DirectionalLight::EnableSimulation()
 	{
 		shouldSimulate = true;

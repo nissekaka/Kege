@@ -4,6 +4,29 @@
 
 namespace Kaka
 {
+	struct PerspectiveData
+	{
+		float width;
+		float height;
+		float vFov;
+		float nearZ;
+		float farZ;
+	};
+
+	struct OrthographicData
+	{
+		float width;
+		float height;
+		float nearZ;
+		float farZ;
+	};
+
+	enum class eCameraType
+	{
+		Perspective,
+		Orthographic
+	};
+
 	class Camera
 	{
 	public:
@@ -14,10 +37,19 @@ namespace Kaka
 		void Translate(DirectX::XMFLOAT3 aTranslation);
 		void SetPosition(DirectX::XMFLOAT3 aPosition);
 		void SetRotationDegrees(float aPitch, float aYaw);
+		void SetDirection(DirectX::XMFLOAT3 aDirection);
 		DirectX::XMMATRIX GetMatrix() const;
+		DirectX::XMMATRIX GetProjection() const;
 		DirectX::XMFLOAT3 GetPosition() const;
+		void SetPerspective(float aWidth, float aHeight, float aVFov, float aNearZ, float aFarZ);
+		void SetOrthographic(float aWidth, float aHeight, float aNearZ, float aFarZ);
 
 	private:
+		PerspectiveData perspectiveData;
+		OrthographicData orthographicData;
+		eCameraType cameraType;
+		DirectX::XMMATRIX projection{};
+
 		DirectX::XMFLOAT3 position;
 		float pitch;
 		float yaw;

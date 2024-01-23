@@ -18,6 +18,7 @@ namespace Kaka
 		DirectX::XMFLOAT3 GetDirection() const;
 		void SetDirection(DirectX::XMFLOAT3 aDirection);
 		void SetColour(DirectX::XMFLOAT3 aColour);
+		void SetShadowCamera(DirectX::XMMATRIX aShadowCamera);
 		void EnableSimulation();
 		void DisableSimulation();
 		void Simulate(const float aDeltaTime);
@@ -28,6 +29,7 @@ namespace Kaka
 			float padding;
 			DirectX::XMFLOAT3 lightColour;
 			float ambientLight;
+			DirectX::XMMATRIX shadowCamera;
 		};
 
 	private:

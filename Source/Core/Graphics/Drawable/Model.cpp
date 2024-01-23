@@ -7,6 +7,7 @@
 #include <TGAFBXImporter/source/Internal.inl>
 #include <wrl/client.h>
 
+#include "Graphics/Shaders/ShaderFactory.h"
 #include "TGAFBXImporter/source/FBXImporter.h"
 
 namespace Kaka
@@ -71,8 +72,8 @@ namespace Kaka
 			{
 			case eShaderType::Solid:
 				{
-					pixelShader.Init(aGfx, L"Shaders\\Solid_PS.cso");
-					vertexShader.Init(aGfx, L"Shaders\\Solid_VS.cso");
+					pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Solid_PS.cso");
+					vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\Solid_VS.cso");
 
 					ied =
 					{
@@ -85,8 +86,8 @@ namespace Kaka
 				break;
 			case eShaderType::Light:
 				{
-					pixelShader.Init(aGfx, L"Shaders\\Light_PS.cso");
-					vertexShader.Init(aGfx, L"Shaders\\Light_VS.cso");
+					pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Light_PS.cso");
+					vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\Light_VS.cso");
 
 					ied =
 					{
@@ -115,8 +116,8 @@ namespace Kaka
 				break;
 			case eShaderType::Phong:
 				{
-					pixelShader.Init(aGfx, L"Shaders\\Phong_PS.cso");
-					vertexShader.Init(aGfx, L"Shaders\\Phong_VS.cso");
+					pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Phong_PS.cso");
+					vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\Phong_VS.cso");
 
 					ied =
 					{
@@ -141,13 +142,13 @@ namespace Kaka
 							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 						},
 					};
-					inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
+					inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
 				}
 				break;
 			case eShaderType::AnimPhong:
 				{
-					pixelShader.Init(aGfx, L"Shaders\\Phong_PS.cso");
-					vertexShader.Init(aGfx, L"Shaders\\AnimPhong_VS.cso");
+					pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Phong_PS.cso");
+					vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\AnimPhong_VS.cso");
 
 					ied =
 					{
@@ -183,8 +184,8 @@ namespace Kaka
 				}
 			case eShaderType::PBR:
 				{
-					pixelShader.Init(aGfx, L"Shaders\\ModelPBR_PS.cso");
-					vertexShader.Init(aGfx, L"Shaders\\ModelPBR_VS.cso");
+					pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\ModelPBR_PS.cso");
+					vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\ModelPBR_VS.cso");
 
 					ied =
 					{
@@ -209,12 +210,12 @@ namespace Kaka
 							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 						},
 					};
-					inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
+					inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
 				}
 				break;
 			}
 
-			inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
+			inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
 			topology.Init(aGfx, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			rasterizer.Init(aGfx);
 			depthStencil.Init(aGfx, DepthStencil::Mode::Write);
@@ -223,51 +224,19 @@ namespace Kaka
 
 	void Model::LoadFBXModel(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType)
 	{
-		ModelLoader::LoadAnimatedModel(animatedModelData, aFilePath);
 		shaderType = aShaderType;
+		ModelLoader::LoadAnimatedModel(animatedModelData, aFilePath);
 		ModelLoader::LoadTexture(aGfx, animatedModelData, aFilePath);
 
-
-		//if (isLoaded)
-		//{
-		//	//animatedModelData.texture.LoadTextureFromModel(aGfx, aFilePath);
-		//}
-
-		//if (isLoaded)
-		//{
 		sampler.Init(aGfx, 0u);
-
-		//// Vertices and indices
-		//switch (modelData.modelType)
-		//{
-		//case eModelType::None:
-		//	{
-		//		assert("No model type!");
-		//	}
-		//	break;
-		//case eModelType::Static:
-		//	{
-		//		vertexBuffer.Init(aGfx, modelData.mesh.vertices);
-		//		indexBuffer.Init(aGfx, modelData.mesh.indices);
-		//	}
-		//	break;
-		//case eModelType::Skeletal:
-		//	{
-		//		//vertexBuffer.Init(aGfx, modelData.animMesh.vertices);
-		//		//indexBuffer.Init(aGfx, modelData.animMesh.indices);
-		//	}
-		//	break;
-		//default:
-		//	assert("Error!");
-		//}
 
 		// Shaders
 		switch (shaderType)
 		{
 		case eShaderType::AnimPBR:
 			{
-				pixelShader.Init(aGfx, L"Shaders\\ModelPBR_PS.cso");
-				vertexShader.Init(aGfx, L"Shaders\\AnimModelPBR_VS.cso");
+				pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\ModelPBR_PS.cso");
+				vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\AnimModelPBR_VS.cso");
 
 				ied =
 				{
@@ -300,16 +269,15 @@ namespace Kaka
 						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 					},
 				};
-				inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
+				inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
 			}
 			break;
 		}
 
-		inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
+		inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
 		topology.Init(aGfx, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		rasterizer.Init(aGfx);
 		depthStencil.Init(aGfx, DepthStencil::Mode::Write);
-		//}
 	}
 
 	bool Model::LoadFBXAnimation(const std::string& aFilePath)
@@ -337,7 +305,7 @@ namespace Kaka
 
 		TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
 		transformConstantBuffer.Bind(aGfx);
-		pixelShader.Bind(aGfx);
+		pixelShader->Bind(aGfx);
 
 		switch (shaderType)
 		{
@@ -451,7 +419,7 @@ namespace Kaka
 			}
 		}
 
-		vertexShader.Bind(aGfx);
+		vertexShader->Bind(aGfx);
 		inputLayout.Bind(aGfx);
 		topology.Bind(aGfx);
 		rasterizer.Bind(aGfx);
@@ -490,8 +458,8 @@ namespace Kaka
 		TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
 		transformConstantBuffer.Bind(aGfx);
 
-		vertexShader.Bind(aGfx);
-		pixelShader.Bind(aGfx);
+		vertexShader->Bind(aGfx);
+		pixelShader->Bind(aGfx);
 		inputLayout.Bind(aGfx);
 		topology.Bind(aGfx);
 		rasterizer.Bind(aGfx);
@@ -578,8 +546,15 @@ namespace Kaka
 		TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
 		transformConstantBuffer.Bind(aGfx);
 
-		vertexShader.Bind(aGfx);
-		pixelShader.Bind(aGfx);
+		vertexShader->Bind(aGfx);
+		if (aGfx.HasPixelShaderOverride())
+		{
+			aGfx.GetPixelShaderOverride()->Bind(aGfx);
+		}
+		else
+		{
+			pixelShader->Bind(aGfx);
+		}
 		inputLayout.Bind(aGfx);
 		topology.Bind(aGfx);
 		rasterizer.Bind(aGfx);
@@ -656,7 +631,10 @@ namespace Kaka
 		{
 			return;
 		}
-
+		if (aGfx.HasPixelShaderOverride())
+		{
+			return;
+		}
 		// Draw ImGui lines between bones
 		const std::vector<DirectX::XMMATRIX> transforms = animatedModelData.combinedTransforms;
 		for (int i = 0; i < animatedModelData.skeleton->bones.size(); ++i)
@@ -779,87 +757,6 @@ namespace Kaka
 		}
 	}
 
-	void Model::Update(const float aDeltaTime)
-	{
-		//if (selectedAnimationIndex >= 0 && selectedAnimationIndex < modelData.animations.size())
-		//{
-		//	const AnimationClip& animation = modelData.animations[selectedAnimationIndex];
-
-		//	// Apply animation transformation based on the current time
-		//	if (isAnimationPlaying)
-		//	{
-		//		animationTime += aDeltaTime * animationSpeed;
-
-		//		if (isAnimationLooping)
-		//		{
-		//			if (animationTime >= animation.duration)
-		//			{
-		//				animationTime = 0.0f;
-		//			}
-		//		}
-		//		else
-		//		{
-		//			if (animationTime >= animation.duration)
-		//			{
-		//				animationTime = animation.duration;
-		//				return;
-		//			}
-		//		}
-
-		//		// Calculate the current frame and delta
-		//		const float frameRate = 1.0f / animation.fps;
-		//		const float result = animationTime / frameRate;
-		//		const size_t frame = std::floor(result); // Current frame
-		//		const float delta = result - static_cast<float>(frame); // Progress to the next frame
-
-		//		// Update all animations
-		//		const Skeleton* skeleton = &modelData.skeleton;
-
-		//		// Interpolate between current and next frame
-		//		for (size_t i = 0; i < skeleton->bones.size(); i++)
-		//		{
-		//			DirectX::XMMATRIX currentFramePose = animation.keyframes[frame].boneTransforms[i];
-		//			DirectX::XMMATRIX nextFramePose = animation.keyframes[(frame + 1) % animation.keyframes.size()].
-		//				boneTransforms[i];
-
-		//			// Interpolate between current and next frame using delta
-		//			DirectX::XMMATRIX blendedPose = currentFramePose + delta * (nextFramePose - currentFramePose);
-
-		//			const int parentIndex = skeleton->bones[i].parentIndex;
-
-		//			if (parentIndex >= 0)
-		//			{
-		//				// Accumulate relative transformation
-		//				combinedTransforms[i] = blendedPose * combinedTransforms[parentIndex];
-		//			}
-		//			else
-		//			{
-		//				// Root bone, use absolute transformation
-		//				combinedTransforms[i] = blendedPose;
-		//			}
-
-		//			finalTransforms[i] = skeleton->bones[i].bindPose * combinedTransforms[i];
-		//		}
-		//	}
-		//	else
-		//	{
-		//		// Play paused frame i.e do nothing
-		//	}
-		//}
-		//else
-		//{
-		//	animationTime = 0.0f;
-
-		//	// Show bind pose (T-pose)
-		//	const Skeleton* skeleton = &modelData.skeleton;
-
-		//	for (size_t i = 0; i < skeleton->bones.size(); i++)
-		//	{
-		//		finalTransforms[i] = DirectX::XMMatrixIdentity();
-		//	}
-		//}
-	}
-
 	void Model::UpdatePtr(float aDeltaTime)
 	{
 		if (!isLoaded)
@@ -932,7 +829,7 @@ namespace Kaka
 
 	void Model::BindPixelShader(const Graphics& aGfx)
 	{
-		pixelShader.Bind(aGfx);
+		pixelShader->Bind(aGfx);
 	}
 
 	DirectX::XMMATRIX& Model::GetBoneTransform(const int aBoneIndex)

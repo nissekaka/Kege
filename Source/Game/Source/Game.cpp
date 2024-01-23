@@ -13,6 +13,7 @@ constexpr int NUM_SPOT_LIGHTS = 10;
 constexpr int TERRAIN_SIZE = 1000;
 
 constexpr int MODELS_TO_LOAD_THREADED = 10;
+constexpr float SHADOW_RESOLUTION_DIVIDER = 4.0f;
 
 namespace Kaka
 {
@@ -20,12 +21,8 @@ namespace Kaka
 		:
 		wnd(WINDOW_WIDTH, WINDOW_HEIGHT, L"Kaka")
 	{
-		wnd.Gfx().SetProjection(
-			DirectX::XMMatrixPerspectiveLH(
-				1.0f,
-				static_cast<float>(WINDOW_HEIGHT) / static_cast<float>(WINDOW_WIDTH),
-				0.5f,
-				5000.0f));
+		camera.SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 90, 0.5f, 5000.0f);
+		directionalLightShadowCamera.SetOrthographic(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f, -500.0f, 500.0f);
 
 		for (int i = 0; i < NUM_POINT_LIGHTS; ++i)
 		{
@@ -69,6 +66,7 @@ namespace Kaka
 		reflectionPlane.Init(wnd.Gfx(), terrain.GetSize() / 2.0f);
 		reflectionPlane.SetPosition({terrain.GetSize() / 2.0f, reflectPlaneHeight, terrain.GetSize() / 2.0f});
 
+		directionalLightShadowCamera.SetPosition({500.0f, 0.0f, 500.0f});
 		camera.SetPosition({800.0f, 60.0f, 800.0f});
 		camera.SetRotationDegrees(0.0f, -180.0f);
 
@@ -167,14 +165,16 @@ namespace Kaka
 			}
 		}
 
-		camera.SetPosition({camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z - cameraMoveSpeed * aDeltaTime});
+		//camera.SetPosition({camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z - cameraMoveSpeed * aDeltaTime});
+
 
 		// Begin frame
 		wnd.Gfx().BeginFrame();
-		wnd.Gfx().SetCamera(camera.GetMatrix());
+		wnd.Gfx().SetCamera(camera);
 
 		HandleInput(aDeltaTime);
 
+		directionalLight.SetShadowCamera(directionalLightShadowCamera.GetMatrix() * directionalLightShadowCamera.GetProjection());
 		directionalLight.Bind(wnd.Gfx());
 		directionalLight.Simulate(aDeltaTime);
 
@@ -198,15 +198,33 @@ namespace Kaka
 
 		reflectionVSBuffer.height = reflectionPlane.GetPosition().y;
 
-		VertexConstantBuffer<ReflectionHeightBuffer> rhvb{wnd.Gfx(), 1u};
+		VertexConstantBuffer<ReflectionHeightBuffer> rhvb{wnd.Gfx(), 9u};
 		rhvb.Update(wnd.Gfx(), reflectionVSBuffer);
 		rhvb.Bind(wnd.Gfx());
 
 		skyboxAngle.y += skyboxSpeed * aDeltaTime;
 		skybox.Rotate(skyboxAngle);
 
+		// Draw shadows
+		wnd.Gfx().StartShadows(directionalLightShadowCamera, directionalLight.GetDirection());
+		wnd.Gfx().SetRenderTarget(eRenderTargetType::ShadowMap);
+
+		// Render everything that casts shadows
+		{
+			terrain.Draw(wnd.Gfx());
+
+			for (Model& model : threadedModels)
+			{
+				model.DrawFBXPtr(wnd.Gfx());
+			}
+		}
+
 		// Reflective plane and terrain
 		wnd.Gfx().SetRenderTarget(eRenderTargetType::WaterReflect);
+		// Setting new render target...
+		// Need to set new render target before binding the resource view for the shadow map
+		wnd.Gfx().ResetShadows(camera);
+		wnd.Gfx().BindShadows();
 
 		skybox.FlipScale();
 
@@ -218,11 +236,13 @@ namespace Kaka
 		terrain.Draw(wnd.Gfx());
 
 		skybox.FlipScale();
+
 		terrain.SetReflectShader(wnd.Gfx(), false);
 		terrain.FlipScale(reflectionPlane.GetPosition().y, true);
+
+		// Draw regular render
 		wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing);
 
-		// Draw normal
 		for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
 		{
 			pointLights[i].Bind(wnd.Gfx(), camera.GetMatrix());
@@ -323,6 +343,12 @@ namespace Kaka
 			model.Draw(wnd.Gfx());
 		}
 
+		for (Model& model : threadedModels)
+		{
+			model.UpdatePtr(aDeltaTime);
+			model.DrawFBXPtr(wnd.Gfx());
+		}
+
 		skybox.Draw(wnd.Gfx());
 		terrain.SetCullingMode(eCullingMode::Back);
 		for (TerrainSubset& subset : terrain.GetTerrainSubsets())
@@ -355,12 +381,6 @@ namespace Kaka
 			subset.SetNearbyLights(nearbyPointLights, nearbySpotLights);
 		}
 		terrain.Draw(wnd.Gfx());
-
-		for (Model& model : threadedModels)
-		{
-			model.UpdatePtr(aDeltaTime);
-			model.DrawFBXPtr(wnd.Gfx());
-		}
 
 		wnd.Gfx().BindWaterReflectionTexture();
 		wnd.Gfx().SetAlpha();

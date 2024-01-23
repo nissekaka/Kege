@@ -24,7 +24,6 @@ namespace Kaka
 		int Go();
 
 	private:
-		void LoadModels();
 		void LoadModelThreaded(const std::string& aModelPath, Model& aModel);
 		void Update(const float aDeltaTime);
 		void HandleInput(const float aDeltaTime);
@@ -36,6 +35,8 @@ namespace Kaka
 		Window wnd;
 		Timer timer;
 		Camera camera;
+
+		Camera directionalLightShadowCamera;
 
 		DirectionalLight directionalLight{wnd.Gfx(), 1u};
 		std::vector<PointLight> pointLights = {};

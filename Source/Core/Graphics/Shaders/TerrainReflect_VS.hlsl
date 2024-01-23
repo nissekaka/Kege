@@ -4,7 +4,7 @@ cbuffer Transform : register(b0)
     matrix objectToClip;
 }
 
-cbuffer Reflection : register(b1)
+cbuffer Reflection : register(b9)
 {
     float planeHeight;
 }

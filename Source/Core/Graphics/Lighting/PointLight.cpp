@@ -149,7 +149,7 @@ namespace Kaka
 			DirectX::XMMATRIX modelView;
 			DirectX::XMMATRIX modelProjection;
 		};
-		const DirectX::XMMATRIX modelView = GetTransform() * aGfx.GetCamera();
+		const DirectX::XMMATRIX modelView = GetTransform() * aGfx.GetCurrentCameraMatrix();
 
 		const VSTransformBuffer vtb =
 		{

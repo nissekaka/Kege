@@ -34,9 +34,9 @@ struct PixelInput
     float3 viewitan : BITANGENT;
 };
 
-Texture2D albedoTex;
-Texture2D normalTex;
-Texture2D materialTex;
+Texture2D albedoTex : register (t2);
+Texture2D normalTex : register (t3);
+Texture2D materialTex : register (t4);
 
 SamplerState splr;
 

@@ -6,6 +6,8 @@
 #include <memory>
 #include <vector>
 
+#include "Shaders/ShaderFactory.h"
+
 
 #define KAKA_BG_COLOUR {0.1f, 0.2f, 0.3f, 1.0f}
 
@@ -16,6 +18,9 @@ namespace DirectX
 
 namespace Kaka
 {
+	class VertexShader;
+	class PixelShader;
+	class Camera;
 	struct Mesh;
 
 	enum class eRenderTargetType
@@ -23,6 +28,7 @@ namespace Kaka
 		Default,
 		WaterReflect,
 		PostProcessing,
+		ShadowMap,
 	};
 
 	struct RenderTarget
@@ -52,10 +58,10 @@ namespace Kaka
 		void BeginFrame();
 		void EndFrame();
 		void DrawIndexed(UINT aCount);
-		void SetProjection(DirectX::FXMMATRIX& aProjection);
+		//void SetProjection(DirectX::FXMMATRIX& aProjection);
 		DirectX::XMMATRIX GetProjection() const;
-		void SetCamera(DirectX::FXMMATRIX& aCamera);
-		DirectX::XMMATRIX GetCamera() const;
+		void SetCamera(Camera& aCamera);
+		DirectX::XMMATRIX GetCurrentCameraMatrix() const;
 		UINT GetDrawcallCount() const;
 		void SetRenderTarget(eRenderTargetType aRenderTargetType) const;
 		void SetAlpha() const;
@@ -67,6 +73,19 @@ namespace Kaka
 		void BindPostProcessingTexture();
 		void BindBloomDownscaleTexture(const int aIndex);
 		DirectX::XMFLOAT2 GetCurrentResolution() const;
+
+		void StartShadows(Camera& aCamera, DirectX::XMFLOAT3 aLightDirection);
+		void ResetShadows(Camera& aCamera);
+		void BindShadows();
+
+		void SetPixelShaderOverride(const std::wstring& aFileName) { pixelShaderOverride = ShaderFactory::GetPixelShader(*this, aFileName); }
+		void SetVertexShaderOverride(const std::wstring& aFileName) { vertexShaderOverride = ShaderFactory::GetVertexShader(*this, aFileName); }
+		PixelShader* GetPixelShaderOverride() const { return pixelShaderOverride; }
+		VertexShader* GetVertexShaderOverride() const { return vertexShaderOverride; }
+		bool HasPixelShaderOverride() const { return pixelShaderOverride != nullptr; }
+		bool HasVertexShaderOverride() const { return vertexShaderOverride != nullptr; }
+		void ClearPixelShaderOverride() { pixelShaderOverride = nullptr; }
+		void ClearVertexShaderOverride() { vertexShaderOverride = nullptr; }
 
 	public:
 		void EnableImGui();
@@ -91,8 +110,7 @@ namespace Kaka
 		bool IsBoundingBoxInFrustum(const DirectX::XMFLOAT3& aMin, const DirectX::XMFLOAT3& aMax) const;
 
 	private:
-		DirectX::XMMATRIX projection{};
-		DirectX::XMMATRIX camera{};
+		Camera* camera = nullptr;
 		Microsoft::WRL::ComPtr<ID3D11Device> pDevice;
 		Microsoft::WRL::ComPtr<IDXGISwapChain> pSwap;
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext;
@@ -108,8 +126,14 @@ namespace Kaka
 		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pDefaultTarget;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pDefaultShaderResourceView;
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pDepth;
+
+		RenderTarget shadowMap;
+		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pShadowDepth;
 		UINT width;
 		UINT height;
+
+		PixelShader* pixelShaderOverride = nullptr;
+		VertexShader* vertexShaderOverride = nullptr;
 
 	private:
 		struct DownSampleBuffer

@@ -16,6 +16,7 @@ cbuffer DirectionalLightBuffer : register(b1)
     float padding;
     float3 dLightColour;
     float ambientLightPower;
+    float4x4 directionalLightCameraTransform;
 };
 
 cbuffer PointLightBuffer : register(b2)
@@ -64,6 +65,8 @@ Texture2D matTexRock : register(t7);
 Texture2D albTexSnow : register(t8);
 Texture2D nrmTexSnow : register(t9);
 Texture2D matTexSnow : register(t10);
+
+Texture2D directionalLightShadowMap : register(t14);
 
 float4 main(PixelInput aInput) : SV_TARGET
 {
@@ -174,6 +177,24 @@ float4 main(PixelInput aInput) : SV_TARGET
 
     const float3 toEye = normalize(cameraPosition.xyz - aInput.worldPos.xyz);
 
+	// Shadows
+
+    float4 directionalLightProjectedPositionTemp = mul(directionalLightCameraTransform, float4(aInput.worldPos, 1.0f));
+    float3 directionLightProjectedPosition = directionalLightProjectedPositionTemp.xyz / directionalLightProjectedPositionTemp.w;
+
+    // Shadows should be soft with Percentage Closer Filtering (PCF)
+
+    float shadowFactor = 1.0f;
+    if (clamp(directionLightProjectedPosition.x, -1.0f, 1.0f) == directionLightProjectedPosition.x &&
+        clamp(directionLightProjectedPosition.y, -1.0f, 1.0f) == directionLightProjectedPosition.y)
+    {
+        const float computedZ = directionLightProjectedPosition.z;
+        const float shadowMapZ = directionalLightShadowMap.Sample(splr, 0.5f + float2(0.5f, -0.5f) * directionLightProjectedPosition.xy);
+        const float bias = 0.001f;
+        
+        shadowFactor = (computedZ < shadowMapZ + bias);
+    }
+
     // Lighting
 
 	// Day/night cycle
@@ -216,7 +237,8 @@ float4 main(PixelInput aInput) : SV_TARGET
 
 	// Final colour
     //const float3 emissiveColour = colour * emissive;
-    const float3 finalColour = saturate(ambientLight * ambientLightPower + directionalLight + pointLight + spotLight);
+    //const float3 finalColour = saturate(directionalLight * shadowFactor);
+    const float3 finalColour = saturate(ambientLight * ambientLightPower + directionalLight * shadowFactor + pointLight + spotLight);
 
     return float4(finalColour, 1.0f);
 

@@ -54,8 +54,8 @@ namespace Kaka
 		Sampler sampler = {};
 		VertexBuffer vertexBuffer = {};
 		IndexBuffer indexBuffer = {};
-		PixelShader pixelShader;
-		VertexShader vertexShader;
+		PixelShader* pixelShader = nullptr;
+		VertexShader* vertexShader = nullptr;
 		std::vector<D3D11_INPUT_ELEMENT_DESC> ied;
 		InputLayout inputLayout;
 		Topology topology = {};

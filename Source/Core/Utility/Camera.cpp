@@ -68,36 +68,58 @@ namespace Kaka
 		yaw = DegToRad(aYaw);
 	}
 
+	void Camera::SetDirection(const DirectX::XMFLOAT3 aDirection)
+	{
+		pitch = asin(-aDirection.y);
+		yaw = atan2(aDirection.x, aDirection.z);
+	}
+
 	DirectX::XMMATRIX Camera::GetMatrix() const
 	{
-		//	using namespace DirectX;
-
-		//	const DirectX::XMVECTOR forwardBaseVector = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
-		//	// Apply the camera rotations to a base vector
-		//	const auto lookVector = XMVector3Transform(forwardBaseVector,
-		//	                                           XMMatrixRotationRollPitchYaw(pitch, yaw, 0.0f)
-		//	);
-		//	// Generate camera transform (applied to all objects to arrange them relative
-		//	// to camera position/orientation in world) from cam position and direction
-		//	// camera "top" always faces towards +Y (cannot do a barrel roll)
-		//	const auto camPosition = XMLoadFloat3(&position);
-		//	const auto camTarget = camPosition + lookVector;
-		//	return XMMatrixLookAtLH(camPosition, camTarget, XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
-		//}
 		DirectX::XMMATRIX myMatrix = DirectX::XMMatrixIdentity();
 
-
 		myMatrix *= DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);
-
-
 		myMatrix *= DirectX::XMMatrixRotationRollPitchYaw(pitch, yaw, 0.0f);
 		myMatrix *= DirectX::XMMatrixTranslation(position.x, position.y, position.z);
 
-		return myMatrix;
+		return DirectX::XMMatrixInverse(nullptr, myMatrix);
+	}
+
+	DirectX::XMMATRIX Camera::GetProjection() const
+	{
+		return projection;
 	}
 
 	DirectX::XMFLOAT3 Camera::GetPosition() const
 	{
 		return position;
+	}
+
+	void Camera::SetPerspective(float aWidth, float aHeight, float aVFov, float aNearZ, float aFarZ)
+	{
+		cameraType = eCameraType::Perspective;
+
+		perspectiveData.width = aWidth;
+		perspectiveData.height = aHeight;
+		perspectiveData.nearZ = aNearZ;
+		perspectiveData.farZ = aFarZ;
+
+		const float verticalFov = 2 * atan(tan(aVFov / 2) * (aHeight / aWidth));
+
+		perspectiveData.vFov = verticalFov;
+
+		projection = DirectX::XMMatrixPerspectiveFovLH(verticalFov, aWidth / aHeight, aNearZ, aFarZ);
+	}
+
+	void Camera::SetOrthographic(float aWidth, float aHeight, float aNearZ, float aFarZ)
+	{
+		cameraType = eCameraType::Orthographic;
+
+		orthographicData.width = aWidth;
+		orthographicData.height = aHeight;
+		orthographicData.nearZ = aNearZ;
+		orthographicData.farZ = aFarZ;
+
+		projection = DirectX::XMMatrixOrthographicLH(aWidth, aHeight, aNearZ, aFarZ);
 	}
 }

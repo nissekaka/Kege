@@ -57,10 +57,10 @@ namespace Kaka
 		vertexBuffer.Init(aGfx, vertices);
 		indexBuffer.Init(aGfx, indices);
 
-		pixelShader.Init(aGfx, L"Shaders\\ReflectionPlane_PS.cso");
-		vertexShader.Init(aGfx, L"Shaders\\ReflectionPlane_VS.cso");
+		pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\ReflectionPlane_PS.cso");
+		vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\ReflectionPlane_VS.cso");
 
-		inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
+		inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
 		topology.Init(aGfx, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		rasterizer.Init(aGfx, eCullingMode::None);
@@ -78,12 +78,12 @@ namespace Kaka
 		TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
 		transformConstantBuffer.Bind(aGfx);
 
-		pixelShader.Bind(aGfx);
+		pixelShader->Bind(aGfx);
 
 		PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
 		psConstantBuffer.Bind(aGfx);
 
-		vertexShader.Bind(aGfx);
+		vertexShader->Bind(aGfx);
 		inputLayout.Bind(aGfx);
 		topology.Bind(aGfx);
 		rasterizer.Bind(aGfx);
