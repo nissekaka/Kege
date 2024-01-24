@@ -1,7 +1,6 @@
 #pragma once
 #include "Bindable.h"
 
-
 namespace Kaka
 {
 	class Sampler : public Bindable

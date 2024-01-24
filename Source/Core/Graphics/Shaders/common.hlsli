@@ -20,7 +20,6 @@ int GetNumMips(TextureCube cubeTex)
 }
 
 SamplerState splr : register(s0);
-SamplerState shadowSplr : register(s1);
 
 //cbuffer CommonBuffer : register(b0)
 //{

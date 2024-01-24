@@ -129,6 +129,9 @@ namespace Kaka
 
 		RenderTarget shadowMap;
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pShadowDepth;
+
+		Microsoft::WRL::ComPtr<ID3D11SamplerState> pShadowSampler;
+
 		UINT width;
 		UINT height;
 

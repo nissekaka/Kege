@@ -1,6 +1,7 @@
 #include "Light.hlsli"
 //#include "ShaderOps.hlsl"
 #include "PBRFunctions.hlsli"
+#include "Shadows.hlsli"
 
 static const uint MAX_LIGHTS = 50u; // Needs to be the same in PointLight
 
@@ -48,7 +49,6 @@ struct PixelInput
 Texture2D albedoTex : register(t2);
 Texture2D normalTex : register(t3);
 Texture2D materialTex : register(t4);
-Texture2D directionalLightShadowMap : register(t14);
 
 float4 main(PixelInput aInput) : SV_TARGET
 {
@@ -130,19 +130,7 @@ float4 main(PixelInput aInput) : SV_TARGET
 
     // Shadows
 
-    float4 directionalLightProjectedPositionTemp = mul(directionalLightCameraTransform, float4(aInput.worldPos, 1.0f));
-    float3 directionLightProjectedPosition = directionalLightProjectedPositionTemp.xyz / directionalLightProjectedPositionTemp.w;
-    
-    float shadowFactor = 1.0f;
-    if (clamp(directionLightProjectedPosition.x, -1.0f, 1.0f) == directionLightProjectedPosition.x &&
-        clamp(directionLightProjectedPosition.y, -1.0f, 1.0f) == directionLightProjectedPosition.y)
-    {
-        const float computedZ = directionLightProjectedPosition.z;
-        const float shadowMapZ = directionalLightShadowMap.Sample(splr, 0.5f + float2(0.5f, -0.5f) * directionLightProjectedPosition.xy);
-        const float bias = 0.001f;
-
-        shadowFactor = (computedZ < shadowMapZ + bias);
-    }
+    const float shadowFactor = Shadow(directionalLightCameraTransform, float4(aInput.worldPos, 1.0f));
 
     // Lighting
 

@@ -16,7 +16,8 @@ namespace Kaka
 {
 	Graphics::Graphics(HWND aHWnd, UINT aWidth, UINT aHeight)
 		:
-		width(aWidth), height(aHeight)
+		width(aWidth),
+		height(aHeight)
 	{
 		{
 			DXGI_SWAP_CHAIN_DESC scd = {};
@@ -240,6 +241,15 @@ namespace Kaka
 			assert(SUCCEEDED(result));
 			shadowMap.pResource = SRV;
 			SRV->Release();
+
+			D3D11_SAMPLER_DESC samplerDesc = CD3D11_SAMPLER_DESC{CD3D11_DEFAULT{}};
+			samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
+
+			pDevice->CreateSamplerState(&samplerDesc, &pShadowSampler);
 
 			//ID3D11Texture2D* shadowTexture;
 			//D3D11_TEXTURE2D_DESC smDesc = {0};
@@ -510,7 +520,7 @@ namespace Kaka
 
 	DirectX::XMFLOAT2 Graphics::GetCurrentResolution() const
 	{
-		return {(float)width, (float)height};
+		return {static_cast<float>(width), static_cast<float>(height)};
 	}
 
 	void Graphics::StartShadows(Camera& aCamera, const DirectX::XMFLOAT3 aLightDirection)
@@ -518,7 +528,6 @@ namespace Kaka
 		pContext->ClearDepthStencilView(pShadowDepth.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 		SetCamera(aCamera);
-		//DirectX::XMFLOAT3 inverseLightDirection = {-aLightDirection.x, -aLightDirection.y, -aLightDirection.z};
 		aCamera.SetDirection(aLightDirection);
 
 		SetPixelShaderOverride(L"Shaders\\Shadow_PS.cso");
@@ -539,6 +548,9 @@ namespace Kaka
 		ImGui::Begin("Shadow map");
 		ImGui::Image(shadowMap.pResource.Get(), ImVec2(1600 / 3, 800 / 3));
 		ImGui::End();
+
+		pContext->PSSetSamplers(1u, 1u, pShadowSampler.GetAddressOf());
+
 		pContext->PSSetShaderResources(14u, 1u, shadowMap.pResource.GetAddressOf());
 	}
 
