@@ -375,6 +375,12 @@ namespace Kaka
 		pContext->DrawIndexed(aCount, 0u, 0u);
 	}
 
+	void Graphics::DrawIndexedInstanced(const UINT aCount, const UINT aInstanceCount)
+	{
+		drawcallCount++;
+		pContext->DrawIndexedInstanced(aCount, aInstanceCount, 0u, 0u, 0u);
+	}
+
 	//void Graphics::SetProjection(DirectX::FXMMATRIX& aProjection)
 	//{
 	//	camera->projection = aProjection;

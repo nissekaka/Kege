@@ -13,6 +13,7 @@
 #include "Core/Graphics/Drawable/Terrain.h"
 #include "Core/Graphics/Drawable/Skybox.h"
 #include "Core/Graphics/Drawable/ReflectionPlane.h"
+#include "Core/Graphics/Drawable/SpriteManager.h"
 
 namespace Kaka
 {
@@ -39,6 +40,9 @@ namespace Kaka
 		Camera directionalLightShadowCamera;
 
 		DirectionalLight directionalLight{wnd.Gfx(), 1u};
+
+		SpriteManager spriteManager;
+		SpriteBatch spriteBatch;
 		std::vector<PointLight> pointLights = {};
 		std::vector<SpotLight> spotLights = {};
 		//float pointLightAngles[] = PI;

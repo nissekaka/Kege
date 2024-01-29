@@ -15,8 +15,9 @@ float Shadow(const in float4x4 aCameraTransform, const in float4 aWorldPosition)
 
         float totalFactor = 0.0f;
 
-        // Filter kernel for PCF eg. (16x16)
-        const int numSamples = 16;
+        // Filter kernel for PCF eg. (15x15)
+        const int numSamples = 15;
+        // Offset scale decides how much the shadow edge is moved for "blurring"
         const float offsetScale = 0.004f;
 
         for (int i = -numSamples / 2; i <= numSamples / 2; ++i)

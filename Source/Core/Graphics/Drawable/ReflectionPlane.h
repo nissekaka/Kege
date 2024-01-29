@@ -3,7 +3,6 @@
 #include "Core/Graphics/Graphics.h"
 #include "Core/Graphics/Bindable/BindableCommon.h"
 
-
 namespace Kaka
 {
 	struct Vertex;

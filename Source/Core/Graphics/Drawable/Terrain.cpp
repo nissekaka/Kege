@@ -409,6 +409,7 @@ namespace Kaka
 
 	void Terrain::Draw(Graphics& aGfx)
 	{
+		return;
 		sampler.Bind(aGfx);
 		texture.Bind(aGfx);
 

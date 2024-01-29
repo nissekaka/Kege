@@ -6,6 +6,8 @@
 #include <random>
 #include <TGAFBXImporter/source/Internal.inl>
 
+#include "Graphics/Drawable/ModelLoader.h"
+
 constexpr int WINDOW_WIDTH = 1920;
 constexpr int WINDOW_HEIGHT = 1080;
 constexpr int NUM_POINT_LIGHTS = 10;
@@ -115,6 +117,10 @@ namespace Kaka
 			spotLights[i].SetPosition(pos);
 			spotLights[i].SetIntensity(3000.0f);
 		}
+
+		spriteManager.Init(wnd.Gfx());
+		spriteBatch.data.texture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\Rock\\peter-larsen-stylizedrockdiffuse.jpg");
+		spriteBatch.instances.emplace_back();
 
 		while (true)
 		{
@@ -386,6 +392,8 @@ namespace Kaka
 		wnd.Gfx().SetAlpha();
 		reflectionPlane.Draw(wnd.Gfx());
 		wnd.Gfx().ResetAlpha();
+
+		spriteManager.Draw(wnd.Gfx(), spriteBatch);
 
 		// ImGui windows
 		if (showImGui)

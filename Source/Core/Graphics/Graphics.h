@@ -49,6 +49,7 @@ namespace Kaka
 		friend class ReflectionPlane;
 		friend class Game;
 		friend class PostProcessing;
+		friend class SpriteManager;
 
 	public:
 		Graphics(HWND aHWnd, UINT aWidth, UINT aHeight);
@@ -58,6 +59,7 @@ namespace Kaka
 		void BeginFrame();
 		void EndFrame();
 		void DrawIndexed(UINT aCount);
+		void DrawIndexedInstanced(UINT aCount, UINT aInstanceCount);
 		//void SetProjection(DirectX::FXMMATRIX& aProjection);
 		DirectX::XMMATRIX GetProjection() const;
 		void SetCamera(Camera& aCamera);

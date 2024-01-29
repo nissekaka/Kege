@@ -557,6 +557,19 @@ namespace Kaka
 		return true;
 	}
 
+	Texture* ModelLoader::LoadTexture(const Graphics& aGfx, const std::string& aFilePath)
+	{
+		if (textures.contains(aFilePath))
+		{
+			return &textures[aFilePath];
+		}
+
+		textures[aFilePath] = Texture(2u);
+		textures[aFilePath].LoadTextureFromPath(aGfx, aFilePath);
+
+		return &textures[aFilePath];
+	}
+
 	bool ModelLoader::LoadAnimation(AnimatedModelDataPtr& aOutModelData, const std::string& aFilePath)
 	{
 		if (animationClips.contains(aFilePath))
