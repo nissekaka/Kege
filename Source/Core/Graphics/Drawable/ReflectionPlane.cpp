@@ -111,7 +111,7 @@ namespace Kaka
 	DirectX::XMMATRIX ReflectionPlane::GetTransform() const
 	{
 		return DirectX::XMMatrixScaling(transform.scale, transform.scale, transform.scale) *
-			DirectX::XMMatrixRotationRollPitchYaw(transform.roll, transform.pitch, transform.roll) *
+			DirectX::XMMatrixRotationRollPitchYaw(transform.roll, transform.pitch, transform.yaw) *
 			DirectX::XMMatrixTranslation(transform.x, transform.y, transform.z);
 	}
 

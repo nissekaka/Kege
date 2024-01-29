@@ -4,6 +4,7 @@
 #include "ModelLoader.h"
 #include "Core/Graphics/Drawable/Vertex.h"
 #include "External/include/imgui/imgui.h"
+#include "Utility/Camera.h"
 
 namespace Kaka
 {
@@ -75,27 +76,30 @@ namespace Kaka
 		vertexBuffer.Bind(aGfx);
 		indexBuffer.Bind(aGfx);
 
-		// Get the inverse of the camera matrix
-		DirectX::XMMATRIX cameraInverse = DirectX::XMMatrixInverse(nullptr, aGfx.GetCurrentCameraMatrix());
+		DirectX::XMMATRIX camera = DirectX::XMMatrixInverse(nullptr, aGfx.camera->GetMatrix());
 
-		// Calculate the object's forward direction in camera space
-		DirectX::XMVECTOR objectForwardCameraSpace = DirectX::XMVector3TransformNormal(DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), cameraInverse);
+		DirectX::XMFLOAT3 cameraDir = {camera.r[2].m128_f32[0], camera.r[2].m128_f32[1], camera.r[2].m128_f32[2]};
+		float pitch = atan2f(cameraDir.y, sqrtf(cameraDir.x * cameraDir.x + cameraDir.z * cameraDir.z));
+		float yaw = atan2f(cameraDir.x, cameraDir.z);
+		float roll = 0.0f;
 
-		// Calculate pitch and yaw angles
-		DirectX::XMFLOAT3 angles;
-		angles.y = atan2(DirectX::XMVectorGetX(objectForwardCameraSpace), DirectX::XMVectorGetZ(objectForwardCameraSpace));
-		angles.x = asin(DirectX::XMVectorGetY(objectForwardCameraSpace));
+		// Make the sprite face the camera
+		transform.pitch = pitch;
+		transform.yaw = yaw;
+		transform.roll = roll;
 
-		// Calculate the roll angle using the camera matrix directly
-		DirectX::XMFLOAT4X4 cameraMatrix;
-		DirectX::XMStoreFloat4x4(&cameraMatrix, aGfx.GetCurrentCameraMatrix());
+		//DirectX::XMFLOAT3 cameraPos = aGfx.camera->GetPosition();
+		//DirectX::XMFLOAT3 spritePos = GetPosition();
 
-		angles.z = atan2(cameraMatrix._21, cameraMatrix._11);
+		//DirectX::XMFLOAT3 cameraToSprite = {spritePos.x - cameraPos.x, spritePos.y - cameraPos.y, spritePos.z - cameraPos.z};
 
-		// Set the rotation angles
-		transform.pitch = angles.y;
-		transform.yaw = angles.x;
-		transform.roll = angles.z;
+		//float pitch = atan2f(cameraToSprite.y, sqrtf(cameraToSprite.x * cameraToSprite.x + cameraToSprite.z * cameraToSprite.z));
+		//float yaw = atan2f(cameraToSprite.x, cameraToSprite.z);
+		//float roll = 0.0f;
+
+		//transform.pitch = pitch;
+		//transform.yaw = yaw;
+		//transform.roll = roll;
 
 		TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
 		transformConstantBuffer.Bind(aGfx);
@@ -133,7 +137,7 @@ namespace Kaka
 	DirectX::XMMATRIX Sprite::GetTransform() const
 	{
 		return DirectX::XMMatrixScaling(transform.scale, transform.scale, transform.scale) *
-			DirectX::XMMatrixRotationRollPitchYaw(transform.roll, transform.pitch, transform.roll) *
+			DirectX::XMMatrixRotationRollPitchYaw(transform.roll, transform.pitch, transform.yaw) *
 			DirectX::XMMatrixTranslation(transform.x, transform.y, transform.z);
 	}
 

@@ -528,7 +528,7 @@ namespace Kaka
 	DirectX::XMMATRIX Terrain::GetTransform() const
 	{
 		return DirectX::XMMatrixScaling(transform.scale.x, transform.scale.y, transform.scale.z) *
-			DirectX::XMMatrixRotationRollPitchYaw(transform.roll, transform.pitch, transform.roll) *
+			DirectX::XMMatrixRotationRollPitchYaw(transform.roll, transform.pitch, transform.yaw) *
 			DirectX::XMMatrixTranslation(transform.x, transform.y, transform.z);
 	}
 

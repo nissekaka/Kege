@@ -446,6 +446,8 @@ namespace Kaka
 			//	spotLights[i].ShowControlWindow(name.c_str());
 			//}
 
+			sprites[0].ShowControlWindow("Sprite");
+
 			camera.ShowControlWindow();
 		}
 		if (showStatsWindow)
