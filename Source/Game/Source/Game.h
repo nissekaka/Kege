@@ -14,6 +14,7 @@
 #include "Core/Graphics/Drawable/Skybox.h"
 #include "Core/Graphics/Drawable/ReflectionPlane.h"
 #include "Core/Graphics/Drawable/SpriteManager.h"
+#include "Core/Graphics/Drawable/Sprite.h"
 
 namespace Kaka
 {
@@ -41,8 +42,7 @@ namespace Kaka
 
 		DirectionalLight directionalLight{wnd.Gfx(), 1u};
 
-		SpriteManager spriteManager;
-		SpriteBatch spriteBatch;
+		std::vector<Sprite> sprites = {};
 		std::vector<PointLight> pointLights = {};
 		std::vector<SpotLight> spotLights = {};
 		//float pointLightAngles[] = PI;

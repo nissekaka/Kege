@@ -65,11 +65,18 @@ namespace Kaka
 
 		terrain.Init(wnd.Gfx(), TERRAIN_SIZE);
 
+		for (int i = 0; i < 50; ++i)
+		{
+			sprites.emplace_back();
+			sprites.back().Init(wnd.Gfx(), 5.0f);
+			sprites.back().SetPosition({i * 10.0f, 20.0f, 0.0f});
+		}
+
 		reflectionPlane.Init(wnd.Gfx(), terrain.GetSize() / 2.0f);
 		reflectionPlane.SetPosition({terrain.GetSize() / 2.0f, reflectPlaneHeight, terrain.GetSize() / 2.0f});
 
 		directionalLightShadowCamera.SetPosition({500.0f, 0.0f, 500.0f});
-		camera.SetPosition({800.0f, 60.0f, 800.0f});
+		camera.SetPosition({0.0f, 30.0f, 10.0f});
 		camera.SetRotationDegrees(0.0f, -180.0f);
 
 		for (int i = 0; i < MODELS_TO_LOAD_THREADED / 2; ++i)
@@ -118,9 +125,9 @@ namespace Kaka
 			spotLights[i].SetIntensity(3000.0f);
 		}
 
-		spriteManager.Init(wnd.Gfx());
-		spriteBatch.data.texture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\Rock\\peter-larsen-stylizedrockdiffuse.jpg");
-		spriteBatch.instances.emplace_back();
+		//spriteManager.Init(wnd.Gfx());
+		//spriteBatch.data.texture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\Rock\\peter-larsen-stylizedrockdiffuse.jpg");
+		//spriteBatch.instances.emplace_back();
 
 		while (true)
 		{
@@ -393,7 +400,10 @@ namespace Kaka
 		reflectionPlane.Draw(wnd.Gfx());
 		wnd.Gfx().ResetAlpha();
 
-		spriteManager.Draw(wnd.Gfx(), spriteBatch);
+		for (Sprite& sprite : sprites)
+		{
+			sprite.Draw(wnd.Gfx());
+		}
 
 		// ImGui windows
 		if (showImGui)

@@ -55,7 +55,7 @@ struct PixelInput
     float3 bitan : BITANGENT;
 };
 
-Texture2D albedoTex : register(t2);
+Texture2D colourTex : register(t2);
 Texture2D normalTex : register(t3);
 Texture2D materialTex : register(t4);
 
@@ -97,7 +97,7 @@ float4 main(PixelInput aInput) : SV_TARGET
         }
     }
 
-    const float3 grassColour = albedoTex.Sample(splr, aInput.texCoord).rgb;
+    const float3 grassColour = colourTex.Sample(splr, aInput.texCoord).rgb;
     const float3 grassNormal = normalTex.Sample(splr, aInput.texCoord).wyz;
     const float3 grassMaterial = materialTex.Sample(splr, aInput.texCoord).rgb;
 

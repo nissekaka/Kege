@@ -29,6 +29,6 @@ namespace Kaka
 	struct Material
 	{
 		std::string name;
-		Texture* textures[3u];
+		Texture* textures[2u];
 	};
 }

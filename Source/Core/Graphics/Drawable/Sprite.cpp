@@ -1,13 +1,15 @@
 #include "stdafx.h"
-#include "ReflectionPlane.h"
+#include "Sprite.h"
+
+#include "ModelLoader.h"
 #include "Core/Graphics/Drawable/Vertex.h"
 #include "External/include/imgui/imgui.h"
 
 namespace Kaka
 {
-	void ReflectionPlane::Init(const Graphics& aGfx, float aSize)
+	void Sprite::Init(const Graphics& aGfx, float aSize)
 	{
-		constexpr float uvFactor = 0.04f;
+		constexpr float uvFactor = 1.0f;
 
 		Vertex v0 = {};
 		v0.position = DirectX::XMFLOAT3(-aSize, 0.0f, aSize);
@@ -48,17 +50,15 @@ namespace Kaka
 		indices.push_back(2);
 		indices.push_back(3);
 
-		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Water\\Water_c.jpg");
-		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Water\\Water_n.jpg");
-		texture.LoadTextureFromPath(aGfx, "Assets\\Textures\\Water\\Water_m.jpg");
+		texture = ModelLoader::LoadTexture(aGfx, "Assets\\Textures\\Water\\Water_c.jpg");
 
 		sampler.Init(aGfx, 0u);
 
 		vertexBuffer.Init(aGfx, vertices);
 		indexBuffer.Init(aGfx, indices);
 
-		pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\ReflectionPlane_PS.cso");
-		vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\ReflectionPlane_VS.cso");
+		vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\Sprite_VS.cso");
+		pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Sprite_PS.cso");
 
 		inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
 		topology.Init(aGfx, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -67,13 +67,35 @@ namespace Kaka
 		depthStencil.Init(aGfx, DepthStencil::Mode::Off);
 	}
 
-	void ReflectionPlane::Draw(Graphics& aGfx)
+	void Sprite::Draw(Graphics& aGfx)
 	{
 		sampler.Bind(aGfx);
-		texture.Bind(aGfx);
+		texture->Bind(aGfx);
 
 		vertexBuffer.Bind(aGfx);
 		indexBuffer.Bind(aGfx);
+
+		// Get the inverse of the camera matrix
+		DirectX::XMMATRIX cameraInverse = DirectX::XMMatrixInverse(nullptr, aGfx.GetCurrentCameraMatrix());
+
+		// Calculate the object's forward direction in camera space
+		DirectX::XMVECTOR objectForwardCameraSpace = DirectX::XMVector3TransformNormal(DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), cameraInverse);
+
+		// Calculate pitch and yaw angles
+		DirectX::XMFLOAT3 angles;
+		angles.y = atan2(DirectX::XMVectorGetX(objectForwardCameraSpace), DirectX::XMVectorGetZ(objectForwardCameraSpace));
+		angles.x = asin(DirectX::XMVectorGetY(objectForwardCameraSpace));
+
+		// Calculate the roll angle using the camera matrix directly
+		DirectX::XMFLOAT4X4 cameraMatrix;
+		DirectX::XMStoreFloat4x4(&cameraMatrix, aGfx.GetCurrentCameraMatrix());
+
+		angles.z = atan2(cameraMatrix._21, cameraMatrix._11);
+
+		// Set the rotation angles
+		transform.pitch = angles.y;
+		transform.yaw = angles.x;
+		transform.roll = angles.z;
 
 		TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
 		transformConstantBuffer.Bind(aGfx);
@@ -96,33 +118,33 @@ namespace Kaka
 		aGfx.pContext->PSSetShaderResources(2u, 4u, nullSRVs);
 	}
 
-	void ReflectionPlane::SetPosition(const DirectX::XMFLOAT3 aPosition)
+	void Sprite::SetPosition(const DirectX::XMFLOAT3 aPosition)
 	{
 		transform.x = aPosition.x;
 		transform.y = aPosition.y;
 		transform.z = aPosition.z;
 	}
 
-	void ReflectionPlane::SetScale(const float aScale)
+	void Sprite::SetScale(const float aScale)
 	{
 		transform.scale = aScale;
 	}
 
-	DirectX::XMMATRIX ReflectionPlane::GetTransform() const
+	DirectX::XMMATRIX Sprite::GetTransform() const
 	{
 		return DirectX::XMMatrixScaling(transform.scale, transform.scale, transform.scale) *
 			DirectX::XMMatrixRotationRollPitchYaw(transform.roll, transform.pitch, transform.roll) *
 			DirectX::XMMatrixTranslation(transform.x, transform.y, transform.z);
 	}
 
-	DirectX::XMFLOAT3 ReflectionPlane::GetPosition() const
+	DirectX::XMFLOAT3 Sprite::GetPosition() const
 	{
 		return {transform.x, transform.y, transform.z};
 	}
 
-	void ReflectionPlane::ShowControlWindow(const char* aWindowName)
+	void Sprite::ShowControlWindow(const char* aWindowName)
 	{
-		aWindowName = aWindowName ? aWindowName : "Reflection Plane";
+		aWindowName = aWindowName ? aWindowName : "Sprite";
 
 		if (ImGui::Begin(aWindowName))
 		{

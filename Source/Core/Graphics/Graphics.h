@@ -49,7 +49,7 @@ namespace Kaka
 		friend class ReflectionPlane;
 		friend class Game;
 		friend class PostProcessing;
-		friend class SpriteManager;
+		friend class Sprite;
 
 	public:
 		Graphics(HWND aHWnd, UINT aWidth, UINT aHeight);

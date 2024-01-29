@@ -38,7 +38,7 @@ struct PixelInput
     matrix modelView : MODELVIEW;
 };
 
-Texture2D albedoTex : register (t0);
+Texture2D colourTex : register (t0);
 Texture2D normalTex : register(t1);
 Texture2D materialTex : register(t2);
 
@@ -47,7 +47,7 @@ SamplerState splr;
 
 float4 main(PixelInput aInput) : SV_TARGET
 {
-    const float3 colour = albedoTex.Sample(splr, aInput.texCoord).rgb;
+    const float3 colour = colourTex.Sample(splr, aInput.texCoord).rgb;
     //const float3 groundColour = { 0.9f, 0.7f, 0.1f };
     //const float3 skyColour = { 0.6f, 0.6f, 0.8f };
     const float3 groundColour = { 0.0f, 0.5f, 1.0f };

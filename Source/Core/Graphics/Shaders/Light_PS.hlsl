@@ -34,7 +34,7 @@ struct PixelInput
     float3 viewitan : BITANGENT;
 };
 
-Texture2D albedoTex : register (t2);
+Texture2D colourTex : register (t2);
 Texture2D normalTex : register (t3);
 Texture2D materialTex : register (t4);
 
@@ -64,7 +64,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     const float3 combinedLight = max(0, dot(aInput.viewNormal, -dLightDirection)) * dLightColour + att * max(0.0f, dot(dirToL, aInput.viewNormal)) * pLightColour * pLightIntensity;
 
 	// Use the transformed normal for lighting calculations
-    const float4 textureColour = albedoTex.Sample(splr, aInput.texCoord);
+    const float4 textureColour = colourTex.Sample(splr, aInput.texCoord);
     
     return float4(saturate(combinedLight + ambientLight), 1.0f) * textureColour;
 }
