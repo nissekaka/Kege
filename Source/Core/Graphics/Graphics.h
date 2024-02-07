@@ -18,6 +18,7 @@ namespace DirectX
 
 namespace Kaka
 {
+	class Texture;
 	class VertexShader;
 	class PixelShader;
 	class Camera;
@@ -63,14 +64,18 @@ namespace Kaka
 		//void SetProjection(DirectX::FXMMATRIX& aProjection);
 		DirectX::XMMATRIX GetProjection() const;
 		void SetCamera(Camera& aCamera);
-		DirectX::XMMATRIX GetCurrentCameraMatrix() const;
+		DirectX::XMMATRIX GetCameraInverseMatrix() const;
 		UINT GetDrawcallCount() const;
-		void SetRenderTarget(eRenderTargetType aRenderTargetType) const;
-		void SetAlpha() const;
-		void ResetAlpha() const;
+		void SetRenderTarget(eRenderTargetType aRenderTargetType, const bool aUseDepth = true, const bool aWriteToWorldPos = false) const;
+		void SetAlphaBlend() const;
+		void SetVFXBlend() const;
+		void SetAdditiveBlend() const;
+		void ResetBlend() const;
 
 		void HandleBloomScaling(PostProcessing& aPostProcessor);
 
+		void BindWorldPositionTexture();
+		void UnbindWorldPositionTexture();
 		void BindWaterReflectionTexture();
 		void BindPostProcessingTexture();
 		void BindBloomDownscaleTexture(const int aIndex);
@@ -95,6 +100,8 @@ namespace Kaka
 		bool IsImGuiEnabled() const;
 		UINT GetWidth() const;
 		UINT GetHeight() const;
+		void BindDepth();
+		void UnbindDepthSRV();
 
 	private:
 		bool imGuiEnabled = true;
@@ -118,6 +125,8 @@ namespace Kaka
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext;
 
 		Microsoft::WRL::ComPtr<ID3D11BlendState> pBlend;
+		Microsoft::WRL::ComPtr<ID3D11BlendState> pBlendVfx;
+		Microsoft::WRL::ComPtr<ID3D11BlendState> pBlendAdd;
 
 		RenderTarget renderWaterReflect;
 		RenderTarget postProcessing;
@@ -126,13 +135,17 @@ namespace Kaka
 		int bloomSteps = 5;
 
 		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pDefaultTarget;
-		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pDefaultShaderResourceView;
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pDepthShaderResourceView;
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pDepth;
+
+		RenderTarget worldPosition;
 
 		RenderTarget shadowMap;
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pShadowDepth;
 
 		Microsoft::WRL::ComPtr<ID3D11SamplerState> pShadowSampler;
+		Microsoft::WRL::ComPtr<ID3D11SamplerState> pShadowCompSampler;
+		Microsoft::WRL::ComPtr<ID3D11SamplerState> pVFXSampler;
 
 		UINT width;
 		UINT height;

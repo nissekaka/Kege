@@ -28,7 +28,7 @@ namespace Kaka
 	SkyboxTransformConstantBuffer::Transforms SkyboxTransformConstantBuffer::GetTransforms(const Graphics& aGfx) const
 	{
 		return {
-			DirectX::XMMatrixTranspose(parent.GetTransform() * aGfx.GetCurrentCameraMatrix() * aGfx.GetProjection())
+			DirectX::XMMatrixTranspose(parent.GetTransform() * aGfx.GetCameraInverseMatrix() * aGfx.GetProjection())
 		};
 	}
 

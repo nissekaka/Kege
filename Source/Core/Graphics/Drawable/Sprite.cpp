@@ -51,7 +51,7 @@ namespace Kaka
 		indices.push_back(2);
 		indices.push_back(3);
 
-		texture = ModelLoader::LoadTexture(aGfx, "Assets\\Textures\\Water\\Water_c.jpg");
+		texture = ModelLoader::LoadTexture(aGfx, "Assets\\Textures\\SpriteCloud.png");
 
 		sampler.Init(aGfx, 0u);
 
@@ -65,7 +65,9 @@ namespace Kaka
 		topology.Init(aGfx, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		rasterizer.Init(aGfx, eCullingMode::None);
-		depthStencil.Init(aGfx, DepthStencil::Mode::Off);
+		depthStencil.Init(aGfx, DepthStencil::Mode::DepthFirst);
+
+		mTransform = DirectX::XMMatrixIdentity();
 	}
 
 	void Sprite::Draw(Graphics& aGfx)
@@ -76,30 +78,36 @@ namespace Kaka
 		vertexBuffer.Bind(aGfx);
 		indexBuffer.Bind(aGfx);
 
-		DirectX::XMMATRIX camera = DirectX::XMMatrixInverse(nullptr, aGfx.camera->GetMatrix());
+		// Rotate the sprite to face the camera
+		const DirectX::XMVECTOR cameraForward = aGfx.camera->GetForwardVector();
 
-		DirectX::XMFLOAT3 cameraDir = {camera.r[2].m128_f32[0], camera.r[2].m128_f32[1], camera.r[2].m128_f32[2]};
-		float pitch = atan2f(cameraDir.y, sqrtf(cameraDir.x * cameraDir.x + cameraDir.z * cameraDir.z));
-		float yaw = atan2f(cameraDir.x, cameraDir.z);
-		float roll = 0.0f;
+		// Get right vector from cross product of forward and up
+		DirectX::XMVECTOR cameraRight = DirectX::XMVector3Cross(DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), cameraForward);
+		cameraRight = DirectX::XMVector3Normalize(cameraRight);
+		DirectX::XMVECTOR cameraUp = DirectX::XMVector3Cross(cameraForward, cameraRight);
+		cameraUp = DirectX::XMVector3Normalize(cameraUp);
 
-		// Make the sprite face the camera
-		transform.pitch = pitch;
-		transform.yaw = yaw;
-		transform.roll = roll;
+		// X
+		mTransform.r[0].m128_f32[0] = cameraRight.m128_f32[0];
+		mTransform.r[0].m128_f32[1] = cameraRight.m128_f32[1];
+		mTransform.r[0].m128_f32[2] = cameraRight.m128_f32[2];
 
-		//DirectX::XMFLOAT3 cameraPos = aGfx.camera->GetPosition();
-		//DirectX::XMFLOAT3 spritePos = GetPosition();
+		// Y
+		mTransform.r[1].m128_f32[0] = cameraForward.m128_f32[0];
+		mTransform.r[1].m128_f32[1] = cameraForward.m128_f32[1];
+		mTransform.r[1].m128_f32[2] = cameraForward.m128_f32[2];
 
-		//DirectX::XMFLOAT3 cameraToSprite = {spritePos.x - cameraPos.x, spritePos.y - cameraPos.y, spritePos.z - cameraPos.z};
+		// Z
+		mTransform.r[2].m128_f32[0] = cameraUp.m128_f32[0];
+		mTransform.r[2].m128_f32[1] = cameraUp.m128_f32[1];
+		mTransform.r[2].m128_f32[2] = cameraUp.m128_f32[2];
 
-		//float pitch = atan2f(cameraToSprite.y, sqrtf(cameraToSprite.x * cameraToSprite.x + cameraToSprite.z * cameraToSprite.z));
-		//float yaw = atan2f(cameraToSprite.x, cameraToSprite.z);
-		//float roll = 0.0f;
+		// Apply rotation so that the sprite can spin around the axis pointing towards the camera
+		mTransform = DirectX::XMMatrixRotationRollPitchYaw(0.0f, rotation, 0.0f) * mTransform;
 
-		//transform.pitch = pitch;
-		//transform.yaw = yaw;
-		//transform.roll = roll;
+		DirectX::XMFLOAT3 position = GetPosition();
+		mTransform *= DirectX::XMMatrixScaling(transform.scale, transform.scale, transform.scale);
+		SetPosition(position);
 
 		TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
 		transformConstantBuffer.Bind(aGfx);
@@ -124,6 +132,8 @@ namespace Kaka
 
 	void Sprite::SetPosition(const DirectX::XMFLOAT3 aPosition)
 	{
+		// Set position directly in transform
+		mTransform.r[3] = DirectX::XMVectorSet(aPosition.x, aPosition.y, aPosition.z, 1.0f);
 		transform.x = aPosition.x;
 		transform.y = aPosition.y;
 		transform.z = aPosition.z;
@@ -132,18 +142,29 @@ namespace Kaka
 	void Sprite::SetScale(const float aScale)
 	{
 		transform.scale = aScale;
+		DirectX::XMFLOAT3 position = GetPosition();
+		mTransform *= DirectX::XMMatrixScaling(aScale, aScale, aScale);
+		SetPosition(position);
+	}
+
+	void Sprite::SetRotation(float aRotation)
+	{
+		rotation = aRotation;
 	}
 
 	DirectX::XMMATRIX Sprite::GetTransform() const
 	{
-		return DirectX::XMMatrixScaling(transform.scale, transform.scale, transform.scale) *
-			DirectX::XMMatrixRotationRollPitchYaw(transform.roll, transform.pitch, transform.yaw) *
-			DirectX::XMMatrixTranslation(transform.x, transform.y, transform.z);
+		return mTransform;
 	}
 
 	DirectX::XMFLOAT3 Sprite::GetPosition() const
 	{
-		return {transform.x, transform.y, transform.z};
+		DirectX::XMFLOAT3 position = {
+			mTransform.r[3].m128_f32[0],
+			mTransform.r[3].m128_f32[1],
+			mTransform.r[3].m128_f32[2]
+		};
+		return position;
 	}
 
 	void Sprite::ShowControlWindow(const char* aWindowName)
@@ -153,13 +174,13 @@ namespace Kaka
 		if (ImGui::Begin(aWindowName))
 		{
 			ImGui::Text("Orientation");
-			ImGui::SliderAngle("Roll", &transform.roll, -180.0f, 180.0f);
-			ImGui::SliderAngle("Pitch", &transform.pitch, -180.0f, 180.0f);
-			ImGui::SliderAngle("Yaw", &transform.yaw, -180.0f, 180.0f);
+			ImGui::SliderAngle("X", mTransform.r[0].m128_f32 + 0, -180.0f, 180.0f);
+			ImGui::SliderAngle("Y", mTransform.r[0].m128_f32 + 1, -180.0f, 180.0f);
+			ImGui::SliderAngle("Z", mTransform.r[0].m128_f32 + 2, -180.0f, 180.0f);
 			ImGui::Text("Position");
-			ImGui::DragFloat3("XYZ", &transform.x);
+			ImGui::DragFloat3("XYZ", mTransform.r[3].m128_f32);
 			ImGui::Text("Scale");
-			ImGui::DragFloat("XYZ", &transform.scale, 0.1f, 0.0f, 10.0f, "%.1f");
+			ImGui::DragFloat("XYZ", mTransform.r[4].m128_f32, 0.1f, 0.0f, 10.0f, "%.1f");
 		}
 		ImGui::End();
 	}

@@ -38,9 +38,10 @@ namespace Kaka
 		void SetPosition(DirectX::XMFLOAT3 aPosition);
 		void SetRotationDegrees(float aPitch, float aYaw);
 		void SetDirection(DirectX::XMFLOAT3 aDirection);
-		DirectX::XMMATRIX GetMatrix() const;
+		DirectX::XMMATRIX GetInverseMatrix() const;
 		DirectX::XMMATRIX GetProjection() const;
 		DirectX::XMFLOAT3 GetPosition() const;
+		DirectX::XMVECTOR GetForwardVector() const;
 		void SetPerspective(float aWidth, float aHeight, float aVFov, float aNearZ, float aFarZ);
 		void SetOrthographic(float aWidth, float aHeight, float aNearZ, float aFarZ);
 

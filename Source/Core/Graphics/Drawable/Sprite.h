@@ -14,6 +14,8 @@ namespace Kaka
 		void Draw(Graphics& aGfx);
 		void SetPosition(DirectX::XMFLOAT3 aPosition);
 		void SetScale(float aScale);
+		float GetRotation() const { return rotation; }
+		void SetRotation(float aRotation);
 		DirectX::XMMATRIX GetTransform() const override;
 		DirectX::XMFLOAT3 GetPosition() const;
 
@@ -71,6 +73,9 @@ namespace Kaka
 		};
 
 		TransformParameters transform;
+
+		DirectX::XMMATRIX mTransform = {};
+		float rotation = 0.0f;
 
 		struct PSMaterialConstant
 		{

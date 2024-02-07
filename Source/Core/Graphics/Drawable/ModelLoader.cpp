@@ -557,14 +557,14 @@ namespace Kaka
 		return true;
 	}
 
-	Texture* ModelLoader::LoadTexture(const Graphics& aGfx, const std::string& aFilePath)
+	Texture* ModelLoader::LoadTexture(const Graphics& aGfx, const std::string& aFilePath, const UINT aSlot)
 	{
 		if (textures.contains(aFilePath))
 		{
 			return &textures[aFilePath];
 		}
 
-		textures[aFilePath] = Texture(2u);
+		textures[aFilePath] = Texture(aSlot);
 		textures[aFilePath].LoadTextureFromPath(aGfx, aFilePath);
 
 		return &textures[aFilePath];

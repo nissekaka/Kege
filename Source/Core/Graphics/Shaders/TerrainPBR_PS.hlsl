@@ -55,6 +55,12 @@ struct PixelInput
     float3 bitan : BITANGENT;
 };
 
+struct PixelOutput
+{
+    float4 colour : SV_TARGET0;
+    float4 worldPosition : SV_TARGET1;
+};
+
 Texture2D colourTex : register(t2);
 Texture2D normalTex : register(t3);
 Texture2D materialTex : register(t4);
@@ -67,8 +73,11 @@ Texture2D albTexSnow : register(t8);
 Texture2D nrmTexSnow : register(t9);
 Texture2D matTexSnow : register(t10);
 
-float4 main(PixelInput aInput) : SV_TARGET
+PixelOutput main(PixelInput aInput) : SV_TARGET
 {
+    PixelOutput output;
+    output.worldPosition = float4(aInput.worldPos, 1.0f);
+
 	// Unpack light data
     bool nearbyPointLights[MAX_LIGHTS];
     bool nearbySpotLights[MAX_LIGHTS];
@@ -225,7 +234,8 @@ float4 main(PixelInput aInput) : SV_TARGET
     //const float3 finalColour = saturate(directionalLight * shadowFactor);
     const float3 finalColour = saturate(ambientLight * ambientLightPower + directionalLight * shadowFactor + pointLight + spotLight);
 
-    return float4(finalColour, 1.0f);
+    output.colour = float4(finalColour, 1.0f);
+    return output;
 
     //return float4(toEye, 1.0f);
 }

@@ -46,31 +46,31 @@ namespace Kaka
 			// Vertices and indices
 			switch (modelData.modelType)
 			{
-			case eModelType::None:
+				case eModelType::None:
 				{
 					assert("No model type!");
 				}
 				break;
-			case eModelType::Static:
+				case eModelType::Static:
 				{
 					vertexBuffer.Init(aGfx, modelData.mesh.vertices);
 					indexBuffer.Init(aGfx, modelData.mesh.indices);
 				}
 				break;
-			case eModelType::Skeletal:
+				case eModelType::Skeletal:
 				{
 					vertexBuffer.Init(aGfx, modelData.animMesh.vertices);
 					indexBuffer.Init(aGfx, modelData.animMesh.indices);
 				}
 				break;
-			default:
-				assert("Error!");
+				default:
+					assert("Error!");
 			}
 
 			// Shaders
 			switch (shaderType)
 			{
-			case eShaderType::Solid:
+				case eShaderType::Solid:
 				{
 					pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Solid_PS.cso");
 					vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\Solid_VS.cso");
@@ -84,7 +84,7 @@ namespace Kaka
 					};
 				}
 				break;
-			case eShaderType::Light:
+				case eShaderType::Light:
 				{
 					pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Light_PS.cso");
 					vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\Light_VS.cso");
@@ -114,7 +114,7 @@ namespace Kaka
 					};
 				}
 				break;
-			case eShaderType::Phong:
+				case eShaderType::Phong:
 				{
 					pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Phong_PS.cso");
 					vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\Phong_VS.cso");
@@ -145,7 +145,7 @@ namespace Kaka
 					inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
 				}
 				break;
-			case eShaderType::AnimPhong:
+				case eShaderType::AnimPhong:
 				{
 					pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Phong_PS.cso");
 					vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\AnimPhong_VS.cso");
@@ -182,7 +182,7 @@ namespace Kaka
 						},
 					};
 				}
-			case eShaderType::PBR:
+				case eShaderType::PBR:
 				{
 					pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\ModelPBR_PS.cso");
 					vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\ModelPBR_VS.cso");
@@ -233,7 +233,7 @@ namespace Kaka
 		// Shaders
 		switch (shaderType)
 		{
-		case eShaderType::AnimPBR:
+			case eShaderType::AnimPBR:
 			{
 				pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\ModelPBR_PS.cso");
 				vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\AnimModelPBR_VS.cso");
@@ -309,7 +309,7 @@ namespace Kaka
 
 		switch (shaderType)
 		{
-		case eShaderType::Solid:
+			case eShaderType::Solid:
 			{
 				struct PSMaterialConstant
 				{
@@ -321,7 +321,7 @@ namespace Kaka
 				psConstantBuffer.Bind(aGfx);
 			}
 			break;
-		case eShaderType::Light:
+			case eShaderType::Light:
 			{
 				struct PSMaterialConstant
 				{
@@ -337,7 +337,7 @@ namespace Kaka
 				psConstantBuffer.Bind(aGfx);
 			}
 			break;
-		case eShaderType::Phong:
+			case eShaderType::Phong:
 			{
 				struct PSMaterialConstant
 				{
@@ -355,7 +355,7 @@ namespace Kaka
 				psConstantBuffer.Bind(aGfx);
 			}
 			break;
-		case eShaderType::AnimPhong:
+			case eShaderType::AnimPhong:
 			{
 				struct PSMaterialConstant
 				{
@@ -386,7 +386,7 @@ namespace Kaka
 				vsConstantBuffer.Bind(aGfx);
 			}
 			break;
-		case eShaderType::PBR:
+			case eShaderType::PBR:
 			{
 				struct PSMaterialConstant
 				{
@@ -429,12 +429,12 @@ namespace Kaka
 
 		switch (modelData.modelType)
 		{
-		case eModelType::Static:
-			indices = modelData.mesh.indices;
-			break;
-		case eModelType::Skeletal:
-			indices = modelData.animMesh.indices;
-			break;
+			case eModelType::Static:
+				indices = modelData.mesh.indices;
+				break;
+			case eModelType::Skeletal:
+				indices = modelData.animMesh.indices;
+				break;
 		}
 
 		aGfx.DrawIndexed(static_cast<UINT>(std::size(indices)));
@@ -475,7 +475,7 @@ namespace Kaka
 
 			switch (shaderType)
 			{
-			case eShaderType::AnimPBR:
+				case eShaderType::AnimPBR:
 				{
 					struct PSMaterialConstant
 					{
@@ -570,7 +570,7 @@ namespace Kaka
 
 			switch (shaderType)
 			{
-			case eShaderType::AnimPBR:
+				case eShaderType::AnimPBR:
 				{
 					struct PSMaterialConstant
 					{
@@ -853,6 +853,16 @@ namespace Kaka
 	DirectX::XMMATRIX Model::GetBoneWorldTransform(const int aBoneIndex) const
 	{
 		return animatedModelData.combinedTransforms[aBoneIndex] * GetTransform();
+	}
+
+	void Model::SetPixelShader(const Graphics& aGfx, const std::wstring& aFilePath)
+	{
+		pixelShader = ShaderFactory::GetPixelShader(aGfx, aFilePath);
+	}
+
+	void Model::SetTexture(Texture* aTexture)
+	{
+		animatedModelData.texture = aTexture;
 	}
 
 	void Model::ShowControlWindow(const char* aWindowName)

@@ -21,7 +21,7 @@ namespace Kaka
 
 		static bool LoadAnimatedModel(AnimatedModelDataPtr& aOutModelData, const std::string& aFilePath);
 		static bool LoadTexture(const Graphics& aGfx, AnimatedModelDataPtr& aOutModelData, const std::string& aFilePath);
-		static Texture* LoadTexture(const Graphics& aGfx, const std::string& aFilePath);
+		static Texture* LoadTexture(const Graphics& aGfx, const std::string& aFilePath, const UINT aSlot = 2u);
 		static bool LoadAnimation(AnimatedModelDataPtr& aOutModelData, const std::string& aFilePath);
 
 	private:

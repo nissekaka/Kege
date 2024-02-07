@@ -60,7 +60,8 @@ namespace Kaka
 
 	private:
 		std::vector<Model> models;
-		//Model animatedModel{};
+		Model vfxModel{};
+		Model vfxModelOlle{};
 		std::vector<Model> threadedModels{};
 		//Model spy{};
 		//Model ken{};
@@ -79,6 +80,10 @@ namespace Kaka
 		std::vector<float> spotLightTravelRadiuses = {};
 		std::vector<float> spotLightTravelSpeeds = {};
 		std::vector<float> spotLightTravelAngles = {};
+
+		std::vector<float> spriteTravelRadiuses = {};
+		std::vector<float> spriteTravelSpeeds = {};
+		std::vector<float> spriteTravelAngles = {};
 
 		struct ReflectionWaveBuffer
 		{
@@ -101,6 +106,9 @@ namespace Kaka
 
 		struct CommonBuffer
 		{
+			DirectX::XMMATRIX view;
+			DirectX::XMMATRIX viewProjectionInverse;
+			DirectX::XMMATRIX viewInverse;
 			DirectX::XMFLOAT4 cameraPosition;
 			DirectX::XMFLOAT2 resolution;
 			float currentTime;

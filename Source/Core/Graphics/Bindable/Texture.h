@@ -18,6 +18,7 @@ namespace Kaka
 		void Bind(const Graphics& aGfx) override;
 		BOOL HasNormalMap() const;
 		BOOL HasMaterial() const;
+		void SetSlot(const UINT aSlot) { slot = aSlot; }
 
 	private:
 		std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> pTextures;

@@ -74,7 +74,7 @@ namespace Kaka
 		yaw = atan2(aDirection.x, aDirection.z);
 	}
 
-	DirectX::XMMATRIX Camera::GetMatrix() const
+	DirectX::XMMATRIX Camera::GetInverseMatrix() const
 	{
 		DirectX::XMMATRIX myMatrix = DirectX::XMMatrixIdentity();
 
@@ -93,6 +93,15 @@ namespace Kaka
 	DirectX::XMFLOAT3 Camera::GetPosition() const
 	{
 		return position;
+	}
+
+	DirectX::XMVECTOR Camera::GetForwardVector() const
+	{
+		return {
+			GetInverseMatrix().r[0].m128_f32[2],
+			GetInverseMatrix().r[1].m128_f32[2],
+			GetInverseMatrix().r[2].m128_f32[2]
+		};
 	}
 
 	void Camera::SetPerspective(float aWidth, float aHeight, float aVFov, float aNearZ, float aFarZ)

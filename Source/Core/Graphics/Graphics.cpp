@@ -5,6 +5,7 @@
 #include <External/include/imgui/imgui_impl_win32.h>
 #include <complex>
 
+#include "Drawable/ModelLoader.h"
 #include "Shaders/ShaderFactory.h"
 
 namespace WRL = Microsoft::WRL;
@@ -65,40 +66,109 @@ namespace Kaka
 
 		// Create depth stencil state
 		{
-			D3D11_DEPTH_STENCIL_DESC dsDesc = {};
-			dsDesc.DepthEnable = TRUE;
-			dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-			dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
-			WRL::ComPtr<ID3D11DepthStencilState> pDSState;
-			pDevice->CreateDepthStencilState(&dsDesc, &pDSState);
+			D3D11_TEXTURE2D_DESC desc = {0};
+			desc.Width = width;
+			desc.Height = height;
+			desc.MipLevels = 1;
+			desc.ArraySize = 1;
+			desc.Format = DXGI_FORMAT_R32_TYPELESS;
+			desc.SampleDesc.Count = 1;
+			desc.SampleDesc.Quality = 0;
+			desc.Usage = D3D11_USAGE_DEFAULT;
+			desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+			desc.CPUAccessFlags = 0;
+			desc.MiscFlags = 0;
 
-			// Bind depth state
-			pContext->OMSetDepthStencilState(pDSState.Get(), 1u);
+			ID3D11Texture2D* texture;
+			HRESULT result = pDevice->CreateTexture2D(&desc, nullptr, &texture);
+			assert(SUCCEEDED(result));
 
-			// Create depth stencil texture
-			WRL::ComPtr<ID3D11Texture2D> pDepthStencil;
-			D3D11_TEXTURE2D_DESC descDepth = {};
-			descDepth.Width = width;
-			descDepth.Height = height;
-			descDepth.MipLevels = 1u;
-			descDepth.ArraySize = 1u;
-			descDepth.Format = DXGI_FORMAT_D32_FLOAT;
-			descDepth.SampleDesc.Count = 1u;
-			descDepth.SampleDesc.Quality = 0u;
-			descDepth.Usage = D3D11_USAGE_DEFAULT;
-			descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-			pDevice->CreateTexture2D(&descDepth, nullptr, &pDepthStencil);
+			ID3D11DepthStencilView* DSV;
+			D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
 
-			// Create view of depth stencil texture
-			D3D11_DEPTH_STENCIL_VIEW_DESC descDSV = {};
-			descDSV.Format = DXGI_FORMAT_D32_FLOAT;
-			descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-			descDSV.Texture2D.MipSlice = 0u;
-			pDevice->CreateDepthStencilView(pDepthStencil.Get(), &descDSV, &pDepth);
+			dsvDesc.Flags = 0;
+			dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+			dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+			result = pDevice->CreateDepthStencilView(texture, &dsvDesc, &DSV);
+			assert(SUCCEEDED(result));
+
+			pDepth = DSV;
+			DSV->Release();
+
+			ID3D11ShaderResourceView* SRV;
+			D3D11_SHADER_RESOURCE_VIEW_DESC srDesc{};
+			srDesc.Format = DXGI_FORMAT_R32_FLOAT;
+			srDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			srDesc.Texture2D.MostDetailedMip = 0;
+			srDesc.Texture2D.MipLevels = UINT_MAX;
+			result = pDevice->CreateShaderResourceView(texture, &srDesc, &SRV);
+			assert(SUCCEEDED(result));
+			pDepthShaderResourceView = SRV;
+			SRV->Release();
+
+			//D3D11_DEPTH_STENCIL_DESC dsDesc = {};
+			//dsDesc.DepthEnable = TRUE;
+			//dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+			//dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
+			//WRL::ComPtr<ID3D11DepthStencilState> pDSState;
+			//pDevice->CreateDepthStencilState(&dsDesc, &pDSState);
+
+			//// Bind depth state
+			//pContext->OMSetDepthStencilState(pDSState.Get(), 1u);
+
+			//// Create depth stencil texture
+			//WRL::ComPtr<ID3D11Texture2D> depthTexture;
+			//D3D11_TEXTURE2D_DESC descDepth = {};
+			//descDepth.Width = width;
+			//descDepth.Height = height;
+			//descDepth.MipLevels = 1u;
+			//descDepth.ArraySize = 1u;
+			//descDepth.Format = DXGI_FORMAT_D32_FLOAT;
+			//descDepth.SampleDesc.Count = 1u;
+			//descDepth.SampleDesc.Quality = 0u;
+			//descDepth.Usage = D3D11_USAGE_DEFAULT;
+			//descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+			//pDevice->CreateTexture2D(&descDepth, nullptr, &depthTexture);
+
+			//// Create view of depth stencil texture
+			//D3D11_DEPTH_STENCIL_VIEW_DESC descDSV = {};
+			//descDSV.Format = DXGI_FORMAT_D32_FLOAT;
+			//descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+			//descDSV.Texture2D.MipSlice = 0u;
+			//pDevice->CreateDepthStencilView(depthTexture.Get(), &descDSV, &pDepth);
+
+			//// I want to see the depth as a texture
+			//D3D11_TEXTURE2D_DESC desc = {0};
+			//desc.Width = width;
+			//desc.Height = height;
+			//desc.MipLevels = 1;
+			//desc.ArraySize = 1;
+			//desc.Format = DXGI_FORMAT_R32_TYPELESS;
+			//desc.SampleDesc.Count = 1;
+			//desc.SampleDesc.Quality = 0;
+			//desc.Usage = D3D11_USAGE_DEFAULT;
+			//desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+			//desc.CPUAccessFlags = 0;
+			//desc.MiscFlags = 0;
+
+			//ID3D11Texture2D* texture;
+			//HRESULT result = pDevice->CreateTexture2D(&desc, nullptr, &texture);
+			//assert(SUCCEEDED(result));
+
+			//ID3D11ShaderResourceView* SRV;
+			//D3D11_SHADER_RESOURCE_VIEW_DESC srDesc{};
+			//srDesc.Format = DXGI_FORMAT_R32_FLOAT;
+			//srDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			//srDesc.Texture2D.MostDetailedMip = 0;
+			//srDesc.Texture2D.MipLevels = UINT_MAX;
+			//result = pDevice->CreateShaderResourceView(texture, &srDesc, &SRV);
+			//assert(SUCCEEDED(result));
+			//pDepthShaderResourceView = SRV;
+			//SRV->Release();
 
 			// Bind depth stencil view to OM
 			pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), pDepth.Get());
-			//pContext->OMSetRenderTargets(1u, shadowMap.pTarget.GetAddressOf(), pShadowDepth.Get());
+			//depthTexture->Release();
 
 			// Configure viewport
 			D3D11_VIEWPORT vp = {};
@@ -115,7 +185,7 @@ namespace Kaka
 
 		// Reflection texture
 		{
-			ID3D11Texture2D* texture;
+			ID3D11Texture2D* reflectionTexture;
 			D3D11_TEXTURE2D_DESC desc = {0};
 			desc.Width = width;
 			desc.Height = height;
@@ -128,14 +198,14 @@ namespace Kaka
 			desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 			desc.CPUAccessFlags = 0u;
 			desc.MiscFlags = 0u;
-			result = pDevice->CreateTexture2D(&desc, nullptr, &texture);
+			result = pDevice->CreateTexture2D(&desc, nullptr, &reflectionTexture);
 			assert(SUCCEEDED(result));
-			result = pDevice->CreateShaderResourceView(texture, nullptr, &renderWaterReflect.pResource);
+			result = pDevice->CreateShaderResourceView(reflectionTexture, nullptr, &renderWaterReflect.pResource);
 			assert(SUCCEEDED(result));
-			result = pDevice->CreateRenderTargetView(texture, nullptr, &renderWaterReflect.pTarget);
+			result = pDevice->CreateRenderTargetView(reflectionTexture, nullptr, &renderWaterReflect.pTarget);
 			assert(SUCCEEDED(result));
 
-			texture->Release();
+			reflectionTexture->Release();
 		}
 
 		// Post processing
@@ -251,46 +321,39 @@ namespace Kaka
 
 			pDevice->CreateSamplerState(&samplerDesc, &pShadowSampler);
 
-			//ID3D11Texture2D* shadowTexture;
-			//D3D11_TEXTURE2D_DESC smDesc = {0};
-			//smDesc.Width = shadowWidth;
-			//smDesc.Height = shadowHeight;
-			//smDesc.MipLevels = 1u;
-			//smDesc.ArraySize = 1u;
-			//smDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			//smDesc.SampleDesc.Count = 1u;
-			//smDesc.SampleDesc.Quality = 0u;
-			//smDesc.Usage = D3D11_USAGE_DEFAULT;
-			//smDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-			//smDesc.CPUAccessFlags = 0u;
-			//smDesc.MiscFlags = 0u;
-			//result = pDevice->CreateTexture2D(&smDesc, nullptr, &shadowTexture);
-			//assert(SUCCEEDED(result));
-			//result = pDevice->CreateShaderResourceView(shadowTexture, nullptr, &shadowMap.pResource);
-			//assert(SUCCEEDED(result));
-			//result = pDevice->CreateRenderTargetView(shadowTexture, nullptr, &shadowMap.pTarget);
-			//shadowTexture->Release();
+			D3D11_SAMPLER_DESC samplerCompDesc = CD3D11_SAMPLER_DESC{CD3D11_DEFAULT{}};
+			samplerCompDesc.Filter = D3D11_FILTER_COMPARISON_ANISOTROPIC;
+			samplerCompDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerCompDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerCompDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerCompDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
 
-			//// Create depth stencil texture
-			//WRL::ComPtr<ID3D11Texture2D> pShadowDepthStencil;
-			//D3D11_TEXTURE2D_DESC descShadowDepth = {};
-			//descShadowDepth.Width = width / 4.0f;
-			//descShadowDepth.Height = height / 4.0f;
-			//descShadowDepth.MipLevels = 1u;
-			//descShadowDepth.ArraySize = 1u;
-			//descShadowDepth.Format = DXGI_FORMAT_R32_TYPELESS;
-			//descShadowDepth.SampleDesc.Count = 1u;
-			//descShadowDepth.SampleDesc.Quality = 0u;
-			//descShadowDepth.Usage = D3D11_USAGE_DEFAULT;
-			//descShadowDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-			//pDevice->CreateTexture2D(&descShadowDepth, nullptr, &pShadowDepthStencil);
+			pDevice->CreateSamplerState(&samplerCompDesc, &pShadowCompSampler);
+		}
 
-			//// Create view of depth stencil texture
-			//D3D11_DEPTH_STENCIL_VIEW_DESC descShadowDSV = {};
-			//descShadowDSV.Format = DXGI_FORMAT_D32_FLOAT;
-			//descShadowDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-			//descShadowDSV.Texture2D.MipSlice = 0u;
-			//pDevice->CreateDepthStencilView(pShadowDepthStencil.Get(), &descShadowDSV, &pShadowDepth);
+		// World Position
+		{
+			ID3D11Texture2D* worldPosTexture;
+			D3D11_TEXTURE2D_DESC desc = {0};
+			desc.Width = width;
+			desc.Height = height;
+			desc.MipLevels = 1;
+			desc.ArraySize = 1;
+			desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			desc.SampleDesc.Count = 1;
+			desc.SampleDesc.Quality = 0;
+			desc.Usage = D3D11_USAGE_DEFAULT;
+			desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+			desc.CPUAccessFlags = 0;
+			desc.MiscFlags = 0;
+			result = pDevice->CreateTexture2D(&desc, nullptr, &worldPosTexture);
+			assert(SUCCEEDED(result));
+			result = pDevice->CreateShaderResourceView(worldPosTexture, nullptr, &worldPosition.pResource);
+			assert(SUCCEEDED(result));
+			result = pDevice->CreateRenderTargetView(worldPosTexture, nullptr, &worldPosition.pTarget);
+			assert(SUCCEEDED(result));
+
+			worldPosTexture->Release();
 		}
 
 		// Blend state
@@ -306,8 +369,44 @@ namespace Kaka
 		result = pDevice->CreateBlendState(&omDesc, &pBlend);
 		assert(SUCCEEDED(result));
 
+		omDesc.RenderTarget[0].BlendEnable = true;
+		omDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+		omDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+		omDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+		omDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
+		omDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+		omDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		omDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		result = pDevice->CreateBlendState(&omDesc, &pBlendVfx);
+		assert(SUCCEEDED(result));
+
+		omDesc.RenderTarget[0].BlendEnable = true;
+		omDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+		omDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+		omDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+		omDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+		omDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+		omDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_MAX;
+		omDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		result = pDevice->CreateBlendState(&omDesc, &pBlendAdd);
+		assert(SUCCEEDED(result));
+
 		// Init imgui d3d impl
 		ImGui_ImplDX11_Init(pDevice.Get(), pContext.Get());
+
+		// VFX
+		{
+			D3D11_SAMPLER_DESC samplerDesc = CD3D11_SAMPLER_DESC{CD3D11_DEFAULT{}};
+			samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
+
+			pDevice->CreateSamplerState(&samplerDesc, &pVFXSampler);
+
+			pContext->PSSetSamplers(7u, 1u, pVFXSampler.GetAddressOf());
+		}
 	}
 
 	Graphics::~Graphics()
@@ -327,6 +426,7 @@ namespace Kaka
 
 		constexpr float colour[] = KAKA_BG_COLOUR;
 		pContext->ClearRenderTargetView(pDefaultTarget.Get(), colour);
+		pContext->ClearRenderTargetView(worldPosition.pTarget.Get(), colour);
 		//pContext->ClearRenderTargetView(renderWaterReflect.pTarget.Get(), colour);
 		//pContext->ClearRenderTargetView(postProcessing.pTarget.Get(), colour);
 		//for (int i = 0; i < bloomSteps; ++i)
@@ -396,9 +496,9 @@ namespace Kaka
 		camera = &aCamera;
 	}
 
-	DirectX::XMMATRIX Graphics::GetCurrentCameraMatrix() const
+	DirectX::XMMATRIX Graphics::GetCameraInverseMatrix() const
 	{
-		return camera->GetMatrix();
+		return camera->GetInverseMatrix();
 	}
 
 	UINT Graphics::GetDrawcallCount() const
@@ -406,41 +506,61 @@ namespace Kaka
 		return drawcallCount;
 	}
 
-	void Graphics::SetRenderTarget(const eRenderTargetType aRenderTargetType) const
+	void Graphics::SetRenderTarget(eRenderTargetType aRenderTargetType, const bool aUseDepth, const bool aWriteToWorldPos) const
 	{
 		constexpr float colour[] = KAKA_BG_COLOUR;
 
 		switch (aRenderTargetType)
 		{
-		case eRenderTargetType::Default:
+			case eRenderTargetType::Default:
 			{
-				pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), pDepth.Get());
+				pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 				break;
 			}
-		case eRenderTargetType::WaterReflect:
+			case eRenderTargetType::WaterReflect:
 			{
-				pContext->OMSetRenderTargets(1u, renderWaterReflect.pTarget.GetAddressOf(), pDepth.Get());
+				ID3D11RenderTargetView* renderTargets[2] = {renderWaterReflect.pTarget.Get(), worldPosition.pTarget.Get()};
+				pContext->OMSetRenderTargets(2u, &renderTargets[0], aUseDepth ? pDepth.Get() : NULL);
 				break;
 			}
-		case eRenderTargetType::PostProcessing:
+			case eRenderTargetType::PostProcessing:
 			{
-				pContext->OMSetRenderTargets(1u, postProcessing.pTarget.GetAddressOf(), pDepth.Get());
-				break;
+				if (aWriteToWorldPos)
+				{
+					ID3D11RenderTargetView* renderTargets[2] = {postProcessing.pTarget.Get(), worldPosition.pTarget.Get()};
+					pContext->OMSetRenderTargets(2u, &renderTargets[0], aUseDepth ? pDepth.Get() : NULL);
+					break;
+				}
+				else
+				{
+					pContext->OMSetRenderTargets(1u, postProcessing.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
+					break;
+				}
 			}
-		case eRenderTargetType::ShadowMap:
+			case eRenderTargetType::ShadowMap:
 			{
-				pContext->OMSetRenderTargets(0u, nullptr, pShadowDepth.Get());
+				pContext->OMSetRenderTargets(0u, nullptr, aUseDepth ? pShadowDepth.Get() : NULL);
 				break;
 			}
 		}
 	}
 
-	void Graphics::SetAlpha() const
+	void Graphics::SetAlphaBlend() const
 	{
 		pContext->OMSetBlendState(pBlend.Get(), nullptr, 0x0f);
 	}
 
-	void Graphics::ResetAlpha() const
+	void Graphics::SetVFXBlend() const
+	{
+		pContext->OMSetBlendState(pBlendVfx.Get(), nullptr, 0x0f);
+	}
+
+	void Graphics::SetAdditiveBlend() const
+	{
+		pContext->OMSetBlendState(pBlendAdd.Get(), nullptr, 0x0f);
+	}
+
+	void Graphics::ResetBlend() const
 	{
 		pContext->OMSetBlendState(nullptr, nullptr, 0x0f);
 	}
@@ -473,7 +593,7 @@ namespace Kaka
 				aPostProcessor.Draw(*this);
 			}
 
-			SetAlpha();
+			SetAlphaBlend();
 
 			aPostProcessor.SetUpsamplePS();
 
@@ -489,7 +609,7 @@ namespace Kaka
 				aPostProcessor.Draw(*this);
 			}
 
-			ResetAlpha();
+			ResetBlend();
 
 			aPostProcessor.SetPostProcessPS();
 
@@ -506,22 +626,30 @@ namespace Kaka
 		}
 	}
 
+	void Graphics::BindWorldPositionTexture()
+	{
+		pContext->PSSetShaderResources(12u, 1u, worldPosition.pResource.GetAddressOf());
+	}
+
+	void Graphics::UnbindWorldPositionTexture()
+	{
+		ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
+		pContext->PSSetShaderResources(12u, 1u, nullSRVs);
+	}
+
 	void Graphics::BindWaterReflectionTexture()
 	{
-		pContext->PSSetShaderResources(2u, 1u,
-		                               renderWaterReflect.pResource.GetAddressOf());
+		pContext->PSSetShaderResources(2u, 1u, renderWaterReflect.pResource.GetAddressOf());
 	}
 
 	void Graphics::BindPostProcessingTexture()
 	{
-		pContext->PSSetShaderResources(0u, 1u,
-		                               postProcessing.pResource.GetAddressOf());
+		pContext->PSSetShaderResources(0u, 1u, postProcessing.pResource.GetAddressOf());
 	}
 
 	void Graphics::BindBloomDownscaleTexture(const int aIndex)
 	{
-		pContext->PSSetShaderResources(0u, 1u,
-		                               bloomDownscale[aIndex].pResource.GetAddressOf());
+		pContext->PSSetShaderResources(0u, 1u, bloomDownscale[aIndex].pResource.GetAddressOf());
 	}
 
 	DirectX::XMFLOAT2 Graphics::GetCurrentResolution() const
@@ -555,7 +683,16 @@ namespace Kaka
 		ImGui::Image(shadowMap.pResource.Get(), ImVec2(1600 / 3, 800 / 3));
 		ImGui::End();
 
+		//ImGui::Begin("Depth");
+		//ImGui::Image(pDepthShaderResourceView.Get(), ImVec2(1600 / 3, 800 / 3));
+		//ImGui::End();
+
+		ImGui::Begin("World Position");
+		ImGui::Image(worldPosition.pResource.Get(), ImVec2(1600 / 3, 800 / 3));
+		ImGui::End();
+
 		pContext->PSSetSamplers(1u, 1u, pShadowSampler.GetAddressOf());
+		pContext->PSSetSamplers(2u, 1u, pShadowCompSampler.GetAddressOf());
 
 		pContext->PSSetShaderResources(14u, 1u, shadowMap.pResource.GetAddressOf());
 	}
@@ -585,13 +722,24 @@ namespace Kaka
 		return height;
 	}
 
+	void Graphics::BindDepth()
+	{
+		pContext->PSSetShaderResources(13u, 1u, pDepthShaderResourceView.GetAddressOf());
+	}
+
+	void Graphics::UnbindDepthSRV()
+	{
+		ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
+		pContext->PSSetShaderResources(13u, 1, nullSRVs);
+	}
+
 	Graphics::FrustumPlanes Graphics::ExtractFrustumPlanes() const
 	{
 		FrustumPlanes frustum;
 
 		// Extract the rows of the view-projection matrix
 		DirectX::XMFLOAT4X4 VP;
-		auto viewProjectionMatrix = GetCurrentCameraMatrix() * camera->GetProjection();
+		auto viewProjectionMatrix = GetCameraInverseMatrix() * camera->GetProjection();
 		DirectX::XMStoreFloat4x4(&VP, viewProjectionMatrix);
 
 		// Extract the frustum planes from the view-projection matrix

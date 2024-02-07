@@ -47,6 +47,9 @@ namespace Kaka
 		DirectX::XMMATRIX& GetBoneTransform(const std::string& aBoneName);
 		DirectX::XMMATRIX GetBoneWorldTransform(int aBoneIndex) const;
 
+		void SetPixelShader(const Graphics& aGfx, const std::wstring& aFilePath);
+		void SetTexture(Texture* aTexture);
+
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
 
@@ -89,8 +92,8 @@ namespace Kaka
 		//std::vector<std::unique_ptr<Bindable>> bindablePtrs;
 		bool isLoaded = false;
 
-		bool drawSkeleton = true;
-		bool drawBoneNames = true;
+		bool drawSkeleton = false;
+		bool drawBoneNames = false;
 
 		BOOL nearbyPointLights[50u];
 		BOOL nearbySpotLights[50u];
