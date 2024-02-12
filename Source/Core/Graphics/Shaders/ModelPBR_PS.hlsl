@@ -126,9 +126,9 @@ PixelOutput main(PixelInput aInput)
 
     if (materialEnabled)
     {
-        ambientOcclusion = 0.0f; //material.r;
-        roughness = 1.0f; //material.g;
-        metalness = 0.0f; //material.b;
+        ambientOcclusion = material.r;
+        roughness = material.g;
+        metalness = material.b;
         //emissive = material.b;
 
         specular = lerp((float3) 0.04f, colour.rgb, metalness);

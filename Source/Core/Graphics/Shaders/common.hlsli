@@ -6,7 +6,7 @@
 cbuffer CommonBuffer : register(b4)
 {
     float4x4 view;
-    float4x4 viewProjectionInverse;
+    float4x4 projectionInverse;
     float4x4 viewInverse;
     float4 cameraPosition;
     float2 clientResolution;
@@ -23,7 +23,7 @@ int GetNumMips(TextureCube cubeTex)
 }
 
 SamplerState splr : register(s0);
-Texture2D depthTex : register(t13);
+//Texture2D depthTex : register(t13);
 
 
 //cbuffer CommonBuffer : register(b0)

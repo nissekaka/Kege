@@ -23,17 +23,11 @@ namespace Kaka
 		~Model() override = default;
 		void Init();
 		void LoadModel(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType);
-		void LoadFBXModel(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType);
-		bool LoadFBXAnimation(const std::string& aFilePath);
-		void Draw(Graphics& aGfx);
-		void DrawFBX(Graphics& aGfx);
-		void DrawFBXPtr(Graphics& aGfx);
-		void Update(float aDeltaTime);
-		void UpdatePtr(float aDeltaTime);
+		bool LoadAnimation(const std::string& aFilePath);
+		void Draw(Graphics& aGfx, const float aDeltaTime);
 		void SetPosition(DirectX::XMFLOAT3 aPosition);
 		void SetRotation(DirectX::XMFLOAT3 aRotation);
 		void SetScale(float aScale);
-		void SetColour(DirectX::XMFLOAT4 aColour);
 		DirectX::XMFLOAT3 GetPosition() const;
 		DirectX::XMFLOAT3 GetRotation() const;
 		DirectX::XMMATRIX GetTransform() const override;
@@ -41,7 +35,7 @@ namespace Kaka
 		bool IsLoaded() const;
 		void SetNearbyLights(bool aNearbyPointLights[], bool aNearbySpotLights[]);
 		void BindPixelShader(const Graphics& aGfx);
-		ModelData& GetModelData() { return modelData; }
+		ModelDataPtr& GetModelData() { return modelData; }
 		AnimatedModelDataPtr& GetAnimatedModelData() { return animatedModelData; }
 		DirectX::XMMATRIX& GetBoneTransform(int aBoneIndex);
 		DirectX::XMMATRIX& GetBoneTransform(const std::string& aBoneName);
@@ -52,6 +46,11 @@ namespace Kaka
 
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
+
+	private:
+		void UpdatePtr(float aDeltaTime);
+		void DrawStatic(Graphics& aGfx);
+		void DrawAnimated(Graphics& aGfx);
 
 	private:
 		Sampler sampler = {};
@@ -82,13 +81,13 @@ namespace Kaka
 
 		TransformParameters transform;
 
-		DirectX::XMFLOAT4 solidColour = {};
 		float specularIntensity = 0.1f;
 		float specularPower = 2.0f;
 
 	private:
 		AnimatedModelDataPtr animatedModelData;
-		ModelData modelData;
+		ModelDataPtr modelData;
+		eModelType modelType = eModelType::None;
 		//std::vector<std::unique_ptr<Bindable>> bindablePtrs;
 		bool isLoaded = false;
 

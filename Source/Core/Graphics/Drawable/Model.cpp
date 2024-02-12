@@ -16,225 +16,69 @@ namespace Kaka
 
 	Model::Model(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType)
 		:
-		shaderType(aShaderType)
-	{
-		//isLoaded = ModelLoader::LoadModel(aFilePath, modelData);
-		//animatedModelData.texture.LoadTextureFromModel(aGfx, aFilePath);
-		solidColour = {1.0f, 1.0f, 1.0f, 1.0f};
-	}
+		shaderType(aShaderType) { }
 
 	void Model::Init()
 	{
-		animationPlayer.Init(&animatedModelData);
+		if (modelType == eModelType::Skeletal)
+		{
+			animationPlayer.Init(&animatedModelData);
+		}
 		isLoaded = true;
 	}
 
 	void Model::LoadModel(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType)
 	{
-		if (!isLoaded)
-		{
-			shaderType = aShaderType;
-			isLoaded = ModelLoader::LoadModel(aFilePath, modelData);
-			//animatedModelData.texture->LoadTextureFromModel(aGfx, aFilePath);
-			solidColour = {1.0f, 1.0f, 1.0f, 1.0f};
-		}
-
-		if (isLoaded)
-		{
-			sampler.Init(aGfx, 0u);
-
-			// Vertices and indices
-			switch (modelData.modelType)
-			{
-				case eModelType::None:
-				{
-					assert("No model type!");
-				}
-				break;
-				case eModelType::Static:
-				{
-					vertexBuffer.Init(aGfx, modelData.mesh.vertices);
-					indexBuffer.Init(aGfx, modelData.mesh.indices);
-				}
-				break;
-				case eModelType::Skeletal:
-				{
-					vertexBuffer.Init(aGfx, modelData.animMesh.vertices);
-					indexBuffer.Init(aGfx, modelData.animMesh.indices);
-				}
-				break;
-				default:
-					assert("Error!");
-			}
-
-			// Shaders
-			switch (shaderType)
-			{
-				case eShaderType::Solid:
-				{
-					pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Solid_PS.cso");
-					vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\Solid_VS.cso");
-
-					ied =
-					{
-						{
-							"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-					};
-				}
-				break;
-				case eShaderType::Light:
-				{
-					pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Light_PS.cso");
-					vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\Light_VS.cso");
-
-					ied =
-					{
-						{
-							"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-					};
-				}
-				break;
-				case eShaderType::Phong:
-				{
-					pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Phong_PS.cso");
-					vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\Phong_VS.cso");
-
-					ied =
-					{
-						{
-							"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-					};
-					inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
-				}
-				break;
-				case eShaderType::AnimPhong:
-				{
-					pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Phong_PS.cso");
-					vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\AnimPhong_VS.cso");
-
-					ied =
-					{
-						{
-							"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"BONEINDICES", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"BONEWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-					};
-				}
-				case eShaderType::PBR:
-				{
-					pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\ModelPBR_PS.cso");
-					vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\ModelPBR_VS.cso");
-
-					ied =
-					{
-						{
-							"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-						{
-							"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-							D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
-						},
-					};
-					inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
-				}
-				break;
-			}
-
-			inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
-			topology.Init(aGfx, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			rasterizer.Init(aGfx);
-			depthStencil.Init(aGfx, DepthStencil::Mode::Write);
-		}
-	}
-
-	void Model::LoadFBXModel(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType)
-	{
 		shaderType = aShaderType;
-		ModelLoader::LoadAnimatedModel(animatedModelData, aFilePath);
-		ModelLoader::LoadTexture(aGfx, animatedModelData, aFilePath);
 
 		sampler.Init(aGfx, 0u);
 
 		// Shaders
 		switch (shaderType)
 		{
-			case eShaderType::AnimPBR:
+		case eShaderType::PBR:
 			{
+				modelType = eModelType::Static;
+
+				ModelLoader::LoadModel(modelData, aFilePath);
+				ModelLoader::LoadTexture(aGfx, modelData, aFilePath);
+
+				pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\ModelPBR_Deferred_PS.cso");
+				vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\ModelPBR_Deferred_VS.cso");
+
+				ied =
+				{
+					{
+						"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+					{
+						"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+					{
+						"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+					{
+						"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+					{
+						"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+						D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
+					},
+				};
+				inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
+			}
+			break;
+		case eShaderType::AnimPBR:
+			{
+				modelType = eModelType::Skeletal;
+
+				ModelLoader::LoadAnimatedModel(animatedModelData, aFilePath);
+				ModelLoader::LoadTexture(aGfx, animatedModelData, aFilePath);
+
 				pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\ModelPBR_PS.cso");
 				vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\AnimModelPBR_VS.cso");
 
@@ -280,172 +124,31 @@ namespace Kaka
 		depthStencil.Init(aGfx, DepthStencil::Mode::Write);
 	}
 
-	bool Model::LoadFBXAnimation(const std::string& aFilePath)
+	bool Model::LoadAnimation(const std::string& aFilePath)
 	{
 		return ModelLoader::LoadAnimation(animatedModelData, aFilePath);
 	}
 
-	void Model::Draw(Graphics& aGfx)
+	void Model::Draw(Graphics& aGfx, const float aDeltaTime)
 	{
-		//if (!aGfx.IsBoundingBoxInFrustum(GetPosition(), GetPosition()))
-		//{
-		//	return;
-		//}
-
-		if (!isLoaded)
+		switch (modelType)
 		{
-			return;
+		case eModelType::Static:
+			{
+				DrawStatic(aGfx);
+			}
+			break;
+		case eModelType::Skeletal:
+			{
+				UpdatePtr(aDeltaTime);
+				DrawAnimated(aGfx);
+			}
+			break;
+		default: ;
 		}
-
-		sampler.Bind(aGfx);
-		animatedModelData.texture->Bind(aGfx);
-
-		vertexBuffer.Bind(aGfx);
-		indexBuffer.Bind(aGfx);
-
-		TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
-		transformConstantBuffer.Bind(aGfx);
-		pixelShader->Bind(aGfx);
-
-		switch (shaderType)
-		{
-			case eShaderType::Solid:
-			{
-				struct PSMaterialConstant
-				{
-					DirectX::XMFLOAT4 colour;
-				} pmc = {};
-				pmc.colour = solidColour;
-
-				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-				psConstantBuffer.Bind(aGfx);
-			}
-			break;
-			case eShaderType::Light:
-			{
-				struct PSMaterialConstant
-				{
-					BOOL normalMapEnabled = FALSE;
-					BOOL materialEnabled = FALSE;
-					BOOL padding1 = {};
-					BOOL padding2 = {};
-				} pmc;
-				pmc.normalMapEnabled = animatedModelData.texture->HasNormalMap();
-				pmc.materialEnabled = animatedModelData.texture->HasMaterial();
-
-				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-				psConstantBuffer.Bind(aGfx);
-			}
-			break;
-			case eShaderType::Phong:
-			{
-				struct PSMaterialConstant
-				{
-					BOOL normalMapEnabled = FALSE;
-					BOOL materialEnabled = FALSE;
-					float specularIntensity = 0.1f;
-					float specularPower = 30.0f;
-				} pmc;
-				pmc.normalMapEnabled = animatedModelData.texture->HasNormalMap();
-				pmc.materialEnabled = animatedModelData.texture->HasMaterial();
-				pmc.specularIntensity = specularIntensity;
-				pmc.specularPower = specularPower;
-
-				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-				psConstantBuffer.Bind(aGfx);
-			}
-			break;
-			case eShaderType::AnimPhong:
-			{
-				struct PSMaterialConstant
-				{
-					BOOL normalMapEnabled = FALSE;
-					BOOL materialEnabled = FALSE;
-					float specularIntensity = 0.1f;
-					float specularPower = 30.0f;
-				} pmc;
-				pmc.normalMapEnabled = animatedModelData.texture->HasNormalMap();
-				pmc.materialEnabled = animatedModelData.texture->HasMaterial();
-				pmc.specularIntensity = specularIntensity;
-				pmc.specularPower = specularPower;
-
-				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-				psConstantBuffer.Bind(aGfx);
-
-				struct VSBoneConstant
-				{
-					DirectX::XMMATRIX bones[64u];
-				} vsb = {};
-
-				for (int i = 0; i < modelData.skeleton.bones.size(); ++i)
-				{
-					vsb.bones[i] = modelData.skeleton.bones[i].bindPose;
-				}
-
-				VertexConstantBuffer<VSBoneConstant> vsConstantBuffer(aGfx, vsb, 1u);
-				vsConstantBuffer.Bind(aGfx);
-			}
-			break;
-			case eShaderType::PBR:
-			{
-				struct PSMaterialConstant
-				{
-					BOOL normalMapEnabled = FALSE;
-					BOOL materialEnabled = FALSE;
-					unsigned int packedNearbyPointLightDataA = 0u;
-					unsigned int packedNearbyPointLightDataB = 0u;
-					unsigned int packedNearbySpotLightDataA = 0u;
-					unsigned int packedNearbySpotLightDataB = 0u;
-					float padding[2];
-				} pmc;
-				pmc.normalMapEnabled = animatedModelData.texture->HasNormalMap();
-				pmc.materialEnabled = animatedModelData.texture->HasMaterial();
-				for (int i = 0; i < MAX_LIGHTS; ++i)
-				{
-					if (i < 32)
-					{
-						pmc.packedNearbyPointLightDataA |= (nearbyPointLights[i] ? (1u << i) : 0u);
-						pmc.packedNearbySpotLightDataA |= (nearbySpotLights[i] ? (1u << i) : 0u);
-					}
-					else
-					{
-						pmc.packedNearbyPointLightDataA |= (nearbyPointLights[i - 32] ? (1u << (i - 32)) : 0u);
-						pmc.packedNearbySpotLightDataA |= (nearbySpotLights[i - 32] ? (1u << (i - 32)) : 0u);
-					}
-				}
-
-				PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-				psConstantBuffer.Bind(aGfx);
-			}
-		}
-
-		vertexShader->Bind(aGfx);
-		inputLayout.Bind(aGfx);
-		topology.Bind(aGfx);
-		rasterizer.Bind(aGfx);
-		depthStencil.Bind(aGfx);
-
-		std::vector<unsigned short> indices;
-
-		switch (modelData.modelType)
-		{
-			case eModelType::Static:
-				indices = modelData.mesh.indices;
-				break;
-			case eModelType::Skeletal:
-				indices = modelData.animMesh.indices;
-				break;
-		}
-
-		aGfx.DrawIndexed(static_cast<UINT>(std::size(indices)));
-		//aGfx.pContext->DrawIndexed(static_cast<UINT>(std::size(indices)), 0u, 0u);
-		// Unbind shader resources
-		ID3D11ShaderResourceView* nullSRVs[3] = {nullptr};
-		aGfx.pContext->PSSetShaderResources(0u, 3u, nullSRVs);
-		//}
 	}
 
-	void Model::DrawFBX(Graphics& aGfx)
+	void Model::DrawStatic(Graphics& aGfx)
 	{
 		if (!isLoaded)
 		{
@@ -453,19 +156,26 @@ namespace Kaka
 		}
 
 		sampler.Bind(aGfx);
-		animatedModelData.texture->Bind(aGfx);
+		modelData.texture->Bind(aGfx);
 
 		TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
 		transformConstantBuffer.Bind(aGfx);
 
 		vertexShader->Bind(aGfx);
-		pixelShader->Bind(aGfx);
+		if (aGfx.HasPixelShaderOverride())
+		{
+			aGfx.GetPixelShaderOverride()->Bind(aGfx);
+		}
+		else
+		{
+			pixelShader->Bind(aGfx);
+		}
 		inputLayout.Bind(aGfx);
 		topology.Bind(aGfx);
 		rasterizer.Bind(aGfx);
 		depthStencil.Bind(aGfx);
 
-		for (auto& mesh : modelData.animMeshes)
+		for (Mesh& mesh : modelData.meshList->meshes)
 		{
 			vertexBuffer.Init(aGfx, mesh.vertices);
 			indexBuffer.Init(aGfx, mesh.indices);
@@ -475,7 +185,7 @@ namespace Kaka
 
 			switch (shaderType)
 			{
-				case eShaderType::AnimPBR:
+			case eShaderType::PBR:
 				{
 					struct PSMaterialConstant
 					{
@@ -487,8 +197,8 @@ namespace Kaka
 						unsigned int packedNearbySpotLightDataB = 0u;
 						float padding[2];
 					} pmc;
-					pmc.normalMapEnabled = animatedModelData.texture->HasNormalMap();
-					pmc.materialEnabled = animatedModelData.texture->HasMaterial();
+					pmc.normalMapEnabled = modelData.texture->HasNormalMap();
+					pmc.materialEnabled = modelData.texture->HasMaterial();
 					for (int i = 0; i < MAX_LIGHTS; ++i)
 					{
 						if (i < 32)
@@ -505,22 +215,7 @@ namespace Kaka
 
 					PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
 					psConstantBuffer.Bind(aGfx);
-
-					// Bones
-					struct VSBoneConstant
-					{
-						DirectX::XMMATRIX bones[64u];
-					} vsb = {};
-
-					for (int i = 0; i < finalTransforms.size(); ++i)
-					{
-						vsb.bones[i] = finalTransforms[i];
-					}
-
-					VertexConstantBuffer<VSBoneConstant> vsConstantBuffer(aGfx, vsb, 1u);
-					vsConstantBuffer.Bind(aGfx);
 				}
-				break;
 			}
 
 			std::vector<unsigned short> indices;
@@ -528,12 +223,13 @@ namespace Kaka
 
 			aGfx.DrawIndexed(static_cast<UINT>(std::size(indices)));
 		}
+
 		// Unbind shader resources
 		ID3D11ShaderResourceView* nullSRVs[3] = {nullptr};
 		aGfx.pContext->PSSetShaderResources(0u, 3u, nullSRVs);
 	}
 
-	void Model::DrawFBXPtr(Graphics& aGfx)
+	void Model::DrawAnimated(Graphics& aGfx)
 	{
 		if (!isLoaded)
 		{
@@ -570,7 +266,7 @@ namespace Kaka
 
 			switch (shaderType)
 			{
-				case eShaderType::AnimPBR:
+			case eShaderType::AnimPBR:
 				{
 					struct PSMaterialConstant
 					{
@@ -623,6 +319,7 @@ namespace Kaka
 
 			aGfx.DrawIndexed(static_cast<UINT>(std::size(indices)));
 		}
+
 		// Unbind shader resources
 		ID3D11ShaderResourceView* nullSRVs[3] = {nullptr};
 		aGfx.pContext->PSSetShaderResources(0u, 3u, nullSRVs);
@@ -785,11 +482,6 @@ namespace Kaka
 		transform.scale = aScale;
 	}
 
-	void Model::SetColour(const DirectX::XMFLOAT4 aColour)
-	{
-		solidColour = aColour;
-	}
-
 	DirectX::XMFLOAT3 Model::GetPosition() const
 	{
 		return {transform.x, transform.y, transform.z};
@@ -910,7 +602,7 @@ namespace Kaka
 					animationPlayer.StopAnimation();
 				}
 
-				if (ImGui::Checkbox("Loop", &animationPlayer.currentAnimation.isLooping)) { }
+				if (ImGui::Checkbox("Loop", &animationPlayer.currentAnimation.isLooping)) {}
 
 				// Animation speed slider
 				ImGui::Text("Speed");

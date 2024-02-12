@@ -10,8 +10,8 @@
 
 constexpr int WINDOW_WIDTH = 1920;
 constexpr int WINDOW_HEIGHT = 1080;
-constexpr int NUM_POINT_LIGHTS = 10;
-constexpr int NUM_SPOT_LIGHTS = 10;
+constexpr int NUM_POINT_LIGHTS = 0;
+constexpr int NUM_SPOT_LIGHTS = 0;
 constexpr int TERRAIN_SIZE = 1000;
 
 constexpr int MODELS_TO_LOAD_THREADED = 10;
@@ -23,7 +23,7 @@ namespace Kaka
 		:
 		wnd(WINDOW_WIDTH, WINDOW_HEIGHT, L"Kaka")
 	{
-		camera.SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 90, 0.5f, 5000.0f);
+		camera.SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 110, 0.5f, 5000.0f);
 		directionalLightShadowCamera.SetOrthographic(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f, -500.0f, 500.0f);
 
 		for (int i = 0; i < NUM_POINT_LIGHTS; ++i)
@@ -36,12 +36,14 @@ namespace Kaka
 			spotLights.emplace_back(SpotLight{wnd.Gfx(), 3u});
 		}
 
-		threadedModels.resize(MODELS_TO_LOAD_THREADED);
-		modelLoadingThreads.resize(threadedModels.size());
+		//threadedModels.resize(MODELS_TO_LOAD_THREADED);
+		//modelLoadingThreads.resize(threadedModels.size());
 		for (int i = 0; i < modelLoadingThreads.size(); ++i)
 		{
 			threadHasStarted.push_back(false);
 		}
+
+		deferredLights.Init(wnd.Gfx());
 	}
 
 	int Game::Go()
@@ -57,13 +59,13 @@ namespace Kaka
 
 		skybox.Init(wnd.Gfx(), "Assets\\Textures\\Skybox\\Miramar\\", "Assets\\Textures\\Skybox\\Kurt\\");
 
-		reflectionPSBuffer.A = 0.7f;
-		reflectionPSBuffer.k0 = {-0.9f, 0.5f};
-		reflectionPSBuffer.k1 = {-0.2f, 0.5f};
+		//reflectionPSBuffer.A = 0.7f;
+		//reflectionPSBuffer.k0 = {-0.9f, 0.5f};
+		//reflectionPSBuffer.k1 = {-0.2f, 0.5f};
 
-		constexpr float reflectPlaneHeight = -8.0f;
+		//constexpr float reflectPlaneHeight = -8.0f;
 
-		terrain.Init(wnd.Gfx(), TERRAIN_SIZE);
+		//terrain.Init(wnd.Gfx(), TERRAIN_SIZE);
 
 		for (int i = 0; i < 50; ++i)
 		{
@@ -72,98 +74,103 @@ namespace Kaka
 			sprites.back().SetPosition({i * 10.0f, 20.0f, 0.0f});
 		}
 
-		reflectionPlane.Init(wnd.Gfx(), terrain.GetSize() / 2.0f);
-		reflectionPlane.SetPosition({terrain.GetSize() / 2.0f, reflectPlaneHeight, terrain.GetSize() / 2.0f});
+		//reflectionPlane.Init(wnd.Gfx(), terrain.GetSize() / 2.0f);
+		//reflectionPlane.SetPosition({terrain.GetSize() / 2.0f, reflectPlaneHeight, terrain.GetSize() / 2.0f});
 
 		directionalLightShadowCamera.SetPosition({500.0f, 0.0f, 500.0f});
-		camera.SetPosition({759.0f, 40.0f, 450.0f});
+		camera.SetPosition({0.0f, 0.0f, 0.0f});
 		camera.SetRotationDegrees(34.0f, 114.0f);
 
-		for (int i = 0; i < MODELS_TO_LOAD_THREADED / 2; ++i)
+		//for (int i = 0; i < MODELS_TO_LOAD_THREADED / 2; ++i)
+		//{
+		//	constexpr float move = 60.0f;
+		//	threadedModels[i].SetPosition({780, 40.0f, 600.0f - move * (float)i});
+		//	threadedModels[i].SetScale(0.1f);
+		//}
+		//for (int i = MODELS_TO_LOAD_THREADED / 2; i < threadedModels.size(); ++i)
+		//{
+		//	constexpr float move = 60.0f;
+		//	threadedModels[i].SetPosition({820, 40.0f, 600.0f - move * (float)(i - 5)});
+		//	threadedModels[i].SetScale(0.1f);
+		//}
+
+		//std::random_device rd;
+		//std::mt19937 mt(rd());
+		//{
+		//	std::uniform_real_distribution<float> cDist(0.0f, 1.0f);
+		//	std::uniform_real_distribution<float> rDist(50.0f, 600.0f);
+		//	std::uniform_real_distribution<float> sDist(0.1f, 2.0f);
+
+		//	for (int i = 0; i < NUM_POINT_LIGHTS; ++i)
+		//	{
+		//		pointLightTravelRadiuses.push_back(rDist(mt));
+		//		pointLightTravelSpeeds.push_back(sDist(mt));
+		//		pointLightTravelAngles.push_back(PI);
+
+		//		pointLights[i].SetColour({cDist(mt), cDist(mt), cDist(mt)});
+		//		DirectX::XMFLOAT3 pos = terrain.GetRandomVertexPosition();
+		//		pos.y += 20.0f;
+		//		pointLights[i].SetRadius(75.0f);
+		//		pointLights[i].SetFalloff(1.0f);
+		//		pointLights[i].SetIntensity(500.0f);
+		//	}
+
+		//	for (int i = 0; i < NUM_SPOT_LIGHTS; ++i)
+		//	{
+		//		spotLightTravelRadiuses.push_back(rDist(mt));
+		//		spotLightTravelSpeeds.push_back(sDist(mt));
+		//		spotLightTravelAngles.push_back(PI);
+
+		//		spotLights[i].SetColour({cDist(mt), cDist(mt), cDist(mt)});
+		//		DirectX::XMFLOAT3 pos = terrain.GetRandomVertexPosition();
+		//		pos.y += 20.0f;
+		//		spotLights[i].SetPosition(pos);
+		//		spotLights[i].SetIntensity(3000.0f);
+		//	}
+		//}
+
+		//{
+		//	std::uniform_real_distribution<float> hDist(10.0f, 100.0f);
+		//	std::uniform_real_distribution<float> rDist(5.0f, 60.0f);
+		//	std::uniform_real_distribution<float> sDist(0.1f, 2.0f);
+		//	std::uniform_real_distribution<float> scDist(1.0f, 8.0f);
+
+		//	for (int i = 0; i < sprites.size(); ++i)
+		//	{
+		//		spriteTravelRadiuses.push_back(rDist(mt));
+		//		spriteTravelSpeeds.push_back(sDist(mt));
+		//		spriteTravelAngles.push_back(PI);
+
+		//		DirectX::XMFLOAT3 pos = terrain.GetRandomVertexPosition();
+		//		pos.y += hDist(mt);
+		//		sprites[i].SetPosition(pos);
+		//		sprites[i].SetScale(scDist(mt));
+		//	}
+		//}
+
+		//vfxModel.LoadModel(wnd.Gfx(), "Assets\\Models\\crawler\\CH_NPC_Crawler_01_22G3S_SK.fbx", Model::eShaderType::AnimPBR);
+		//vfxModel.SetTexture(ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\coolest.png", 7u));
+		//vfxModel.SetPixelShader(wnd.Gfx(), L"Shaders\\ScrollingTextureVFX_PS.cso");
+		//vfxModel.LoadAnimation("Assets\\Models\\crawler\\CH_NPC_CrawlerIdle__22G3S_AN.fbx");
+		//vfxModel.Init();
+		//vfxModel.SetPosition({terrain.GetSize() / 2.0f, 40.0f, terrain.GetSize() / 2.0f});
+
+		//vfxModelOlle.LoadModel(wnd.Gfx(), "Assets\\Models\\muzen\\MuzenSpeaker.fbx", Model::eShaderType::PBR);
+		////vfxModelOlle.LoadFBXModel(wnd.Gfx(), "Assets\\Models\\rex\\sk_rex.fbx", Model::eShaderType::AnimPBR);
+		//vfxModelOlle.SetTexture(ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\coolfx.jpg", 7u));
+		//vfxModelOlle.SetPixelShader(wnd.Gfx(), L"Shaders\\Ripple_VFX_PS.cso");
+		//vfxModelOlle.Init();
+		//vfxModelOlle.SetPosition({250.0f, -10.0f, 500.0f});
+		//vfxModelOlle.SetScale(150.0f);
+
+		for (int i = 0; i < 5; ++i)
 		{
-			constexpr float move = 60.0f;
-			threadedModels[i].SetPosition({780, 40.0f, 600.0f - move * (float)i});
-			threadedModels[i].SetScale(0.1f);
+			models.emplace_back();
+			models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\player\\sk_player.fbx", Model::eShaderType::PBR);
+			models.back().Init();
+			models.back().SetPosition({i * 50.0f, 0.0f, 000.0f});
+			models.back().SetScale(0.1f);
 		}
-		for (int i = MODELS_TO_LOAD_THREADED / 2; i < threadedModels.size(); ++i)
-		{
-			constexpr float move = 60.0f;
-			threadedModels[i].SetPosition({820, 40.0f, 600.0f - move * (float)(i - 5)});
-			threadedModels[i].SetScale(0.1f);
-		}
-
-		std::random_device rd;
-		std::mt19937 mt(rd());
-		{
-			std::uniform_real_distribution<float> cDist(0.0f, 1.0f);
-			std::uniform_real_distribution<float> rDist(50.0f, 600.0f);
-			std::uniform_real_distribution<float> sDist(0.1f, 2.0f);
-
-			for (int i = 0; i < NUM_POINT_LIGHTS; ++i)
-			{
-				pointLightTravelRadiuses.push_back(rDist(mt));
-				pointLightTravelSpeeds.push_back(sDist(mt));
-				pointLightTravelAngles.push_back(PI);
-
-				pointLights[i].SetColour({cDist(mt), cDist(mt), cDist(mt)});
-				DirectX::XMFLOAT3 pos = terrain.GetRandomVertexPosition();
-				pos.y += 20.0f;
-				pointLights[i].SetRadius(75.0f);
-				pointLights[i].SetFalloff(1.0f);
-				pointLights[i].SetIntensity(500.0f);
-			}
-
-			for (int i = 0; i < NUM_SPOT_LIGHTS; ++i)
-			{
-				spotLightTravelRadiuses.push_back(rDist(mt));
-				spotLightTravelSpeeds.push_back(sDist(mt));
-				spotLightTravelAngles.push_back(PI);
-
-				spotLights[i].SetColour({cDist(mt), cDist(mt), cDist(mt)});
-				DirectX::XMFLOAT3 pos = terrain.GetRandomVertexPosition();
-				pos.y += 20.0f;
-				spotLights[i].SetPosition(pos);
-				spotLights[i].SetIntensity(3000.0f);
-			}
-		}
-
-		{
-			std::uniform_real_distribution<float> hDist(10.0f, 100.0f);
-			std::uniform_real_distribution<float> rDist(5.0f, 60.0f);
-			std::uniform_real_distribution<float> sDist(0.1f, 2.0f);
-			std::uniform_real_distribution<float> scDist(1.0f, 8.0f);
-
-			for (int i = 0; i < sprites.size(); ++i)
-			{
-				spriteTravelRadiuses.push_back(rDist(mt));
-				spriteTravelSpeeds.push_back(sDist(mt));
-				spriteTravelAngles.push_back(PI);
-
-				DirectX::XMFLOAT3 pos = terrain.GetRandomVertexPosition();
-				pos.y += hDist(mt);
-				sprites[i].SetPosition(pos);
-				sprites[i].SetScale(scDist(mt));
-			}
-		}
-
-		vfxModel.LoadFBXModel(wnd.Gfx(), "Assets\\Models\\crawler\\CH_NPC_Crawler_01_22G3S_SK.fbx", Model::eShaderType::AnimPBR);
-		vfxModel.SetTexture(ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\coolest.png", 7u));
-		vfxModel.SetPixelShader(wnd.Gfx(), L"Shaders\\ScrollingTextureVFX_PS.cso");
-		vfxModel.LoadFBXAnimation("Assets\\Models\\crawler\\CH_NPC_CrawlerIdle__22G3S_AN.fbx");
-		vfxModel.Init();
-		vfxModel.SetPosition({terrain.GetSize() / 2.0f, 40.0f, terrain.GetSize() / 2.0f});
-
-		vfxModelOlle.LoadFBXModel(wnd.Gfx(), "Assets\\Models\\hiroyuki\\hiroyuki.fbx", Model::eShaderType::AnimPBR);
-		//vfxModelOlle.LoadFBXModel(wnd.Gfx(), "Assets\\Models\\rex\\sk_rex.fbx", Model::eShaderType::AnimPBR);
-		vfxModelOlle.SetTexture(ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\coolfx.jpg", 7u));
-		vfxModelOlle.SetPixelShader(wnd.Gfx(), L"Shaders\\Ripple_VFX_PS.cso");
-		vfxModelOlle.Init();
-		vfxModelOlle.SetPosition({250.0f, -10.0f, 500.0f});
-		vfxModelOlle.SetScale(150.0f);
-
-		//spriteManager.Init(wnd.Gfx());
-		//spriteBatch.data.texture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\Rock\\peter-larsen-stylizedrockdiffuse.jpg");
-		//spriteBatch.instances.emplace_back();
 
 		while (true)
 		{
@@ -181,7 +188,7 @@ namespace Kaka
 	void Game::LoadModelThreaded(const std::string& aModelPath, Model& aModel)
 	{
 		modelLoadingMutex.lock();
-		aModel.LoadFBXModel(wnd.Gfx(), aModelPath, Model::eShaderType::AnimPBR);
+		aModel.LoadModel(wnd.Gfx(), aModelPath, Model::eShaderType::AnimPBR);
 		aModel.Init();
 		modelLoadingMutex.unlock();
 	}
@@ -190,29 +197,29 @@ namespace Kaka
 	{
 		UNREFERENCED_PARAMETER(aDeltaTime);
 
-		for (int i = 0; i < threadedModels.size(); ++i)
-		{
-			const float distance = GetDistanceBetweenObjects(camera.GetPosition(), threadedModels[i].GetPosition());
+		//for (int i = 0; i < threadedModels.size(); ++i)
+		//{
+		//	const float distance = GetDistanceBetweenObjects(camera.GetPosition(), threadedModels[i].GetPosition());
 
-			if (distance < loadRadius)
-			{
-				// We only want to start the thread if it hasn't already been started
-				if (!threadHasStarted[i])
-				{
-					threadHasStarted[i] = true;
-					std::string path[3] = {
-						"Assets\\Models\\player\\sk_player.fbx",
-						"Assets\\Models\\crawler\\CH_NPC_Crawler_01_22G3S_SK.fbx",
-						"Assets\\Models\\wizard\\SM_wizard.fbx",
-					};
-					modelLoadingThreads[i] = std::thread(&Game::LoadModelThreaded, this, path[i % 3], std::ref(threadedModels[i]));
+		//	if (distance < loadRadius)
+		//	{
+		//		// We only want to start the thread if it hasn't already been started
+		//		if (!threadHasStarted[i])
+		//		{
+		//			threadHasStarted[i] = true;
+		//			std::string path[3] = {
+		//				"Assets\\Models\\player\\sk_player.fbx",
+		//				"Assets\\Models\\crawler\\CH_NPC_Crawler_01_22G3S_SK.fbx",
+		//				"Assets\\Models\\wizard\\SM_wizard.fbx",
+		//			};
+		//			modelLoadingThreads[i] = std::thread(&Game::LoadModelThreaded, this, path[i % 3], std::ref(threadedModels[i]));
 
-					// We don't have to wait for this thread, it will just do its thing
-					// So we detach	it
-					modelLoadingThreads[i].detach();
-				}
-			}
-		}
+		//			// We don't have to wait for this thread, it will just do its thing
+		//			// So we detach	it
+		//			modelLoadingThreads[i].detach();
+		//		}
+		//	}
+		//}
 
 		//camera.SetPosition({camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z - cameraMoveSpeed * aDeltaTime});
 
@@ -223,13 +230,13 @@ namespace Kaka
 
 		HandleInput(aDeltaTime);
 
-		directionalLight.SetShadowCamera(directionalLightShadowCamera.GetInverseMatrix() * directionalLightShadowCamera.GetProjection());
-		directionalLight.Bind(wnd.Gfx());
-		directionalLight.Simulate(aDeltaTime);
+		//directionalLight.SetShadowCamera(directionalLightShadowCamera.GetInverseMatrix() * directionalLightShadowCamera.GetProjection());
+		//directionalLight.Bind(wnd.Gfx());
+		//directionalLight.Simulate(aDeltaTime);
 		commonBuffer.view = DirectX::XMMatrixInverse(nullptr, camera.GetProjection());
 		//commonBuffer.view = DirectX::XMMatrixInverse(nullptr, camera.GetInverseMatrix());
 		commonBuffer.viewInverse = camera.GetInverseMatrix();
-		commonBuffer.viewProjectionInverse = DirectX::XMMatrixInverse(nullptr, camera.GetProjection()) * camera.GetInverseMatrix();
+		commonBuffer.projectionInverse = DirectX::XMMatrixInverse(nullptr, camera.GetProjection());
 		commonBuffer.cameraPosition = {camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z, 0.0f};
 		commonBuffer.resolution = wnd.Gfx().GetCurrentResolution();
 		commonBuffer.currentTime = timer.GetTotalTime();
@@ -238,255 +245,65 @@ namespace Kaka
 		cb.Update(wnd.Gfx(), commonBuffer);
 		cb.Bind(wnd.Gfx());
 
-		PixelConstantBuffer<ReflectionWaveBuffer> rwpb{wnd.Gfx(), 10u};
-		rwpb.Update(wnd.Gfx(), reflectionPSBuffer);
-		rwpb.Bind(wnd.Gfx());
+		//PixelConstantBuffer<ReflectionWaveBuffer> rwpb{wnd.Gfx(), 10u};
+		//rwpb.Update(wnd.Gfx(), reflectionPSBuffer);
+		//rwpb.Bind(wnd.Gfx());
 
-		reflectionHeightPSBuffer.height = reflectionPlane.GetPosition().y;
+		//reflectionHeightPSBuffer.height = reflectionPlane.GetPosition().y;
 
-		PixelConstantBuffer<ReflectionHeightBuffer> rhpb{wnd.Gfx(), 11u};
-		rhpb.Update(wnd.Gfx(), reflectionHeightPSBuffer);
-		rhpb.Bind(wnd.Gfx());
+		//PixelConstantBuffer<ReflectionHeightBuffer> rhpb{wnd.Gfx(), 11u};
+		//rhpb.Update(wnd.Gfx(), reflectionHeightPSBuffer);
+		//rhpb.Bind(wnd.Gfx());
 
-		reflectionVSBuffer.height = reflectionPlane.GetPosition().y;
+		//reflectionVSBuffer.height = reflectionPlane.GetPosition().y;
 
-		VertexConstantBuffer<ReflectionHeightBuffer> rhvb{wnd.Gfx(), 9u};
-		rhvb.Update(wnd.Gfx(), reflectionVSBuffer);
-		rhvb.Bind(wnd.Gfx());
+		//VertexConstantBuffer<ReflectionHeightBuffer> rhvb{wnd.Gfx(), 9u};
+		//rhvb.Update(wnd.Gfx(), reflectionVSBuffer);
+		//rhvb.Bind(wnd.Gfx());
 
-		skyboxAngle.y += skyboxSpeed * aDeltaTime;
-		skybox.Rotate(skyboxAngle);
+		//skyboxAngle.y += skyboxSpeed * aDeltaTime;
+		//skybox.Rotate(skyboxAngle);
 
-		// Draw shadows
-		wnd.Gfx().StartShadows(directionalLightShadowCamera, directionalLight.GetDirection());
-		wnd.Gfx().SetRenderTarget(eRenderTargetType::ShadowMap);
+		// GBuffer pass -- BEGIN
 
-		// Render everything that casts shadows
-		{
-			terrain.Draw(wnd.Gfx());
-
-			for (Model& model : threadedModels)
-			{
-				model.DrawFBXPtr(wnd.Gfx());
-			}
-
-			vfxModel.DrawFBXPtr(wnd.Gfx());
-			vfxModelOlle.DrawFBXPtr(wnd.Gfx());
-		}
-
-		// Reflective plane and terrain
-		wnd.Gfx().SetRenderTarget(eRenderTargetType::WaterReflect);
-		// Setting new render target...
-		// Need to set new render target before binding the resource view for the shadow map
-		wnd.Gfx().ResetShadows(camera);
-		wnd.Gfx().BindShadows();
-
-		skybox.FlipScale();
-
-		terrain.FlipScale(reflectionPlane.GetPosition().y, false);
-		terrain.SetReflectShader(wnd.Gfx(), true);
-
-		skybox.Draw(wnd.Gfx());
-		terrain.SetCullingMode(eCullingMode::Front);
-		terrain.Draw(wnd.Gfx());
-		skybox.FlipScale();
-
-		terrain.SetReflectShader(wnd.Gfx(), false);
-		terrain.FlipScale(reflectionPlane.GetPosition().y, true);
-
-		// Draw regular render
-		wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, true, true);
-
-		for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
-		{
-			pointLights[i].Bind(wnd.Gfx(), camera.GetInverseMatrix());
-
-			pointLightTravelAngles[i] += pointLightTravelSpeeds[i] * aDeltaTime;
-
-			float posX = pointLightTravelRadiuses[i] * std::cos(pointLightTravelAngles[i]) + TERRAIN_SIZE / 2.0f;
-			float posZ = pointLightTravelRadiuses[i] * std::sin(pointLightTravelAngles[i]) + TERRAIN_SIZE / 2.0f;
-
-			pointLights[i].SetPosition({posX, 40.0f, posZ});
-
-			if (pointLightTravelAngles[i] > 2 * PI)
-			{
-				pointLightTravelAngles[i] -= 2 * PI;
-			}
-
-			if (drawLightDebug)
-			{
-				pointLights[i].Draw(wnd.Gfx());
-			}
-		}
-
-		for (int i = 0; i < static_cast<int>(spotLights.size()); ++i)
-		{
-			spotLights[i].Bind(wnd.Gfx(), camera.GetInverseMatrix());
-
-			spotLightTravelAngles[i] -= spotLightTravelSpeeds[i] * aDeltaTime;
-
-			float posX = spotLightTravelRadiuses[i] * std::cos(spotLightTravelAngles[i]) + TERRAIN_SIZE / 2.0f;
-			float posZ = spotLightTravelRadiuses[i] * std::sin(spotLightTravelAngles[i]) + TERRAIN_SIZE / 2.0f;
-
-			spotLights[i].SetPosition({posX, 40.0f, posZ});
-
-			if (spotLightTravelAngles[i] > 2 * PI)
-			{
-				spotLightTravelAngles[i] -= 2 * PI;
-			}
-
-			if (drawLightDebug)
-			{
-				spotLights[i].Draw(wnd.Gfx());
-			}
-		}
-
-		{
-			for (int i = 0; i < threadedModels.size(); ++i)
-			{
-				// Point light range
-				bool nearbyPointLights[50u] = {};
-				bool nearbySpotLights[50u] = {};
-
-				for (int j = 0; j < 50u; ++j)
-				{
-					if (j >= pointLights.size())
-					{
-						nearbyPointLights[j] = false;
-						nearbySpotLights[j] = false;
-					}
-					else
-					{
-						const float distance = GetDistanceBetweenObjects(threadedModels[i].GetPosition(), pointLights[j].GetPosition());
-						nearbyPointLights[j] = (distance <= pointLights[j].GetRadius());
-						if (j >= spotLights.size())
-						{
-							nearbySpotLights[j] = false;
-						}
-						else
-						{
-							nearbySpotLights[j] = (distance <= spotLights[j].GetRange());
-						}
-					}
-				}
-				threadedModels[i].SetNearbyLights(nearbyPointLights, nearbySpotLights);
-			}
-		}
+		wnd.Gfx().gBuffer.ClearTextures(wnd.Gfx().pContext.Get());
+		wnd.Gfx().gBuffer.SetAsActiveTarget(wnd.Gfx().pContext.Get(), wnd.Gfx().pDepth.Get());
 
 		for (Model& model : models)
 		{
-			// Point light range
-			bool nearbyPointLights[50u] = {};
-			bool nearbySpotLights[50u] = {};
-
-			for (int i = 0; i < 50u; ++i)
-			{
-				if (i >= pointLights.size())
-				{
-					nearbyPointLights[i] = false;
-					nearbySpotLights[i] = false;
-				}
-				else
-				{
-					const float distance = GetDistanceBetweenObjects(model.GetPosition(), pointLights[i].GetPosition());
-					nearbyPointLights[i] = (distance <= pointLights[i].GetRadius());
-					nearbySpotLights[i] = (distance <= spotLights[i].GetRange());
-				}
-			}
-			model.SetNearbyLights(nearbyPointLights, nearbySpotLights);
-			model.Draw(wnd.Gfx());
+			model.Draw(wnd.Gfx(), aDeltaTime);
 		}
 
-		for (Model& model : threadedModels)
-		{
-			model.UpdatePtr(aDeltaTime);
-			model.DrawFBXPtr(wnd.Gfx());
-		}
+		wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, true);
+		wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), 1u);
+		deferredLights.Draw(wnd.Gfx());
+		wnd.Gfx().gBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), 1u);
+
+		// GBuffer pass -- END
+
+		//// Draw shadows
+		//wnd.Gfx().StartShadows(directionalLightShadowCamera, directionalLight.GetDirection());
+		//wnd.Gfx().SetRenderTarget(eRenderTargetType::ShadowMap);
+
+		//// Render everything that casts shadows
+		//{
+		//	//terrain.Draw(wnd.Gfx());
+		//	for (Model& model : models)
+		//	{
+		//		model.Draw(wnd.Gfx(), aDeltaTime);
+		//	}
+		//}
+
+		//// Need to set new render target before binding the resource view for the shadow map
+		//wnd.Gfx().ResetShadows(camera);
+		//wnd.Gfx().BindShadows();
 
 		skybox.Draw(wnd.Gfx());
-		terrain.SetCullingMode(eCullingMode::Back);
-		for (TerrainSubset& subset : terrain.GetTerrainSubsets())
-		{
-			// Point light range
-			bool nearbyPointLights[50u] = {};
-			bool nearbySpotLights[50u] = {};
-
-			for (int i = 0; i < 50u; ++i)
-			{
-				if (i >= pointLights.size())
-				{
-					nearbyPointLights[i] = false;
-					nearbySpotLights[i] = false;
-				}
-				else
-				{
-					const float distance = GetDistanceBetweenObjects(subset.center, pointLights[i].GetPosition());
-					nearbyPointLights[i] = distance <= pointLights[i].GetRadius() * 2;
-					if (i >= spotLights.size())
-					{
-						nearbySpotLights[i] = false;
-					}
-					else
-					{
-						nearbySpotLights[i] = distance <= spotLights[i].GetRange() * 2;
-					}
-				}
-			}
-			subset.SetNearbyLights(nearbyPointLights, nearbySpotLights);
-		}
-		terrain.Draw(wnd.Gfx());
-
-		wnd.Gfx().BindWaterReflectionTexture();
-		wnd.Gfx().SetAlphaBlend();
-		reflectionPlane.Draw(wnd.Gfx());
-
-		wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, true, false);
-
-		//wnd.Gfx().BindDepth();
-		//wnd.Gfx().SetVFXBlend();
-		wnd.Gfx().SetAdditiveBlend();
-
-		wnd.Gfx().BindWorldPositionTexture();
-
-		vfxModel.UpdatePtr(aDeltaTime);
-		vfxModel.DrawFBXPtr(wnd.Gfx());
-		vfxModelOlle.UpdatePtr(aDeltaTime);
-		vfxModelOlle.DrawFBXPtr(wnd.Gfx());
-
-		for (int i = 0; i < sprites.size(); ++i)
-		{
-			sprites[i].SetRotation(sprites[i].GetRotation() + spriteTravelSpeeds[i] * aDeltaTime);
-
-			spriteTravelAngles[i] -= spriteTravelSpeeds[i] * aDeltaTime;
-
-			float posX = spriteTravelRadiuses[i] * std::cos(spriteTravelAngles[i]) + TERRAIN_SIZE / 2.0f;
-			float posZ = spriteTravelRadiuses[i] * std::sin(spriteTravelAngles[i]) + TERRAIN_SIZE / 2.0f;
-
-			sprites[i].SetPosition({posX, sprites[i].GetPosition().y, posZ});
-
-			if (spriteTravelAngles[i] > 2 * PI)
-			{
-				spriteTravelAngles[i] -= 2 * PI;
-			}
-
-			sprites[i].Draw(wnd.Gfx());
-		}
-
-		wnd.Gfx().UnbindWorldPositionTexture();
-		//wnd.Gfx().UnbindDepthSRV();
-		wnd.Gfx().ResetBlend();
 
 		// ImGui windows
 		if (showImGui)
 		{
 			ImGui::ShowDemoWindow();
-
-			terrain.ShowControlWindow("Terrain");
-			reflectionPlane.ShowControlWindow("Reflection Plane");
-			directionalLight.ShowControlWindow("Directional Light");
-			vfxModel.ShowControlWindow("VFX Model");
-			vfxModelOlle.ShowControlWindow("VFX Model Olle");
-			//ken.ShowControlWindow("Ken");
 
 			if (ImGui::Begin("Reflection"))
 			{
@@ -521,6 +338,26 @@ namespace Kaka
 			//sprites[0].ShowControlWindow("Sprite");
 
 			camera.ShowControlWindow();
+
+			// Draw all resources in GBuffer
+			if (ImGui::Begin("GBuffer"))
+			{
+				ImGui::Columns(2, nullptr, false);
+				ImGui::Text("World Position");
+				ImGui::Image(wnd.Gfx().gBuffer.GetShaderResourceViews()[0], ImVec2(512, 288));
+				ImGui::Text("Albedo");
+				ImGui::Image(wnd.Gfx().gBuffer.GetShaderResourceViews()[1], ImVec2(512, 288));
+				ImGui::Text("Normal");
+				ImGui::Image(wnd.Gfx().gBuffer.GetShaderResourceViews()[2], ImVec2(512, 288));
+				ImGui::NextColumn();
+				ImGui::Text("Material");
+				ImGui::Image(wnd.Gfx().gBuffer.GetShaderResourceViews()[3], ImVec2(512, 288));
+				ImGui::Text("Depth");
+				ImGui::Image(wnd.Gfx().gBuffer.GetShaderResourceViews()[4], ImVec2(512, 288));
+			}
+			ImGui::End();
+
+			deferredLights.ShowControlWindow();
 		}
 		if (showStatsWindow)
 		{
@@ -552,27 +389,27 @@ namespace Kaka
 
 			switch (e->GetKeyCode())
 			{
-				case VK_ESCAPE:
-					if (wnd.CursorEnabled())
-					{
-						wnd.DisableCursor();
-						wnd.mouse.EnableRaw();
-					}
-					else
-					{
-						wnd.EnableCursor();
-						wnd.mouse.DisableRaw();
-					}
-					break;
-				case VK_F1:
-					showImGui = !showImGui;
-					break;
-				case VK_F2:
-					showStatsWindow = !showStatsWindow;
-					break;
-				case VK_F3:
-					drawLightDebug = !drawLightDebug;
-					break;
+			case VK_ESCAPE:
+				if (wnd.CursorEnabled())
+				{
+					wnd.DisableCursor();
+					wnd.mouse.EnableRaw();
+				}
+				else
+				{
+					wnd.EnableCursor();
+					wnd.mouse.DisableRaw();
+				}
+				break;
+			case VK_F1:
+				showImGui = !showImGui;
+				break;
+			case VK_F2:
+				showStatsWindow = !showStatsWindow;
+				break;
+			case VK_F3:
+				drawLightDebug = !drawLightDebug;
+				break;
 			}
 		}
 

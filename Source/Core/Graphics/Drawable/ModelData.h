@@ -56,16 +56,16 @@ namespace Kaka
 		std::string filePath;
 	};
 
-	struct ModelData
-	{
-		ModelData() = default;
-		Mesh mesh;
-		std::vector<AnimatedMesh> animMeshes;
-		AnimatedMesh animMesh;
-		Skeleton skeleton;
-		std::vector<AnimationClip> animations = {};
-		eModelType modelType = eModelType::None;
-	};
+	//struct ModelData
+	//{
+	//	ModelData() = default;
+	//	Mesh mesh;
+	//	std::vector<AnimatedMesh> animMeshes;
+	//	AnimatedMesh animMesh;
+	//	Skeleton skeleton;
+	//	std::vector<AnimationClip> animations = {};
+	//	eModelType modelType = eModelType::None;
+	//};
 
 	struct RenderResources
 	{
@@ -77,9 +77,8 @@ namespace Kaka
 	struct ModelDataPtr
 	{
 		MeshList* meshList = nullptr;
-		Skeleton* skeleton = nullptr;
 
-		//std::vector<RenderResources> renderResources = {};
+		Texture* texture;
 
 		DirectX::XMMATRIX* transform = nullptr;
 	};
@@ -88,8 +87,6 @@ namespace Kaka
 	{
 		AnimatedMeshList* meshList = nullptr;
 		Skeleton* skeleton = nullptr;
-
-		//std::vector<RenderResources> renderResources = {};
 
 		Texture* texture;
 

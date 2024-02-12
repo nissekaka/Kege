@@ -15,6 +15,7 @@
 #include "Core/Graphics/Drawable/ReflectionPlane.h"
 #include "Core/Graphics/Drawable/SpriteManager.h"
 #include "Core/Graphics/Drawable/Sprite.h"
+#include "Core/Graphics/Lighting/DeferredLights.h"
 
 namespace Kaka
 {
@@ -40,7 +41,9 @@ namespace Kaka
 
 		Camera directionalLightShadowCamera;
 
-		DirectionalLight directionalLight{wnd.Gfx(), 1u};
+		DeferredLights deferredLights;
+
+		//DirectionalLight directionalLight{wnd.Gfx(), 1u};
 
 		std::vector<Sprite> sprites = {};
 		std::vector<PointLight> pointLights = {};
@@ -60,17 +63,13 @@ namespace Kaka
 
 	private:
 		std::vector<Model> models;
-		Model vfxModel{};
-		Model vfxModelOlle{};
-		std::vector<Model> threadedModels{};
-		//Model spy{};
-		//Model ken{};
-		//Model vamp{};
-		//Model cube{};
-		//Model cubeTwoBones{};
-		Terrain terrain{};
+		//Model vfxModel{};
+		//Model vfxModelOlle{};
+		//std::vector<Model> threadedModels{};
+
+		//Terrain terrain{};
 		Skybox skybox{};
-		ReflectionPlane reflectionPlane{};
+		//ReflectionPlane reflectionPlane{};
 		float skyboxSpeed = 0.005f;
 		DirectX::XMFLOAT3 skyboxAngle = {};
 		std::vector<float> pointLightTravelRadiuses = {};
@@ -107,7 +106,7 @@ namespace Kaka
 		struct CommonBuffer
 		{
 			DirectX::XMMATRIX view;
-			DirectX::XMMATRIX viewProjectionInverse;
+			DirectX::XMMATRIX projectionInverse;
 			DirectX::XMMATRIX viewInverse;
 			DirectX::XMFLOAT4 cameraPosition;
 			DirectX::XMFLOAT2 resolution;

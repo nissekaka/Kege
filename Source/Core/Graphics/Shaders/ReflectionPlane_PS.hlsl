@@ -99,8 +99,8 @@ float4 main(PixelInput aInput) : SV_TARGET
     if (materialEnabled)
     {
         ambientOcclusion = material.r;
-        roughness = material.g;
-        metalness = material.b;
+        roughness = 1.0f; //material.g;
+        metalness = 0.0f; //material.b;
         //emissive = material.b;
 
         specular = lerp((float3) 0.64f, colour.rgb, metalness);
@@ -154,7 +154,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     }
 
 	// Final colour
-    const float3 finalColour = saturate(ambientLight * ambientLightPower + directionalLight * shadowFactor + pointLight + spotLight);
+    const float3 finalColour = saturate(ambientLight * ambientLightPower + directionalLight + pointLight + spotLight);
     
     // Reflection
     const float dist = abs(dot(toEye, cameraPosition.xyz));
@@ -168,7 +168,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     const float2 offset = A * (maxValue + heightDerivative) / dist;
     const float3 reflection = reflectTex.Sample(splr, aInput.position.xy / clientResolution + offset).rgb;
 
-    const float3 result = lerp(reflection, finalColour, 0.35f);
+    const float3 result = lerp(reflection, finalColour * shadowFactor, 0.35f);
 
     return float4(result, 0.5f);
 }

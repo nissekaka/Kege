@@ -6,6 +6,7 @@
 #include <memory>
 #include <vector>
 
+#include "GBuffer.h"
 #include "Shaders/ShaderFactory.h"
 
 
@@ -26,6 +27,7 @@ namespace Kaka
 
 	enum class eRenderTargetType
 	{
+		None,
 		Default,
 		WaterReflect,
 		PostProcessing,
@@ -40,6 +42,8 @@ namespace Kaka
 
 	class Graphics
 	{
+		friend class GBuffer;
+		friend class DeferredLights;
 		friend class Model;
 		friend class Bindable;
 		friend class DirectionalLight;
@@ -66,7 +70,7 @@ namespace Kaka
 		void SetCamera(Camera& aCamera);
 		DirectX::XMMATRIX GetCameraInverseMatrix() const;
 		UINT GetDrawcallCount() const;
-		void SetRenderTarget(eRenderTargetType aRenderTargetType, const bool aUseDepth = true, const bool aWriteToWorldPos = false) const;
+		void SetRenderTarget(eRenderTargetType aRenderTargetType, const bool aUseDepth = true) const;
 		void SetAlphaBlend() const;
 		void SetVFXBlend() const;
 		void SetAdditiveBlend() const;
@@ -152,6 +156,8 @@ namespace Kaka
 
 		PixelShader* pixelShaderOverride = nullptr;
 		VertexShader* vertexShaderOverride = nullptr;
+
+		GBuffer gBuffer;
 
 	private:
 		struct DownSampleBuffer

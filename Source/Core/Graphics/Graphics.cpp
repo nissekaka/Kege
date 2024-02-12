@@ -106,69 +106,8 @@ namespace Kaka
 			pDepthShaderResourceView = SRV;
 			SRV->Release();
 
-			//D3D11_DEPTH_STENCIL_DESC dsDesc = {};
-			//dsDesc.DepthEnable = TRUE;
-			//dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-			//dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
-			//WRL::ComPtr<ID3D11DepthStencilState> pDSState;
-			//pDevice->CreateDepthStencilState(&dsDesc, &pDSState);
-
-			//// Bind depth state
-			//pContext->OMSetDepthStencilState(pDSState.Get(), 1u);
-
-			//// Create depth stencil texture
-			//WRL::ComPtr<ID3D11Texture2D> depthTexture;
-			//D3D11_TEXTURE2D_DESC descDepth = {};
-			//descDepth.Width = width;
-			//descDepth.Height = height;
-			//descDepth.MipLevels = 1u;
-			//descDepth.ArraySize = 1u;
-			//descDepth.Format = DXGI_FORMAT_D32_FLOAT;
-			//descDepth.SampleDesc.Count = 1u;
-			//descDepth.SampleDesc.Quality = 0u;
-			//descDepth.Usage = D3D11_USAGE_DEFAULT;
-			//descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-			//pDevice->CreateTexture2D(&descDepth, nullptr, &depthTexture);
-
-			//// Create view of depth stencil texture
-			//D3D11_DEPTH_STENCIL_VIEW_DESC descDSV = {};
-			//descDSV.Format = DXGI_FORMAT_D32_FLOAT;
-			//descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-			//descDSV.Texture2D.MipSlice = 0u;
-			//pDevice->CreateDepthStencilView(depthTexture.Get(), &descDSV, &pDepth);
-
-			//// I want to see the depth as a texture
-			//D3D11_TEXTURE2D_DESC desc = {0};
-			//desc.Width = width;
-			//desc.Height = height;
-			//desc.MipLevels = 1;
-			//desc.ArraySize = 1;
-			//desc.Format = DXGI_FORMAT_R32_TYPELESS;
-			//desc.SampleDesc.Count = 1;
-			//desc.SampleDesc.Quality = 0;
-			//desc.Usage = D3D11_USAGE_DEFAULT;
-			//desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-			//desc.CPUAccessFlags = 0;
-			//desc.MiscFlags = 0;
-
-			//ID3D11Texture2D* texture;
-			//HRESULT result = pDevice->CreateTexture2D(&desc, nullptr, &texture);
-			//assert(SUCCEEDED(result));
-
-			//ID3D11ShaderResourceView* SRV;
-			//D3D11_SHADER_RESOURCE_VIEW_DESC srDesc{};
-			//srDesc.Format = DXGI_FORMAT_R32_FLOAT;
-			//srDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-			//srDesc.Texture2D.MostDetailedMip = 0;
-			//srDesc.Texture2D.MipLevels = UINT_MAX;
-			//result = pDevice->CreateShaderResourceView(texture, &srDesc, &SRV);
-			//assert(SUCCEEDED(result));
-			//pDepthShaderResourceView = SRV;
-			//SRV->Release();
-
 			// Bind depth stencil view to OM
 			pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), pDepth.Get());
-			//depthTexture->Release();
 
 			// Configure viewport
 			D3D11_VIEWPORT vp = {};
@@ -182,6 +121,8 @@ namespace Kaka
 		}
 
 		HRESULT result;
+
+		gBuffer = GBuffer::Create(*this, width, height);
 
 		// Reflection texture
 		{
@@ -269,9 +210,6 @@ namespace Kaka
 
 		// Shadow
 		{
-			UINT shadowWidth = 1024.0f;
-			UINT shadowHeight = 1024.0f;
-
 			D3D11_TEXTURE2D_DESC desc = {0};
 			desc.Width = width;
 			desc.Height = height;
@@ -506,42 +444,38 @@ namespace Kaka
 		return drawcallCount;
 	}
 
-	void Graphics::SetRenderTarget(eRenderTargetType aRenderTargetType, const bool aUseDepth, const bool aWriteToWorldPos) const
+	void Graphics::SetRenderTarget(eRenderTargetType aRenderTargetType, const bool aUseDepth) const
 	{
 		constexpr float colour[] = KAKA_BG_COLOUR;
 
 		switch (aRenderTargetType)
 		{
-			case eRenderTargetType::Default:
+		case eRenderTargetType::None:
+			{
+				pContext->OMSetRenderTargets(0u, nullptr, aUseDepth ? pDepth.Get() : NULL);
+			}
+			break;
+		case eRenderTargetType::Default:
 			{
 				pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
-				break;
 			}
-			case eRenderTargetType::WaterReflect:
+			break;
+		case eRenderTargetType::WaterReflect:
 			{
 				ID3D11RenderTargetView* renderTargets[2] = {renderWaterReflect.pTarget.Get(), worldPosition.pTarget.Get()};
 				pContext->OMSetRenderTargets(2u, &renderTargets[0], aUseDepth ? pDepth.Get() : NULL);
-				break;
 			}
-			case eRenderTargetType::PostProcessing:
+			break;
+		case eRenderTargetType::PostProcessing:
 			{
-				if (aWriteToWorldPos)
-				{
-					ID3D11RenderTargetView* renderTargets[2] = {postProcessing.pTarget.Get(), worldPosition.pTarget.Get()};
-					pContext->OMSetRenderTargets(2u, &renderTargets[0], aUseDepth ? pDepth.Get() : NULL);
-					break;
-				}
-				else
-				{
-					pContext->OMSetRenderTargets(1u, postProcessing.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
-					break;
-				}
+				pContext->OMSetRenderTargets(1u, postProcessing.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
-			case eRenderTargetType::ShadowMap:
+			break;
+		case eRenderTargetType::ShadowMap:
 			{
 				pContext->OMSetRenderTargets(0u, nullptr, aUseDepth ? pShadowDepth.Get() : NULL);
-				break;
 			}
+			break;
 		}
 	}
 

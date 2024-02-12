@@ -113,7 +113,10 @@ namespace Kaka
 		perspectiveData.nearZ = aNearZ;
 		perspectiveData.farZ = aFarZ;
 
-		const float verticalFov = 2 * atan(tan(aVFov / 2) * (aHeight / aWidth));
+		// Convert aVFov to radians if it's specified in degrees
+		float vFovRadians = DirectX::XMConvertToRadians(aVFov);
+
+		const float verticalFov = 2 * atan(tan(vFovRadians / 2) * (aHeight / aWidth));
 
 		perspectiveData.vFov = verticalFov;
 

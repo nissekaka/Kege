@@ -7,7 +7,7 @@ namespace Kaka
 {
 	void ReflectionPlane::Init(const Graphics& aGfx, float aSize)
 	{
-		constexpr float uvFactor = 0.04f;
+		constexpr float uvFactor = 0.02f;
 
 		Vertex v0 = {};
 		v0.position = DirectX::XMFLOAT3(-aSize, 0.0f, aSize);
