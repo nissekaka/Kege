@@ -23,8 +23,6 @@ int GetNumMips(TextureCube cubeTex)
 }
 
 SamplerState splr : register(s0);
-//Texture2D depthTex : register(t13);
-
 
 //cbuffer CommonBuffer : register(b0)
 //{

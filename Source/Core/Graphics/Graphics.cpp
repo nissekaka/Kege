@@ -107,7 +107,7 @@ namespace Kaka
 			SRV->Release();
 
 			// Bind depth stencil view to OM
-			pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), pDepth.Get());
+			//pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), pDepth.Get());
 
 			// Configure viewport
 			D3D11_VIEWPORT vp = {};
@@ -474,6 +474,20 @@ namespace Kaka
 		case eRenderTargetType::ShadowMap:
 			{
 				pContext->OMSetRenderTargets(0u, nullptr, aUseDepth ? pShadowDepth.Get() : NULL);
+			}
+			break;
+		}
+	}
+
+	void Graphics::SetRenderTarget(eRenderTargetType aRenderTargetType, ID3D11DepthStencilView* aDepth) const
+	{
+		constexpr float colour[] = KAKA_BG_COLOUR;
+
+		switch (aRenderTargetType)
+		{
+		case eRenderTargetType::PostProcessing:
+			{
+				pContext->OMSetRenderTargets(1u, postProcessing.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
 		}

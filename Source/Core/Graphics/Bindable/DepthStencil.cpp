@@ -17,9 +17,9 @@ namespace Kaka
 
 		switch (aMode)
 		{
-			case Mode::Off:
-				break;
-			case Mode::Write:
+		case Mode::Off:
+			break;
+		case Mode::Write:
 			{
 				dsDesc.StencilEnable = TRUE;
 				dsDesc.StencilWriteMask = 0xFF;
@@ -27,14 +27,14 @@ namespace Kaka
 				dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
 			}
 			break;
-			case Mode::Normal:
+		case Mode::Normal:
 			{
 				dsDesc.DepthEnable = TRUE;
 				dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 				dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
 			}
 			break;
-			case Mode::Mask:
+		case Mode::Mask:
 			{
 				dsDesc.DepthEnable = FALSE;
 				dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
@@ -44,26 +44,28 @@ namespace Kaka
 				dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 			}
 			break;
-			case Mode::DepthOff:
+		case Mode::DepthOff:
 			{
 				dsDesc.DepthEnable = FALSE;
 				dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 			}
 			break;
-			case Mode::DepthReversed:
+		case Mode::DepthReversed:
 			{
 				dsDesc.DepthFunc = D3D11_COMPARISON_GREATER;
 			}
 			break;
-			case Mode::DepthFirst:
+		case Mode::DepthFirst:
 			{
-				dsDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+				dsDesc.DepthEnable = TRUE;
 				dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+				dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
+				dsDesc.StencilEnable = FALSE;
 			}
 			break;
-			default:
-				assert("No stencil mode");
-				break;
+		default:
+			assert("No stencil mode");
+			break;
 		}
 
 		GetDevice(aGfx)->CreateDepthStencilState(&dsDesc, &pStencil);

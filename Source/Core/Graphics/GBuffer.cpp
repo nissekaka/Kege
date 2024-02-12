@@ -140,6 +140,8 @@ namespace Kaka
 			aContext->OMSetRenderTargets(static_cast<int>(GBufferTexture::Count), renderTargetViews[0].GetAddressOf(),
 			                             nullptr);
 		}
+
+		//aContext->RSSetViewports(1, &viewport);
 	}
 
 	void GBuffer::SetAsResourceOnSlot(ID3D11DeviceContext* aContext, GBufferTexture aTexture, const unsigned int aSlot)
@@ -149,16 +151,14 @@ namespace Kaka
 
 	void GBuffer::SetAllAsResources(ID3D11DeviceContext* aContext, const unsigned int aSlot)
 	{
-		aContext->PSSetShaderResources(aSlot, static_cast<int>(GBufferTexture::Count),
-		                               shaderResourceViews[0].GetAddressOf());
+		aContext->PSSetShaderResources(aSlot, static_cast<int>(GBufferTexture::Count), shaderResourceViews[0].GetAddressOf());
 	}
 
 	void GBuffer::ClearAllAsResourcesSlots(ID3D11DeviceContext* aContext, unsigned int aSlot)
 	{
 		ID3D11ShaderResourceView* const nullSRV[6] = {NULL};
 
-		aContext->PSSetShaderResources(aSlot, static_cast<int>(GBufferTexture::Count),
-		                               nullSRV);
+		aContext->PSSetShaderResources(aSlot, static_cast<int>(GBufferTexture::Count), nullSRV);
 	}
 
 	ID3D11Texture2D* GBuffer::GetTexture(const unsigned int aIndex)

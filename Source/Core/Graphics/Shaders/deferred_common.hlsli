@@ -1,9 +1,9 @@
-Texture2D worldPositionTex : register(t1);
-Texture2D colourTex : register(t2);
-Texture2D normalTex : register(t3);
-Texture2D materialTex : register(t4);
-Texture2D ambientOcclusionTex : register(t5);
-Texture2D depthTex : register(t6);
+Texture2D worldPositionTex : register(t0);
+Texture2D colourTex : register(t1);
+Texture2D normalTex : register(t2);
+Texture2D materialTex : register(t3);
+Texture2D ambientOcclusionTex : register(t4);
+Texture2D depthTex : register(t5);
 
 struct GBufferOutput
 {

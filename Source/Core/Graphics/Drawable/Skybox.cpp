@@ -51,8 +51,8 @@ namespace Kaka
 		aGfx.DrawIndexed(static_cast<UINT>(std::size(indices)));
 
 		// Unbind shader resources
-		//ID3D11ShaderResourceView* nullSRVs[2] = {nullptr};
-		//aGfx.pContext->PSSetShaderResources(0u, 2, nullSRVs);
+		ID3D11ShaderResourceView* nullSRVs[2] = {nullptr};
+		aGfx.pContext->PSSetShaderResources(0u, 2, nullSRVs);
 	}
 
 	void Skybox::Rotate(const DirectX::XMFLOAT3 aRotation)

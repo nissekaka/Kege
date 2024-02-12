@@ -621,7 +621,7 @@ namespace Kaka
 			return true;
 		}
 
-		textures[aFilePath] = Texture(2u);
+		textures[aFilePath] = Texture(1u);
 		textures[aFilePath].LoadTextureFromModel(aGfx, aFilePath);
 		aOutModelData.texture = &textures[aFilePath];
 
@@ -636,7 +636,7 @@ namespace Kaka
 			return true;
 		}
 
-		textures[aFilePath] = Texture(2u);
+		textures[aFilePath] = Texture(1u);
 		textures[aFilePath].LoadTextureFromModel(aGfx, aFilePath);
 		aOutModelData.texture = &textures[aFilePath];
 

@@ -71,6 +71,7 @@ namespace Kaka
 		DirectX::XMMATRIX GetCameraInverseMatrix() const;
 		UINT GetDrawcallCount() const;
 		void SetRenderTarget(eRenderTargetType aRenderTargetType, const bool aUseDepth = true) const;
+		void SetRenderTarget(eRenderTargetType aRenderTargetType, ID3D11DepthStencilView* aDepth) const;
 		void SetAlphaBlend() const;
 		void SetVFXBlend() const;
 		void SetAdditiveBlend() const;

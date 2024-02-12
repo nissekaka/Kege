@@ -266,18 +266,22 @@ namespace Kaka
 
 		// GBuffer pass -- BEGIN
 
+
 		wnd.Gfx().gBuffer.ClearTextures(wnd.Gfx().pContext.Get());
-		wnd.Gfx().gBuffer.SetAsActiveTarget(wnd.Gfx().pContext.Get(), wnd.Gfx().pDepth.Get());
+		wnd.Gfx().gBuffer.SetAsActiveTarget(wnd.Gfx().pContext.Get(), wnd.Gfx().gBuffer.GetDepthStencilView());
 
 		for (Model& model : models)
 		{
 			model.Draw(wnd.Gfx(), aDeltaTime);
 		}
 
-		wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, true);
-		wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), 1u);
+		wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, wnd.Gfx().gBuffer.GetDepthStencilView());
+		wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), 0u);
 		deferredLights.Draw(wnd.Gfx());
-		wnd.Gfx().gBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), 1u);
+		wnd.Gfx().gBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), 0u);
+		wnd.Gfx().pContext->ClearDepthStencilView(wnd.Gfx().gBuffer.GetDepthStencilView(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+		skybox.Draw(wnd.Gfx());
 
 		// GBuffer pass -- END
 
@@ -298,7 +302,6 @@ namespace Kaka
 		//wnd.Gfx().ResetShadows(camera);
 		//wnd.Gfx().BindShadows();
 
-		skybox.Draw(wnd.Gfx());
 
 		// ImGui windows
 		if (showImGui)
