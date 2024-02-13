@@ -36,7 +36,7 @@ namespace Kaka
 		// Shaders
 		switch (shaderType)
 		{
-		case eShaderType::PBR:
+			case eShaderType::PBR:
 			{
 				modelType = eModelType::Static;
 
@@ -72,7 +72,7 @@ namespace Kaka
 				inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
 			}
 			break;
-		case eShaderType::AnimPBR:
+			case eShaderType::AnimPBR:
 			{
 				modelType = eModelType::Skeletal;
 
@@ -133,18 +133,18 @@ namespace Kaka
 	{
 		switch (modelType)
 		{
-		case eModelType::Static:
+			case eModelType::Static:
 			{
 				DrawStatic(aGfx);
 			}
 			break;
-		case eModelType::Skeletal:
+			case eModelType::Skeletal:
 			{
 				UpdatePtr(aDeltaTime);
 				DrawAnimated(aGfx);
 			}
 			break;
-		default: ;
+			default: ;
 		}
 	}
 
@@ -185,7 +185,7 @@ namespace Kaka
 
 			switch (shaderType)
 			{
-			case eShaderType::PBR:
+				case eShaderType::PBR:
 				{
 					struct PSMaterialConstant
 					{
@@ -266,7 +266,7 @@ namespace Kaka
 
 			switch (shaderType)
 			{
-			case eShaderType::AnimPBR:
+				case eShaderType::AnimPBR:
 				{
 					struct PSMaterialConstant
 					{

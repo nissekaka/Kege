@@ -24,7 +24,7 @@ namespace Kaka
 		wnd(WINDOW_WIDTH, WINDOW_HEIGHT, L"Kaka")
 	{
 		camera.SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 110, 0.5f, 5000.0f);
-		directionalLightShadowCamera.SetOrthographic(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f, -500.0f, 500.0f);
+		directionalLightShadowCamera.SetOrthographic(WINDOW_WIDTH / 4.0f, WINDOW_HEIGHT / 4.0f, -500.0f, 500.0f);
 
 		for (int i = 0; i < NUM_POINT_LIGHTS; ++i)
 		{
@@ -77,7 +77,7 @@ namespace Kaka
 		//reflectionPlane.Init(wnd.Gfx(), terrain.GetSize() / 2.0f);
 		//reflectionPlane.SetPosition({terrain.GetSize() / 2.0f, reflectPlaneHeight, terrain.GetSize() / 2.0f});
 
-		directionalLightShadowCamera.SetPosition({500.0f, 0.0f, 500.0f});
+		directionalLightShadowCamera.SetPosition({0.0f, 0.0f, 0.0f});
 		camera.SetPosition({0.0f, 0.0f, 0.0f});
 		camera.SetRotationDegrees(34.0f, 114.0f);
 
@@ -264,9 +264,25 @@ namespace Kaka
 		//skyboxAngle.y += skyboxSpeed * aDeltaTime;
 		//skybox.Rotate(skyboxAngle);
 
+		// Shadow map pass -- BEGIN
+		wnd.Gfx().StartShadows(directionalLightShadowCamera, deferredLights.GetDirectionalLightData().lightDirection);
+		deferredLights.SetShadowCamera(directionalLightShadowCamera.GetInverseMatrix() * directionalLightShadowCamera.GetProjection());
+		wnd.Gfx().SetRenderTarget(eRenderTargetType::ShadowMap);
+
+		// Render everything that casts shadows
+		{
+			//terrain.Draw(wnd.Gfx());
+			for (Model& model : models)
+			{
+				model.Draw(wnd.Gfx(), aDeltaTime);
+			}
+		}
+
+		// Need to set new render target before binding the resource view for the shadow map
+		wnd.Gfx().ResetShadows(camera);
+		// Shadow map pass -- END
+
 		// GBuffer pass -- BEGIN
-
-
 		wnd.Gfx().gBuffer.ClearTextures(wnd.Gfx().pContext.Get());
 		wnd.Gfx().gBuffer.SetAsActiveTarget(wnd.Gfx().pContext.Get(), wnd.Gfx().gBuffer.GetDepthStencilView());
 
@@ -275,33 +291,21 @@ namespace Kaka
 			model.Draw(wnd.Gfx(), aDeltaTime);
 		}
 
-		wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, wnd.Gfx().gBuffer.GetDepthStencilView());
+		wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, nullptr);
 		wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), 0u);
+
+		wnd.Gfx().BindShadows();
+
 		deferredLights.Draw(wnd.Gfx());
+
+		wnd.Gfx().UnbindShadows();
+
 		wnd.Gfx().gBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), 0u);
-		wnd.Gfx().pContext->ClearDepthStencilView(wnd.Gfx().gBuffer.GetDepthStencilView(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+		wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, wnd.Gfx().gBuffer.GetDepthStencilView());
 
 		skybox.Draw(wnd.Gfx());
-
 		// GBuffer pass -- END
-
-		//// Draw shadows
-		//wnd.Gfx().StartShadows(directionalLightShadowCamera, directionalLight.GetDirection());
-		//wnd.Gfx().SetRenderTarget(eRenderTargetType::ShadowMap);
-
-		//// Render everything that casts shadows
-		//{
-		//	//terrain.Draw(wnd.Gfx());
-		//	for (Model& model : models)
-		//	{
-		//		model.Draw(wnd.Gfx(), aDeltaTime);
-		//	}
-		//}
-
-		//// Need to set new render target before binding the resource view for the shadow map
-		//wnd.Gfx().ResetShadows(camera);
-		//wnd.Gfx().BindShadows();
-
 
 		// ImGui windows
 		if (showImGui)
@@ -357,6 +361,9 @@ namespace Kaka
 				ImGui::Image(wnd.Gfx().gBuffer.GetShaderResourceViews()[3], ImVec2(512, 288));
 				ImGui::Text("Depth");
 				ImGui::Image(wnd.Gfx().gBuffer.GetShaderResourceViews()[4], ImVec2(512, 288));
+				// Show shadow map in new imgui viewport
+				ImGui::Text("Shadow map");
+				ImGui::Image(wnd.Gfx().shadowMap.pResource.Get(), ImVec2(512, 288));
 			}
 			ImGui::End();
 
@@ -392,27 +399,27 @@ namespace Kaka
 
 			switch (e->GetKeyCode())
 			{
-			case VK_ESCAPE:
-				if (wnd.CursorEnabled())
-				{
-					wnd.DisableCursor();
-					wnd.mouse.EnableRaw();
-				}
-				else
-				{
-					wnd.EnableCursor();
-					wnd.mouse.DisableRaw();
-				}
-				break;
-			case VK_F1:
-				showImGui = !showImGui;
-				break;
-			case VK_F2:
-				showStatsWindow = !showStatsWindow;
-				break;
-			case VK_F3:
-				drawLightDebug = !drawLightDebug;
-				break;
+				case VK_ESCAPE:
+					if (wnd.CursorEnabled())
+					{
+						wnd.DisableCursor();
+						wnd.mouse.EnableRaw();
+					}
+					else
+					{
+						wnd.EnableCursor();
+						wnd.mouse.DisableRaw();
+					}
+					break;
+				case VK_F1:
+					showImGui = !showImGui;
+					break;
+				case VK_F2:
+					showStatsWindow = !showStatsWindow;
+					break;
+				case VK_F3:
+					drawLightDebug = !drawLightDebug;
+					break;
 			}
 		}
 

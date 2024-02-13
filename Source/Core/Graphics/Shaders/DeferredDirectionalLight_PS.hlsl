@@ -1,5 +1,6 @@
 #include "deferred_common.hlsli"
 #include "PBRFunctions.hlsli"
+#include "Shadows.hlsli"
 
 cbuffer DirectionalLight : register(b1)
 {
@@ -30,10 +31,14 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 
     const float3 toEye = normalize(cameraPosition.xyz - worldPosition);
 
+	// Shadows
+
+    const float shadowFactor = Shadow(directionalLightCameraTransform, float4(worldPosition, 1.0f));
+
     float3 directionalLight = EvaluateDirectionalLight(colour, specular, normal,
     roughness, directionalLightColour, directionalLightDirection, toEye) * directionalLightIntensity;
     
-    float3 finalColour = directionalLight + colour;
+    float3 finalColour = directionalLight * shadowFactor;//    +colour;
 
     float3 ambiance = 0.0f;
     

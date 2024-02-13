@@ -103,6 +103,7 @@ namespace Kaka
 			srDesc.Texture2D.MipLevels = UINT_MAX;
 			result = pDevice->CreateShaderResourceView(texture, &srDesc, &SRV);
 			assert(SUCCEEDED(result));
+
 			pDepthShaderResourceView = SRV;
 			SRV->Release();
 
@@ -269,30 +270,30 @@ namespace Kaka
 			pDevice->CreateSamplerState(&samplerCompDesc, &pShadowCompSampler);
 		}
 
-		// World Position
-		{
-			ID3D11Texture2D* worldPosTexture;
-			D3D11_TEXTURE2D_DESC desc = {0};
-			desc.Width = width;
-			desc.Height = height;
-			desc.MipLevels = 1;
-			desc.ArraySize = 1;
-			desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-			desc.SampleDesc.Count = 1;
-			desc.SampleDesc.Quality = 0;
-			desc.Usage = D3D11_USAGE_DEFAULT;
-			desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-			desc.CPUAccessFlags = 0;
-			desc.MiscFlags = 0;
-			result = pDevice->CreateTexture2D(&desc, nullptr, &worldPosTexture);
-			assert(SUCCEEDED(result));
-			result = pDevice->CreateShaderResourceView(worldPosTexture, nullptr, &worldPosition.pResource);
-			assert(SUCCEEDED(result));
-			result = pDevice->CreateRenderTargetView(worldPosTexture, nullptr, &worldPosition.pTarget);
-			assert(SUCCEEDED(result));
+		//// World Position
+		//{
+		//	ID3D11Texture2D* worldPosTexture;
+		//	D3D11_TEXTURE2D_DESC desc = {0};
+		//	desc.Width = width;
+		//	desc.Height = height;
+		//	desc.MipLevels = 1;
+		//	desc.ArraySize = 1;
+		//	desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+		//	desc.SampleDesc.Count = 1;
+		//	desc.SampleDesc.Quality = 0;
+		//	desc.Usage = D3D11_USAGE_DEFAULT;
+		//	desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+		//	desc.CPUAccessFlags = 0;
+		//	desc.MiscFlags = 0;
+		//	result = pDevice->CreateTexture2D(&desc, nullptr, &worldPosTexture);
+		//	assert(SUCCEEDED(result));
+		//	result = pDevice->CreateShaderResourceView(worldPosTexture, nullptr, &worldPosition.pResource);
+		//	assert(SUCCEEDED(result));
+		//	result = pDevice->CreateRenderTargetView(worldPosTexture, nullptr, &worldPosition.pTarget);
+		//	assert(SUCCEEDED(result));
 
-			worldPosTexture->Release();
-		}
+		//	worldPosTexture->Release();
+		//}
 
 		// Blend state
 		D3D11_BLEND_DESC omDesc = {0};
@@ -364,14 +365,15 @@ namespace Kaka
 
 		constexpr float colour[] = KAKA_BG_COLOUR;
 		pContext->ClearRenderTargetView(pDefaultTarget.Get(), colour);
-		pContext->ClearRenderTargetView(worldPosition.pTarget.Get(), colour);
+		pContext->ClearRenderTargetView(postProcessing.pTarget.Get(), colour);
+		//pContext->ClearRenderTargetView(worldPosition.pTarget.Get(), colour);
 		//pContext->ClearRenderTargetView(renderWaterReflect.pTarget.Get(), colour);
 		//pContext->ClearRenderTargetView(postProcessing.pTarget.Get(), colour);
 		//for (int i = 0; i < bloomSteps; ++i)
 		//{
 		//	pContext->ClearRenderTargetView(bloomDownscale[i].pTarget.Get(), colour);
 		//}
-		pContext->ClearDepthStencilView(pDepth.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0u);
+		pContext->ClearDepthStencilView(pDepth.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0u);
 	}
 
 	void Graphics::EndFrame()
@@ -450,28 +452,27 @@ namespace Kaka
 
 		switch (aRenderTargetType)
 		{
-		case eRenderTargetType::None:
+			case eRenderTargetType::None:
 			{
 				pContext->OMSetRenderTargets(0u, nullptr, aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::Default:
+			case eRenderTargetType::Default:
 			{
 				pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::WaterReflect:
+			case eRenderTargetType::WaterReflect:
 			{
-				ID3D11RenderTargetView* renderTargets[2] = {renderWaterReflect.pTarget.Get(), worldPosition.pTarget.Get()};
-				pContext->OMSetRenderTargets(2u, &renderTargets[0], aUseDepth ? pDepth.Get() : NULL);
+				pContext->OMSetRenderTargets(1u, renderWaterReflect.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::PostProcessing:
+			case eRenderTargetType::PostProcessing:
 			{
 				pContext->OMSetRenderTargets(1u, postProcessing.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::ShadowMap:
+			case eRenderTargetType::ShadowMap:
 			{
 				pContext->OMSetRenderTargets(0u, nullptr, aUseDepth ? pShadowDepth.Get() : NULL);
 			}
@@ -485,9 +486,29 @@ namespace Kaka
 
 		switch (aRenderTargetType)
 		{
-		case eRenderTargetType::PostProcessing:
+			case eRenderTargetType::None:
+			{
+				pContext->OMSetRenderTargets(0u, nullptr, aDepth);
+			}
+			break;
+			case eRenderTargetType::Default:
+			{
+				pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), aDepth);
+			}
+			break;
+			case eRenderTargetType::WaterReflect:
+			{
+				pContext->OMSetRenderTargets(1u, renderWaterReflect.pTarget.GetAddressOf(), aDepth);
+			}
+			break;
+			case eRenderTargetType::PostProcessing:
 			{
 				pContext->OMSetRenderTargets(1u, postProcessing.pTarget.GetAddressOf(), aDepth);
+			}
+			break;
+			case eRenderTargetType::ShadowMap:
+			{
+				pContext->OMSetRenderTargets(0u, nullptr, pShadowDepth.Get());
 			}
 			break;
 		}
@@ -574,16 +595,16 @@ namespace Kaka
 		}
 	}
 
-	void Graphics::BindWorldPositionTexture()
-	{
-		pContext->PSSetShaderResources(12u, 1u, worldPosition.pResource.GetAddressOf());
-	}
+	//void Graphics::BindWorldPositionTexture()
+	//{
+	//	pContext->PSSetShaderResources(12u, 1u, worldPosition.pResource.GetAddressOf());
+	//}
 
-	void Graphics::UnbindWorldPositionTexture()
-	{
-		ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
-		pContext->PSSetShaderResources(12u, 1u, nullSRVs);
-	}
+	//void Graphics::UnbindWorldPositionTexture()
+	//{
+	//	ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
+	//	pContext->PSSetShaderResources(12u, 1u, nullSRVs);
+	//}
 
 	void Graphics::BindWaterReflectionTexture()
 	{
@@ -626,23 +647,16 @@ namespace Kaka
 
 	void Graphics::BindShadows()
 	{
-		// Show shadow map in new imgui viewport
-		ImGui::Begin("Shadow map");
-		ImGui::Image(shadowMap.pResource.Get(), ImVec2(1600 / 3, 800 / 3));
-		ImGui::End();
-
-		//ImGui::Begin("Depth");
-		//ImGui::Image(pDepthShaderResourceView.Get(), ImVec2(1600 / 3, 800 / 3));
-		//ImGui::End();
-
-		ImGui::Begin("World Position");
-		ImGui::Image(worldPosition.pResource.Get(), ImVec2(1600 / 3, 800 / 3));
-		ImGui::End();
-
 		pContext->PSSetSamplers(1u, 1u, pShadowSampler.GetAddressOf());
 		pContext->PSSetSamplers(2u, 1u, pShadowCompSampler.GetAddressOf());
 
 		pContext->PSSetShaderResources(14u, 1u, shadowMap.pResource.GetAddressOf());
+	}
+
+	void Graphics::UnbindShadows()
+	{
+		ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
+		pContext->PSSetShaderResources(14u, 1u, nullSRVs);
 	}
 
 	void Graphics::EnableImGui()

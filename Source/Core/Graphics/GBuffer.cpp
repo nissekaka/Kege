@@ -34,23 +34,17 @@ namespace Kaka
 		for (unsigned int idx = 0; idx < static_cast<int>(GBufferTexture::Count); idx++)
 		{
 			desc.Format = textureFormats[idx];
-			hr = aGfx.pDevice->CreateTexture2D(
-				&desc, nullptr,
-				&returnGBuffer.textures[idx]);
+			hr = aGfx.pDevice->CreateTexture2D(&desc, nullptr, &returnGBuffer.textures[idx]);
 
 			assert(SUCCEEDED(hr));
 
 			hr = aGfx.pDevice->CreateRenderTargetView(
-				returnGBuffer.textures[idx].Get(),
-				nullptr,
-				returnGBuffer.renderTargetViews[idx].GetAddressOf());
+				returnGBuffer.textures[idx].Get(), nullptr, returnGBuffer.renderTargetViews[idx].GetAddressOf());
 
 			assert(SUCCEEDED(hr));
 
 			hr = aGfx.pDevice->CreateShaderResourceView(
-				returnGBuffer.textures[idx].Get(),
-				nullptr,
-				returnGBuffer.shaderResourceViews[idx].GetAddressOf());
+				returnGBuffer.textures[idx].Get(), nullptr, returnGBuffer.shaderResourceViews[idx].GetAddressOf());
 
 			assert(SUCCEEDED(hr));
 		}
@@ -133,7 +127,7 @@ namespace Kaka
 		if (aDepth)
 		{
 			aContext->OMSetRenderTargets(static_cast<int>(GBufferTexture::Count), renderTargetViews[0].GetAddressOf(),
-			                             depthStencilView.Get());
+			                             aDepth);
 		}
 		else
 		{
@@ -156,7 +150,7 @@ namespace Kaka
 
 	void GBuffer::ClearAllAsResourcesSlots(ID3D11DeviceContext* aContext, unsigned int aSlot)
 	{
-		ID3D11ShaderResourceView* const nullSRV[6] = {NULL};
+		ID3D11ShaderResourceView* const nullSRV[static_cast<int>(GBufferTexture::Count)] = {nullptr};
 
 		aContext->PSSetShaderResources(aSlot, static_cast<int>(GBufferTexture::Count), nullSRV);
 	}

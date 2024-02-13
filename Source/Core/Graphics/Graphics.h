@@ -79,8 +79,8 @@ namespace Kaka
 
 		void HandleBloomScaling(PostProcessing& aPostProcessor);
 
-		void BindWorldPositionTexture();
-		void UnbindWorldPositionTexture();
+		//void BindWorldPositionTexture();
+		//void UnbindWorldPositionTexture();
 		void BindWaterReflectionTexture();
 		void BindPostProcessingTexture();
 		void BindBloomDownscaleTexture(const int aIndex);
@@ -89,6 +89,7 @@ namespace Kaka
 		void StartShadows(Camera& aCamera, DirectX::XMFLOAT3 aLightDirection);
 		void ResetShadows(Camera& aCamera);
 		void BindShadows();
+		void UnbindShadows();
 
 		void SetPixelShaderOverride(const std::wstring& aFileName) { pixelShaderOverride = ShaderFactory::GetPixelShader(*this, aFileName); }
 		void SetVertexShaderOverride(const std::wstring& aFileName) { vertexShaderOverride = ShaderFactory::GetVertexShader(*this, aFileName); }
@@ -143,7 +144,7 @@ namespace Kaka
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pDepthShaderResourceView;
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pDepth;
 
-		RenderTarget worldPosition;
+		//RenderTarget worldPosition;
 
 		RenderTarget shadowMap;
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pShadowDepth;

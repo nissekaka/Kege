@@ -110,4 +110,9 @@ namespace Kaka
 		}
 		ImGui::End();
 	}
+
+	void DeferredLights::SetShadowCamera(const DirectX::XMMATRIX& aCamera)
+	{
+		directionalLightData.shadowCamera = aCamera;
+	}
 }

@@ -18,8 +18,10 @@ namespace Kaka
 
 		void Init(Graphics& aGfx);
 		void Draw(Graphics& aGfx);
-
 		void ShowControlWindow();
+		void SetShadowCamera(const DirectX::XMMATRIX& aCamera);
+
+		DirectionalLightData& GetDirectionalLightData() { return directionalLightData; }
 
 	private:
 		VertexShader* lightVS = nullptr;
