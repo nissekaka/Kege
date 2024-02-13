@@ -34,6 +34,33 @@ namespace Kaka
 		ShadowMap,
 	};
 
+	enum class eBlendStates
+	{
+		Disabled,
+		Alpha,
+		Additive,
+		TransparencyBlend,
+		VFX,
+		Count,
+	};
+
+	enum class eDepthStencilStates
+	{
+		Normal,
+		ReadOnlyGreater,
+		ReadOnlyLessEqual,
+		ReadOnlyEmpty,
+		Count,
+	};
+
+	enum class eRasterizerStates
+	{
+		BackfaceCulling,
+		FrontfaceCulling,
+		NoCulling,
+		Count,
+	};
+
 	struct RenderTarget
 	{
 		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pTarget;
@@ -78,6 +105,14 @@ namespace Kaka
 		void ResetBlend() const;
 
 		void HandleBloomScaling(PostProcessing& aPostProcessor);
+
+		void SetBlendState(eBlendStates aBlendState);
+		void SetDepthStencilState(eDepthStencilStates aDepthStencilState);
+		void SetRasterizerState(eRasterizerStates aRasterizerState);
+
+		bool CreateBlendStates();
+		bool CreateDepthStencilStates();
+		bool CreateRasterizerStates();
 
 		//void BindWorldPositionTexture();
 		//void UnbindWorldPositionTexture();
@@ -130,9 +165,9 @@ namespace Kaka
 		Microsoft::WRL::ComPtr<IDXGISwapChain> pSwap;
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext;
 
-		Microsoft::WRL::ComPtr<ID3D11BlendState> pBlend;
-		Microsoft::WRL::ComPtr<ID3D11BlendState> pBlendVfx;
-		Microsoft::WRL::ComPtr<ID3D11BlendState> pBlendAdd;
+		//Microsoft::WRL::ComPtr<ID3D11BlendState> pBlend;
+		//Microsoft::WRL::ComPtr<ID3D11BlendState> pBlendVfx;
+		//Microsoft::WRL::ComPtr<ID3D11BlendState> pBlendAdd;
 
 		RenderTarget renderWaterReflect;
 		RenderTarget postProcessing;
@@ -149,6 +184,11 @@ namespace Kaka
 		RenderTarget shadowMap;
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pShadowDepth;
 
+		Microsoft::WRL::ComPtr<ID3D11BlendState> pBlendStates[(int)eBlendStates::Count];
+		Microsoft::WRL::ComPtr<ID3D11DepthStencilState> pDepthStencilStates[(int)eDepthStencilStates::Count];
+		Microsoft::WRL::ComPtr<ID3D11RasterizerState> pRasterizerStates[(int)eRasterizerStates::Count];
+
+		Microsoft::WRL::ComPtr<ID3D11SamplerState> pSamplerState;
 		Microsoft::WRL::ComPtr<ID3D11SamplerState> pShadowSampler;
 		Microsoft::WRL::ComPtr<ID3D11SamplerState> pShadowCompSampler;
 		Microsoft::WRL::ComPtr<ID3D11SamplerState> pVFXSampler;

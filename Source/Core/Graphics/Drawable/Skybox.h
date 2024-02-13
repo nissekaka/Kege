@@ -51,8 +51,8 @@ namespace Kaka
 		};
 		InputLayout inputLayout;
 		Topology topology = {};
-		Rasterizer rasterizer = {};
-		DepthStencil depthStencil = {};
+		//Rasterizer rasterizer = {};
+		//DepthStencil depthStencil = {};
 
 		struct Vertex
 		{

@@ -121,6 +121,18 @@ namespace Kaka
 			pContext->RSSetViewports(1u, &vp);
 		}
 
+		// Default sampler
+		{
+			D3D11_SAMPLER_DESC samplerDesc = CD3D11_SAMPLER_DESC{CD3D11_DEFAULT{}};
+			samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
+
+			pDevice->CreateSamplerState(&samplerDesc, &pSamplerState);
+		}
+
 		HRESULT result;
 
 		gBuffer = GBuffer::Create(*this, width, height);
@@ -295,40 +307,45 @@ namespace Kaka
 		//	worldPosTexture->Release();
 		//}
 
-		// Blend state
-		D3D11_BLEND_DESC omDesc = {0};
-		omDesc.RenderTarget[0].BlendEnable = true;
-		omDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-		omDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-		omDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-		omDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-		omDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-		omDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-		omDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-		result = pDevice->CreateBlendState(&omDesc, &pBlend);
-		assert(SUCCEEDED(result));
+		// TODO bools
+		CreateBlendStates();
+		CreateDepthStencilStates();
+		CreateRasterizerStates();
 
-		omDesc.RenderTarget[0].BlendEnable = true;
-		omDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-		omDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-		omDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-		omDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
-		omDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
-		omDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-		omDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-		result = pDevice->CreateBlendState(&omDesc, &pBlendVfx);
-		assert(SUCCEEDED(result));
+		//// Blend state
+		//D3D11_BLEND_DESC omDesc = {0};
+		//omDesc.RenderTarget[0].BlendEnable = true;
+		//omDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+		//omDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+		//omDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+		//omDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+		//omDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+		//omDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		//omDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		//result = pDevice->CreateBlendState(&omDesc, &pBlend);
+		//assert(SUCCEEDED(result));
 
-		omDesc.RenderTarget[0].BlendEnable = true;
-		omDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-		omDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
-		omDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-		omDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-		omDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
-		omDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_MAX;
-		omDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-		result = pDevice->CreateBlendState(&omDesc, &pBlendAdd);
-		assert(SUCCEEDED(result));
+		//omDesc.RenderTarget[0].BlendEnable = true;
+		//omDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+		//omDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+		//omDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+		//omDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
+		//omDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+		//omDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		//omDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		//result = pDevice->CreateBlendState(&omDesc, &pBlendVfx);
+		//assert(SUCCEEDED(result));
+
+		//omDesc.RenderTarget[0].BlendEnable = true;
+		//omDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+		//omDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+		//omDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+		//omDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+		//omDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+		//omDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_MAX;
+		//omDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		//result = pDevice->CreateBlendState(&omDesc, &pBlendAdd);
+		//assert(SUCCEEDED(result));
 
 		// Init imgui d3d impl
 		ImGui_ImplDX11_Init(pDevice.Get(), pContext.Get());
@@ -346,6 +363,8 @@ namespace Kaka
 
 			pContext->PSSetSamplers(7u, 1u, pVFXSampler.GetAddressOf());
 		}
+
+		pContext->PSSetSamplers(0u, 1u, pSamplerState.GetAddressOf());
 	}
 
 	Graphics::~Graphics()
@@ -516,22 +535,22 @@ namespace Kaka
 
 	void Graphics::SetAlphaBlend() const
 	{
-		pContext->OMSetBlendState(pBlend.Get(), nullptr, 0x0f);
+		//pContext->OMSetBlendState(pBlend.Get(), nullptr, 0x0f);
 	}
 
 	void Graphics::SetVFXBlend() const
 	{
-		pContext->OMSetBlendState(pBlendVfx.Get(), nullptr, 0x0f);
+		//pContext->OMSetBlendState(pBlendVfx.Get(), nullptr, 0x0f);
 	}
 
 	void Graphics::SetAdditiveBlend() const
 	{
-		pContext->OMSetBlendState(pBlendAdd.Get(), nullptr, 0x0f);
+		//pContext->OMSetBlendState(pBlendAdd.Get(), nullptr, 0x0f);
 	}
 
 	void Graphics::ResetBlend() const
 	{
-		pContext->OMSetBlendState(nullptr, nullptr, 0x0f);
+		//pContext->OMSetBlendState(nullptr, nullptr, 0x0f);
 	}
 
 	void Graphics::HandleBloomScaling(PostProcessing& aPostProcessor)
@@ -593,6 +612,288 @@ namespace Kaka
 			ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
 			pContext->PSSetShaderResources(1u, 1, nullSRVs);
 		}
+	}
+
+	void Graphics::SetBlendState(eBlendStates aBlendState)
+	{
+		switch (aBlendState)
+		{
+			case eBlendStates::Disabled:
+			{
+				ResetBlend();
+			}
+			break;
+			case eBlendStates::Alpha:
+			{
+				SetAlphaBlend();
+			}
+			break;
+			case eBlendStates::VFX:
+			{
+				SetVFXBlend();
+			}
+			break;
+			case eBlendStates::Additive:
+			{
+				SetAdditiveBlend();
+			}
+			break;
+		}
+	}
+
+	void Graphics::SetDepthStencilState(const eDepthStencilStates aDepthStencilState)
+	{
+		switch (aDepthStencilState)
+		{
+			case eDepthStencilStates::Normal:
+			{
+				pContext->OMSetDepthStencilState(pDepthStencilStates[(int)eDepthStencilStates::Normal].Get(), 0u);
+			}
+			break;
+			case eDepthStencilStates::ReadOnlyGreater:
+			{
+				pContext->OMSetDepthStencilState(pDepthStencilStates[(int)eDepthStencilStates::ReadOnlyGreater].Get(), 0u);
+			}
+			break;
+			case eDepthStencilStates::ReadOnlyLessEqual:
+			{
+				pContext->OMSetDepthStencilState(pDepthStencilStates[(int)eDepthStencilStates::ReadOnlyLessEqual].Get(), 0u);
+			}
+			break;
+			case eDepthStencilStates::ReadOnlyEmpty:
+			{
+				pContext->OMSetDepthStencilState(pDepthStencilStates[(int)eDepthStencilStates::ReadOnlyEmpty].Get(), 0u);
+			}
+			break;
+			default: ;
+		}
+	}
+
+	void Graphics::SetRasterizerState(eRasterizerStates aRasterizerState)
+	{
+		switch (aRasterizerState)
+		{
+			case eRasterizerStates::BackfaceCulling:
+			{
+				pContext->RSSetState(pRasterizerStates[(int)eRasterizerStates::BackfaceCulling].Get());
+			}
+			break;
+			case eRasterizerStates::FrontfaceCulling:
+			{
+				pContext->RSSetState(pRasterizerStates[(int)eRasterizerStates::FrontfaceCulling].Get());
+			}
+			break;
+			case eRasterizerStates::NoCulling:
+			{
+				pContext->RSSetState(pRasterizerStates[(int)eRasterizerStates::NoCulling].Get());
+			}
+			break;
+			default: ;
+		}
+	}
+
+	bool Graphics::CreateBlendStates()
+	{
+		HRESULT hr = S_OK;
+		D3D11_BLEND_DESC blendStateDesc = {};
+
+
+		////////////////////////////////////////////////////////////////
+		// DISABLED BLEND STATE -> DEFAULT
+		blendStateDesc.RenderTarget[0].BlendEnable = FALSE;
+		blendStateDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ZERO;
+		blendStateDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
+		blendStateDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+		blendStateDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
+		blendStateDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+		blendStateDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		blendStateDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		hr = pDevice->CreateBlendState(&blendStateDesc, pBlendStates[(int)eBlendStates::Disabled].ReleaseAndGetAddressOf());
+		if (FAILED(hr))
+		{
+			return false;
+		}
+
+		////////////////////////////////////////////////////////////////
+		// ALPHA BLEND
+		blendStateDesc = {};
+		blendStateDesc.RenderTarget[0].BlendEnable = TRUE;
+		blendStateDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+		blendStateDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+		blendStateDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+		blendStateDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+		blendStateDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+		blendStateDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		blendStateDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		hr = pDevice->CreateBlendState(&blendStateDesc, pBlendStates[(int)eBlendStates::Alpha].ReleaseAndGetAddressOf());
+		if (FAILED(hr))
+		{
+			return false;
+		}
+
+		////////////////////////////////////////////////////////////////
+		// VFX BLEND whatever you wanna call it
+		blendStateDesc = {};
+		blendStateDesc.RenderTarget[0].BlendEnable = TRUE;
+
+		blendStateDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+		blendStateDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+		blendStateDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+
+		blendStateDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
+		blendStateDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+		blendStateDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+
+		blendStateDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		hr = pDevice->CreateBlendState(&blendStateDesc,
+		                               pBlendStates[(int)eBlendStates::VFX].ReleaseAndGetAddressOf());
+		if (FAILED(hr))
+		{
+			return false;
+		}
+
+		////////////////////////////////////////////////////////////////
+		// ADDITIVE BLEND
+		blendStateDesc = {};
+		blendStateDesc.RenderTarget[0].BlendEnable = TRUE;
+		blendStateDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+		blendStateDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+		blendStateDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+		blendStateDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+		blendStateDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+		blendStateDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_MAX;
+		blendStateDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		hr = pDevice->CreateBlendState(&blendStateDesc, pBlendStates[(int)eBlendStates::Additive].ReleaseAndGetAddressOf());
+		if (FAILED(hr))
+		{
+			return false;
+		}
+
+		////////////////////////////////////////////////////////////////
+		// TRANSPARENCY BLEND
+		blendStateDesc = {};
+		blendStateDesc.RenderTarget[0].BlendEnable = TRUE;
+		blendStateDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+		blendStateDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+		blendStateDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+		blendStateDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+		blendStateDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
+		blendStateDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		blendStateDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		hr = pDevice->CreateBlendState(&blendStateDesc, pBlendStates[(int)eBlendStates::TransparencyBlend].ReleaseAndGetAddressOf());
+		if (FAILED(hr))
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool Graphics::CreateDepthStencilStates()
+	{
+		HRESULT hr = S_OK;
+
+		// NORMAL
+		D3D11_DEPTH_STENCIL_DESC dsDesc = CD3D11_DEPTH_STENCIL_DESC{CD3D11_DEFAULT{}};
+		dsDesc.DepthEnable = TRUE;
+		dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+		dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+		hr = pDevice->CreateDepthStencilState(&dsDesc, pDepthStencilStates[(int)eDepthStencilStates::Normal].ReleaseAndGetAddressOf());
+
+		if (FAILED(hr))
+		{
+			return false;
+		}
+
+		// READ ONLY GREATER
+		dsDesc = {};
+		dsDesc.DepthEnable = TRUE;
+		dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+		dsDesc.DepthFunc = D3D11_COMPARISON_GREATER;
+		dsDesc.StencilEnable = FALSE;
+
+		hr = pDevice->CreateDepthStencilState(&dsDesc, pDepthStencilStates[(int)eDepthStencilStates::ReadOnlyGreater].ReleaseAndGetAddressOf());
+
+		if (FAILED(hr))
+		{
+			return false;
+		}
+
+		// READ ONLY LESS EQUAL
+		dsDesc = {};
+		dsDesc.DepthEnable = TRUE;
+		dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+		dsDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+		dsDesc.StencilEnable = FALSE;
+
+		hr = pDevice->CreateDepthStencilState(
+			&dsDesc, pDepthStencilStates[(int)eDepthStencilStates::ReadOnlyLessEqual].ReleaseAndGetAddressOf());
+
+		if (FAILED(hr))
+		{
+			return false;
+		}
+
+		// READ ONLY EMPTY
+		//dsDesc = {};
+		//dsDesc.DepthEnable = TRUE;
+		//dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+		//dsDesc.DepthFunc = D3D11_COMPARISON_NEVER;
+		//dsDesc.StencilEnable = TRUE;
+
+		//hr = pDevice->CreateDepthStencilState(
+		//	&dsDesc, pDepthStencilStates[(int)eDepthStencilStates::ReadOnlyEmpty].ReleaseAndGetAddressOf());
+
+		if (FAILED(hr))
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool Graphics::CreateRasterizerStates()
+	{
+		HRESULT hr = S_OK;
+
+		D3D11_RASTERIZER_DESC rasterizerDesc = {};
+
+		pRasterizerStates[(int)eRasterizerStates::BackfaceCulling] = nullptr;
+
+		rasterizerDesc.AntialiasedLineEnable = false;
+		rasterizerDesc.CullMode = D3D11_CULL_FRONT;
+		rasterizerDesc.DepthBias = 0;
+		rasterizerDesc.DepthBiasClamp = 0.0f;
+		rasterizerDesc.DepthClipEnable = true;
+		rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+		rasterizerDesc.FrontCounterClockwise = false;
+		rasterizerDesc.MultisampleEnable = true;
+		rasterizerDesc.ScissorEnable = false;
+		rasterizerDesc.SlopeScaledDepthBias = 0.0f;
+		hr = pDevice->CreateRasterizerState(&rasterizerDesc, &pRasterizerStates[(int)eRasterizerStates::FrontfaceCulling]);
+		if (FAILED(hr))
+		{
+			return false;
+		}
+
+		rasterizerDesc.AntialiasedLineEnable = false;
+		rasterizerDesc.CullMode = D3D11_CULL_NONE;
+		rasterizerDesc.DepthBias = 0;
+		rasterizerDesc.DepthBiasClamp = 0.0f;
+		rasterizerDesc.DepthClipEnable = true;
+		rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+		rasterizerDesc.FrontCounterClockwise = false;
+		rasterizerDesc.MultisampleEnable = true;
+		rasterizerDesc.ScissorEnable = false;
+		rasterizerDesc.SlopeScaledDepthBias = 0.0f;
+		hr = pDevice->CreateRasterizerState(&rasterizerDesc, &pRasterizerStates[(int)eRasterizerStates::NoCulling]);
+		if (FAILED(hr))
+		{
+			return false;
+		}
+
+		return true;
 	}
 
 	//void Graphics::BindWorldPositionTexture()

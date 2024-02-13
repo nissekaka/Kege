@@ -30,23 +30,23 @@ struct DirectionalLightData
 
 struct PointLightData
 {
-	DirectX::XMFLOAT3 myPosition = {}; // 12
-	float myIntensity = {}; // 16
-	DirectX::XMFLOAT3 myColour = {}; // 28
-	float myRange = {}; // 32
+	DirectX::XMFLOAT3 position = {}; // 12
+	float intensity = {}; // 16
+	DirectX::XMFLOAT3 colour = {}; // 28
+	float radius = {}; // 32
 	BOOL isActive = false; // 36
 	float padding[3] = {}; // 48
 };
 
 struct SpotLightData
 {
-	DirectX::XMFLOAT3 myPosition = {}; // 12
-	float myIntensity = {}; // 16
-	DirectX::XMFLOAT3 myDirection = {}; // 28
-	float myRange = {}; // 32
-	DirectX::XMFLOAT3 myColour = {}; // 44
-	float myInnerAngle = {}; // 48
-	float myOuterAngle = {}; // 52
+	DirectX::XMFLOAT3 position = {}; // 12
+	float intensity = {}; // 16
+	DirectX::XMFLOAT3 direction = {}; // 28
+	float range = {}; // 32
+	DirectX::XMFLOAT3 colour = {}; // 44
+	float innerAngle = {}; // 48
+	float outerAngle = {}; // 52
 	BOOL isActive = false; // 56
 	float padding[2] = {}; // 64
 };

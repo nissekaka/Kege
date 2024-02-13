@@ -16,22 +16,47 @@ namespace Kaka
 		DeferredLights() = default;
 		~DeferredLights() = default;
 
+		void CreateSphere(Graphics& aGfx);
+		void CreateQuad(Graphics& aGfx);
 		void Init(Graphics& aGfx);
 		void Draw(Graphics& aGfx);
 		void ShowControlWindow();
 		void SetShadowCamera(const DirectX::XMMATRIX& aCamera);
+		PointLightData& AddPointLight();
+		SpotLightData& AddSpotLight();
 
 		DirectionalLightData& GetDirectionalLightData() { return directionalLightData; }
 
 	private:
+		struct ConstantBuffer
+		{
+			float positionAndRange[4];
+			BOOL isDirectional;
+			float padding[3];
+		};
+
+		struct PVertex
+		{
+			DirectX::XMFLOAT3 pos;
+			DirectX::XMFLOAT2 tex;
+		};
+
 		VertexShader* lightVS = nullptr;
 
-		PixelShader* directionalLightPS = nullptr;
 		DirectionalLightData directionalLightData;
+		std::vector<PointLightData> pointLightData;
+		std::vector<SpotLightData> spotLightData;
+		PixelShader* directionalLightPS = nullptr;
+		PixelShader* pointLightPS = nullptr;
+		PixelShader* spotLightPS = nullptr;
 
 		// Quad
-		VertexBuffer vertexBuffer = {};
-		IndexBuffer indexBuffer = {};
+		VertexBuffer quadVertexBuffer = {};
+		IndexBuffer quadIndexBuffer = {};
+		// Sphere
+		VertexBuffer sphereVertexBuffer = {};
+		IndexBuffer sphereIndexBuffer = {};
+
 		std::vector<D3D11_INPUT_ELEMENT_DESC> ied;
 		InputLayout inputLayout;
 		Topology topology = {};

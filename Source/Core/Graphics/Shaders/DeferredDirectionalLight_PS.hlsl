@@ -11,8 +11,6 @@ cbuffer DirectionalLight : register(b1)
     float4x4 directionalLightCameraTransform;
 };
 
-//Texture2D directionalLightShadowMap : register(t14);
-
 float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 {
 	const float2 uv = aInput.position.xy / clientResolution.xy;
@@ -30,8 +28,6 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 	const float3 colour = lerp((float3)0.0f, albedo.rgb, 1 - metalness);
 
     const float3 toEye = normalize(cameraPosition.xyz - worldPosition);
-
-	// Shadows
 
     const float shadowFactor = Shadow(directionalLightCameraTransform, float4(worldPosition, 1.0f));
 

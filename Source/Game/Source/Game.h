@@ -106,6 +106,7 @@ namespace Kaka
 		struct CommonBuffer
 		{
 			DirectX::XMMATRIX view;
+			DirectX::XMMATRIX projection;
 			DirectX::XMMATRIX projectionInverse;
 			DirectX::XMMATRIX viewInverse;
 			DirectX::XMFLOAT4 cameraPosition;

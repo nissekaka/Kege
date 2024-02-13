@@ -120,8 +120,8 @@ namespace Kaka
 
 		inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
 		topology.Init(aGfx, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		rasterizer.Init(aGfx);
-		depthStencil.Init(aGfx, DepthStencil::Mode::Write);
+		//rasterizer.Init(aGfx);
+		//depthStencil.Init(aGfx, DepthStencil::Mode::Write);
 	}
 
 	bool Model::LoadAnimation(const std::string& aFilePath)
@@ -172,8 +172,8 @@ namespace Kaka
 		}
 		inputLayout.Bind(aGfx);
 		topology.Bind(aGfx);
-		rasterizer.Bind(aGfx);
-		depthStencil.Bind(aGfx);
+		//rasterizer.Bind(aGfx);
+		//depthStencil.Bind(aGfx);
 
 		for (Mesh& mesh : modelData.meshList->meshes)
 		{
@@ -253,8 +253,8 @@ namespace Kaka
 		}
 		inputLayout.Bind(aGfx);
 		topology.Bind(aGfx);
-		rasterizer.Bind(aGfx);
-		depthStencil.Bind(aGfx);
+		//rasterizer.Bind(aGfx);
+		//depthStencil.Bind(aGfx);
 
 		for (AnimatedMesh& mesh : animatedModelData.meshList->meshes)
 		{

@@ -170,7 +170,15 @@ namespace Kaka
 			models.back().Init();
 			models.back().SetPosition({i * 50.0f, 0.0f, 000.0f});
 			models.back().SetScale(0.1f);
+			// Add point light above each model
 		}
+
+		PointLightData& light = deferredLights.AddPointLight();
+		light.position = models.back().GetPosition();
+		light.position.y += 5.0f;
+		light.colour = {1.0f, 0.0f, 0.0f};
+		light.intensity = 1000.0f;
+		light.radius = 50.0f;
 
 		while (true)
 		{
@@ -235,6 +243,7 @@ namespace Kaka
 		//directionalLight.Simulate(aDeltaTime);
 		commonBuffer.view = DirectX::XMMatrixInverse(nullptr, camera.GetProjection());
 		//commonBuffer.view = DirectX::XMMatrixInverse(nullptr, camera.GetInverseMatrix());
+		commonBuffer.projection = camera.GetProjection();
 		commonBuffer.viewInverse = camera.GetInverseMatrix();
 		commonBuffer.projectionInverse = DirectX::XMMatrixInverse(nullptr, camera.GetProjection());
 		commonBuffer.cameraPosition = {camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z, 0.0f};
@@ -269,6 +278,9 @@ namespace Kaka
 		deferredLights.SetShadowCamera(directionalLightShadowCamera.GetInverseMatrix() * directionalLightShadowCamera.GetProjection());
 		wnd.Gfx().SetRenderTarget(eRenderTargetType::ShadowMap);
 
+		wnd.Gfx().SetDepthStencilState(eDepthStencilStates::Normal);
+		wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
+
 		// Render everything that casts shadows
 		{
 			//terrain.Draw(wnd.Gfx());
@@ -278,9 +290,9 @@ namespace Kaka
 			}
 		}
 
-		// Need to set new render target before binding the resource view for the shadow map
 		wnd.Gfx().ResetShadows(camera);
 		// Shadow map pass -- END
+
 
 		// GBuffer pass -- BEGIN
 		wnd.Gfx().gBuffer.ClearTextures(wnd.Gfx().pContext.Get());
@@ -295,14 +307,15 @@ namespace Kaka
 		wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), 0u);
 
 		wnd.Gfx().BindShadows();
-
 		deferredLights.Draw(wnd.Gfx());
-
 		wnd.Gfx().UnbindShadows();
 
 		wnd.Gfx().gBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), 0u);
 
 		wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, wnd.Gfx().gBuffer.GetDepthStencilView());
+
+		wnd.Gfx().SetDepthStencilState(eDepthStencilStates::ReadOnlyLessEqual);
+		wnd.Gfx().SetRasterizerState(eRasterizerStates::NoCulling);
 
 		skybox.Draw(wnd.Gfx());
 		// GBuffer pass -- END

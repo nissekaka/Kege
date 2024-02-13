@@ -21,15 +21,15 @@ namespace Kaka
 		inputLayout.Init(aGfx, ied, vertexShader.GetBytecode());
 		topology.Init(aGfx, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		rasterizer.Init(aGfx, eCullingMode::None);
-		depthStencil.Init(aGfx, DepthStencil::Mode::DepthFirst);
+		//rasterizer.Init(aGfx, eCullingMode::None);
+		//depthStencil.Init(aGfx, DepthStencil::Mode::DepthFirst);
 	}
 
 	void Skybox::Draw(Graphics& aGfx)
 	{
 		UNREFERENCED_PARAMETER(aGfx);
 
-		sampler.Bind(aGfx);
+		//sampler.Bind(aGfx);
 
 		dayTexture.Bind(aGfx);
 		nightTexture.Bind(aGfx);
@@ -45,8 +45,8 @@ namespace Kaka
 
 		inputLayout.Bind(aGfx);
 		topology.Bind(aGfx);
-		rasterizer.Bind(aGfx);
-		depthStencil.Bind(aGfx);
+		//rasterizer.Bind(aGfx);
+		//depthStencil.Bind(aGfx);
 
 		aGfx.DrawIndexed(static_cast<UINT>(std::size(indices)));
 
