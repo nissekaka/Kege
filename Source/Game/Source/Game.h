@@ -48,6 +48,8 @@ namespace Kaka
 		std::vector<Sprite> sprites = {};
 		std::vector<PointLight> pointLights = {};
 		std::vector<SpotLight> spotLights = {};
+
+		SpotLightData* flashLightTest = nullptr;
 		//float pointLightAngles[] = PI;
 		//float pointLightAngles[4] = {0.0f,PI / 2,PI,PI * 1.5f};
 

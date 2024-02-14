@@ -177,26 +177,34 @@ namespace Kaka
 			models.back().SetPosition({i * 50.0f, 0.0f, 000.0f});
 			models.back().SetScale(0.1f);
 
-			// Add point light above each model
-			PointLightData& pointLight = deferredLights.AddPointLight();
-			pointLight.position = models.back().GetPosition();
-			pointLight.position.y += 25.0f;
-			pointLight.colour = colour;
-			pointLight.intensity = 500.0f;
-			pointLight.radius = 15.0f;
+			//// Add point light above each model
+			//PointLightData& pointLight = deferredLights.AddPointLight();
+			//pointLight.position = models.back().GetPosition();
+			//pointLight.position.y += 25.0f;
+			//pointLight.colour = colour;
+			//pointLight.intensity = 500.0f;
+			//pointLight.radius = 15.0f;
 
-			DirectX::XMFLOAT3 colour2 = {cDist(mt), cDist(mt), cDist(mt)};
-			SpotLightData& spotLight = deferredLights.AddSpotLight();
-			spotLight.position = models.back().GetPosition();
-			spotLight.position.y -= 25.0f;
-			spotLight.direction = {0.0f, -1.0f, 0.0f};
-			spotLight.colour = colour2;
-			spotLight.intensity = 5000.0f;
-			spotLight.range = 1000.0f;
-			spotLight.innerAngle = 1.5f; // Radians
-			spotLight.outerAngle = 2.5f; // Radians
+			//DirectX::XMFLOAT3 colour2 = {cDist(mt), cDist(mt), cDist(mt)};
+			//SpotLightData& spotLight = deferredLights.AddSpotLight();
+			//spotLight.position = models.back().GetPosition();
+			//spotLight.position.y -= 25.0f;
+			//spotLight.direction = {0.0f, -1.0f, 0.0f};
+			//spotLight.colour = colour2;
+			//spotLight.intensity = 5000.0f;
+			//spotLight.range = 1000.0f;
+			//spotLight.innerAngle = 1.5f; // Radians
+			//spotLight.outerAngle = 2.5f; // Radians
 		}
 
+		flashLightTest = &deferredLights.AddSpotLight();
+		flashLightTest->position = camera.GetPosition();
+		DirectX::XMStoreFloat3(&flashLightTest->direction, camera.GetForwardVector());
+		flashLightTest->intensity = 500.0f;
+		flashLightTest->range = 1000.0f;
+		flashLightTest->innerAngle = 0.1f; // Radians
+		flashLightTest->outerAngle = 0.6f; // Radians
+		flashLightTest->colour = {1.0f, 0.9f, 0.6f};
 
 		while (true)
 		{
@@ -255,6 +263,10 @@ namespace Kaka
 		wnd.Gfx().SetCamera(camera);
 
 		HandleInput(aDeltaTime);
+
+		flashLightTest->position = camera.GetPosition();
+		DirectX::XMStoreFloat3(&flashLightTest->direction, camera.GetForwardVector());
+		flashLightTest->direction = {flashLightTest->direction.x * -1.0f, flashLightTest->direction.y * -1.0f, flashLightTest->direction.z * -1.0f};
 
 		//directionalLight.SetShadowCamera(directionalLightShadowCamera.GetInverseMatrix() * directionalLightShadowCamera.GetProjection());
 		//directionalLight.Bind(wnd.Gfx());
