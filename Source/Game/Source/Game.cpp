@@ -163,22 +163,40 @@ namespace Kaka
 		//vfxModelOlle.SetPosition({250.0f, -10.0f, 500.0f});
 		//vfxModelOlle.SetScale(150.0f);
 
+		// Random colour between 0 and 1
+		std::random_device rd;
+		std::mt19937 mt(rd());
+		std::uniform_real_distribution<float> cDist(0.0f, 1.0f);
+
 		for (int i = 0; i < 5; ++i)
 		{
+			DirectX::XMFLOAT3 colour = {cDist(mt), cDist(mt), cDist(mt)};
 			models.emplace_back();
-			models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\player\\sk_player.fbx", Model::eShaderType::PBR);
+			models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\crawler\\CH_NPC_Crawler_01_22G3S_SK.fbx", Model::eShaderType::PBR);
 			models.back().Init();
 			models.back().SetPosition({i * 50.0f, 0.0f, 000.0f});
 			models.back().SetScale(0.1f);
+
 			// Add point light above each model
+			PointLightData& pointLight = deferredLights.AddPointLight();
+			pointLight.position = models.back().GetPosition();
+			pointLight.position.y += 25.0f;
+			pointLight.colour = colour;
+			pointLight.intensity = 500.0f;
+			pointLight.radius = 15.0f;
+
+			DirectX::XMFLOAT3 colour2 = {cDist(mt), cDist(mt), cDist(mt)};
+			SpotLightData& spotLight = deferredLights.AddSpotLight();
+			spotLight.position = models.back().GetPosition();
+			spotLight.position.y -= 25.0f;
+			spotLight.direction = {0.0f, -1.0f, 0.0f};
+			spotLight.colour = colour2;
+			spotLight.intensity = 5000.0f;
+			spotLight.range = 1000.0f;
+			spotLight.innerAngle = 1.5f; // Radians
+			spotLight.outerAngle = 2.5f; // Radians
 		}
 
-		PointLightData& light = deferredLights.AddPointLight();
-		light.position = models.back().GetPosition();
-		light.position.y += 5.0f;
-		light.colour = {1.0f, 0.0f, 0.0f};
-		light.intensity = 1000.0f;
-		light.radius = 50.0f;
 
 		while (true)
 		{
@@ -241,18 +259,23 @@ namespace Kaka
 		//directionalLight.SetShadowCamera(directionalLightShadowCamera.GetInverseMatrix() * directionalLightShadowCamera.GetProjection());
 		//directionalLight.Bind(wnd.Gfx());
 		//directionalLight.Simulate(aDeltaTime);
-		commonBuffer.view = DirectX::XMMatrixInverse(nullptr, camera.GetProjection());
+		commonBuffer.worldToClipMatrix = camera.GetInverseView() * camera.GetProjection();
+		commonBuffer.view = camera.GetView();
 		//commonBuffer.view = DirectX::XMMatrixInverse(nullptr, camera.GetInverseMatrix());
 		commonBuffer.projection = camera.GetProjection();
-		commonBuffer.viewInverse = camera.GetInverseMatrix();
+		commonBuffer.viewInverse = camera.GetInverseView();
 		commonBuffer.projectionInverse = DirectX::XMMatrixInverse(nullptr, camera.GetProjection());
 		commonBuffer.cameraPosition = {camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z, 0.0f};
 		commonBuffer.resolution = wnd.Gfx().GetCurrentResolution();
 		commonBuffer.currentTime = timer.GetTotalTime();
 
-		PixelConstantBuffer<CommonBuffer> cb{wnd.Gfx(), 4u};
-		cb.Update(wnd.Gfx(), commonBuffer);
-		cb.Bind(wnd.Gfx());
+		PixelConstantBuffer<CommonBuffer> pcb{wnd.Gfx(), 4u};
+		pcb.Update(wnd.Gfx(), commonBuffer);
+		pcb.Bind(wnd.Gfx());
+
+		VertexConstantBuffer<CommonBuffer> vcb{wnd.Gfx(), 4u};
+		vcb.Update(wnd.Gfx(), commonBuffer);
+		vcb.Bind(wnd.Gfx());
 
 		//PixelConstantBuffer<ReflectionWaveBuffer> rwpb{wnd.Gfx(), 10u};
 		//rwpb.Update(wnd.Gfx(), reflectionPSBuffer);
@@ -274,50 +297,57 @@ namespace Kaka
 		//skybox.Rotate(skyboxAngle);
 
 		// Shadow map pass -- BEGIN
-		wnd.Gfx().StartShadows(directionalLightShadowCamera, deferredLights.GetDirectionalLightData().lightDirection);
-		deferredLights.SetShadowCamera(directionalLightShadowCamera.GetInverseMatrix() * directionalLightShadowCamera.GetProjection());
-		wnd.Gfx().SetRenderTarget(eRenderTargetType::ShadowMap);
-
-		wnd.Gfx().SetDepthStencilState(eDepthStencilStates::Normal);
-		wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
-
-		// Render everything that casts shadows
 		{
-			//terrain.Draw(wnd.Gfx());
-			for (Model& model : models)
-			{
-				model.Draw(wnd.Gfx(), aDeltaTime);
-			}
-		}
+			wnd.Gfx().StartShadows(directionalLightShadowCamera, deferredLights.GetDirectionalLightData().lightDirection);
+			deferredLights.SetShadowCamera(directionalLightShadowCamera.GetInverseView() * directionalLightShadowCamera.GetProjection());
+			wnd.Gfx().SetRenderTarget(eRenderTargetType::ShadowMap);
+			wnd.Gfx().SetDepthStencilState(eDepthStencilStates::Normal);
+			wnd.Gfx().SetRasterizerState(eRasterizerStates::FrontfaceCulling);
 
-		wnd.Gfx().ResetShadows(camera);
+			// Render everything that casts shadows
+			{
+				//terrain.Draw(wnd.Gfx());
+				for (Model& model : models)
+				{
+					model.Draw(wnd.Gfx(), aDeltaTime);
+				}
+			}
+
+			wnd.Gfx().ResetShadows(camera);
+		}
 		// Shadow map pass -- END
 
 
 		// GBuffer pass -- BEGIN
-		wnd.Gfx().gBuffer.ClearTextures(wnd.Gfx().pContext.Get());
-		wnd.Gfx().gBuffer.SetAsActiveTarget(wnd.Gfx().pContext.Get(), wnd.Gfx().gBuffer.GetDepthStencilView());
-
-		for (Model& model : models)
 		{
-			model.Draw(wnd.Gfx(), aDeltaTime);
+			wnd.Gfx().gBuffer.ClearTextures(wnd.Gfx().pContext.Get());
+			wnd.Gfx().gBuffer.SetAsActiveTarget(wnd.Gfx().pContext.Get(), wnd.Gfx().gBuffer.GetDepthStencilView());
+
+			wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
+
+			for (Model& model : models)
+			{
+				model.Draw(wnd.Gfx(), aDeltaTime);
+			}
+
+			wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, nullptr);
+			wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), 0u);
+
+			// Lighting pass
+			wnd.Gfx().BindShadows();
+			deferredLights.Draw(wnd.Gfx());
+			wnd.Gfx().UnbindShadows();
+
+			wnd.Gfx().gBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), 0u);
+
+			// Skybox pass
+			wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, wnd.Gfx().gBuffer.GetDepthStencilView());
+
+			wnd.Gfx().SetDepthStencilState(eDepthStencilStates::ReadOnlyLessEqual);
+			wnd.Gfx().SetRasterizerState(eRasterizerStates::NoCulling);
+
+			skybox.Draw(wnd.Gfx());
 		}
-
-		wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, nullptr);
-		wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), 0u);
-
-		wnd.Gfx().BindShadows();
-		deferredLights.Draw(wnd.Gfx());
-		wnd.Gfx().UnbindShadows();
-
-		wnd.Gfx().gBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), 0u);
-
-		wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, wnd.Gfx().gBuffer.GetDepthStencilView());
-
-		wnd.Gfx().SetDepthStencilState(eDepthStencilStates::ReadOnlyLessEqual);
-		wnd.Gfx().SetRasterizerState(eRasterizerStates::NoCulling);
-
-		skybox.Draw(wnd.Gfx());
 		// GBuffer pass -- END
 
 		// ImGui windows
@@ -340,6 +370,12 @@ namespace Kaka
 				ImGui::DragFloat("Exposure", &ppBuffer.exposure, 0.01f, -10.0f, 10.0f, "%.2f");
 				ImGui::DragFloat("Contrast", &ppBuffer.contrast, 0.01f, 0.0f, 10.0f, "%.2f");
 				ImGui::DragFloat("Saturation", &ppBuffer.saturation, 0.01f, 0.0f, 10.0f, "%.2f");
+				ImGui::Text("Bloom");
+				ImGui::Checkbox("Use bloom", &wnd.Gfx().useBloom);
+				ImGui::SetNextItemWidth(100);
+				ImGui::SliderFloat("Bloom blending", &wnd.Gfx().bb.bloomBlending, 0.0f, 1.0f);
+				ImGui::SetNextItemWidth(100);
+				ImGui::SliderFloat("Bloom threshold", &wnd.Gfx().bb.bloomThreshold, 0.0f, 1.0f);
 			}
 			ImGui::End();
 

@@ -16,7 +16,7 @@ struct GBufferOutput
 };
 struct DeferredVertexInput
 {
-    float4 position : POSITION;
+    float3 position : POSITION;
 };
 
 struct DeferredVertexToPixel

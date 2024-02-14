@@ -95,7 +95,7 @@ namespace Kaka
 		//void SetProjection(DirectX::FXMMATRIX& aProjection);
 		DirectX::XMMATRIX GetProjection() const;
 		void SetCamera(Camera& aCamera);
-		DirectX::XMMATRIX GetCameraInverseMatrix() const;
+		DirectX::XMMATRIX GetCameraInverseView() const;
 		UINT GetDrawcallCount() const;
 		void SetRenderTarget(eRenderTargetType aRenderTargetType, const bool aUseDepth = true) const;
 		void SetRenderTarget(eRenderTargetType aRenderTargetType, ID3D11DepthStencilView* aDepth) const;

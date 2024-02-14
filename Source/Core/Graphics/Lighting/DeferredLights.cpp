@@ -15,14 +15,14 @@ namespace Kaka
 
 		constexpr float radius = 1.0f;
 		const auto base = DirectX::XMVectorSet(0.0f, 0.0f, radius, 0.0f);
-		const float lattitudeAngle = PI / aLatDiv;
+		const float latitudeAngle = PI / aLatDiv;
 		const float longitudeAngle = 2.0f * PI / aLongDiv;
 
 		for (int iLat = 1; iLat < aLatDiv; iLat++)
 		{
 			const auto latBase = DirectX::XMVector3Transform(
 				base,
-				DirectX::XMMatrixRotationX(lattitudeAngle * iLat)
+				DirectX::XMMatrixRotationX(latitudeAngle * iLat)
 			);
 			for (int iLong = 0; iLong < aLongDiv; iLong++)
 			{
@@ -111,19 +111,19 @@ namespace Kaka
 		PVertex _vertices[4] = {
 			{
 				{-1.0f, -1.0f, 0.0f},
-				{0, 1},
+				//{0, 1},
 			},
 			{
 				{-1.0f, 1.0f, 0.0f},
-				{0, 0},
+				//{0, 0},
 			},
 			{
 				{1.0f, -1.0f, 0.0f},
-				{1, 1},
+				//{1, 1},
 			},
 			{
 				{1.0f, 1.0f, 0.0f},
-				{1, 0},
+				//{1, 0},
 			}
 		};
 
@@ -168,7 +168,7 @@ namespace Kaka
 		ied =
 		{
 			{
-				"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,
+				"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
 				D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 			},
 		};
@@ -190,16 +190,16 @@ namespace Kaka
 
 		// Directional Light
 		{
-			ConstantBuffer transformBuffer;
-			transformBuffer.positionAndRange[0] = 0.0f;
-			transformBuffer.positionAndRange[1] = 0.0f;
-			transformBuffer.positionAndRange[2] = 0.0f;
-			transformBuffer.positionAndRange[3] = 1.0f;
-			transformBuffer.isDirectional = TRUE;
+			ConstantBuffer lightBuffer;
+			lightBuffer.positionAndRange[0] = 0.0f;
+			lightBuffer.positionAndRange[1] = 0.0f;
+			lightBuffer.positionAndRange[2] = 0.0f;
+			lightBuffer.positionAndRange[3] = 1.0f;
+			lightBuffer.isDirectional = TRUE;
 
-			VertexConstantBuffer<ConstantBuffer> transformConstantBuffer{aGfx, 1u};
-			transformConstantBuffer.Update(aGfx, transformBuffer);
-			transformConstantBuffer.Bind(aGfx);
+			VertexConstantBuffer<ConstantBuffer> vertexLightBuffer{aGfx, 1u};
+			vertexLightBuffer.Update(aGfx, lightBuffer);
+			vertexLightBuffer.Bind(aGfx);
 
 			quadVertexBuffer.Bind(aGfx);
 			quadIndexBuffer.Bind(aGfx);
@@ -223,17 +223,17 @@ namespace Kaka
 
 				for (PointLightData& lightData : pointLightData)
 				{
-					ConstantBuffer transformBuffer;
+					ConstantBuffer lightBuffer;
 
-					transformBuffer.positionAndRange[0] = lightData.position.x;
-					transformBuffer.positionAndRange[1] = lightData.position.y;
-					transformBuffer.positionAndRange[2] = lightData.position.z;
-					transformBuffer.positionAndRange[3] = lightData.radius;
-					transformBuffer.isDirectional = FALSE;
+					lightBuffer.positionAndRange[0] = lightData.position.x;
+					lightBuffer.positionAndRange[1] = lightData.position.y;
+					lightBuffer.positionAndRange[2] = lightData.position.z;
+					lightBuffer.positionAndRange[3] = lightData.radius;
+					lightBuffer.isDirectional = FALSE;
 
-					VertexConstantBuffer<ConstantBuffer> transformConstantBuffer{aGfx, 1u};
-					transformConstantBuffer.Update(aGfx, transformBuffer);
-					transformConstantBuffer.Bind(aGfx);
+					VertexConstantBuffer<ConstantBuffer> vertexLightBuffer{aGfx, 1u};
+					vertexLightBuffer.Update(aGfx, lightBuffer);
+					vertexLightBuffer.Bind(aGfx);
 
 					PixelConstantBuffer<PointLightData> pointLightBuffer{aGfx, 2u};
 					pointLightBuffer.Update(aGfx, lightData);
@@ -249,19 +249,19 @@ namespace Kaka
 
 				for (SpotLightData& lightData : spotLightData)
 				{
-					ConstantBuffer transformBuffer;
+					ConstantBuffer lightBuffer;
 
-					transformBuffer.positionAndRange[0] = lightData.position.x;
-					transformBuffer.positionAndRange[1] = lightData.position.y;
-					transformBuffer.positionAndRange[2] = lightData.position.z;
-					transformBuffer.positionAndRange[3] = lightData.range;
-					transformBuffer.isDirectional = FALSE;
+					lightBuffer.positionAndRange[0] = lightData.position.x;
+					lightBuffer.positionAndRange[1] = lightData.position.y;
+					lightBuffer.positionAndRange[2] = lightData.position.z;
+					lightBuffer.positionAndRange[3] = lightData.range;
+					lightBuffer.isDirectional = FALSE;
 
-					VertexConstantBuffer<ConstantBuffer> transformConstantBuffer{aGfx, 1u};
-					transformConstantBuffer.Update(aGfx, transformBuffer);
-					transformConstantBuffer.Bind(aGfx);
+					VertexConstantBuffer<ConstantBuffer> vertexLightBuffer{aGfx, 1u};
+					vertexLightBuffer.Update(aGfx, lightBuffer);
+					vertexLightBuffer.Bind(aGfx);
 
-					PixelConstantBuffer<SpotLightData> spotLightBuffer{aGfx, 3u};
+					PixelConstantBuffer<SpotLightData> spotLightBuffer{aGfx, 2u};
 					spotLightBuffer.Update(aGfx, lightData);
 					spotLightBuffer.Bind(aGfx);
 

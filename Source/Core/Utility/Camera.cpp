@@ -74,15 +74,20 @@ namespace Kaka
 		yaw = atan2(aDirection.x, aDirection.z);
 	}
 
-	DirectX::XMMATRIX Camera::GetInverseMatrix() const
+	DirectX::XMMATRIX Camera::GetView() const
 	{
-		DirectX::XMMATRIX myMatrix = DirectX::XMMatrixIdentity();
+		DirectX::XMMATRIX matrix = DirectX::XMMatrixIdentity();
 
-		myMatrix *= DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);
-		myMatrix *= DirectX::XMMatrixRotationRollPitchYaw(pitch, yaw, 0.0f);
-		myMatrix *= DirectX::XMMatrixTranslation(position.x, position.y, position.z);
+		matrix *= DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);
+		matrix *= DirectX::XMMatrixRotationRollPitchYaw(pitch, yaw, 0.0f);
+		matrix *= DirectX::XMMatrixTranslation(position.x, position.y, position.z);
 
-		return DirectX::XMMatrixInverse(nullptr, myMatrix);
+		return matrix;
+	}
+
+	DirectX::XMMATRIX Camera::GetInverseView() const
+	{
+		return DirectX::XMMatrixInverse(nullptr, GetView());
 	}
 
 	DirectX::XMMATRIX Camera::GetProjection() const
@@ -98,9 +103,9 @@ namespace Kaka
 	DirectX::XMVECTOR Camera::GetForwardVector() const
 	{
 		return {
-			GetInverseMatrix().r[0].m128_f32[2],
-			GetInverseMatrix().r[1].m128_f32[2],
-			GetInverseMatrix().r[2].m128_f32[2]
+			GetInverseView().r[0].m128_f32[2],
+			GetInverseView().r[1].m128_f32[2],
+			GetInverseView().r[2].m128_f32[2]
 		};
 	}
 

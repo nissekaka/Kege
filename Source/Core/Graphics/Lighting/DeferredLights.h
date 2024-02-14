@@ -38,7 +38,6 @@ namespace Kaka
 		struct PVertex
 		{
 			DirectX::XMFLOAT3 pos;
-			DirectX::XMFLOAT2 tex;
 		};
 
 		VertexShader* lightVS = nullptr;
@@ -46,6 +45,7 @@ namespace Kaka
 		DirectionalLightData directionalLightData;
 		std::vector<PointLightData> pointLightData;
 		std::vector<SpotLightData> spotLightData;
+
 		PixelShader* directionalLightPS = nullptr;
 		PixelShader* pointLightPS = nullptr;
 		PixelShader* spotLightPS = nullptr;

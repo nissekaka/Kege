@@ -10,23 +10,23 @@ cbuffer DeferredVertexConstantBuffer : register(b1)
 DeferredVertexToPixel main(DeferredVertexInput aInput)
 {
     DeferredVertexToPixel output;
-
-    output.position = aInput.position;
+    
+    output.position = float4(aInput.position, 1.0f);
 
     if (!isDirectional)
     {
-        float4x4 objectToWorld = float4x4(
-        lightPosAndRange.w * 1.1f, 0, 0, lightPosAndRange.x,
-        0, lightPosAndRange.w * 1.1f, 0, lightPosAndRange.y,
-        0, 0, lightPosAndRange.w * 1.1f, lightPosAndRange.z,
-        0, 0, 0, 1
+        const float4 position = { aInput.position, 1.0f };
+
+        matrix objectToWorld = matrix(
+        lightPosAndRange.w, 0, 0, lightPosAndRange.x,
+        0, lightPosAndRange.w, 0, lightPosAndRange.y,
+        0, 0, lightPosAndRange.w, lightPosAndRange.z,
+		0, 0, 0, 1
         );
 
-        output.position = mul(objectToWorld, aInput.position);
-        //const float4 pos = aInput.position;// * lightPosAndRange.w;
-        //output.position = pos + float4(lightPosAndRange.xyz, 0.0f);
-        output.position = mul(mul(view, projection), output.position);
+        output.position = mul(objectToWorld, position);
+        output.position = mul(worldToClipMatrix, output.position);
     }
 
-	return output;
+    return output;
 }

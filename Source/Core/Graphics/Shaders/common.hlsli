@@ -5,6 +5,7 @@
 
 cbuffer CommonBuffer : register(b4)
 {
+    float4x4 worldToClipMatrix;
     float4x4 view;
     float4x4 projection;
     float4x4 projectionInverse;

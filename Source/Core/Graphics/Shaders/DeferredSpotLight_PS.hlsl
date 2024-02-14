@@ -22,16 +22,16 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
     const float3 normal = normalize(2.0f * normalTex.Sample(splr, uv).xyz - 1.0f);
     const float4 material = materialTex.Sample(splr, uv);
 
-    if (material.a == 0.0f)
-    {
-        discard;
-    }
+    //if (material.a == 0.0f)
+    //{
+    //    discard;
+    //}
 
     const float metalness = material.b;
     const float roughness = material.g;
 
     const float3 specular = lerp((float3) 0.04f, albedo.rgb, metalness);
-    const float3 colour = lerp((float3) 0.0f, albedo.rgb, 1 - metalness);
+    const float3 colour = lerp((float3) 0.0f, albedo.rgb, 1.0f - metalness);
 
     const float3 toEye = normalize(cameraPosition.xyz - worldPosition);
 

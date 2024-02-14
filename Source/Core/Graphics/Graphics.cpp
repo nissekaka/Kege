@@ -397,22 +397,6 @@ namespace Kaka
 
 	void Graphics::EndFrame()
 	{
-		//if (ImGui::Begin("the!!"))
-		//{
-		//	ImGui::Image(renderWaterReflect.pResource.Get(), ImVec2(1600 / 4, 800 / 4));
-		//}
-		//ImGui::End();
-
-		if (ImGui::Begin("Bloom"))
-		{
-			ImGui::Checkbox("Use bloom", &useBloom);
-			ImGui::SetNextItemWidth(100);
-			ImGui::SliderFloat("Bloom blending", &bb.bloomBlending, 0.0f, 1.0f);
-			ImGui::SetNextItemWidth(100);
-			ImGui::SliderFloat("Bloom threshold", &bb.bloomThreshold, 0.0f, 1.0f);
-		}
-		ImGui::End();
-
 		// ImGui end frame
 		if (imGuiEnabled)
 		{
@@ -455,9 +439,9 @@ namespace Kaka
 		camera = &aCamera;
 	}
 
-	DirectX::XMMATRIX Graphics::GetCameraInverseMatrix() const
+	DirectX::XMMATRIX Graphics::GetCameraInverseView() const
 	{
-		return camera->GetInverseMatrix();
+		return camera->GetInverseView();
 	}
 
 	UINT Graphics::GetDrawcallCount() const
@@ -581,7 +565,7 @@ namespace Kaka
 				aPostProcessor.Draw(*this);
 			}
 
-			SetAlphaBlend();
+			SetBlendState(eBlendStates::Alpha);
 
 			aPostProcessor.SetUpsamplePS();
 
@@ -597,7 +581,7 @@ namespace Kaka
 				aPostProcessor.Draw(*this);
 			}
 
-			ResetBlend();
+			SetBlendState(eBlendStates::Disabled);
 
 			aPostProcessor.SetPostProcessPS();
 
@@ -620,22 +604,22 @@ namespace Kaka
 		{
 			case eBlendStates::Disabled:
 			{
-				ResetBlend();
+				pContext->OMSetBlendState(pBlendStates[(int)eBlendStates::Disabled].Get(), nullptr, 0x0f);
 			}
 			break;
 			case eBlendStates::Alpha:
 			{
-				SetAlphaBlend();
+				pContext->OMSetBlendState(pBlendStates[(int)eBlendStates::Alpha].Get(), nullptr, 0x0f);
 			}
 			break;
 			case eBlendStates::VFX:
 			{
-				SetVFXBlend();
+				pContext->OMSetBlendState(pBlendStates[(int)eBlendStates::VFX].Get(), nullptr, 0x0f);
 			}
 			break;
 			case eBlendStates::Additive:
 			{
-				SetAdditiveBlend();
+				pContext->OMSetBlendState(pBlendStates[(int)eBlendStates::Additive].Get(), nullptr, 0x0f);
 			}
 			break;
 		}
@@ -1002,7 +986,7 @@ namespace Kaka
 
 		// Extract the rows of the view-projection matrix
 		DirectX::XMFLOAT4X4 VP;
-		auto viewProjectionMatrix = GetCameraInverseMatrix() * camera->GetProjection();
+		auto viewProjectionMatrix = GetCameraInverseView() * camera->GetProjection();
 		DirectX::XMStoreFloat4x4(&VP, viewProjectionMatrix);
 
 		// Extract the frustum planes from the view-projection matrix
