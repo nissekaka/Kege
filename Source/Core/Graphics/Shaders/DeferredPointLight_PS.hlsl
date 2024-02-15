@@ -6,7 +6,7 @@ cbuffer PointLightData : register(b2)
     float3 lightPosition;
     float lightIntensity;
     float3 lightColour;
-    float lightRange;
+    float lightRadius;
     bool lightIsActive;
     float3 padding;
 };
@@ -43,7 +43,7 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 
     float3 pointLight = EvaluatePointLight(colour, specular, normal,
         roughness, lightColour, lightIntensity,
-        lightRange, lightPosition, toEye.xyz, worldPosition.xyz);
+        lightRadius, lightPosition, toEye.xyz, worldPosition.xyz);
     
     float3 finalColour = pointLight;
 

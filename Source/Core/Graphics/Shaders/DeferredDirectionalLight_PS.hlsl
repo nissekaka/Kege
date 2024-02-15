@@ -34,7 +34,7 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
     float3 directionalLight = EvaluateDirectionalLight(colour, specular, normal,
     roughness, directionalLightColour, -directionalLightDirection, toEye) * directionalLightIntensity;
     
-    float3 finalColour = directionalLight * shadowFactor;//    +colour;
+    float3 finalColour = directionalLight * shadowFactor;
 
     float3 ambiance = 0.0f;
     

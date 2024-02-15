@@ -28,6 +28,7 @@ namespace Kaka
 
 	private:
 		void LoadModelThreaded(const std::string& aModelPath, Model& aModel);
+		void PointLightTest(float aDeltaTime);
 		void Update(const float aDeltaTime);
 		void HandleInput(const float aDeltaTime);
 		void ShowStatsWindow();
@@ -50,6 +51,18 @@ namespace Kaka
 		std::vector<SpotLight> spotLights = {};
 
 		SpotLightData* flashLightTest = nullptr;
+		SpotLightData* flashLightTest2 = nullptr;
+
+		PointLightData* pointLightTest = nullptr;
+
+		float flashLightBleedAngleMultiplier = 2.0f;
+		float flashLightBleedIntensityFactor = 0.5f;
+		float pointLightPositionOffsetFactor = 1.0f;
+		float pointLightPositionInterpSpeed = 45.0f;
+		float pointLightColourInterpSpeed = 5.0f;
+		float pointLightIntensityInterpSpeed = 5.0f;
+		float pointLightIntensity = 5.0f;
+		float pointLightRadius = 50.0f;
 		//float pointLightAngles[] = PI;
 		//float pointLightAngles[4] = {0.0f,PI / 2,PI,PI * 1.5f};
 
@@ -74,36 +87,36 @@ namespace Kaka
 		//ReflectionPlane reflectionPlane{};
 		float skyboxSpeed = 0.005f;
 		DirectX::XMFLOAT3 skyboxAngle = {};
-		std::vector<float> pointLightTravelRadiuses = {};
-		std::vector<float> pointLightTravelSpeeds = {};
-		std::vector<float> pointLightTravelAngles = {};
+		//std::vector<float> pointLightTravelRadiuses = {};
+		//std::vector<float> pointLightTravelSpeeds = {};
+		//std::vector<float> pointLightTravelAngles = {};
 
-		std::vector<float> spotLightTravelRadiuses = {};
-		std::vector<float> spotLightTravelSpeeds = {};
-		std::vector<float> spotLightTravelAngles = {};
+		//std::vector<float> spotLightTravelRadiuses = {};
+		//std::vector<float> spotLightTravelSpeeds = {};
+		//std::vector<float> spotLightTravelAngles = {};
 
-		std::vector<float> spriteTravelRadiuses = {};
-		std::vector<float> spriteTravelSpeeds = {};
-		std::vector<float> spriteTravelAngles = {};
+		//std::vector<float> spriteTravelRadiuses = {};
+		//std::vector<float> spriteTravelSpeeds = {};
+		//std::vector<float> spriteTravelAngles = {};
 
-		struct ReflectionWaveBuffer
-		{
-			DirectX::XMFLOAT2 k0;
-			DirectX::XMFLOAT2 k1;
-			float A;
-			float padding[3];
-		};
+		//struct ReflectionWaveBuffer
+		//{
+		//	DirectX::XMFLOAT2 k0;
+		//	DirectX::XMFLOAT2 k1;
+		//	float A;
+		//	float padding[3];
+		//};
 
-		ReflectionWaveBuffer reflectionPSBuffer = {};
+		//ReflectionWaveBuffer reflectionPSBuffer = {};
 
-		struct ReflectionHeightBuffer
-		{
-			float height;
-			float padding[3];
-		};
+		//struct ReflectionHeightBuffer
+		//{
+		//	float height;
+		//	float padding[3];
+		//};
 
-		ReflectionHeightBuffer reflectionVSBuffer = {};
-		ReflectionHeightBuffer reflectionHeightPSBuffer = {};
+		//ReflectionHeightBuffer reflectionVSBuffer = {};
+		//ReflectionHeightBuffer reflectionHeightPSBuffer = {};
 
 		struct CommonBuffer
 		{

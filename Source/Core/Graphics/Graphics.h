@@ -165,10 +165,6 @@ namespace Kaka
 		Microsoft::WRL::ComPtr<IDXGISwapChain> pSwap;
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext;
 
-		//Microsoft::WRL::ComPtr<ID3D11BlendState> pBlend;
-		//Microsoft::WRL::ComPtr<ID3D11BlendState> pBlendVfx;
-		//Microsoft::WRL::ComPtr<ID3D11BlendState> pBlendAdd;
-
 		RenderTarget renderWaterReflect;
 		RenderTarget postProcessing;
 

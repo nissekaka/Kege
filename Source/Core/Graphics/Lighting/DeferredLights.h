@@ -5,6 +5,12 @@
 #include "Graphics/Bindable/Topology.h"
 #include "Graphics/Bindable/VertexBuffer.h"
 
+enum
+{
+	POINT_LIGHT_RESERVE = 100,
+	SPOT_LIGHT_RESERVE = 100
+};
+
 namespace Kaka
 {
 	class PixelShader;
@@ -16,8 +22,6 @@ namespace Kaka
 		DeferredLights() = default;
 		~DeferredLights() = default;
 
-		void CreateSphere(Graphics& aGfx);
-		void CreateQuad(Graphics& aGfx);
 		void Init(Graphics& aGfx);
 		void Draw(Graphics& aGfx);
 		void ShowControlWindow();
@@ -26,6 +30,10 @@ namespace Kaka
 		SpotLightData& AddSpotLight();
 
 		DirectionalLightData& GetDirectionalLightData() { return directionalLightData; }
+
+	private:
+		void CreateSphere(Graphics& aGfx);
+		void CreateQuad(Graphics& aGfx);
 
 	private:
 		struct ConstantBuffer
