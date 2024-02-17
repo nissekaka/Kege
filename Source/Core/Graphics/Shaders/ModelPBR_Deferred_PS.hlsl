@@ -13,13 +13,13 @@ struct PixelInput
 
 GBufferOutput main(PixelInput aInput)
 {
-    float4 albedo = colourTex.Sample(splr, aInput.texCoord).rgba;
+    float4 albedo = colourTex.Sample(defaultSampler, aInput.texCoord).rgba;
     if (albedo.a < 0.5f)
     {
         discard;
     }
 
-    float3 normal = float3(normalTex.Sample(splr, aInput.texCoord).rg, 1.0f);
+    float3 normal = float3(normalTex.Sample(defaultSampler, aInput.texCoord).rg, 1.0f);
     //float3 normal = normalTex.Sample(defaultSampler, scaledUV).wyz;
     //float ambientOcclusion = normal.z;
     normal = 2.0f * normal - 1.0f;
@@ -33,7 +33,7 @@ GBufferOutput main(PixelInput aInput)
 
     const float3 pixelNormal = normalize(mul(TBN, normal));
 
-    float4 material = materialTex.Sample(splr, aInput.texCoord);
+    float4 material = materialTex.Sample(defaultSampler, aInput.texCoord);
     float ambientOcclusion = material.r;
 
     GBufferOutput output;

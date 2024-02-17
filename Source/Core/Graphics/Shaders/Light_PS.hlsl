@@ -38,7 +38,7 @@ Texture2D colourTex : register (t2);
 Texture2D normalTex : register (t3);
 Texture2D materialTex : register (t4);
 
-SamplerState splr;
+SamplerState defaultSampler;
 
 float4 main(PixelInput aInput) : SV_TARGET
 {
@@ -47,7 +47,7 @@ float4 main(PixelInput aInput) : SV_TARGET
         const float3x3 tanBitanNorm = float3x3(normalize(aInput.viewTan), normalize(aInput.viewitan), normalize(aInput.viewNormal));
 
     	// Sample the normal map texture
-        float3 normal = normalTex.Sample(splr, aInput.texCoord).wyz * 2.0f - 1.0f;
+        float3 normal = normalTex.Sample(defaultSampler, aInput.texCoord).wyz * 2.0f - 1.0f;
         normal.z = sqrt(1 - saturate(normal.x * normal.x + normal.y * normal.y));
         normal = normalize(normal);
 
@@ -64,7 +64,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     const float3 combinedLight = max(0, dot(aInput.viewNormal, -dLightDirection)) * dLightColour + att * max(0.0f, dot(dirToL, aInput.viewNormal)) * pLightColour * pLightIntensity;
 
 	// Use the transformed normal for lighting calculations
-    const float4 textureColour = colourTex.Sample(splr, aInput.texCoord);
+    const float4 textureColour = colourTex.Sample(defaultSampler, aInput.texCoord);
     
     return float4(saturate(combinedLight + ambientLight), 1.0f) * textureColour;
 }

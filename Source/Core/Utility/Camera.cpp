@@ -70,8 +70,15 @@ namespace Kaka
 
 	void Camera::SetDirection(const DirectX::XMFLOAT3 aDirection)
 	{
-		pitch = asin(-aDirection.y);
-		yaw = atan2(aDirection.x, aDirection.z);
+		DirectX::XMVECTOR direction = DirectX::XMLoadFloat3(&aDirection);
+		direction = DirectX::XMVector3Normalize(direction);
+
+		// Needed to normalize this for directional light shadow camera
+		// pitch would be -nan(ind) without this
+		pitch = asin(-DirectX::XMVectorGetY(direction));
+		// Not sure if needed for yaw but it's here for now
+		yaw = atan2(-DirectX::XMVectorGetX(direction), DirectX::XMVectorGetZ(direction));
+		//yaw = atan2(aDirection.x, aDirection.z);
 	}
 
 	DirectX::XMMATRIX Camera::GetView() const

@@ -5,6 +5,11 @@ Texture2D materialTex : register(t3);
 Texture2D ambientOcclusionTex : register(t4);
 Texture2D depthTex : register(t5);
 
+TextureCube daySkyTex : register(t6);
+TextureCube nightSkyTex : register(t7);
+
+SamplerState defaultSampler : register(s0);
+
 struct GBufferOutput
 {
     float4 worldPosition : SV_TARGET0;

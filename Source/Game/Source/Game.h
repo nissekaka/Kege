@@ -154,5 +154,17 @@ namespace Kaka
 		std::mutex modelLoadingMutex;
 		float loadRadius = 100.0f;
 		float cameraMoveSpeed = 10.0f;
+
+		struct ShadowBuffer
+		{
+			BOOL usePCF = true;
+			float offsetScalePCF = 0.004f;
+			int sampleCountPCF = 5;
+			BOOL usePoisson = true;
+			float offsetScalePoissonDisk = 0.0002f;
+			float padding[3];
+		};
+
+		ShadowBuffer shadowBuffer = {};
 	};
 }

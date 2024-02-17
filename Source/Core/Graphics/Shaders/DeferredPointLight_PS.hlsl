@@ -22,11 +22,11 @@ cbuffer PointLightData : register(b2)
 float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 {
     const float2 uv = aInput.position.xy / clientResolution.xy;
-    const float3 worldPosition = worldPositionTex.Sample(splr, uv).rgb;
+    const float3 worldPosition = worldPositionTex.Sample(defaultSampler, uv).rgb;
 
-    const float3 albedo = colourTex.Sample(splr, uv).rgb;
-    const float3 normal = normalize(2.0f * normalTex.Sample(splr, uv).xyz - 1.0f);
-    const float4 material = materialTex.Sample(splr, uv);
+    const float3 albedo = colourTex.Sample(defaultSampler, uv).rgb;
+    const float3 normal = normalize(2.0f * normalTex.Sample(defaultSampler, uv).xyz - 1.0f);
+    const float4 material = materialTex.Sample(defaultSampler, uv);
 
     if (material.a == 0.0f)
     {

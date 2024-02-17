@@ -398,7 +398,8 @@ namespace Kaka
 			deferredLights.SetShadowCamera(directionalLightShadowCamera.GetInverseView() * directionalLightShadowCamera.GetProjection());
 			wnd.Gfx().SetRenderTarget(eRenderTargetType::ShadowMap);
 			wnd.Gfx().SetDepthStencilState(eDepthStencilStates::Normal);
-			wnd.Gfx().SetRasterizerState(eRasterizerStates::FrontfaceCulling);
+			// Need backface culling for Reflective Shadow Maps
+			wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
 
 			// Render everything that casts shadows
 			{
@@ -418,7 +419,7 @@ namespace Kaka
 			wnd.Gfx().gBuffer.ClearTextures(wnd.Gfx().pContext.Get());
 			wnd.Gfx().gBuffer.SetAsActiveTarget(wnd.Gfx().pContext.Get(), wnd.Gfx().gBuffer.GetDepthStencilView());
 
-			wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
+			//wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
 
 			for (Model& model : models)
 			{
@@ -427,6 +428,12 @@ namespace Kaka
 
 			wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, nullptr);
 			wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), 0u);
+
+
+			PixelConstantBuffer<ShadowBuffer> shadowPixelBuffer{wnd.Gfx(), 7u};
+			shadowPixelBuffer.Update(wnd.Gfx(), shadowBuffer);
+			shadowPixelBuffer.Bind(wnd.Gfx());
+
 
 			// Lighting pass
 			wnd.Gfx().BindShadows();
@@ -447,7 +454,7 @@ namespace Kaka
 
 		// Point light flashlight test
 		{
-			PointLightTest(aDeltaTime);
+			//PointLightTest(aDeltaTime);
 		}
 
 
@@ -512,6 +519,17 @@ namespace Kaka
 			}
 			ImGui::End();
 
+			if (ImGui::Begin("Shadows"))
+			{
+				ImGui::Text("PCF");
+				ImGui::Checkbox("Use PCF", (bool*)&shadowBuffer.usePCF);
+				ImGui::DragFloat("Offset scale##OffsetPCF", &shadowBuffer.offsetScalePCF, 0.0001f, 0.0f, 1.0f, "%.6f");
+				ImGui::DragInt("Sample count", &shadowBuffer.sampleCountPCF, 1, 1, 25);
+				ImGui::Text("Poisson");
+				ImGui::Checkbox("Use Poisson", (bool*)&shadowBuffer.usePoisson);
+				ImGui::DragFloat("Offset scale##OffsetPoisson", &shadowBuffer.offsetScalePoissonDisk, 0.0001f, 0.0f, 1.0f, "%.6f");
+			}
+			ImGui::End();
 			//for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
 			//{
 			//	std::string name = "Point Light " + std::to_string(i);
@@ -581,27 +599,27 @@ namespace Kaka
 
 			switch (e->GetKeyCode())
 			{
-				case VK_ESCAPE:
-					if (wnd.CursorEnabled())
-					{
-						wnd.DisableCursor();
-						wnd.mouse.EnableRaw();
-					}
-					else
-					{
-						wnd.EnableCursor();
-						wnd.mouse.DisableRaw();
-					}
-					break;
-				case VK_F1:
-					showImGui = !showImGui;
-					break;
-				case VK_F2:
-					showStatsWindow = !showStatsWindow;
-					break;
-				case VK_F3:
-					drawLightDebug = !drawLightDebug;
-					break;
+			case VK_ESCAPE:
+				if (wnd.CursorEnabled())
+				{
+					wnd.DisableCursor();
+					wnd.mouse.EnableRaw();
+				}
+				else
+				{
+					wnd.EnableCursor();
+					wnd.mouse.DisableRaw();
+				}
+				break;
+			case VK_F1:
+				showImGui = !showImGui;
+				break;
+			case VK_F2:
+				showStatsWindow = !showStatsWindow;
+				break;
+			case VK_F3:
+				drawLightDebug = !drawLightDebug;
+				break;
 			}
 		}
 

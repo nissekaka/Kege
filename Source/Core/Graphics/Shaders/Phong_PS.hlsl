@@ -42,12 +42,12 @@ Texture2D colourTex : register (t0);
 Texture2D normalTex : register(t1);
 Texture2D materialTex : register(t2);
 
-SamplerState splr;
+SamplerState defaultSampler;
 
 
 float4 main(PixelInput aInput) : SV_TARGET
 {
-    const float3 colour = colourTex.Sample(splr, aInput.texCoord).rgb;
+    const float3 colour = colourTex.Sample(defaultSampler, aInput.texCoord).rgb;
     //const float3 groundColour = { 0.9f, 0.7f, 0.1f };
     //const float3 skyColour = { 0.6f, 0.6f, 0.8f };
     const float3 groundColour = { 0.0f, 0.5f, 1.0f };
@@ -56,7 +56,7 @@ float4 main(PixelInput aInput) : SV_TARGET
 	// Sample normal from map if normal mapping enabled
     if (normalMapEnabled)
     {
-        const float3 mappedNormal = MapNormal(normalize(aInput.viewTan), normalize(aInput.viewBitan), aInput.viewNormal, aInput.texCoord, normalTex, splr);
+        const float3 mappedNormal = MapNormal(normalize(aInput.viewTan), normalize(aInput.viewBitan), aInput.viewNormal, aInput.texCoord, normalTex, defaultSampler);
         aInput.viewNormal = lerp(aInput.viewNormal, mappedNormal, 1.0f);
     }
 

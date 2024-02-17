@@ -146,8 +146,8 @@ PixelOutput main(PixelInput aInput)
 	// Day/night cycle
     const float3 lightDir = normalize(dLightDirection);
     const float dotProduct = dot(lightDir, float3(0.0f, 1.0f, 0.0f));
-    const float blendFactor = (dotProduct + 1.0) / 2.0f;
-
+    const float blendFactor = (dotProduct + 1.0) / 2.0f
+;
     // Ambient light
     ambientLight = EvaluateAmbianceDynamicSky(splr, dayTex, nightTex, blendFactor,
     normal, aInput.normal.xyz, toEye, roughness, ambientOcclusion, colour, specular);

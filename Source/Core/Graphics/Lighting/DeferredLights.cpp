@@ -16,7 +16,7 @@ namespace Kaka
 		directionalLightData.lightDirection = {0.6f, PI, -0.8f};
 		directionalLightData.lightColour = {1.0f, 0.8f, 0.6f};
 		directionalLightData.lightIntensity = 0.0f;
-		directionalLightData.ambientLight = 50.0f;
+		directionalLightData.ambientLight = 0.0f;
 
 		CreateQuad(aGfx);
 
@@ -40,18 +40,13 @@ namespace Kaka
 
 	void DeferredLights::Draw(Graphics& aGfx)
 	{
-		// Directional Light
-		PixelConstantBuffer<DirectionalLightData> directionalLightBuffer{aGfx, 1u};
-		directionalLightBuffer.Update(aGfx, directionalLightData);
-		directionalLightBuffer.Bind(aGfx);
-
 		lightVS->Bind(aGfx);
 		inputLayout.Bind(aGfx);
 		topology.Bind(aGfx);
 
 		// Directional Light
 		{
-			ConstantBuffer lightBuffer;
+			ConstantBuffer lightBuffer{};
 			lightBuffer.positionAndRange[0] = 0.0f;
 			lightBuffer.positionAndRange[1] = 0.0f;
 			lightBuffer.positionAndRange[2] = 0.0f;
@@ -61,6 +56,11 @@ namespace Kaka
 			VertexConstantBuffer<ConstantBuffer> vertexLightBuffer{aGfx, 1u};
 			vertexLightBuffer.Update(aGfx, lightBuffer);
 			vertexLightBuffer.Bind(aGfx);
+
+			// Directional Light
+			PixelConstantBuffer<DirectionalLightData> directionalLightBuffer{aGfx, 1u};
+			directionalLightBuffer.Update(aGfx, directionalLightData);
+			directionalLightBuffer.Bind(aGfx);
 
 			quadVertexBuffer.Bind(aGfx);
 			quadIndexBuffer.Bind(aGfx);
