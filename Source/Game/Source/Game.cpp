@@ -24,7 +24,7 @@ namespace Kaka
 		wnd(WINDOW_WIDTH, WINDOW_HEIGHT, L"Kaka")
 	{
 		camera.SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 110, 0.5f, 5000.0f);
-		directionalLightShadowCamera.SetOrthographic(WINDOW_WIDTH / 4.0f, WINDOW_HEIGHT / 4.0f, -500.0f, 500.0f);
+		directionalLightShadowCamera.SetOrthographic(WINDOW_WIDTH / 6.0f, WINDOW_HEIGHT / 6.0f, -100.0f, 100.0f);
 
 		for (int i = 0; i < NUM_POINT_LIGHTS; ++i)
 		{
@@ -77,8 +77,8 @@ namespace Kaka
 		//reflectionPlane.SetPosition({terrain.GetSize() / 2.0f, reflectPlaneHeight, terrain.GetSize() / 2.0f});
 
 		directionalLightShadowCamera.SetPosition({0.0f, 0.0f, 0.0f});
-		camera.SetPosition({0.0f, 0.0f, 0.0f});
-		camera.SetRotationDegrees(34.0f, 114.0f);
+		camera.SetPosition({-11.0f, 28.0f, 26.0f});
+		camera.SetRotationDegrees(29.0f, 138.0f);
 
 		//{
 		//	std::uniform_real_distribution<float> hDist(10.0f, 100.0f);
@@ -152,7 +152,7 @@ namespace Kaka
 		flashLightTest = &deferredLights.AddSpotLight();
 		flashLightTest->position = camera.GetPosition();
 		DirectX::XMStoreFloat3(&flashLightTest->direction, camera.GetForwardVector());
-		flashLightTest->intensity = 500.0f;
+		flashLightTest->intensity = 0.0f;
 		flashLightTest->range = 1000.0f;
 		flashLightTest->innerAngle = 0.1f; // Radians
 		flashLightTest->outerAngle = 0.2f; // Radians

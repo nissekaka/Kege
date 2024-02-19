@@ -157,11 +157,11 @@ namespace Kaka
 
 		struct ShadowBuffer
 		{
-			BOOL usePCF = true;
+			BOOL usePCF = false;
 			float offsetScalePCF = 0.004f;
 			int sampleCountPCF = 5;
 			BOOL usePoisson = true;
-			float offsetScalePoissonDisk = 0.0002f;
+			float offsetScalePoissonDisk = 0.0009f;
 			float padding[3];
 		};
 

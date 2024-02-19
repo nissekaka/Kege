@@ -201,12 +201,12 @@ namespace Kaka
 		struct DownSampleBuffer
 		{
 			float bloomBlending = 0.5f;
-			float bloomThreshold = 0.25f;
+			float bloomThreshold = 0.1f;
 			int uvScale = 2;
 			float padding;
 		} bb;
 
 		int bloomDivideFactor = 2;
-		bool useBloom = false;
+		bool useBloom = true;
 	};
 }
