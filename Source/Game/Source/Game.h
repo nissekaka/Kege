@@ -123,7 +123,7 @@ namespace Kaka
 			DirectX::XMMATRIX worldToClipMatrix;
 			DirectX::XMMATRIX view;
 			DirectX::XMMATRIX projection;
-			DirectX::XMMATRIX projectionInverse;
+			DirectX::XMMATRIX clipToWorldMatrix;
 			DirectX::XMMATRIX viewInverse;
 			DirectX::XMFLOAT4 cameraPosition;
 			DirectX::XMFLOAT2 resolution;

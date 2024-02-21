@@ -29,14 +29,8 @@ namespace Kaka
 		const DirectX::XMMATRIX objectToWorld = parent.GetTransform();
 		DirectX::XMMATRIX objectToClip = objectToWorld * aGfx.GetCameraInverseView();
 		objectToClip = objectToClip * aGfx.GetProjection();
-		return {objectToWorld, objectToClip};
 
-		//		const DirectX::XMMATRIX modelView = parent.GetTransform() * aGfx.GetCamera();
-		//return {
-		//	DirectX::XMMatrixTranspose(parent.GetTransform()),
-		//	DirectX::XMMatrixTranspose(modelView),
-		//	DirectX::XMMatrixTranspose(modelView * aGfx.GetProjection())
-		//};
+		return {objectToWorld, objectToClip};
 	}
 
 	std::unique_ptr<VertexConstantBuffer<TransformConstantBuffer::Transforms>> TransformConstantBuffer::pVertexCBuf;

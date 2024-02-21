@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "GBuffer.h"
+#include "RSMBuffer.h"
 #include "Shaders/ShaderFactory.h"
 
 
@@ -70,6 +71,7 @@ namespace Kaka
 	class Graphics
 	{
 		friend class GBuffer;
+		friend class RSMBuffer;
 		friend class DeferredLights;
 		friend class Model;
 		friend class Bindable;
@@ -177,8 +179,8 @@ namespace Kaka
 
 		//RenderTarget worldPosition;
 
-		RenderTarget shadowMap;
-		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pShadowDepth;
+		//RenderTarget shadowMap;
+		//Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pShadowDepth;
 
 		Microsoft::WRL::ComPtr<ID3D11BlendState> pBlendStates[(int)eBlendStates::Count];
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilState> pDepthStencilStates[(int)eDepthStencilStates::Count];
@@ -186,7 +188,7 @@ namespace Kaka
 
 		Microsoft::WRL::ComPtr<ID3D11SamplerState> pSamplerState;
 		Microsoft::WRL::ComPtr<ID3D11SamplerState> pShadowSampler;
-		Microsoft::WRL::ComPtr<ID3D11SamplerState> pShadowCompSampler;
+		//Microsoft::WRL::ComPtr<ID3D11SamplerState> pShadowCompSampler;
 		Microsoft::WRL::ComPtr<ID3D11SamplerState> pVFXSampler;
 
 		UINT width;
@@ -196,6 +198,7 @@ namespace Kaka
 		VertexShader* vertexShaderOverride = nullptr;
 
 		GBuffer gBuffer;
+		RSMBuffer rsmBuffer;
 
 	private:
 		struct DownSampleBuffer

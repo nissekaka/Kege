@@ -86,7 +86,7 @@ namespace Kaka
 		};
 
 	private:
-		CubeTexture dayTexture{6u};
-		CubeTexture nightTexture{7u};
+		CubeTexture dayTexture{12u};
+		CubeTexture nightTexture{13u};
 	};
 }

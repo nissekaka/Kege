@@ -25,20 +25,20 @@ namespace Kaka
 		{
 			switch (aTexture)
 			{
-			case GBufferTexture::WorldPosition:
-				return 2u;
-			case GBufferTexture::Albedo:
-				return 3u;
-			case GBufferTexture::Normal:
-				return 4u;
-			case GBufferTexture::Material:
-				return 5u;
-			case GBufferTexture::AmbientOcclusionAndCustom:
-				return 6u;
-			case GBufferTexture::Depth:
-				return 7u;
-			default:
-				return 0;
+				case GBufferTexture::WorldPosition:
+					return 2u;
+				case GBufferTexture::Albedo:
+					return 3u;
+				case GBufferTexture::Normal:
+					return 4u;
+				case GBufferTexture::Material:
+					return 5u;
+				case GBufferTexture::AmbientOcclusionAndCustom:
+					return 6u;
+				case GBufferTexture::Depth:
+					return 7u;
+				default:
+					return 0;
 			}
 		}
 
@@ -73,7 +73,7 @@ namespace Kaka
 		std::array<Microsoft::WRL::ComPtr<ID3D11Texture2D>, static_cast<size_t>(GBufferTexture::Count)> textures;
 		std::array<Microsoft::WRL::ComPtr<ID3D11RenderTargetView>, static_cast<size_t>(GBufferTexture::Count)> renderTargetViews;
 		std::array<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>, static_cast<size_t>(GBufferTexture::Count)> shaderResourceViews;
-		D3D11_VIEWPORT viewport;
+		//D3D11_VIEWPORT viewport;
 
 		// Depth Stencil
 		Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencilTexture;

@@ -136,6 +136,7 @@ namespace Kaka
 		HRESULT result;
 
 		gBuffer = GBuffer::Create(*this, width, height);
+		rsmBuffer = RSMBuffer::Create(*this, width, height);
 
 		// Reflection texture
 		{
@@ -221,131 +222,72 @@ namespace Kaka
 			}
 		}
 
-		// Shadow
-		{
-			D3D11_TEXTURE2D_DESC desc = {0};
-			desc.Width = width;
-			desc.Height = height;
-			desc.MipLevels = 1;
-			desc.ArraySize = 1;
-			desc.Format = DXGI_FORMAT_R32_TYPELESS;
-			desc.SampleDesc.Count = 1;
-			desc.SampleDesc.Quality = 0;
-			desc.Usage = D3D11_USAGE_DEFAULT;
-			desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-			desc.CPUAccessFlags = 0;
-			desc.MiscFlags = 0;
-
-			ID3D11Texture2D* texture;
-			result = pDevice->CreateTexture2D(&desc, nullptr, &texture);
-			assert(SUCCEEDED(result));
-
-			ID3D11DepthStencilView* DSV;
-			D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
-
-			dsvDesc.Flags = 0;
-			dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
-			dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-			result = pDevice->CreateDepthStencilView(texture, &dsvDesc, &DSV);
-			assert(SUCCEEDED(result));
-
-			pShadowDepth = DSV;
-			DSV->Release();
-
-			ID3D11ShaderResourceView* SRV;
-			D3D11_SHADER_RESOURCE_VIEW_DESC srDesc{};
-			srDesc.Format = DXGI_FORMAT_R32_FLOAT;
-			srDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-			srDesc.Texture2D.MostDetailedMip = 0;
-			srDesc.Texture2D.MipLevels = UINT_MAX;
-			result = pDevice->CreateShaderResourceView(texture, &srDesc, &SRV);
-			assert(SUCCEEDED(result));
-			shadowMap.pResource = SRV;
-			SRV->Release();
-
-			D3D11_SAMPLER_DESC samplerDesc = CD3D11_SAMPLER_DESC{CD3D11_DEFAULT{}};
-			samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-			samplerDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
-
-			pDevice->CreateSamplerState(&samplerDesc, &pShadowSampler);
-
-			D3D11_SAMPLER_DESC samplerCompDesc = CD3D11_SAMPLER_DESC{CD3D11_DEFAULT{}};
-			samplerCompDesc.Filter = D3D11_FILTER_COMPARISON_ANISOTROPIC;
-			samplerCompDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-			samplerCompDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-			samplerCompDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-			samplerCompDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
-
-			pDevice->CreateSamplerState(&samplerCompDesc, &pShadowCompSampler);
-		}
-
-		//// World Position
+		// TODO Move into RSM class
+		//// Shadow
 		//{
-		//	ID3D11Texture2D* worldPosTexture;
 		//	D3D11_TEXTURE2D_DESC desc = {0};
 		//	desc.Width = width;
 		//	desc.Height = height;
 		//	desc.MipLevels = 1;
 		//	desc.ArraySize = 1;
-		//	desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+		//	desc.Format = DXGI_FORMAT_R32_TYPELESS;
 		//	desc.SampleDesc.Count = 1;
 		//	desc.SampleDesc.Quality = 0;
 		//	desc.Usage = D3D11_USAGE_DEFAULT;
-		//	desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+		//	desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 		//	desc.CPUAccessFlags = 0;
 		//	desc.MiscFlags = 0;
-		//	result = pDevice->CreateTexture2D(&desc, nullptr, &worldPosTexture);
-		//	assert(SUCCEEDED(result));
-		//	result = pDevice->CreateShaderResourceView(worldPosTexture, nullptr, &worldPosition.pResource);
-		//	assert(SUCCEEDED(result));
-		//	result = pDevice->CreateRenderTargetView(worldPosTexture, nullptr, &worldPosition.pTarget);
+
+		//	ID3D11Texture2D* texture;
+		//	result = pDevice->CreateTexture2D(&desc, nullptr, &texture);
 		//	assert(SUCCEEDED(result));
 
-		//	worldPosTexture->Release();
+		//	ID3D11DepthStencilView* DSV;
+		//	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
+
+		//	dsvDesc.Flags = 0;
+		//	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+		//	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+		//	result = pDevice->CreateDepthStencilView(texture, &dsvDesc, &DSV);
+		//	assert(SUCCEEDED(result));
+
+		//	pShadowDepth = DSV;
+		//	DSV->Release();
+
+		//	ID3D11ShaderResourceView* SRV;
+		//	D3D11_SHADER_RESOURCE_VIEW_DESC srDesc{};
+		//	srDesc.Format = DXGI_FORMAT_R32_FLOAT;
+		//	srDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		//	srDesc.Texture2D.MostDetailedMip = 0;
+		//	srDesc.Texture2D.MipLevels = UINT_MAX;
+		//	result = pDevice->CreateShaderResourceView(texture, &srDesc, &SRV);
+		//	assert(SUCCEEDED(result));
+		//	shadowMap.pResource = SRV;
+		//	SRV->Release();
+
+		D3D11_SAMPLER_DESC samplerDesc = CD3D11_SAMPLER_DESC{CD3D11_DEFAULT{}};
+		samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
+
+		pDevice->CreateSamplerState(&samplerDesc, &pShadowSampler);
+
+		//	D3D11_SAMPLER_DESC samplerCompDesc = CD3D11_SAMPLER_DESC{CD3D11_DEFAULT{}};
+		//	samplerCompDesc.Filter = D3D11_FILTER_COMPARISON_ANISOTROPIC;
+		//	samplerCompDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		//	samplerCompDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		//	samplerCompDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+		//	samplerCompDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
+
+		//	pDevice->CreateSamplerState(&samplerCompDesc, &pShadowCompSampler);
 		//}
 
 		// TODO bools
 		CreateBlendStates();
 		CreateDepthStencilStates();
 		CreateRasterizerStates();
-
-		//// Blend state
-		//D3D11_BLEND_DESC omDesc = {0};
-		//omDesc.RenderTarget[0].BlendEnable = true;
-		//omDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-		//omDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-		//omDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-		//omDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-		//omDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-		//omDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-		//omDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-		//result = pDevice->CreateBlendState(&omDesc, &pBlend);
-		//assert(SUCCEEDED(result));
-
-		//omDesc.RenderTarget[0].BlendEnable = true;
-		//omDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-		//omDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-		//omDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-		//omDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
-		//omDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
-		//omDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-		//omDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-		//result = pDevice->CreateBlendState(&omDesc, &pBlendVfx);
-		//assert(SUCCEEDED(result));
-
-		//omDesc.RenderTarget[0].BlendEnable = true;
-		//omDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-		//omDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
-		//omDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-		//omDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-		//omDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
-		//omDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_MAX;
-		//omDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-		//result = pDevice->CreateBlendState(&omDesc, &pBlendAdd);
-		//assert(SUCCEEDED(result));
 
 		// Init imgui d3d impl
 		ImGui_ImplDX11_Init(pDevice.Get(), pContext.Get());
@@ -385,13 +327,6 @@ namespace Kaka
 		constexpr float colour[] = KAKA_BG_COLOUR;
 		pContext->ClearRenderTargetView(pDefaultTarget.Get(), colour);
 		pContext->ClearRenderTargetView(postProcessing.pTarget.Get(), colour);
-		//pContext->ClearRenderTargetView(worldPosition.pTarget.Get(), colour);
-		//pContext->ClearRenderTargetView(renderWaterReflect.pTarget.Get(), colour);
-		//pContext->ClearRenderTargetView(postProcessing.pTarget.Get(), colour);
-		//for (int i = 0; i < bloomSteps; ++i)
-		//{
-		//	pContext->ClearRenderTargetView(bloomDownscale[i].pTarget.Get(), colour);
-		//}
 		pContext->ClearDepthStencilView(pDepth.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0u);
 	}
 
@@ -424,11 +359,6 @@ namespace Kaka
 		pContext->DrawIndexedInstanced(aCount, aInstanceCount, 0u, 0u, 0u);
 	}
 
-	//void Graphics::SetProjection(DirectX::FXMMATRIX& aProjection)
-	//{
-	//	camera->projection = aProjection;
-	//}
-
 	DirectX::XMMATRIX Graphics::GetProjection() const
 	{
 		return camera->GetProjection();
@@ -455,29 +385,29 @@ namespace Kaka
 
 		switch (aRenderTargetType)
 		{
-		case eRenderTargetType::None:
+			case eRenderTargetType::None:
 			{
 				pContext->OMSetRenderTargets(0u, nullptr, aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::Default:
+			case eRenderTargetType::Default:
 			{
 				pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::WaterReflect:
+			case eRenderTargetType::WaterReflect:
 			{
 				pContext->OMSetRenderTargets(1u, renderWaterReflect.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::PostProcessing:
+			case eRenderTargetType::PostProcessing:
 			{
 				pContext->OMSetRenderTargets(1u, postProcessing.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::ShadowMap:
+			case eRenderTargetType::ShadowMap:
 			{
-				pContext->OMSetRenderTargets(0u, nullptr, aUseDepth ? pShadowDepth.Get() : NULL);
+				pContext->OMSetRenderTargets(0u, nullptr, aUseDepth ? rsmBuffer.GetDepthStencilView() : NULL);
 			}
 			break;
 		}
@@ -489,29 +419,29 @@ namespace Kaka
 
 		switch (aRenderTargetType)
 		{
-		case eRenderTargetType::None:
+			case eRenderTargetType::None:
 			{
 				pContext->OMSetRenderTargets(0u, nullptr, aDepth);
 			}
 			break;
-		case eRenderTargetType::Default:
+			case eRenderTargetType::Default:
 			{
 				pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::WaterReflect:
+			case eRenderTargetType::WaterReflect:
 			{
 				pContext->OMSetRenderTargets(1u, renderWaterReflect.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::PostProcessing:
+			case eRenderTargetType::PostProcessing:
 			{
 				pContext->OMSetRenderTargets(1u, postProcessing.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::ShadowMap:
+			case eRenderTargetType::ShadowMap:
 			{
-				pContext->OMSetRenderTargets(0u, nullptr, pShadowDepth.Get());
+				pContext->OMSetRenderTargets(0u, nullptr, rsmBuffer.GetDepthStencilView());
 			}
 			break;
 		}
@@ -602,22 +532,22 @@ namespace Kaka
 	{
 		switch (aBlendState)
 		{
-		case eBlendStates::Disabled:
+			case eBlendStates::Disabled:
 			{
 				pContext->OMSetBlendState(pBlendStates[(int)eBlendStates::Disabled].Get(), nullptr, 0x0f);
 			}
 			break;
-		case eBlendStates::Alpha:
+			case eBlendStates::Alpha:
 			{
 				pContext->OMSetBlendState(pBlendStates[(int)eBlendStates::Alpha].Get(), nullptr, 0x0f);
 			}
 			break;
-		case eBlendStates::VFX:
+			case eBlendStates::VFX:
 			{
 				pContext->OMSetBlendState(pBlendStates[(int)eBlendStates::VFX].Get(), nullptr, 0x0f);
 			}
 			break;
-		case eBlendStates::Additive:
+			case eBlendStates::Additive:
 			{
 				pContext->OMSetBlendState(pBlendStates[(int)eBlendStates::Additive].Get(), nullptr, 0x0f);
 			}
@@ -629,27 +559,27 @@ namespace Kaka
 	{
 		switch (aDepthStencilState)
 		{
-		case eDepthStencilStates::Normal:
+			case eDepthStencilStates::Normal:
 			{
 				pContext->OMSetDepthStencilState(pDepthStencilStates[(int)eDepthStencilStates::Normal].Get(), 0u);
 			}
 			break;
-		case eDepthStencilStates::ReadOnlyGreater:
+			case eDepthStencilStates::ReadOnlyGreater:
 			{
 				pContext->OMSetDepthStencilState(pDepthStencilStates[(int)eDepthStencilStates::ReadOnlyGreater].Get(), 0u);
 			}
 			break;
-		case eDepthStencilStates::ReadOnlyLessEqual:
+			case eDepthStencilStates::ReadOnlyLessEqual:
 			{
 				pContext->OMSetDepthStencilState(pDepthStencilStates[(int)eDepthStencilStates::ReadOnlyLessEqual].Get(), 0u);
 			}
 			break;
-		case eDepthStencilStates::ReadOnlyEmpty:
+			case eDepthStencilStates::ReadOnlyEmpty:
 			{
 				pContext->OMSetDepthStencilState(pDepthStencilStates[(int)eDepthStencilStates::ReadOnlyEmpty].Get(), 0u);
 			}
 			break;
-		default: ;
+			default: ;
 		}
 	}
 
@@ -657,22 +587,22 @@ namespace Kaka
 	{
 		switch (aRasterizerState)
 		{
-		case eRasterizerStates::BackfaceCulling:
+			case eRasterizerStates::BackfaceCulling:
 			{
 				pContext->RSSetState(pRasterizerStates[(int)eRasterizerStates::BackfaceCulling].Get());
 			}
 			break;
-		case eRasterizerStates::FrontfaceCulling:
+			case eRasterizerStates::FrontfaceCulling:
 			{
 				pContext->RSSetState(pRasterizerStates[(int)eRasterizerStates::FrontfaceCulling].Get());
 			}
 			break;
-		case eRasterizerStates::NoCulling:
+			case eRasterizerStates::NoCulling:
 			{
 				pContext->RSSetState(pRasterizerStates[(int)eRasterizerStates::NoCulling].Get());
 			}
 			break;
-		default: ;
+			default: ;
 		}
 	}
 
@@ -913,7 +843,7 @@ namespace Kaka
 
 	void Graphics::StartShadows(Camera& aCamera, const DirectX::XMFLOAT3 aLightDirection)
 	{
-		pContext->ClearDepthStencilView(pShadowDepth.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+		pContext->ClearDepthStencilView(rsmBuffer.GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 		SetCamera(aCamera);
 		aCamera.SetDirection(aLightDirection);
@@ -933,9 +863,9 @@ namespace Kaka
 	void Graphics::BindShadows()
 	{
 		pContext->PSSetSamplers(1u, 1u, pShadowSampler.GetAddressOf());
-		pContext->PSSetSamplers(2u, 1u, pShadowCompSampler.GetAddressOf());
+		//pContext->PSSetSamplers(2u, 1u, pShadowCompSampler.GetAddressOf());
 
-		pContext->PSSetShaderResources(14u, 1u, shadowMap.pResource.GetAddressOf());
+		pContext->PSSetShaderResources(14u, 1u, rsmBuffer.GetDepthShaderResourceView());
 	}
 
 	void Graphics::UnbindShadows()

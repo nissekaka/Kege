@@ -183,41 +183,6 @@ namespace Kaka
 			vertexBuffer.Bind(aGfx);
 			indexBuffer.Bind(aGfx);
 
-			switch (shaderType)
-			{
-				case eShaderType::PBR:
-				{
-					struct PSMaterialConstant
-					{
-						BOOL normalMapEnabled = FALSE;
-						BOOL materialEnabled = FALSE;
-						unsigned int packedNearbyPointLightDataA = 0u;
-						unsigned int packedNearbyPointLightDataB = 0u;
-						unsigned int packedNearbySpotLightDataA = 0u;
-						unsigned int packedNearbySpotLightDataB = 0u;
-						float padding[2];
-					} pmc;
-					pmc.normalMapEnabled = modelData.texture->HasNormalMap();
-					pmc.materialEnabled = modelData.texture->HasMaterial();
-					for (int i = 0; i < MAX_LIGHTS; ++i)
-					{
-						if (i < 32)
-						{
-							pmc.packedNearbyPointLightDataA |= (nearbyPointLights[i] ? (1u << i) : 0u);
-							pmc.packedNearbySpotLightDataA |= (nearbySpotLights[i] ? (1u << i) : 0u);
-						}
-						else
-						{
-							pmc.packedNearbyPointLightDataA |= (nearbyPointLights[i - 32] ? (1u << (i - 32)) : 0u);
-							pmc.packedNearbySpotLightDataA |= (nearbySpotLights[i - 32] ? (1u << (i - 32)) : 0u);
-						}
-					}
-
-					PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-					psConstantBuffer.Bind(aGfx);
-				}
-			}
-
 			std::vector<unsigned short> indices;
 			indices = mesh.indices;
 
@@ -268,35 +233,6 @@ namespace Kaka
 			{
 				case eShaderType::AnimPBR:
 				{
-					struct PSMaterialConstant
-					{
-						BOOL normalMapEnabled = FALSE;
-						BOOL materialEnabled = FALSE;
-						unsigned int packedNearbyPointLightDataA = 0u;
-						unsigned int packedNearbyPointLightDataB = 0u;
-						unsigned int packedNearbySpotLightDataA = 0u;
-						unsigned int packedNearbySpotLightDataB = 0u;
-						float padding[2];
-					} pmc;
-					pmc.normalMapEnabled = animatedModelData.texture->HasNormalMap();
-					pmc.materialEnabled = animatedModelData.texture->HasMaterial();
-					for (int i = 0; i < MAX_LIGHTS; ++i)
-					{
-						if (i < 32)
-						{
-							pmc.packedNearbyPointLightDataA |= (nearbyPointLights[i] ? (1u << i) : 0u);
-							pmc.packedNearbySpotLightDataA |= (nearbySpotLights[i] ? (1u << i) : 0u);
-						}
-						else
-						{
-							pmc.packedNearbyPointLightDataA |= (nearbyPointLights[i - 32] ? (1u << (i - 32)) : 0u);
-							pmc.packedNearbySpotLightDataA |= (nearbySpotLights[i - 32] ? (1u << (i - 32)) : 0u);
-						}
-					}
-
-					PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-					psConstantBuffer.Bind(aGfx);
-
 					// Bones
 					struct VSBoneConstant
 					{

@@ -24,7 +24,7 @@ namespace Kaka
 		wnd(WINDOW_WIDTH, WINDOW_HEIGHT, L"Kaka")
 	{
 		camera.SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 110, 0.5f, 5000.0f);
-		directionalLightShadowCamera.SetOrthographic(WINDOW_WIDTH / 6.0f, WINDOW_HEIGHT / 6.0f, -100.0f, 100.0f);
+		directionalLightShadowCamera.SetOrthographic(WINDOW_WIDTH / 8.0f, WINDOW_HEIGHT / 8.0f, -100.0f, 100.0f);
 
 		for (int i = 0; i < NUM_POINT_LIGHTS; ++i)
 		{
@@ -374,11 +374,15 @@ namespace Kaka
 			flashLightTest2->colour = flashLightTest->colour;
 		}
 
+
+		//worldToClip = aGfx.GetCameraInverseView() * aGfx.GetProjection();
+		//clipToWorld = inverse(worldToClip)
+
 		commonBuffer.worldToClipMatrix = camera.GetInverseView() * camera.GetProjection();
 		commonBuffer.view = camera.GetView();
 		commonBuffer.projection = camera.GetProjection();
 		commonBuffer.viewInverse = camera.GetInverseView();
-		commonBuffer.projectionInverse = DirectX::XMMatrixInverse(nullptr, camera.GetProjection());
+		commonBuffer.clipToWorldMatrix = DirectX::XMMatrixInverse(nullptr, commonBuffer.worldToClipMatrix);
 		commonBuffer.cameraPosition = {camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z, 0.0f};
 		commonBuffer.resolution = wnd.Gfx().GetCurrentResolution();
 		commonBuffer.currentTime = timer.GetTotalTime();
@@ -391,15 +395,37 @@ namespace Kaka
 		vcb.Update(wnd.Gfx(), commonBuffer);
 		vcb.Bind(wnd.Gfx());
 
+		skyboxAngle.y += skyboxSpeed * aDeltaTime;
+		skybox.Rotate(skyboxAngle);
 
+		// TODO This needs to be done per light
 		// Shadow map pass -- BEGIN
 		{
 			wnd.Gfx().StartShadows(directionalLightShadowCamera, deferredLights.GetDirectionalLightData().lightDirection);
 			deferredLights.SetShadowCamera(directionalLightShadowCamera.GetInverseView() * directionalLightShadowCamera.GetProjection());
-			wnd.Gfx().SetRenderTarget(eRenderTargetType::ShadowMap);
+			// TODO Currently only works for one directional light
+
+			wnd.Gfx().rsmBuffer.ClearTextures(wnd.Gfx().pContext.Get());
+			wnd.Gfx().rsmBuffer.SetAsActiveTarget(wnd.Gfx().pContext.Get(), wnd.Gfx().rsmBuffer.GetDepthStencilView());
+
+
 			wnd.Gfx().SetDepthStencilState(eDepthStencilStates::Normal);
 			// Need backface culling for Reflective Shadow Maps
 			wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
+
+			struct RSMLightData
+			{
+				float lightIntensity;
+				float falloff;
+				BOOL isDirectionalLight;
+				float padding;
+			} rsmLightData;
+			rsmLightData.lightIntensity = deferredLights.GetDirectionalLightData().lightIntensity;
+			rsmLightData.isDirectionalLight = TRUE;
+
+			PixelConstantBuffer<RSMLightData> rsmLightDataBuffer{wnd.Gfx(), 0u};
+			rsmLightDataBuffer.Update(wnd.Gfx(), rsmLightData);
+			rsmLightDataBuffer.Bind(wnd.Gfx());
 
 			// Render everything that casts shadows
 			{
@@ -454,9 +480,8 @@ namespace Kaka
 
 		// Point light flashlight test
 		{
-			//PointLightTest(aDeltaTime);
+			PointLightTest(aDeltaTime);
 		}
-
 
 		// ImGui windows
 		if (showImGui)
@@ -561,9 +586,22 @@ namespace Kaka
 				ImGui::Image(wnd.Gfx().gBuffer.GetShaderResourceViews()[3], ImVec2(512, 288));
 				ImGui::Text("Depth");
 				ImGui::Image(wnd.Gfx().gBuffer.GetShaderResourceViews()[4], ImVec2(512, 288));
-				// Show shadow map in new imgui viewport
-				ImGui::Text("Shadow map");
-				ImGui::Image(wnd.Gfx().shadowMap.pResource.Get(), ImVec2(512, 288));
+			}
+			ImGui::End();
+
+			// Draw all resources in RSMBuffer
+			if (ImGui::Begin("RSMBuffer"))
+			{
+				ImGui::Columns(2, nullptr, false);
+				ImGui::Text("World Position");
+				ImGui::Image(wnd.Gfx().rsmBuffer.GetShaderResourceViews()[0], ImVec2(512, 288));
+				ImGui::Text("Normal");
+				ImGui::Image(wnd.Gfx().rsmBuffer.GetShaderResourceViews()[1], ImVec2(512, 288));
+				ImGui::NextColumn();
+				ImGui::Text("Flux");
+				ImGui::Image(wnd.Gfx().rsmBuffer.GetShaderResourceViews()[2], ImVec2(512, 288));
+				ImGui::Text("Depth");
+				ImGui::Image(*wnd.Gfx().rsmBuffer.GetDepthShaderResourceView(), ImVec2(512, 288));
 			}
 			ImGui::End();
 
@@ -599,27 +637,27 @@ namespace Kaka
 
 			switch (e->GetKeyCode())
 			{
-			case VK_ESCAPE:
-				if (wnd.CursorEnabled())
-				{
-					wnd.DisableCursor();
-					wnd.mouse.EnableRaw();
-				}
-				else
-				{
-					wnd.EnableCursor();
-					wnd.mouse.DisableRaw();
-				}
-				break;
-			case VK_F1:
-				showImGui = !showImGui;
-				break;
-			case VK_F2:
-				showStatsWindow = !showStatsWindow;
-				break;
-			case VK_F3:
-				drawLightDebug = !drawLightDebug;
-				break;
+				case VK_ESCAPE:
+					if (wnd.CursorEnabled())
+					{
+						wnd.DisableCursor();
+						wnd.mouse.EnableRaw();
+					}
+					else
+					{
+						wnd.EnableCursor();
+						wnd.mouse.DisableRaw();
+					}
+					break;
+				case VK_F1:
+					showImGui = !showImGui;
+					break;
+				case VK_F2:
+					showStatsWindow = !showStatsWindow;
+					break;
+				case VK_F3:
+					drawLightDebug = !drawLightDebug;
+					break;
 			}
 		}
 
