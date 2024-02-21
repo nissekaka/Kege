@@ -6,6 +6,7 @@ struct PixelInput
     float4 position : SV_POSITION;
     float2 texCoord : TEXCOORD;
     float3 normal : NORMAL;
+    float3 worldNormal : WORLDNORMAL;
     float3 tangent : TANGENT;
     float3 bitan : BITANGENT;
 };
@@ -25,18 +26,18 @@ RSMBufferOutput main(PixelInput aInput)
         discard;
     }
 
-    float3 normal = float3(normalTex.Sample(defaultSampler, aInput.texCoord).rg, 1.0f);
+    //float3 normal = float3(normalTex.Sample(defaultSampler, aInput.texCoord).rg, 1.0f);
 
-    normal = 2.0f * normal - 1.0f;
-    normal.z = sqrt(1 - saturate(normal.x * normal.x + normal.y * normal.y));
-    normal = normalize(normal);
+    //normal = 2.0f * normal - 1.0f;
+    //normal.z = sqrt(1 - saturate(normal.x * normal.x + normal.y * normal.y));
+    //normal = normalize(normal);
 
-    float3x3 TBN = float3x3(normalize(aInput.tangent.xyz),
-                            normalize(-aInput.bitan.xyz),
-                            normalize(aInput.normal.xyz));
-    TBN = transpose(TBN);
+    //float3x3 TBN = float3x3(normalize(aInput.tangent.xyz),
+    //                        normalize(-aInput.bitan.xyz),
+    //                        normalize(aInput.normal.xyz));
+    //TBN = transpose(TBN);
 
-    const float3 pixelNormal = normalize(mul(TBN, normal));
+    //const float3 pixelNormal = normalize(mul(TBN, normal));
 
     RSMBufferOutput output;
 
@@ -49,7 +50,8 @@ RSMBufferOutput main(PixelInput aInput)
     {
         output.flux = float4(albedo.rgb, 1.0f) * lightIntensity * falloff;
     }
-    output.normal = float4(0.5f + 0.5f * pixelNormal, 1.0f);
+
+    output.normal = float4(aInput.worldNormal, 1.0f);
 
     return output;
 }

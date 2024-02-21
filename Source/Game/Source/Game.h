@@ -166,5 +166,15 @@ namespace Kaka
 		};
 
 		ShadowBuffer shadowBuffer = {};
+
+		struct RSMBuffer
+		{
+			BOOL useRSM = true;
+			BOOL onlyRSM = false;
+			float rMax = 0.05f; // Maximum sampling radius.
+			float rsmIntensity = 20.0f;
+		};
+
+		RSMBuffer rsmBuffer = {};
 	};
 }

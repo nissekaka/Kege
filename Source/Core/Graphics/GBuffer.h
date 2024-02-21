@@ -17,7 +17,7 @@ namespace Kaka
 			Normal,
 			Material,
 			AmbientOcclusionAndCustom,
-			Depth,
+			RSM,
 			Count
 		};
 
@@ -35,7 +35,7 @@ namespace Kaka
 					return 5u;
 				case GBufferTexture::AmbientOcclusionAndCustom:
 					return 6u;
-				case GBufferTexture::Depth:
+				case GBufferTexture::RSM:
 					return 7u;
 				default:
 					return 0;

@@ -5,6 +5,7 @@
 #include <External/include/imgui/imgui_impl_win32.h>
 #include <complex>
 
+#include "GraphicsConstants.h"
 #include "Drawable/ModelLoader.h"
 #include "Shaders/ShaderFactory.h"
 
@@ -222,67 +223,17 @@ namespace Kaka
 			}
 		}
 
-		// TODO Move into RSM class
-		//// Shadow
-		//{
-		//	D3D11_TEXTURE2D_DESC desc = {0};
-		//	desc.Width = width;
-		//	desc.Height = height;
-		//	desc.MipLevels = 1;
-		//	desc.ArraySize = 1;
-		//	desc.Format = DXGI_FORMAT_R32_TYPELESS;
-		//	desc.SampleDesc.Count = 1;
-		//	desc.SampleDesc.Quality = 0;
-		//	desc.Usage = D3D11_USAGE_DEFAULT;
-		//	desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-		//	desc.CPUAccessFlags = 0;
-		//	desc.MiscFlags = 0;
+		// Shadow
+		{
+			D3D11_SAMPLER_DESC samplerDesc = CD3D11_SAMPLER_DESC{CD3D11_DEFAULT{}};
+			samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
 
-		//	ID3D11Texture2D* texture;
-		//	result = pDevice->CreateTexture2D(&desc, nullptr, &texture);
-		//	assert(SUCCEEDED(result));
-
-		//	ID3D11DepthStencilView* DSV;
-		//	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
-
-		//	dsvDesc.Flags = 0;
-		//	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
-		//	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-		//	result = pDevice->CreateDepthStencilView(texture, &dsvDesc, &DSV);
-		//	assert(SUCCEEDED(result));
-
-		//	pShadowDepth = DSV;
-		//	DSV->Release();
-
-		//	ID3D11ShaderResourceView* SRV;
-		//	D3D11_SHADER_RESOURCE_VIEW_DESC srDesc{};
-		//	srDesc.Format = DXGI_FORMAT_R32_FLOAT;
-		//	srDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-		//	srDesc.Texture2D.MostDetailedMip = 0;
-		//	srDesc.Texture2D.MipLevels = UINT_MAX;
-		//	result = pDevice->CreateShaderResourceView(texture, &srDesc, &SRV);
-		//	assert(SUCCEEDED(result));
-		//	shadowMap.pResource = SRV;
-		//	SRV->Release();
-
-		D3D11_SAMPLER_DESC samplerDesc = CD3D11_SAMPLER_DESC{CD3D11_DEFAULT{}};
-		samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-		samplerDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
-
-		pDevice->CreateSamplerState(&samplerDesc, &pShadowSampler);
-
-		//	D3D11_SAMPLER_DESC samplerCompDesc = CD3D11_SAMPLER_DESC{CD3D11_DEFAULT{}};
-		//	samplerCompDesc.Filter = D3D11_FILTER_COMPARISON_ANISOTROPIC;
-		//	samplerCompDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-		//	samplerCompDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-		//	samplerCompDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-		//	samplerCompDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
-
-		//	pDevice->CreateSamplerState(&samplerCompDesc, &pShadowCompSampler);
-		//}
+			pDevice->CreateSamplerState(&samplerDesc, &pShadowSampler);
+		}
 
 		// TODO bools
 		CreateBlendStates();
@@ -851,7 +802,7 @@ namespace Kaka
 		SetPixelShaderOverride(L"Shaders\\Shadow_PS.cso");
 
 		ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
-		pContext->PSSetShaderResources(14u, 1u, nullSRVs);
+		pContext->PSSetShaderResources(PS_TEXTURE_SLOT_SHADOW_MAP, 1u, nullSRVs);
 	}
 
 	void Graphics::ResetShadows(Camera& aCamera)
@@ -865,13 +816,13 @@ namespace Kaka
 		pContext->PSSetSamplers(1u, 1u, pShadowSampler.GetAddressOf());
 		//pContext->PSSetSamplers(2u, 1u, pShadowCompSampler.GetAddressOf());
 
-		pContext->PSSetShaderResources(14u, 1u, rsmBuffer.GetDepthShaderResourceView());
+		pContext->PSSetShaderResources(PS_TEXTURE_SLOT_SHADOW_MAP, 1u, rsmBuffer.GetDepthShaderResourceView());
 	}
 
 	void Graphics::UnbindShadows()
 	{
 		ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
-		pContext->PSSetShaderResources(14u, 1u, nullSRVs);
+		pContext->PSSetShaderResources(PS_TEXTURE_SLOT_SHADOW_MAP, 1u, nullSRVs);
 	}
 
 	void Graphics::EnableImGui()
@@ -899,16 +850,16 @@ namespace Kaka
 		return height;
 	}
 
-	void Graphics::BindDepth()
-	{
-		pContext->PSSetShaderResources(13u, 1u, pDepthShaderResourceView.GetAddressOf());
-	}
+	//void Graphics::BindDepth()
+	//{
+	//	pContext->PSSetShaderResources(13u, 1u, pDepthShaderResourceView.GetAddressOf());
+	//}
 
-	void Graphics::UnbindDepthSRV()
-	{
-		ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
-		pContext->PSSetShaderResources(13u, 1, nullSRVs);
-	}
+	//void Graphics::UnbindDepthSRV()
+	//{
+	//	ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
+	//	pContext->PSSetShaderResources(13u, 1, nullSRVs);
+	//}
 
 	Graphics::FrustumPlanes Graphics::ExtractFrustumPlanes() const
 	{

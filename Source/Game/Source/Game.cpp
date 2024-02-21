@@ -6,6 +6,7 @@
 #include <random>
 #include <TGAFBXImporter/source/Internal.inl>
 
+#include "Graphics/GraphicsConstants.h"
 #include "Graphics/Drawable/ModelLoader.h"
 
 constexpr int WINDOW_WIDTH = 1920;
@@ -23,7 +24,7 @@ namespace Kaka
 		:
 		wnd(WINDOW_WIDTH, WINDOW_HEIGHT, L"Kaka")
 	{
-		camera.SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 110, 0.5f, 5000.0f);
+		camera.SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 110, 0.1f, 500.0f);
 		directionalLightShadowCamera.SetOrthographic(WINDOW_WIDTH / 8.0f, WINDOW_HEIGHT / 8.0f, -100.0f, 100.0f);
 
 		for (int i = 0; i < NUM_POINT_LIGHTS; ++i)
@@ -387,11 +388,11 @@ namespace Kaka
 		commonBuffer.resolution = wnd.Gfx().GetCurrentResolution();
 		commonBuffer.currentTime = timer.GetTotalTime();
 
-		PixelConstantBuffer<CommonBuffer> pcb{wnd.Gfx(), 4u};
+		PixelConstantBuffer<CommonBuffer> pcb{wnd.Gfx(), PS_CBUFFER_SLOT_COMMON};
 		pcb.Update(wnd.Gfx(), commonBuffer);
 		pcb.Bind(wnd.Gfx());
 
-		VertexConstantBuffer<CommonBuffer> vcb{wnd.Gfx(), 4u};
+		VertexConstantBuffer<CommonBuffer> vcb{wnd.Gfx(), VS_CBUFFER_SLOT_COMMON};
 		vcb.Update(wnd.Gfx(), commonBuffer);
 		vcb.Bind(wnd.Gfx());
 
@@ -407,7 +408,6 @@ namespace Kaka
 
 			wnd.Gfx().rsmBuffer.ClearTextures(wnd.Gfx().pContext.Get());
 			wnd.Gfx().rsmBuffer.SetAsActiveTarget(wnd.Gfx().pContext.Get(), wnd.Gfx().rsmBuffer.GetDepthStencilView());
-
 
 			wnd.Gfx().SetDepthStencilState(eDepthStencilStates::Normal);
 			// Need backface culling for Reflective Shadow Maps
@@ -447,26 +447,34 @@ namespace Kaka
 
 			//wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
 
+			wnd.Gfx().rsmBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_RSM_SLOT);
+
 			for (Model& model : models)
 			{
 				model.Draw(wnd.Gfx(), aDeltaTime);
 			}
 
+
 			wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, nullptr);
-			wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), 0u);
+			wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_GBUFFER_SLOT);
 
 
-			PixelConstantBuffer<ShadowBuffer> shadowPixelBuffer{wnd.Gfx(), 7u};
+			PixelConstantBuffer<ShadowBuffer> shadowPixelBuffer{wnd.Gfx(), PS_CBUFFER_SLOT_SHADOW};
 			shadowPixelBuffer.Update(wnd.Gfx(), shadowBuffer);
 			shadowPixelBuffer.Bind(wnd.Gfx());
 
+			// Prepare RSM for lighting pass
+			PixelConstantBuffer<RSMBuffer> rsmPixelBuffer{wnd.Gfx(), PS_CBUFFER_SLOT_RSM};
+			rsmPixelBuffer.Update(wnd.Gfx(), rsmBuffer);
+			rsmPixelBuffer.Bind(wnd.Gfx());
 
 			// Lighting pass
 			wnd.Gfx().BindShadows();
 			deferredLights.Draw(wnd.Gfx());
 			wnd.Gfx().UnbindShadows();
 
-			wnd.Gfx().gBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), 0u);
+			wnd.Gfx().rsmBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_RSM_SLOT);
+			wnd.Gfx().gBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_GBUFFER_SLOT);
 
 			// Skybox pass
 			wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, wnd.Gfx().gBuffer.GetDepthStencilView());
@@ -480,7 +488,7 @@ namespace Kaka
 
 		// Point light flashlight test
 		{
-			PointLightTest(aDeltaTime);
+			//PointLightTest(aDeltaTime);
 		}
 
 		// ImGui windows
@@ -553,6 +561,11 @@ namespace Kaka
 				ImGui::Text("Poisson");
 				ImGui::Checkbox("Use Poisson", (bool*)&shadowBuffer.usePoisson);
 				ImGui::DragFloat("Offset scale##OffsetPoisson", &shadowBuffer.offsetScalePoissonDisk, 0.0001f, 0.0f, 1.0f, "%.6f");
+				ImGui::Text("RSM");
+				ImGui::Checkbox("Use RSM", (bool*)&rsmBuffer.useRSM);
+				ImGui::Checkbox("Only RSM", (bool*)&rsmBuffer.onlyRSM);
+				ImGui::DragFloat("R Max", &rsmBuffer.rMax, 0.01f, 0.0f, 5.0f, "%.2f");
+				ImGui::DragFloat("RSM Intensity", &rsmBuffer.rsmIntensity, 0.01f, 0.0f, 100.0f, "%.2f");
 			}
 			ImGui::End();
 			//for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
@@ -584,8 +597,20 @@ namespace Kaka
 				ImGui::NextColumn();
 				ImGui::Text("Material");
 				ImGui::Image(wnd.Gfx().gBuffer.GetShaderResourceViews()[3], ImVec2(512, 288));
-				ImGui::Text("Depth");
+				ImGui::Text("Ambient Occlusion");
 				ImGui::Image(wnd.Gfx().gBuffer.GetShaderResourceViews()[4], ImVec2(512, 288));
+				//ImGui::Text("RSM");
+				//ImGui::Image(wnd.Gfx().gBuffer.GetShaderResourceViews()[5], ImVec2(512, 288));
+				ImGui::Text("Depth");
+				ImGui::Image(*wnd.Gfx().gBuffer.GetDepthShaderResourceView(), ImVec2(512, 288));
+			}
+			ImGui::End();
+
+			// RSM indirect lighting
+			if (ImGui::Begin("RSM"))
+			{
+				ImGui::Text("Indirect lighting");
+				ImGui::Image(wnd.Gfx().gBuffer.GetShaderResourceViews()[5], ImVec2(1024, 576));
 			}
 			ImGui::End();
 
@@ -604,6 +629,7 @@ namespace Kaka
 				ImGui::Image(*wnd.Gfx().rsmBuffer.GetDepthShaderResourceView(), ImVec2(512, 288));
 			}
 			ImGui::End();
+
 
 			deferredLights.ShowControlWindow();
 		}

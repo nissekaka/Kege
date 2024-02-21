@@ -19,6 +19,7 @@ struct PixelInput
     float4 position : SV_POSITION;
     float2 texCoord : TEXCOORD;
     float3 normal : NORMAL;
+    float3 worldNormal : WORLDNORMAL;
     float3 tangent : TANGENT;
     float3 bitan : BITANGENT;
 };
@@ -32,7 +33,8 @@ PixelInput main(const VertexInput aInput)
     output.worldPos = mul(objectToWorld, position).xyz;
     output.position = mul(objectToClip, position);
     output.texCoord = aInput.texCoord;
-    output.normal = mul(objectToWorldRotation, aInput.normal);
+	output.normal = mul(objectToWorldRotation, aInput.normal);
+    output.worldNormal = aInput.normal;
     output.tangent = mul(objectToWorldRotation, aInput.tan);
     output.bitan = mul(objectToWorldRotation, aInput.bitan);
     

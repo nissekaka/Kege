@@ -1,14 +1,15 @@
+// GBuffer
 Texture2D worldPositionTex : register(t0);
 Texture2D colourTex : register(t1);
 Texture2D normalTex : register(t2);
 Texture2D materialTex : register(t3);
 Texture2D ambientOcclusionTex : register(t4);
-//Texture2D depthTex : register(t5);
-Texture2D RSM_WorldPositionTex : register(t5);
-Texture2D RSM_NormalTex : register(t6);
-Texture2D RSM_FluxTex : register(t7);
-Texture2D RSM_DepthTex : register(t8);
-
+Texture2D rsmTex : register(t5);
+// Reflective Shadow Map
+Texture2D RSM_WorldPositionTex : register(t6);
+Texture2D RSM_NormalTex : register(t7);
+Texture2D RSM_FluxTex : register(t8);
+// Skybox
 TextureCube daySkyTex : register(t12);
 TextureCube nightSkyTex : register(t13);
 
@@ -21,7 +22,7 @@ struct GBufferOutput
     float4 normal : SV_TARGET2;
     float4 material : SV_TARGET3;
     float4 ambientOcclusionAndCustom : SV_TARGET4;
-    //float4 depth : SV_TARGET6;
+    float4 rsm : SV_TARGET5;
 };
 
 struct RSMBufferOutput
