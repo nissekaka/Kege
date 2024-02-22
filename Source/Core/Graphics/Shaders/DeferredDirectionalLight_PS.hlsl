@@ -26,7 +26,7 @@ cbuffer DirectionalLight : register(b1)
 //    float4 worldPosition = mul(clipToWorldMatrix, viewspacePosition);
 //    return worldPosition.xyz;
 //}
-cbuffer RSMData : register(b2)
+cbuffer RSMData : register(b3)
 {
     bool useRSM;
     bool onlyRSM;

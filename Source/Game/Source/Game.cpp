@@ -172,7 +172,7 @@ namespace Kaka
 		flashLightTest = &deferredLights.AddSpotLight();
 		flashLightTest->position = camera.GetPosition();
 		DirectX::XMStoreFloat3(&flashLightTest->direction, camera.GetForwardVector());
-		flashLightTest->intensity = 0.0f;
+		flashLightTest->intensity = 500.0f;
 		flashLightTest->range = 1000.0f;
 		flashLightTest->innerAngle = 0.1f; // Radians
 		flashLightTest->outerAngle = 0.2f; // Radians
@@ -691,27 +691,27 @@ namespace Kaka
 
 			switch (e->GetKeyCode())
 			{
-				case VK_ESCAPE:
-					if (wnd.CursorEnabled())
-					{
-						wnd.DisableCursor();
-						wnd.mouse.EnableRaw();
-					}
-					else
-					{
-						wnd.EnableCursor();
-						wnd.mouse.DisableRaw();
-					}
-					break;
-				case VK_F1:
-					showImGui = !showImGui;
-					break;
-				case VK_F2:
-					showStatsWindow = !showStatsWindow;
-					break;
-				case VK_F3:
-					drawLightDebug = !drawLightDebug;
-					break;
+			case VK_ESCAPE:
+				if (wnd.CursorEnabled())
+				{
+					wnd.DisableCursor();
+					wnd.mouse.EnableRaw();
+				}
+				else
+				{
+					wnd.EnableCursor();
+					wnd.mouse.DisableRaw();
+				}
+				break;
+			case VK_F1:
+				showImGui = !showImGui;
+				break;
+			case VK_F2:
+				showStatsWindow = !showStatsWindow;
+				break;
+			case VK_F3:
+				drawLightDebug = !drawLightDebug;
+				break;
 			}
 		}
 

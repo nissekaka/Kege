@@ -1,7 +1,7 @@
 #include "deferred_common.hlsli"
 #include "PBRFunctions.hlsli"
 
-cbuffer SpotLightData : register(b2)
+cbuffer SpotLightData : register(b1)
 {
     float3 lightPosition;
     float lightIntensity;
@@ -35,7 +35,7 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 
     const float3 toEye = normalize(cameraPosition.xyz - worldPosition);
 
-    float3 spotLight = EvaluateSpotLight(colour, specular, normal, roughness, lightColour, lightIntensity,
+    const float3 spotLight = EvaluateSpotLight(colour, specular, normal, roughness, lightColour, lightIntensity,
         lightRange, lightPosition, -lightDirection, lightOuterAngle, lightInnerAngle, toEye,
         worldPosition.xyz);
 

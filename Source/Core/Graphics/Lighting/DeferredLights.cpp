@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "DeferredLights.h"
 #include "Core/Utility/KakaMath.h"
+#include "Graphics/GraphicsConstants.h"
 #include "imgui/imgui.h"
 
 namespace Kaka
@@ -53,12 +54,12 @@ namespace Kaka
 			lightBuffer.positionAndRange[3] = 1.0f;
 			lightBuffer.isDirectional = TRUE;
 
-			VertexConstantBuffer<ConstantBuffer> vertexLightBuffer{aGfx, 1u};
+			VertexConstantBuffer<ConstantBuffer> vertexLightBuffer{aGfx, VS_CBUFFER_SLOT_LIGHT};
 			vertexLightBuffer.Update(aGfx, lightBuffer);
 			vertexLightBuffer.Bind(aGfx);
 
 			// Directional Light
-			PixelConstantBuffer<DirectionalLightData> directionalLightBuffer{aGfx, 1u};
+			PixelConstantBuffer<DirectionalLightData> directionalLightBuffer{aGfx, PS_CBUFFER_SLOT_DIRECTIONAL_LIGHT};
 			directionalLightBuffer.Update(aGfx, directionalLightData);
 			directionalLightBuffer.Bind(aGfx);
 
@@ -92,11 +93,11 @@ namespace Kaka
 					lightBuffer.positionAndRange[3] = lightData.radius;
 					lightBuffer.isDirectional = FALSE;
 
-					VertexConstantBuffer<ConstantBuffer> vertexLightBuffer{aGfx, 1u};
+					VertexConstantBuffer<ConstantBuffer> vertexLightBuffer{aGfx, VS_CBUFFER_SLOT_LIGHT};
 					vertexLightBuffer.Update(aGfx, lightBuffer);
 					vertexLightBuffer.Bind(aGfx);
 
-					PixelConstantBuffer<PointLightData> pointLightBuffer{aGfx, 2u};
+					PixelConstantBuffer<PointLightData> pointLightBuffer{aGfx, PS_CBUFFER_SLOT_POINT_LIGHT};
 					pointLightBuffer.Update(aGfx, lightData);
 					pointLightBuffer.Bind(aGfx);
 
@@ -118,11 +119,11 @@ namespace Kaka
 					lightBuffer.positionAndRange[3] = lightData.range;
 					lightBuffer.isDirectional = FALSE;
 
-					VertexConstantBuffer<ConstantBuffer> vertexLightBuffer{aGfx, 1u};
+					VertexConstantBuffer<ConstantBuffer> vertexLightBuffer{aGfx, VS_CBUFFER_SLOT_LIGHT};
 					vertexLightBuffer.Update(aGfx, lightBuffer);
 					vertexLightBuffer.Bind(aGfx);
 
-					PixelConstantBuffer<SpotLightData> spotLightBuffer{aGfx, 2u};
+					PixelConstantBuffer<SpotLightData> spotLightBuffer{aGfx, PS_CBUFFER_SLOT_SPOT_LIGHT};
 					spotLightBuffer.Update(aGfx, lightData);
 					spotLightBuffer.Bind(aGfx);
 

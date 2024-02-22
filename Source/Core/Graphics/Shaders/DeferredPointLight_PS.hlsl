@@ -1,7 +1,7 @@
 #include "deferred_common.hlsli"
 #include "PBRFunctions.hlsli"
 
-cbuffer PointLightData : register(b2)
+cbuffer PointLightData : register(b1)
 {
     float3 lightPosition;
     float lightIntensity;
@@ -41,9 +41,9 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 
     const float3 toEye = normalize(cameraPosition.xyz - worldPosition.xyz);
 
-    float3 pointLight = EvaluatePointLight(colour, specular, normal,
-        roughness, lightColour, lightIntensity,
-        lightRadius, lightPosition, toEye.xyz, worldPosition.xyz);
+    const float3 pointLight = EvaluatePointLight(colour, specular, normal,
+                                                 roughness, lightColour, lightIntensity,
+                                                 lightRadius, lightPosition, toEye.xyz, worldPosition.xyz);
     
     float3 finalColour = pointLight;
 
