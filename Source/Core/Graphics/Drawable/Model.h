@@ -43,6 +43,7 @@ namespace Kaka
 
 		void SetPixelShader(const Graphics& aGfx, const std::wstring& aFilePath);
 		void SetTexture(Texture* aTexture);
+		void SetTextureAtIndex(Texture* aTexture, size_t aIndex) const;
 
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);

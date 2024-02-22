@@ -9,11 +9,11 @@
 #include "Graphics/GraphicsConstants.h"
 #include "Graphics/Drawable/ModelLoader.h"
 
-constexpr int WINDOW_WIDTH = 1920;
-constexpr int WINDOW_HEIGHT = 1080;
+constexpr int WINDOW_WIDTH = 2560;
+constexpr int WINDOW_HEIGHT = 1440;
 constexpr int NUM_POINT_LIGHTS = 0;
 constexpr int NUM_SPOT_LIGHTS = 0;
-constexpr int TERRAIN_SIZE = 1000;
+constexpr int TERRAIN_SIZE = 0;
 
 constexpr int MODELS_TO_LOAD_THREADED = 10;
 constexpr float SHADOW_RESOLUTION_DIVIDER = 4.0f;
@@ -25,7 +25,7 @@ namespace Kaka
 		wnd(WINDOW_WIDTH, WINDOW_HEIGHT, L"Kaka")
 	{
 		camera.SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 110, 0.1f, 500.0f);
-		directionalLightShadowCamera.SetOrthographic(WINDOW_WIDTH / 8.0f, WINDOW_HEIGHT / 8.0f, -100.0f, 100.0f);
+		directionalLightShadowCamera.SetOrthographic(WINDOW_WIDTH / 8.0f, WINDOW_HEIGHT / 8.0f, -150.0f, 150.0f);
 
 		for (int i = 0; i < NUM_POINT_LIGHTS; ++i)
 		{
@@ -77,7 +77,7 @@ namespace Kaka
 		//reflectionPlane.Init(wnd.Gfx(), terrain.GetSize() / 2.0f);
 		//reflectionPlane.SetPosition({terrain.GetSize() / 2.0f, reflectPlaneHeight, terrain.GetSize() / 2.0f});
 
-		directionalLightShadowCamera.SetPosition({0.0f, 0.0f, 0.0f});
+		directionalLightShadowCamera.SetPosition({0.0f, 70.0f, 0.0f});
 		camera.SetPosition({-11.0f, 28.0f, 26.0f});
 		camera.SetRotationDegrees(29.0f, 138.0f);
 
@@ -134,10 +134,29 @@ namespace Kaka
 			//spotLight.outerAngle = 2.5f; // Radians
 		}
 
+		whiteTexture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\white.png", 2u);
+		blueTexture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\blue.png", 2u);
+		redTexture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\red.png", 2u);
+
+		// Floor and walls
 		models.emplace_back();
-		models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\floor\\Floor_2x2.fbx", Model::eShaderType::PBR);
+		models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\floor\\white\\Floor_2x2_white.fbx", Model::eShaderType::PBR);
 		models.back().Init();
 		models.back().SetPosition({75.0f, 0.0f, 25.0f});
+		models.back().SetScale(0.5f);
+
+		models.emplace_back();
+		models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\floor\\blue\\Floor_2x2_blue.fbx", Model::eShaderType::PBR);
+		models.back().Init();
+		models.back().SetPosition({75.0f, 100.0f, -75.0f});
+		models.back().SetRotation({-PI / 2.0f, 0.0f, PI / 2.0f});
+		models.back().SetScale(0.5f);
+
+		models.emplace_back();
+		models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\floor\\red\\Floor_2x2_red.fbx", Model::eShaderType::PBR);
+		models.back().Init();
+		models.back().SetPosition({75.0f, 0.0f, -75.0f});
+		models.back().SetRotation({PI / 2.0f, 0.0f, 0.0f});
 		models.back().SetScale(0.5f);
 
 		for (int i = 0; i < 5; ++i)
@@ -415,12 +434,19 @@ namespace Kaka
 
 			struct RSMLightData
 			{
-				float lightIntensity;
+				DirectX::XMFLOAT4 lightColourAndIntensity;
 				float falloff;
 				BOOL isDirectionalLight;
-				float padding;
+				float padding[2];
 			} rsmLightData;
-			rsmLightData.lightIntensity = deferredLights.GetDirectionalLightData().lightIntensity;
+
+			rsmLightData.lightColourAndIntensity =
+			{
+				deferredLights.GetDirectionalLightData().lightColour.x,
+				deferredLights.GetDirectionalLightData().lightColour.y,
+				deferredLights.GetDirectionalLightData().lightColour.z,
+				deferredLights.GetDirectionalLightData().lightIntensity
+			};
 			rsmLightData.isDirectionalLight = TRUE;
 
 			PixelConstantBuffer<RSMLightData> rsmLightDataBuffer{wnd.Gfx(), 0u};
@@ -559,12 +585,14 @@ namespace Kaka
 				ImGui::DragFloat("Offset scale##OffsetPCF", &shadowBuffer.offsetScalePCF, 0.0001f, 0.0f, 1.0f, "%.6f");
 				ImGui::DragInt("Sample count", &shadowBuffer.sampleCountPCF, 1, 1, 25);
 				ImGui::Text("Poisson");
-				ImGui::Checkbox("Use Poisson", (bool*)&shadowBuffer.usePoisson);
+				ImGui::Checkbox("Use Poisson##Shadow", (bool*)&shadowBuffer.usePoisson);
 				ImGui::DragFloat("Offset scale##OffsetPoisson", &shadowBuffer.offsetScalePoissonDisk, 0.0001f, 0.0f, 1.0f, "%.6f");
 				ImGui::Text("RSM");
 				ImGui::Checkbox("Use RSM", (bool*)&rsmBuffer.useRSM);
 				ImGui::Checkbox("Only RSM", (bool*)&rsmBuffer.onlyRSM);
-				ImGui::DragFloat("R Max", &rsmBuffer.rMax, 0.01f, 0.0f, 5.0f, "%.2f");
+				ImGui::Checkbox("Use Poisson##RSM", (bool*)&rsmBuffer.usePoisson);
+				ImGui::DragInt("Sample count##RSM", (int*)&rsmBuffer.sampleCount, 1, 1, 2000);
+				ImGui::DragFloat("R Max", &rsmBuffer.rMax, 0.001f, 0.0f, 5.0f, "%.3f");
 				ImGui::DragFloat("RSM Intensity", &rsmBuffer.rsmIntensity, 0.01f, 0.0f, 100.0f, "%.2f");
 			}
 			ImGui::End();

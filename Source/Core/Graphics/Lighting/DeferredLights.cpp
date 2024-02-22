@@ -13,7 +13,7 @@ namespace Kaka
 		spotLightPS = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\DeferredSpotLight_PS.cso");
 
 		// Initial directional light values
-		directionalLightData.lightDirection = {0.6f, -1.1f, -0.8f};
+		directionalLightData.lightDirection = {-0.7f, -0.5f, -0.7f};
 		directionalLightData.lightColour = {1.0f, 0.8f, 0.6f};
 		directionalLightData.lightIntensity = 1.0f;
 		directionalLightData.ambientLight = 0.0f;

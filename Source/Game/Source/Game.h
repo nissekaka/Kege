@@ -78,6 +78,9 @@ namespace Kaka
 
 	private:
 		std::vector<Model> models;
+		Texture* whiteTexture = nullptr;
+		Texture* blueTexture = nullptr;
+		Texture* redTexture = nullptr;
 		//Model vfxModel{};
 		//Model vfxModelOlle{};
 		//std::vector<Model> threadedModels{};
@@ -171,8 +174,11 @@ namespace Kaka
 		{
 			BOOL useRSM = true;
 			BOOL onlyRSM = false;
-			float rMax = 0.05f; // Maximum sampling radius.
-			float rsmIntensity = 20.0f;
+			BOOL usePoisson = false;
+			unsigned int sampleCount = 400;
+			float rMax = 0.08f; // Maximum sampling radius.
+			float rsmIntensity = 10.0f;
+			float padding[2];
 		};
 
 		RSMBuffer rsmBuffer = {};

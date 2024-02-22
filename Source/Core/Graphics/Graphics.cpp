@@ -131,7 +131,31 @@ namespace Kaka
 			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 			samplerDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
 
-			pDevice->CreateSamplerState(&samplerDesc, &pSamplerState);
+			pDevice->CreateSamplerState(&samplerDesc, &pDefaultSampler);
+		}
+
+		// Shadow sampler
+		{
+			D3D11_SAMPLER_DESC samplerDesc = CD3D11_SAMPLER_DESC{CD3D11_DEFAULT{}};
+			samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
+
+			pDevice->CreateSamplerState(&samplerDesc, &pShadowSampler);
+		}
+
+		// Clamped sampler
+		{
+			D3D11_SAMPLER_DESC samplerDesc = CD3D11_SAMPLER_DESC{CD3D11_DEFAULT{}};
+			samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+			samplerDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
+
+			pDevice->CreateSamplerState(&samplerDesc, &pClampedSampler);
 		}
 
 		HRESULT result;
@@ -223,18 +247,6 @@ namespace Kaka
 			}
 		}
 
-		// Shadow
-		{
-			D3D11_SAMPLER_DESC samplerDesc = CD3D11_SAMPLER_DESC{CD3D11_DEFAULT{}};
-			samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-			samplerDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
-
-			pDevice->CreateSamplerState(&samplerDesc, &pShadowSampler);
-		}
-
 		// TODO bools
 		CreateBlendStates();
 		CreateDepthStencilStates();
@@ -257,7 +269,9 @@ namespace Kaka
 			pContext->PSSetSamplers(7u, 1u, pVFXSampler.GetAddressOf());
 		}
 
-		pContext->PSSetSamplers(0u, 1u, pSamplerState.GetAddressOf());
+		pContext->PSSetSamplers(0u, 1u, pDefaultSampler.GetAddressOf());
+		pContext->PSSetSamplers(1u, 1u, pShadowSampler.GetAddressOf());
+		pContext->PSSetSamplers(2u, 1u, pClampedSampler.GetAddressOf());
 	}
 
 	Graphics::~Graphics()
@@ -813,7 +827,7 @@ namespace Kaka
 
 	void Graphics::BindShadows()
 	{
-		pContext->PSSetSamplers(1u, 1u, pShadowSampler.GetAddressOf());
+		//pContext->PSSetSamplers(1u, 1u, pShadowSampler.GetAddressOf());
 		//pContext->PSSetSamplers(2u, 1u, pShadowCompSampler.GetAddressOf());
 
 		pContext->PSSetShaderResources(PS_TEXTURE_SLOT_SHADOW_MAP, 1u, rsmBuffer.GetDepthShaderResourceView());

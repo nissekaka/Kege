@@ -14,6 +14,7 @@ TextureCube daySkyTex : register(t12);
 TextureCube nightSkyTex : register(t13);
 
 SamplerState defaultSampler : register(s0);
+SamplerState clampedSampler : register(s2);
 
 struct GBufferOutput
 {

@@ -490,7 +490,26 @@ namespace Kaka
 
 	void Model::SetTexture(Texture* aTexture)
 	{
-		animatedModelData.texture = aTexture;
+		if (modelType == eModelType::Static)
+		{
+			modelData.texture = aTexture;
+		}
+		else if (modelType == eModelType::Skeletal)
+		{
+			animatedModelData.texture = aTexture;
+		}
+	}
+
+	void Model::SetTextureAtIndex(Texture* aTexture, const size_t aIndex) const
+	{
+		if (modelType == eModelType::Static)
+		{
+			modelData.texture->SetTextureAtIndex(aTexture->GetTextureAtIndex(aIndex), aIndex);
+		}
+		else if (modelType == eModelType::Skeletal)
+		{
+			animatedModelData.texture->SetTextureAtIndex(aTexture->GetTextureAtIndex(aIndex), aIndex);
+		}
 	}
 
 	void Model::ShowControlWindow(const char* aWindowName)

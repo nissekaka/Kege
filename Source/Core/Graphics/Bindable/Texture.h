@@ -19,6 +19,8 @@ namespace Kaka
 		BOOL HasNormalMap() const;
 		BOOL HasMaterial() const;
 		void SetSlot(const UINT aSlot) { slot = aSlot; }
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetTextureAtIndex(size_t aIndex) { return pTextures[aIndex]; }
+		void SetTextureAtIndex(const Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& aTexture, size_t aIndex) { pTextures[aIndex] = aTexture; }
 
 	private:
 		std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> pTextures;

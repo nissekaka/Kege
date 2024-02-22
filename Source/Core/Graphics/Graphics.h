@@ -186,8 +186,9 @@ namespace Kaka
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilState> pDepthStencilStates[(int)eDepthStencilStates::Count];
 		Microsoft::WRL::ComPtr<ID3D11RasterizerState> pRasterizerStates[(int)eRasterizerStates::Count];
 
-		Microsoft::WRL::ComPtr<ID3D11SamplerState> pSamplerState;
+		Microsoft::WRL::ComPtr<ID3D11SamplerState> pDefaultSampler;
 		Microsoft::WRL::ComPtr<ID3D11SamplerState> pShadowSampler;
+		Microsoft::WRL::ComPtr<ID3D11SamplerState> pClampedSampler;
 		//Microsoft::WRL::ComPtr<ID3D11SamplerState> pShadowCompSampler;
 		Microsoft::WRL::ComPtr<ID3D11SamplerState> pVFXSampler;
 
