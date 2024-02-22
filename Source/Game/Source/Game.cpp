@@ -24,7 +24,7 @@ namespace Kaka
 		:
 		wnd(WINDOW_WIDTH, WINDOW_HEIGHT, L"Kaka")
 	{
-		camera.SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 110, 0.1f, 500.0f);
+		camera.SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 110, 0.5f, 5000.0f);
 		directionalLightShadowCamera.SetOrthographic(WINDOW_WIDTH / 8.0f, WINDOW_HEIGHT / 8.0f, -150.0f, 150.0f);
 
 		for (int i = 0; i < NUM_POINT_LIGHTS; ++i)

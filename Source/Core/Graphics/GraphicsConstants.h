@@ -29,8 +29,9 @@ enum
 	// Light
 	VS_CBUFFER_SLOT_LIGHT = 1u,
 	PS_CBUFFER_SLOT_DIRECTIONAL_LIGHT = 1u,
-	PS_CBUFFER_SLOT_POINT_LIGHT = 1u,
-	PS_CBUFFER_SLOT_SPOT_LIGHT = 1u,
+	// TODO Skybox currently needs directional light to be at slot 1
+	PS_CBUFFER_SLOT_POINT_LIGHT = 2u,
+	PS_CBUFFER_SLOT_SPOT_LIGHT = 2u,
 	// Misc
 	PS_CBUFFER_SLOT_SHADOW = 7u,
 };

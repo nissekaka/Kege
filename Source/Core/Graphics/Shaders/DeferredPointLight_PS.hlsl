@@ -1,7 +1,7 @@
 #include "deferred_common.hlsli"
 #include "PBRFunctions.hlsli"
 
-cbuffer PointLightData : register(b1)
+cbuffer PointLightData : register(b2)
 {
     float3 lightPosition;
     float lightIntensity;
@@ -10,14 +10,6 @@ cbuffer PointLightData : register(b1)
     bool lightIsActive;
     float3 padding;
 };
-
-//float3 get_world_position_from_depth(float2 uv, float depth)
-//{
-//    float4 ndc = float4(uv * 2.0f - 1.0f, depth, 1.0f);
-//    ndc.y *= -1.0f;
-//    float4 wp = mul(ndc, clipToWorldSpaceMatrix);
-//    return (wp / wp.w).xyz;
-//}
 
 float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 {

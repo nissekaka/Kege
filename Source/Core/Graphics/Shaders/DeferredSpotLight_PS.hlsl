@@ -1,7 +1,7 @@
 #include "deferred_common.hlsli"
 #include "PBRFunctions.hlsli"
 
-cbuffer SpotLightData : register(b1)
+cbuffer SpotLightData : register(b2)
 {
     float3 lightPosition;
     float lightIntensity;
@@ -21,11 +21,6 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
     const float3 albedo = colourTex.Sample(defaultSampler, uv).rgb;
     const float3 normal = normalize(2.0f * normalTex.Sample(defaultSampler, uv).xyz - 1.0f);
     const float4 material = materialTex.Sample(defaultSampler, uv);
-
-    //if (material.a == 0.0f)
-    //{
-    //    discard;
-    //}
 
     const float metalness = material.b;
     const float roughness = material.g;

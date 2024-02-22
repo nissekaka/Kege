@@ -11,21 +11,6 @@ cbuffer DirectionalLight : register(b1)
     float4x4 directionalLightCameraTransform;
 };
 
-//float3 GetWorldPositionFromDepth(float2 aUv, float aDepth)
-//{
-//    float4 ndc = float4(aUv * 2.0f - 1.0f, aDepth, 1.0f);
-//    //ndc.y *= -1.0f;
-//    float4 wp = mul(clipToWorldMatrix, ndc);
-//    //return wp;
-//    return (wp.xyz / wp.w).xyz;
-//}
-
-//float3 GetWorldPosFromDepth(float3 aViewRay, float aDepth)
-//{
-//    float4 viewspacePosition = float4((aViewRay * aDepth).xyz, 1.0f);
-//    float4 worldPosition = mul(clipToWorldMatrix, viewspacePosition);
-//    return worldPosition.xyz;
-//}
 cbuffer RSMData : register(b3)
 {
     bool useRSM;
@@ -36,7 +21,6 @@ cbuffer RSMData : register(b3)
     float RSM_INTENSITY;
 };
 
-//#define SAMPLES 400u
 
 #define PI (3.141592653)
 #define TWO_PI (2.0 * PI)
@@ -111,8 +95,6 @@ float3 IndirectLighting(float2 uv, float3 n, float3 x)
         }
     }
 
-
-
     return RSM_INTENSITY * rsmOutput; // Modulate result with some intensity value
 }
 
@@ -120,8 +102,6 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 {
     const float2 uv = aInput.position.xy / clientResolution.xy;
     const float3 worldPosition = worldPositionTex.Sample(defaultSampler, uv).rgb;
-    //const float depth = depthTex.Sample(defaultSampler, uv).r;
-    //const float3 worldPosition = GetWorldPositionFromDepth(aInput.position, depth);
     const float3 albedo = colourTex.Sample(defaultSampler, uv).rgb;
     const float4 ambientOcclusionAndCustom = ambientOcclusionTex.Sample(defaultSampler, uv).rgba;
     
