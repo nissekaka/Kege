@@ -61,9 +61,9 @@ float3 IndirectLighting(float2 uv, float3 n, float3 x)
 {
     // The irradiance at a surface point x with normal n due to pixel light p is
     //
-    //               max{0,?np|x?xp?} max{0,?n| xp?x?}
-    // Ep(x, n) = ?p -----------------------------------             
-	//                          ||x?xp||^4
+    //                   max{0,<np|x-xp>} max{0,<n| xp-x>}
+    // Ep(x, n) = phi(p) -----------------------------------             
+	//                              ||x-xp||^4
 
     float3 rsmOutput = { 0.0f, 0.0f, 0.0f };
 
