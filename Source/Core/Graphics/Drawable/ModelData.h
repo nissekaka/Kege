@@ -32,12 +32,14 @@ namespace Kaka
 		std::vector<unsigned short> indices{};
 		Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
 		Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
+		Texture* texture;
 	};
 
 	struct MeshList
 	{
 		std::vector<Mesh> meshes;
-		std::vector<std::string> materialNames;
+		//std::vector<std::string> materialNames;
+		//std::vector<Texture*> textures;
 		std::string filePath;
 	};
 

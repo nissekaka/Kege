@@ -123,18 +123,20 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 
     // Reflective Shadow Maps -- Indirect lighting -- END
 
-    const float metalness = material.b;
-    const float roughness = material.g;
+    const float metalness = material.r;
+    const float roughness = material.r;
 
     const float3 specular = lerp((float3) 0.04f, albedo.rgb, metalness);
     const float3 colour = lerp((float3) 0.0f, albedo.rgb, 1.0f - metalness);
 
     const float3 toEye = normalize(cameraPosition.xyz - worldPosition);
 
-    const float shadowFactor = Shadow(directionalLightCameraTransform, float4(worldPosition, 1.0f));
+    float shadowFactor = Shadow(directionalLightCameraTransform, float4(worldPosition, 1.0f)) + 0.1f;
+    shadowFactor = saturate(shadowFactor);
 
     float3 dirLightDir = directionalLightDirection;
     dirLightDir.x = -dirLightDir.x;
+
     const float3 directionalLight = EvaluateDirectionalLight(colour, specular, normal,
     roughness, directionalLightColour, -dirLightDir, toEye) * directionalLightIntensity;
     
@@ -144,8 +146,14 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
     const float dotProduct = dot(lightDir, float3(0.0f, 1.0f, 0.0f));
     const float blendFactor = (dotProduct + 1.0) / 2.0f;
 
-    const float ambiance = EvaluateAmbianceDynamicSky(defaultSampler, daySkyTex, nightSkyTex, blendFactor,
-    normal, normal, toEye, roughness, ambientOcclusionAndCustom.r, colour, specular);
+    const float3 ambiance = EvaluateAmbianceDynamicSky(defaultSampler, daySkyTex, nightSkyTex, blendFactor,
+    normal, ambientOcclusionAndCustom.gba, toEye, roughness, ambientOcclusionAndCustom.r, colour, specular);
+
+    //const float3 ambiance = EvaluateAmbiance(defaultSampler,
+    //daySkyTex, normal, ambientOcclusionAndCustom.gba,
+    //toEye, roughness, ambientOcclusionAndCustom.r, colour, specular);
+
+    //const float3 ambienceDirectionalLight = directionalLightColour * ambiance;
 
     if (useRSM)
     {

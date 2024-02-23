@@ -17,7 +17,7 @@ namespace Kaka
 	class ModelLoader
 	{
 	public:
-		//static bool LoadModel(const std::string& aFilePath, ModelData& aOutModelData);
+		static bool LoadStaticModel(const Graphics& aGfx, const std::string& aFilePath, ModelDataPtr& aOutModelData);
 
 		//static bool LoadModel(ModelData* aOutModelData, const std::string& aFilePath);
 		static bool LoadModel(ModelDataPtr& aOutModelData, const std::string& aFilePath);

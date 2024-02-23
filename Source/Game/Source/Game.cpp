@@ -25,7 +25,7 @@ namespace Kaka
 		wnd(WINDOW_WIDTH, WINDOW_HEIGHT, L"Kaka")
 	{
 		camera.SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 110, 0.5f, 5000.0f);
-		directionalLightShadowCamera.SetOrthographic(WINDOW_WIDTH / 8.0f, WINDOW_HEIGHT / 8.0f, -150.0f, 150.0f);
+		directionalLightShadowCamera.SetOrthographic(WINDOW_WIDTH / 4.0f, WINDOW_HEIGHT / 4.0f, -500.0f, 500.0f);
 
 		for (int i = 0; i < NUM_POINT_LIGHTS; ++i)
 		{
@@ -67,12 +67,12 @@ namespace Kaka
 
 		//terrain.Init(wnd.Gfx(), TERRAIN_SIZE);
 
-		for (int i = 0; i < 50; ++i)
-		{
-			sprites.emplace_back();
-			sprites.back().Init(wnd.Gfx(), 5.0f);
-			sprites.back().SetPosition({i * 10.0f, 20.0f, 0.0f});
-		}
+		//for (int i = 0; i < 50; ++i)
+		//{
+		//	sprites.emplace_back();
+		//	sprites.back().Init(wnd.Gfx(), 5.0f);
+		//	sprites.back().SetPosition({i * 10.0f, 20.0f, 0.0f});
+		//}
 
 		//reflectionPlane.Init(wnd.Gfx(), terrain.GetSize() / 2.0f);
 		//reflectionPlane.SetPosition({terrain.GetSize() / 2.0f, reflectPlaneHeight, terrain.GetSize() / 2.0f});
@@ -100,74 +100,80 @@ namespace Kaka
 		//	}
 		//}
 
-		// Random colour between 0 and 1
-		std::random_device rd;
-		std::mt19937 mt(rd());
-		std::uniform_real_distribution<float> cDist(0.0f, 1.0f);
+		//// Random colour between 0 and 1
+		//std::random_device rd;
+		//std::mt19937 mt(rd());
+		//std::uniform_real_distribution<float> cDist(0.0f, 1.0f);
 
-		for (int i = 0; i < 5; ++i)
-		{
-			DirectX::XMFLOAT3 colour = {cDist(mt), cDist(mt), cDist(mt)};
-			models.emplace_back();
-			models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\crawler\\CH_NPC_Crawler_01_22G3S_SK.fbx", Model::eShaderType::PBR);
-			models.back().Init();
-			models.back().SetPosition({i * 15.0f, 0.0f, 0.0f});
-			models.back().SetScale(0.1f);
+		//for (int i = 0; i < 5; ++i)
+		//{
+		//	DirectX::XMFLOAT3 colour = {cDist(mt), cDist(mt), cDist(mt)};
+		//	models.emplace_back();
+		//	models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\crawler\\CH_NPC_Crawler_01_22G3S_SK.fbx", Model::eShaderType::PBR);
+		//	models.back().Init();
+		//	models.back().SetPosition({i * 15.0f, 0.0f, 0.0f});
+		//	models.back().SetScale(0.1f);
 
-			//// Add point light above each model
-			//PointLightData& pointLight = deferredLights.AddPointLight();
-			//pointLight.position = models.back().GetPosition();
-			//pointLight.position.y += 25.0f;
-			//pointLight.colour = colour;
-			//pointLight.intensity = 500.0f;
-			//pointLight.radius = 15.0f;
+		//	//// Add point light above each model
+		//	//PointLightData& pointLight = deferredLights.AddPointLight();
+		//	//pointLight.position = models.back().GetPosition();
+		//	//pointLight.position.y += 25.0f;
+		//	//pointLight.colour = colour;
+		//	//pointLight.intensity = 500.0f;
+		//	//pointLight.radius = 15.0f;
 
-			//DirectX::XMFLOAT3 colour2 = {cDist(mt), cDist(mt), cDist(mt)};
-			//SpotLightData& spotLight = deferredLights.AddSpotLight();
-			//spotLight.position = models.back().GetPosition();
-			//spotLight.position.y -= 25.0f;
-			//spotLight.direction = {0.0f, -1.0f, 0.0f};
-			//spotLight.colour = colour2;
-			//spotLight.intensity = 5000.0f;
-			//spotLight.range = 1000.0f;
-			//spotLight.innerAngle = 1.5f; // Radians
-			//spotLight.outerAngle = 2.5f; // Radians
-		}
+		//	//DirectX::XMFLOAT3 colour2 = {cDist(mt), cDist(mt), cDist(mt)};
+		//	//SpotLightData& spotLight = deferredLights.AddSpotLight();
+		//	//spotLight.position = models.back().GetPosition();
+		//	//spotLight.position.y -= 25.0f;
+		//	//spotLight.direction = {0.0f, -1.0f, 0.0f};
+		//	//spotLight.colour = colour2;
+		//	//spotLight.intensity = 5000.0f;
+		//	//spotLight.range = 1000.0f;
+		//	//spotLight.innerAngle = 1.5f; // Radians
+		//	//spotLight.outerAngle = 2.5f; // Radians
+		//}
 
-		whiteTexture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\white.png", 2u);
-		blueTexture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\blue.png", 2u);
-		redTexture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\red.png", 2u);
-
-		// Floor and walls
-		models.emplace_back();
-		models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\floor\\white\\Floor_2x2_white.fbx", Model::eShaderType::PBR);
-		models.back().Init();
-		models.back().SetPosition({75.0f, 0.0f, 25.0f});
-		models.back().SetScale(0.5f);
+		//whiteTexture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\white.png", 2u);
+		//blueTexture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\blue.png", 2u);
+		//redTexture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\red.png", 2u);
 
 		models.emplace_back();
-		models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\floor\\blue\\Floor_2x2_blue.fbx", Model::eShaderType::PBR);
+		models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\sponza_pbr\\Sponza.obj", Model::eShaderType::PBR);
+		//models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\sponza\\NewSponza_Main_Yup_002.fbx", Model::eShaderType::PBR);
 		models.back().Init();
-		models.back().SetPosition({75.0f, 100.0f, -75.0f});
-		models.back().SetRotation({-PI / 2.0f, 0.0f, PI / 2.0f});
-		models.back().SetScale(0.5f);
+		models.back().SetScale(0.1f);
 
-		models.emplace_back();
-		models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\floor\\red\\Floor_2x2_red.fbx", Model::eShaderType::PBR);
-		models.back().Init();
-		models.back().SetPosition({75.0f, 0.0f, -75.0f});
-		models.back().SetRotation({PI / 2.0f, 0.0f, 0.0f});
-		models.back().SetScale(0.5f);
+		//// Floor and walls
+		//models.emplace_back();
+		//models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\floor\\white\\Floor_2x2_white.fbx", Model::eShaderType::PBR);
+		//models.back().Init();
+		//models.back().SetPosition({75.0f, 0.0f, 25.0f});
+		//models.back().SetScale(0.5f);
 
-		for (int i = 0; i < 5; ++i)
-		{
-			DirectX::XMFLOAT3 colour = {cDist(mt), cDist(mt), cDist(mt)};
-			models.emplace_back();
-			models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\crawler\\CH_NPC_Crawler_01_22G3S_SK.fbx", Model::eShaderType::PBR);
-			models.back().Init();
-			models.back().SetPosition({i * 15.0f, 0.0f, -15.0f});
-			models.back().SetScale(0.1f);
-		}
+		//models.emplace_back();
+		//models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\floor\\blue\\Floor_2x2_blue.fbx", Model::eShaderType::PBR);
+		//models.back().Init();
+		//models.back().SetPosition({75.0f, 100.0f, -75.0f});
+		//models.back().SetRotation({-PI / 2.0f, 0.0f, PI / 2.0f});
+		//models.back().SetScale(0.5f);
+
+		//models.emplace_back();
+		//models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\floor\\red\\Floor_2x2_red.fbx", Model::eShaderType::PBR);
+		//models.back().Init();
+		//models.back().SetPosition({75.0f, 0.0f, -75.0f});
+		//models.back().SetRotation({PI / 2.0f, 0.0f, 0.0f});
+		//models.back().SetScale(0.5f);
+
+		//for (int i = 0; i < 5; ++i)
+		//{
+		//	DirectX::XMFLOAT3 colour = {cDist(mt), cDist(mt), cDist(mt)};
+		//	models.emplace_back();
+		//	models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\crawler\\CH_NPC_Crawler_01_22G3S_SK.fbx", Model::eShaderType::PBR);
+		//	models.back().Init();
+		//	models.back().SetPosition({i * 15.0f, 0.0f, -15.0f});
+		//	models.back().SetScale(0.1f);
+		//}
 
 		flashLightTest = &deferredLights.AddSpotLight();
 		flashLightTest->position = camera.GetPosition();
@@ -187,11 +193,11 @@ namespace Kaka
 		flashLightTest2->outerAngle = std::clamp(flashLightTest->outerAngle * 10.0f, flashLightTest2->outerAngle, 3.14f); // Radians
 		flashLightTest2->colour = flashLightTest->colour;
 
-		pointLightTest = &deferredLights.AddPointLight();
-		pointLightTest->position = camera.GetPosition();
-		pointLightTest->intensity = 5.0f;
-		pointLightTest->colour = {1.0f, 1.0f, 1.0f};
-		pointLightTest->radius = 50.0f;
+		//pointLightTest = &deferredLights.AddPointLight();
+		//pointLightTest->position = camera.GetPosition();
+		//pointLightTest->intensity = 5.0f;
+		//pointLightTest->colour = {1.0f, 1.0f, 1.0f};
+		//pointLightTest->radius = 50.0f;
 
 		while (true)
 		{
@@ -264,11 +270,11 @@ namespace Kaka
 				worldPos.z -= cameraForward.z * pointLightPositionOffsetFactor;
 
 				// Lerp towards the world position
-				pointLightTest->position.x = Interp(pointLightTest->position.x, worldPos.x, aDeltaTime * pointLightPositionInterpSpeed);
-				pointLightTest->position.y = Interp(pointLightTest->position.y, worldPos.y, aDeltaTime * pointLightPositionInterpSpeed);
-				pointLightTest->position.z = Interp(pointLightTest->position.z, worldPos.z, aDeltaTime * pointLightPositionInterpSpeed);
-				pointLightTest->intensity = Interp(pointLightTest->intensity, pointLightIntensity, aDeltaTime * pointLightIntensityInterpSpeed);
-				pointLightTest->radius = pointLightRadius;
+				//pointLightTest->position.x = Interp(pointLightTest->position.x, worldPos.x, aDeltaTime * pointLightPositionInterpSpeed);
+				//pointLightTest->position.y = Interp(pointLightTest->position.y, worldPos.y, aDeltaTime * pointLightPositionInterpSpeed);
+				//pointLightTest->position.z = Interp(pointLightTest->position.z, worldPos.z, aDeltaTime * pointLightPositionInterpSpeed);
+				//pointLightTest->intensity = Interp(pointLightTest->intensity, pointLightIntensity, aDeltaTime * pointLightIntensityInterpSpeed);
+				//pointLightTest->radius = pointLightRadius;
 
 				{
 					// Colour buffer
@@ -315,9 +321,9 @@ namespace Kaka
 						// If length of worldPos is 0, then we didn't hit anything
 						if (DirectX::XMVector3Length(DirectX::XMLoadFloat3(&colour)).m128_f32[0] > 0.0f)
 						{
-							pointLightTest->colour.x = Interp(pointLightTest->colour.x, colour.x, aDeltaTime * pointLightColourInterpSpeed);
-							pointLightTest->colour.y = Interp(pointLightTest->colour.y, colour.y, aDeltaTime * pointLightColourInterpSpeed);
-							pointLightTest->colour.z = Interp(pointLightTest->colour.z, colour.z, aDeltaTime * pointLightColourInterpSpeed);
+							//pointLightTest->colour.x = Interp(pointLightTest->colour.x, colour.x, aDeltaTime * pointLightColourInterpSpeed);
+							//pointLightTest->colour.y = Interp(pointLightTest->colour.y, colour.y, aDeltaTime * pointLightColourInterpSpeed);
+							//pointLightTest->colour.z = Interp(pointLightTest->colour.z, colour.z, aDeltaTime * pointLightColourInterpSpeed);
 						}
 
 						// Unmap the staging buffer
@@ -330,7 +336,7 @@ namespace Kaka
 			}
 			else
 			{
-				pointLightTest->intensity = Interp(pointLightTest->intensity, 0.0f, aDeltaTime * pointLightIntensityInterpSpeed);
+				//pointLightTest->intensity = Interp(pointLightTest->intensity, 0.0f, aDeltaTime * pointLightIntensityInterpSpeed);
 			}
 
 			// Unmap the staging buffer
@@ -474,6 +480,7 @@ namespace Kaka
 			//wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
 
 			wnd.Gfx().rsmBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_RSM_SLOT);
+			wnd.Gfx().pContext->PSSetSamplers(0u, 1u, wnd.Gfx().pDefaultSampler.GetAddressOf());
 
 			for (Model& model : models)
 			{
@@ -573,8 +580,8 @@ namespace Kaka
 				ImGui::DragFloat("Intensity##PointIntensity", &pointLightIntensity, 1.0f, 0.0f, 10000.0f, "%.2f");
 				ImGui::SetNextItemWidth(150.0f);
 				ImGui::DragFloat("Radius", &pointLightRadius, 1.0f, 0.0f, 1000.0f, "%.2f");
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::ColorPicker3("Colour##PointColour", &pointLightTest->colour.x);
+				//ImGui::SetNextItemWidth(150.0f);
+				//ImGui::ColorPicker3("Colour##PointColour", &pointLightTest->colour.x);
 			}
 			ImGui::End();
 

@@ -53,7 +53,7 @@ namespace Kaka
 		SpotLightData* flashLightTest = nullptr;
 		SpotLightData* flashLightTest2 = nullptr;
 
-		PointLightData* pointLightTest = nullptr;
+		//PointLightData* pointLightTest = nullptr;
 
 		float flashLightBleedAngleMultiplier = 2.0f;
 		float flashLightBleedIntensityFactor = 0.5f;
@@ -175,7 +175,7 @@ namespace Kaka
 			BOOL useRSM = true;
 			BOOL onlyRSM = false;
 			BOOL usePoisson = false;
-			unsigned int sampleCount = 400;
+			unsigned int sampleCount = 100;
 			float rMax = 0.08f; // Maximum sampling radius.
 			float rsmIntensity = 10.0f;
 			float padding[2];

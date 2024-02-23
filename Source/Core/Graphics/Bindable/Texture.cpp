@@ -70,6 +70,22 @@ namespace Kaka
 				hr = DirectX::LoadFromDDSFile(DEFAULT_DIFFUSE_TEXTURE_PATH, DirectX::DDS_FLAGS_NONE, &metadata,
 				                              image);
 
+				if (SUCCEEDED(hr))
+				{
+					pTextures.emplace_back();
+					// Create the shader resource view from the loaded texture
+					hr = CreateShaderResourceView(GetDevice(aGfx), image.GetImages(), image.GetImageCount(), metadata,
+					                              pTextures.back().GetAddressOf());
+
+					const std::string text =
+						"\n+++++++++++++++++++++++++++++++++++++++++++++++++"
+						"\nLoaded diffuse texture!"
+						"\nModel: " + aFilePath +
+						"\nTexture: " + texturePath +
+						"\n+++++++++++++++++++++++++++++++++++++++++++++++++";
+					OutputDebugStringA(text.c_str());
+				}
+
 				if (FAILED(hr))
 				{
 					text = "\n-------------------------------------------------"
@@ -135,6 +151,19 @@ namespace Kaka
 
 				if (SUCCEEDED(hr))
 				{
+					pTextures.emplace_back();
+					// Create the shader resource view from the loaded texture
+					hr = CreateShaderResourceView(GetDevice(aGfx), image.GetImages(), image.GetImageCount(), metadata,
+					                              pTextures.back().GetAddressOf());
+
+					const std::string text =
+						"\n+++++++++++++++++++++++++++++++++++++++++++++++++"
+						"\nLoaded normal texture!"
+						"\nModel: " + aFilePath +
+						"\nTexture: " + texturePath +
+						"\n+++++++++++++++++++++++++++++++++++++++++++++++++";
+					OutputDebugStringA(text.c_str());
+
 					hasNormalMap = TRUE;
 				}
 				if (FAILED(hr))
@@ -203,6 +232,19 @@ namespace Kaka
 
 				if (SUCCEEDED(hr))
 				{
+					pTextures.emplace_back();
+					// Create the shader resource view from the loaded texture
+					hr = CreateShaderResourceView(GetDevice(aGfx), image.GetImages(), image.GetImageCount(), metadata,
+					                              pTextures.back().GetAddressOf());
+
+					const std::string text =
+						"\n+++++++++++++++++++++++++++++++++++++++++++++++++"
+						"\nLoaded material texture!"
+						"\nModel: " + aFilePath +
+						"\nTexture: " + texturePath +
+						"\n+++++++++++++++++++++++++++++++++++++++++++++++++";
+					OutputDebugStringA(text.c_str());
+
 					hasMaterial = TRUE;
 				}
 				if (FAILED(hr))
@@ -267,6 +309,95 @@ namespace Kaka
 				"\nTexture: " + aFilePath +
 				"\n-------------------------------------------------";
 			OutputDebugStringA(text.c_str());
+		}
+	}
+
+	void Texture::LoadMaterialFromPaths(const Graphics& aGfx, const std::string& aFilePath1, const std::string& aFilePath2, const std::string& aFilePath3)
+	{
+		DirectX::ScratchImage image;
+		DirectX::TexMetadata metadata;
+
+		for (int i = 0; i < 3; ++i)
+		{
+			std::string aFilePath;
+			switch (i)
+			{
+			case 0:
+				aFilePath = aFilePath1;
+				break;
+			case 1:
+				aFilePath = aFilePath2;
+				break;
+			case 2:
+				aFilePath = aFilePath3;
+				break;
+			}
+
+			// Try to load the DDS texture file
+			HRESULT hr = DirectX::LoadFromDDSFile(std::wstring(aFilePath.begin(), aFilePath.end()).c_str(),
+			                                      DirectX::DDS_FLAGS_NONE, &metadata, image);
+
+			if (FAILED(hr))
+			{
+				// If DDS texture not found, try to load PNG texture with the same name
+				hr = DirectX::LoadFromWICFile(std::wstring(aFilePath.begin(), aFilePath.end()).c_str(),
+				                              DirectX::WIC_FLAGS_NONE, &metadata, image);
+			}
+
+			if (SUCCEEDED(hr))
+			{
+				// Generate mipmaps for the loaded texture
+				DirectX::ScratchImage mipmappedImage;
+				hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), metadata,
+				                              DirectX::TEX_FILTER_DEFAULT, 0, mipmappedImage);
+
+				if (SUCCEEDED(hr))
+				{
+					pTextures.emplace_back();
+					// Create the shader resource view from the mipmapped texture
+					hr = CreateShaderResourceView(GetDevice(aGfx), mipmappedImage.GetImages(),
+					                              mipmappedImage.GetImageCount(), mipmappedImage.GetMetadata(),
+					                              pTextures.back().GetAddressOf());
+				}
+
+				if (SUCCEEDED(hr))
+				{
+					const std::string text =
+						"\n+++++++++++++++++++++++++++++++++++++++++++++++++"
+						"\nLoaded texture!"
+						"\nTexture: " + aFilePath +
+						"\n+++++++++++++++++++++++++++++++++++++++++++++++++";
+					OutputDebugStringA(text.c_str());
+				}
+			}
+
+			//if (SUCCEEDED(hr))
+			//{
+			//	pTextures.emplace_back();
+			//	// Create the shader resource view from the loaded texture
+			//	hr = CreateShaderResourceView(GetDevice(aGfx), image.GetImages(), image.GetImageCount(), metadata,
+			//	                              pTextures.back().GetAddressOf());
+			//}
+
+			//if (SUCCEEDED(hr))
+			//{
+			//	const std::string text =
+			//		"\n+++++++++++++++++++++++++++++++++++++++++++++++++"
+			//		"\nLoaded texture!"
+			//		"\nTexture: " + aFilePath +
+			//		"\n+++++++++++++++++++++++++++++++++++++++++++++++++";
+			//	OutputDebugStringA(text.c_str());
+			//}
+
+			if (FAILED(hr))
+			{
+				const std::string text =
+					"\n-------------------------------------------------"
+					"\nFailed to load texture!"
+					"\nTexture: " + aFilePath +
+					"\n-------------------------------------------------";
+				OutputDebugStringA(text.c_str());
+			}
 		}
 	}
 

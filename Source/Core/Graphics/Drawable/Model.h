@@ -54,7 +54,7 @@ namespace Kaka
 		void DrawAnimated(Graphics& aGfx);
 
 	private:
-		Sampler sampler = {};
+		//Sampler sampler = {};
 		VertexBuffer vertexBuffer = {};
 		IndexBuffer indexBuffer = {};
 		PixelShader* pixelShader = nullptr;

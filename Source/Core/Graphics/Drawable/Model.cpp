@@ -31,17 +31,17 @@ namespace Kaka
 	{
 		shaderType = aShaderType;
 
-		sampler.Init(aGfx, 0u);
+		//sampler.Init(aGfx, 0u);
 
 		// Shaders
 		switch (shaderType)
 		{
-			case eShaderType::PBR:
+		case eShaderType::PBR:
 			{
 				modelType = eModelType::Static;
-
-				ModelLoader::LoadModel(modelData, aFilePath);
-				ModelLoader::LoadTexture(aGfx, modelData, aFilePath);
+				ModelLoader::LoadStaticModel(aGfx, aFilePath, modelData);
+				//ModelLoader::LoadModel(modelData, aFilePath);
+				//ModelLoader::LoadTexture(aGfx, modelData, aFilePath);
 
 				pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\ModelPBR_Deferred_PS.cso");
 				vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\ModelPBR_Deferred_VS.cso");
@@ -72,7 +72,7 @@ namespace Kaka
 				inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
 			}
 			break;
-			case eShaderType::AnimPBR:
+		case eShaderType::AnimPBR:
 			{
 				modelType = eModelType::Skeletal;
 
@@ -133,18 +133,18 @@ namespace Kaka
 	{
 		switch (modelType)
 		{
-			case eModelType::Static:
+		case eModelType::Static:
 			{
 				DrawStatic(aGfx);
 			}
 			break;
-			case eModelType::Skeletal:
+		case eModelType::Skeletal:
 			{
 				UpdatePtr(aDeltaTime);
 				DrawAnimated(aGfx);
 			}
 			break;
-			default: ;
+		default: ;
 		}
 	}
 
@@ -155,8 +155,8 @@ namespace Kaka
 			return;
 		}
 
-		sampler.Bind(aGfx);
-		modelData.texture->Bind(aGfx);
+		//sampler.Bind(aGfx);
+		//modelData.texture->Bind(aGfx);
 
 		TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
 		transformConstantBuffer.Bind(aGfx);
@@ -177,6 +177,10 @@ namespace Kaka
 
 		for (Mesh& mesh : modelData.meshList->meshes)
 		{
+			if (mesh.texture != nullptr)
+			{
+				mesh.texture->Bind(aGfx);
+			}
 			vertexBuffer.Init(aGfx, mesh.vertices);
 			indexBuffer.Init(aGfx, mesh.indices);
 
@@ -201,7 +205,7 @@ namespace Kaka
 			return;
 		}
 
-		sampler.Bind(aGfx);
+		//sampler.Bind(aGfx);
 		animatedModelData.texture->Bind(aGfx);
 
 		TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
@@ -231,7 +235,7 @@ namespace Kaka
 
 			switch (shaderType)
 			{
-				case eShaderType::AnimPBR:
+			case eShaderType::AnimPBR:
 				{
 					// Bones
 					struct VSBoneConstant

@@ -8,232 +8,146 @@
 #include <External/include/assimp/postprocess.h>
 #include <DirectXMath.h>
 #include <cassert>
+#include <filesystem>
 #include <vector>
 
 #include "TGAFBXImporter/source/FBXImporter.h"
 
 namespace Kaka
 {
-	//bool ModelLoader::LoadModel(const std::string& aFilePath, ModelData& aOutModelData)
-	//{
-	//	Assimp::Importer importer;
-	//	const aiScene* scene = importer.ReadFile(aFilePath,
-	//	                                         aiProcess_Triangulate |
-	//	                                         aiProcess_JoinIdenticalVertices |
-	//	                                         aiProcess_FlipUVs |
-	//	                                         aiProcess_ConvertToLeftHanded |
-	//	                                         aiProcess_LimitBoneWeights |
-	//	                                         /*aiProcess_GenSmoothNormals |*/
-	//	                                         aiProcess_FindInvalidData |
-	//	                                         aiProcessPreset_TargetRealtime_Quality
-	//	);
+	bool ModelLoader::LoadStaticModel(const Graphics& aGfx, const std::string& aFilePath, ModelDataPtr& aOutModelData)
+	{
+		Assimp::Importer importer;
+		const aiScene* scene = importer.ReadFile(aFilePath,
+		                                         aiProcess_Triangulate |
+		                                         aiProcess_JoinIdenticalVertices |
+		                                         aiProcess_FlipUVs |
+		                                         aiProcess_ConvertToLeftHanded |
+		                                         aiProcess_LimitBoneWeights |
+		                                         /*aiProcess_GenSmoothNormals |*/
+		                                         aiProcess_FindInvalidData |
+		                                         aiProcessPreset_TargetRealtime_Fast
+		);
 
-	//	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-	//	{
-	//		std::cerr << "Failed to load file: " << importer.GetErrorString() << std::endl;
-	//		return false;
-	//	}
+		const std::filesystem::path rootFsPath = std::filesystem::path(aFilePath).parent_path();
+		const std::string rootPath = rootFsPath.string() + "\\";
 
-	//	const aiMesh* mesh = scene->mMeshes[0];
+		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+		{
+			std::cerr << "Failed to load file: " << importer.GetErrorString() << std::endl;
+			return false;
+		}
+		meshLists[aFilePath] = MeshList();
+		MeshList& meshList = meshLists[aFilePath];
+		aOutModelData.meshList = &meshList;
 
-	//	//aOutModelData.globalInverseMatrix = AssimpToDirectXMatrix(scene->mRootNode->mTransformation);
-	//	//DirectX::XMStoreFloat4x4(&aOutModelData.globalInverseMatrix,
-	//	//                         DirectX::XMMatrixInverse(
-	//	//	                         nullptr, DirectX::XMLoadFloat4x4(&aOutModelData.globalInverseMatrix)));
+		meshLists[aFilePath].meshes.resize(scene->mNumMeshes);
 
-	//	// Check if scene contains animations
-	//	if (scene->mNumAnimations > 0)
-	//	{
-	//		// Load the skeleton and animations
-	//		aOutModelData.skeleton = LoadSkeleton(scene);
-	//		aOutModelData.animations = LoadAnimations(scene);
+		// Copy model data from FBXImporter to our own model data
+		aOutModelData.meshList = &meshLists[aFilePath];
+		for (size_t i = 0; i < aOutModelData.meshList->meshes.size(); ++i)
+		{
+			// Imported data
+			aiMesh* aiMesh = scene->mMeshes[i];
 
-	//		for (const Bone& bone : aOutModelData.skeleton.bones)
-	//		{
-	//			// Compute the bind pose transformation matrix as the inverse of the bone's offset matrix
-	//			DirectX::XMMATRIX bindPose = DirectX::XMMatrixInverse(nullptr, bone.bindPose);
+			// Our own data
+			Mesh& mesh = aOutModelData.meshList->meshes[i];
+
+			// Get Material from .fbx
+			{
+				aiString textureFileName;
+				aiMaterial* mat = scene->mMaterials[aiMesh->mMaterialIndex];
+
+				std::string materialName = mat->GetName().C_Str();
+				std::string diffuseTextureFileName;
+				std::string normalTextureFileName;
+				std::string materialTextureFileName;
+
+				// Diffuse
+				if (mat->GetTexture(aiTextureType_DIFFUSE, 0, &textureFileName) == aiReturn_SUCCESS)
+				{
+					diffuseTextureFileName = rootPath + textureFileName.C_Str();
+				}
+				if (mat->GetTexture(aiTextureType_NORMALS, 0, &textureFileName) == aiReturn_SUCCESS)
+				{
+					normalTextureFileName = rootPath + textureFileName.C_Str();
+				}
+				if (mat->GetTexture(aiTextureType_METALNESS, 0, &textureFileName) == aiReturn_SUCCESS)
+				{
+					materialTextureFileName = rootPath + textureFileName.C_Str();
+				}
+
+				if (textures.contains(materialName))
+				{
+					//return &textures[materialName];
+					mesh.texture = &textures[materialName];
+				}
+				else
+				{
+					textures[materialName] = Texture(1u);
+					textures[materialName].LoadMaterialFromPaths(aGfx, diffuseTextureFileName, normalTextureFileName, materialTextureFileName);
+
+					//return &textures[aFilePath];
+					mesh.texture = &textures[materialName];
+				}
+
+				//std::string name = textureFileName.C_Str();
+
+				//meshList.materialNames.push_back(name);
+			}
+
+			mesh.vertices.reserve(aiMesh->mNumVertices);
+
+			for (unsigned int i = 0; i < aiMesh->mNumVertices; ++i)
+			{
+				const DirectX::XMFLOAT3 position{aiMesh->mVertices[i].x, aiMesh->mVertices[i].y, aiMesh->mVertices[i].z};
+				const DirectX::XMFLOAT3 normal = *reinterpret_cast<DirectX::XMFLOAT3*>(&aiMesh->mNormals[i]);
+				DirectX::XMFLOAT2 texCoord{0.0f, 0.0f};
+				DirectX::XMFLOAT3 tangent{0.0f, 0.0f, 0.0f};
+				DirectX::XMFLOAT3 bitangent{0.0f, 0.0f, 0.0f};
+
+				// Check if the mesh has texture coordinates
+				if (aiMesh->HasTextureCoords(0))
+				{
+					// Retrieve the first set of texture coordinates
+					const aiVector3D& aiTexCoord = aiMesh->mTextureCoords[0][i];
+					texCoord.x = aiTexCoord.x;
+					texCoord.y = aiTexCoord.y;
+				}
+
+				if (aiMesh->HasTangentsAndBitangents())
+				{
+					tangent = *reinterpret_cast<DirectX::XMFLOAT3*>(&aiMesh->mTangents[i]);
+					bitangent = *reinterpret_cast<DirectX::XMFLOAT3*>(&aiMesh->mBitangents[i]);
+				}
+
+				mesh.vertices.push_back({position, texCoord, normal, tangent, bitangent});
+			}
+
+			mesh.indices.reserve(static_cast<std::vector<unsigned short, std::allocator<unsigned short>>::size_type>(aiMesh->mNumFaces) * 3);
+
+			for (unsigned int j = 0; j < aiMesh->mNumFaces; j++)
+			{
+				const aiFace& face = aiMesh->mFaces[j];
+
+				for (unsigned int k = 0; k < face.mNumIndices; k++)
+				{
+					mesh.indices.push_back(face.mIndices[k]);
+				}
+			}
+			//for (unsigned int j = 0; i < aiMesh->mNumFaces; j++)
+			//{
+			//	const auto& face = aiMesh->mFaces[j];
+			//	assert(face.mNumIndices == 3);
+			//	mesh.indices.push_back(static_cast<const unsigned short&>(face.mIndices[0]));
+			//	mesh.indices.push_back(static_cast<const unsigned short&>(face.mIndices[1]));
+			//	mesh.indices.push_back(static_cast<const unsigned short&>(face.mIndices[2]));
+			//}
+		}
 
 
-	//			// Store the bind pose transformation matrix
-	//			//aOutModelData.bindPose.push_back(bindPoseBoneTransform);
-	//		}
-
-	//		aOutModelData.modelType = eModelType::Skeletal;
-
-	//		const std::string text = "\nSuccessfully loaded skeleton!"
-	//			"\nNumber of bones: " + std::to_string(aOutModelData.skeleton.bones.size()) +
-	//			"\nNumber of animations: " + std::to_string(aOutModelData.animations.size());
-	//		OutputDebugStringA(text.c_str());
-	//		std::string names;
-
-	//		for (auto& anim : aOutModelData.animations)
-	//		{
-	//			names += "\n" + anim.name;
-	//		}
-
-	//		OutputDebugStringA(names.c_str());
-
-	//		aOutModelData.animMesh.vertices.reserve(mesh->mNumVertices);
-
-	//		for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
-	//		{
-	//			const DirectX::XMFLOAT3 position{mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z};
-	//			const DirectX::XMFLOAT3 normal = *reinterpret_cast<DirectX::XMFLOAT3*>(&mesh->mNormals[i]);
-	//			DirectX::XMFLOAT2 texCoord{0.0f, 0.0f};
-	//			DirectX::XMFLOAT3 tangent{0.0f, 0.0f, 0.0f};
-	//			DirectX::XMFLOAT3 bitangent{0.0f, 0.0f, 0.0f};
-	//			// Initialize bone indices and bone weights for the vertex
-	//			std::array<unsigned int, 4> boneIndices = {};
-	//			std::array<float, 4> boneWeights = {};
-
-	//			// Check if the mesh has texture coordinates
-	//			if (mesh->HasTextureCoords(0))
-	//			{
-	//				// Retrieve the first set of texture coordinates
-	//				const aiVector3D& aiTexCoord = mesh->mTextureCoords[0][i];
-	//				texCoord.x = aiTexCoord.x;
-	//				texCoord.y = aiTexCoord.y;
-	//			}
-
-	//			if (mesh->HasTangentsAndBitangents())
-	//			{
-	//				tangent = *reinterpret_cast<DirectX::XMFLOAT3*>(&mesh->mTangents[i]);
-	//				bitangent = *reinterpret_cast<DirectX::XMFLOAT3*>(&mesh->mBitangents[i]);
-	//			}
-
-	//			if (mesh->HasBones())
-	//			{
-	//				// Keep track of the number of bone influences encountered
-	//				unsigned int numInfluences = 0;
-
-	//				// Iterate over each bone influencing the current vertex
-	//				for (unsigned int j = 0; j < mesh->mNumBones; ++j)
-	//				{
-	//					aiBone* bone = mesh->mBones[j];
-
-	//					// Iterate over each vertex weight in the bone
-	//					for (unsigned int k = 0; k < bone->mNumWeights; ++k)
-	//					{
-	//						aiVertexWeight vertexWeight = bone->mWeights[k];
-
-	//						// Check if the vertex index matches the current vertex
-	//						if (vertexWeight.mVertexId == i)
-	//						{
-	//							// Find the index for the bone in the boneIndices vector
-	//							auto it = std::find(boneIndices.begin(), boneIndices.end(), j);
-	//							if (it == boneIndices.end())
-	//							{
-	//								// The bone index is not already in the boneIndices vector, add it
-	//								if (numInfluences < boneIndices.size())
-	//								{
-	//									boneIndices[numInfluences] = j;
-	//									boneWeights[numInfluences] = vertexWeight.mWeight;
-	//									numInfluences++;
-	//								}
-	//							}
-	//							else
-	//							{
-	//								// The bone index already exists in the boneIndices vector, update its weight
-	//								size_t index = std::distance(boneIndices.begin(), it);
-	//								boneWeights[index] = vertexWeight.mWeight;
-	//							}
-	//						}
-	//					}
-	//				}
-
-	//				// Normalize bone weights if there are multiple influences
-	//				if (numInfluences > 1)
-	//				{
-	//					// Calculate the sum of bone weights
-	//					float weightSum = 0.0f;
-	//					for (unsigned int l = 0; l < numInfluences; ++l)
-	//					{
-	//						weightSum += boneWeights[l];
-	//					}
-
-	//					// Normalize the bone weights
-	//					for (unsigned int l = 0; l < numInfluences; ++l)
-	//					{
-	//						boneWeights[l] /= weightSum;
-	//					}
-	//				}
-	//			}
-
-	//			aOutModelData.animMesh.vertices.push_back({
-	//				position, texCoord, normal, tangent, bitangent,
-	//				{boneIndices[0], boneIndices[1], boneIndices[2], boneIndices[3]},
-	//				{boneWeights[0], boneWeights[1], boneWeights[2], boneWeights[3]}
-	//			});
-
-	//			//for (int k = 0; k < 4; ++k)
-	//			//{
-	//			//	std::string boneInfo = "\n Vertex: " + std::to_string(i) + " [" + std::to_string(k) + "] Bone: " + std::to_string(boneIndices[k]) + " Weight: " + std::to_string(boneWeights[k]);
-	//			//	OutputDebugStringA(boneInfo.c_str());
-	//			//}
-	//			//OutputDebugStringA("\n---");
-	//		}
-
-	//		aOutModelData.animMesh.indices.reserve(
-	//			static_cast<std::vector<unsigned short, std::allocator<unsigned short>>::size_type>(mesh->mNumFaces) *
-	//			3);
-	//		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
-	//		{
-	//			const auto& face = mesh->mFaces[i];
-	//			assert(face.mNumIndices == 3);
-	//			aOutModelData.animMesh.indices.push_back(static_cast<const unsigned short&>(face.mIndices[0]));
-	//			aOutModelData.animMesh.indices.push_back(static_cast<const unsigned short&>(face.mIndices[1]));
-	//			aOutModelData.animMesh.indices.push_back(static_cast<const unsigned short&>(face.mIndices[2]));
-	//		}
-	//	}
-	//	else
-	//	{
-	//		aOutModelData.modelType = eModelType::Static;
-	//		const std::string text = "\nNo skeleton found!";
-	//		OutputDebugStringA(text.c_str());
-
-	//		aOutModelData.mesh.vertices.reserve(mesh->mNumVertices);
-
-	//		for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
-	//		{
-	//			const DirectX::XMFLOAT3 position{mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z};
-	//			const DirectX::XMFLOAT3 normal = *reinterpret_cast<DirectX::XMFLOAT3*>(&mesh->mNormals[i]);
-	//			DirectX::XMFLOAT2 texCoord{0.0f, 0.0f};
-	//			DirectX::XMFLOAT3 tangent{0.0f, 0.0f, 0.0f};
-	//			DirectX::XMFLOAT3 bitangent{0.0f, 0.0f, 0.0f};
-
-	//			// Check if the mesh has texture coordinates
-	//			if (mesh->HasTextureCoords(0))
-	//			{
-	//				// Retrieve the first set of texture coordinates
-	//				const aiVector3D& aiTexCoord = mesh->mTextureCoords[0][i];
-	//				texCoord.x = aiTexCoord.x;
-	//				texCoord.y = aiTexCoord.y;
-	//			}
-
-	//			if (mesh->HasTangentsAndBitangents())
-	//			{
-	//				tangent = *reinterpret_cast<DirectX::XMFLOAT3*>(&mesh->mTangents[i]);
-	//				bitangent = *reinterpret_cast<DirectX::XMFLOAT3*>(&mesh->mBitangents[i]);
-	//			}
-
-	//			aOutModelData.mesh.vertices.push_back({position, texCoord, normal, tangent, bitangent});
-	//		}
-
-	//		aOutModelData.mesh.indices.reserve(
-	//			static_cast<std::vector<unsigned short, std::allocator<unsigned short>>::size_type>(mesh->mNumFaces) *
-	//			3);
-	//		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
-	//		{
-	//			const auto& face = mesh->mFaces[i];
-	//			assert(face.mNumIndices == 3);
-	//			aOutModelData.mesh.indices.push_back(static_cast<const unsigned short&>(face.mIndices[0]));
-	//			aOutModelData.mesh.indices.push_back(static_cast<const unsigned short&>(face.mIndices[1]));
-	//			aOutModelData.mesh.indices.push_back(static_cast<const unsigned short&>(face.mIndices[2]));
-	//		}
-	//	}
-
-	//	return true;
-	//}
+		return true;
+	}
 
 	//Skeleton ModelLoader::LoadSkeleton(const aiScene* aScene)
 	//{
@@ -468,7 +382,7 @@ namespace Kaka
 				}
 
 				// Assign material name
-				aOutModelData.meshList->materialNames.push_back(fbxModel.Materials[fbxMesh.MaterialIndex].MaterialName);
+				//aOutModelData.meshList->materialNames.push_back(fbxModel.Materials[fbxMesh.MaterialIndex].MaterialName);
 			}
 			return true;
 		}
