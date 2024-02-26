@@ -9,8 +9,8 @@
 #include "Graphics/GraphicsConstants.h"
 #include "Graphics/Drawable/ModelLoader.h"
 
-constexpr int WINDOW_WIDTH = 2560;
-constexpr int WINDOW_HEIGHT = 1440;
+constexpr int WINDOW_WIDTH = 1920;
+constexpr int WINDOW_HEIGHT = 1080;
 constexpr int NUM_POINT_LIGHTS = 0;
 constexpr int NUM_SPOT_LIGHTS = 0;
 constexpr int TERRAIN_SIZE = 0;
@@ -24,8 +24,8 @@ namespace Kaka
 		:
 		wnd(WINDOW_WIDTH, WINDOW_HEIGHT, L"Kaka")
 	{
-		camera.SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 110, 0.5f, 5000.0f);
-		directionalLightShadowCamera.SetOrthographic(WINDOW_WIDTH / 4.0f, WINDOW_HEIGHT / 4.0f, -500.0f, 500.0f);
+		camera.SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 90, 0.5f, 5000.0f);
+		directionalLightShadowCamera.SetOrthographic(WINDOW_WIDTH / 3.0f, WINDOW_HEIGHT / 3.0f, -500.0f, 500.0f);
 
 		for (int i = 0; i < NUM_POINT_LIGHTS; ++i)
 		{
@@ -140,7 +140,7 @@ namespace Kaka
 
 		models.emplace_back();
 		models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\sponza_pbr\\Sponza.obj", Model::eShaderType::PBR);
-		//models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\sponza\\NewSponza_Main_Yup_002.fbx", Model::eShaderType::PBR);
+		//models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\NewSponza\\New_Sponza_001.gltf", Model::eShaderType::PBR);
 		models.back().Init();
 		models.back().SetScale(0.1f);
 
@@ -413,11 +413,9 @@ namespace Kaka
 		commonBuffer.resolution = wnd.Gfx().GetCurrentResolution();
 		commonBuffer.currentTime = timer.GetTotalTime();
 
-		PixelConstantBuffer<CommonBuffer> pcb{wnd.Gfx(), PS_CBUFFER_SLOT_COMMON};
 		pcb.Update(wnd.Gfx(), commonBuffer);
 		pcb.Bind(wnd.Gfx());
 
-		VertexConstantBuffer<CommonBuffer> vcb{wnd.Gfx(), VS_CBUFFER_SLOT_COMMON};
 		vcb.Update(wnd.Gfx(), commonBuffer);
 		vcb.Bind(wnd.Gfx());
 
@@ -438,14 +436,6 @@ namespace Kaka
 			// Need backface culling for Reflective Shadow Maps
 			wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
 
-			struct RSMLightData
-			{
-				DirectX::XMFLOAT4 lightColourAndIntensity;
-				float falloff;
-				BOOL isDirectionalLight;
-				float padding[2];
-			} rsmLightData;
-
 			rsmLightData.lightColourAndIntensity =
 			{
 				deferredLights.GetDirectionalLightData().lightColour.x,
@@ -455,7 +445,6 @@ namespace Kaka
 			};
 			rsmLightData.isDirectionalLight = TRUE;
 
-			PixelConstantBuffer<RSMLightData> rsmLightDataBuffer{wnd.Gfx(), 0u};
 			rsmLightDataBuffer.Update(wnd.Gfx(), rsmLightData);
 			rsmLightDataBuffer.Bind(wnd.Gfx());
 
@@ -587,6 +576,8 @@ namespace Kaka
 
 			if (ImGui::Begin("Shadows"))
 			{
+				ImGui::Columns(2, nullptr, false);
+				ImGui::SetColumnWidth(0, 250.0f);
 				ImGui::Text("PCF");
 				ImGui::Checkbox("Use PCF", (bool*)&shadowBuffer.usePCF);
 				ImGui::DragFloat("Offset scale##OffsetPCF", &shadowBuffer.offsetScalePCF, 0.0001f, 0.0f, 1.0f, "%.6f");
@@ -594,6 +585,8 @@ namespace Kaka
 				ImGui::Text("Poisson");
 				ImGui::Checkbox("Use Poisson##Shadow", (bool*)&shadowBuffer.usePoisson);
 				ImGui::DragFloat("Offset scale##OffsetPoisson", &shadowBuffer.offsetScalePoissonDisk, 0.0001f, 0.0f, 1.0f, "%.6f");
+				ImGui::NextColumn();
+				ImGui::SetColumnWidth(0, 250.0f);
 				ImGui::Text("RSM");
 				ImGui::Checkbox("Use RSM", (bool*)&rsmBuffer.useRSM);
 				ImGui::Checkbox("Only RSM", (bool*)&rsmBuffer.onlyRSM);
@@ -601,6 +594,12 @@ namespace Kaka
 				ImGui::DragInt("Sample count##RSM", (int*)&rsmBuffer.sampleCount, 1, 1, 2000);
 				ImGui::DragFloat("R Max", &rsmBuffer.rMax, 0.001f, 0.0f, 5.0f, "%.3f");
 				ImGui::DragFloat("RSM Intensity", &rsmBuffer.rsmIntensity, 0.01f, 0.0f, 100.0f, "%.2f");
+				ImGui::SetNextItemWidth(150.0f);
+				ImGui::ColorPicker3("Shadow colour", &rsmBuffer.shadowColour.x);
+				ImGui::DragFloat("Shadow intensity", &rsmBuffer.shadowColour.w, 0.01f, 0.0f, 1.0f, "%.2f");
+				ImGui::SetNextItemWidth(150.0f);
+				ImGui::ColorPicker3("Ambiance colour", &rsmBuffer.ambianceColour.x);
+				ImGui::DragFloat("Ambiance intensity", &rsmBuffer.ambianceColour.w, 0.01f, 0.0f, 1.0f, "%.2f");
 			}
 			ImGui::End();
 			//for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
@@ -733,30 +732,51 @@ namespace Kaka
 				cameraSpeed = cameraSpeedDefault;
 			}
 
+			cameraInput = {0.0f, 0.0f, 0.0f};
+
 			if (wnd.keyboard.KeyIsPressed('W'))
 			{
-				camera.Translate({0.0f, 0.0f, aDeltaTime * cameraSpeed});
+				cameraInput.z += 1.0f;
+				//
+				//camera.Translate({0.0f, 0.0f, aDeltaTime * cameraSpeed});
 			}
+
 			if (wnd.keyboard.KeyIsPressed('A'))
 			{
-				camera.Translate({-aDeltaTime * cameraSpeed, 0.0f, 0.0f});
+				cameraInput.x -= 1.0f;
+				//camera.Translate({-aDeltaTime * cameraSpeed, 0.0f, 0.0f});
 			}
+
 			if (wnd.keyboard.KeyIsPressed('S'))
 			{
-				camera.Translate({0.0f, 0.0f, -aDeltaTime * cameraSpeed});
+				cameraInput.z -= 1.0f;
+				//camera.Translate({0.0f, 0.0f, -aDeltaTime * cameraSpeed});
 			}
+
 			if (wnd.keyboard.KeyIsPressed('D'))
 			{
-				camera.Translate({aDeltaTime * cameraSpeed, 0.0f, 0.0f});
+				cameraInput.x += 1.0f;
+				//camera.Translate({aDeltaTime * cameraSpeed, 0.0f, 0.0f});
 			}
+
 			if (wnd.keyboard.KeyIsPressed(VK_SPACE))
 			{
-				camera.Translate({0.0f, aDeltaTime * cameraSpeed, 0.0f});
+				cameraInput.y += 1.0f;
+				//camera.Translate({0.0f, aDeltaTime * cameraSpeed, 0.0f});
 			}
 			if (wnd.keyboard.KeyIsPressed(VK_CONTROL))
 			{
-				camera.Translate({0.0f, -aDeltaTime * cameraSpeed, 0.0f});
+				cameraInput.y -= 1.0f;
+				//camera.Translate({0.0f, -aDeltaTime * cameraSpeed, 0.0f});
 			}
+
+			cameraVelocity = {
+				Interp(cameraVelocity.x, aDeltaTime * cameraSpeed * cameraInput.x, aDeltaTime * cameraMoveInterpSpeed),
+				Interp(cameraVelocity.y, aDeltaTime * cameraSpeed * cameraInput.y, aDeltaTime * cameraMoveInterpSpeed),
+				Interp(cameraVelocity.z, aDeltaTime * cameraSpeed * cameraInput.z, aDeltaTime * cameraMoveInterpSpeed),
+			};
+
+			camera.Translate(cameraVelocity);
 		}
 
 		while (const auto delta = wnd.mouse.ReadRawDelta())

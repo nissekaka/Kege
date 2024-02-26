@@ -25,7 +25,7 @@ GBufferOutput main(PixelInput aInput)
     normal = 2.0f * normal - 1.0f;
     normal.z = sqrt(1 - saturate(normal.x * normal.x + normal.y * normal.y));
     normal = normalize(normal);
-    //normal.z = -normal.z;
+    normal.y = -normal.y;
 
     float3x3 TBN = float3x3(normalize(aInput.tangent.xyz),
                             normalize(-aInput.bitan.xyz),

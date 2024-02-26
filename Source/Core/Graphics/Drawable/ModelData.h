@@ -30,8 +30,10 @@ namespace Kaka
 	{
 		std::vector<Vertex> vertices{};
 		std::vector<unsigned short> indices{};
-		Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
-		Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
+		VertexBuffer vertexBuffer;
+		IndexBuffer indexBuffer;
+		//Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
+		//Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
 		Texture* texture;
 	};
 
@@ -47,8 +49,10 @@ namespace Kaka
 	{
 		std::vector<BoneVertex> vertices{};
 		std::vector<unsigned short> indices{};
-		Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
-		Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
+		VertexBuffer vertexBuffer;
+		IndexBuffer indexBuffer;
+		//Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
+		//Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
 	};
 
 	struct AnimatedMeshList

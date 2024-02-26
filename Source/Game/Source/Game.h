@@ -16,6 +16,7 @@
 #include "Core/Graphics/Drawable/SpriteManager.h"
 #include "Core/Graphics/Drawable/Sprite.h"
 #include "Core/Graphics/Lighting/DeferredLights.h"
+#include "Graphics/GraphicsConstants.h"
 
 namespace Kaka
 {
@@ -44,8 +45,6 @@ namespace Kaka
 
 		DeferredLights deferredLights;
 
-		//DirectionalLight directionalLight{wnd.Gfx(), 1u};
-
 		std::vector<Sprite> sprites = {};
 		std::vector<PointLight> pointLights = {};
 		std::vector<SpotLight> spotLights = {};
@@ -63,8 +62,6 @@ namespace Kaka
 		float pointLightIntensityInterpSpeed = 5.0f;
 		float pointLightIntensity = 5.0f;
 		float pointLightRadius = 50.0f;
-		//float pointLightAngles[] = PI;
-		//float pointLightAngles[4] = {0.0f,PI / 2,PI,PI * 1.5f};
 
 	private:
 		bool showImGui = true;
@@ -72,6 +69,10 @@ namespace Kaka
 		bool drawLightDebug = false;
 
 	private:
+		DirectX::XMFLOAT3 cameraInput = {0.0f, 0.0f, 0.0f};
+		DirectX::XMFLOAT3 cameraVelocity = {0.0f, 0.0f, 0.0f};
+		float cameraMoveInterpSpeed = 10.0f;
+		float cameraRotateInterpSpeed = 25.0f;
 		float cameraSpeed = 0.0f;
 		float cameraSpeedDefault = 3.0f;
 		float cameraSpeedBoost = 6.0f;
@@ -81,45 +82,10 @@ namespace Kaka
 		Texture* whiteTexture = nullptr;
 		Texture* blueTexture = nullptr;
 		Texture* redTexture = nullptr;
-		//Model vfxModel{};
-		//Model vfxModelOlle{};
-		//std::vector<Model> threadedModels{};
 
-		//Terrain terrain{};
 		Skybox skybox{};
-		//ReflectionPlane reflectionPlane{};
 		float skyboxSpeed = 0.005f;
 		DirectX::XMFLOAT3 skyboxAngle = {};
-		//std::vector<float> pointLightTravelRadiuses = {};
-		//std::vector<float> pointLightTravelSpeeds = {};
-		//std::vector<float> pointLightTravelAngles = {};
-
-		//std::vector<float> spotLightTravelRadiuses = {};
-		//std::vector<float> spotLightTravelSpeeds = {};
-		//std::vector<float> spotLightTravelAngles = {};
-
-		//std::vector<float> spriteTravelRadiuses = {};
-		//std::vector<float> spriteTravelSpeeds = {};
-		//std::vector<float> spriteTravelAngles = {};
-
-		//struct ReflectionWaveBuffer
-		//{
-		//	DirectX::XMFLOAT2 k0;
-		//	DirectX::XMFLOAT2 k1;
-		//	float A;
-		//	float padding[3];
-		//};
-
-		//ReflectionWaveBuffer reflectionPSBuffer = {};
-
-		//struct ReflectionHeightBuffer
-		//{
-		//	float height;
-		//	float padding[3];
-		//};
-
-		//ReflectionHeightBuffer reflectionVSBuffer = {};
-		//ReflectionHeightBuffer reflectionHeightPSBuffer = {};
 
 		struct CommonBuffer
 		{
@@ -179,8 +145,23 @@ namespace Kaka
 			float rMax = 0.08f; // Maximum sampling radius.
 			float rsmIntensity = 10.0f;
 			float padding[2];
+			DirectX::XMFLOAT4 shadowColour = {0.8f, 0.9f, 1.0f, 0.01f};
+			DirectX::XMFLOAT4 ambianceColour = {0.1f, 0.1f, 0.1f, 0.85f};
+			//float shadowIntensity = 0.25f;
 		};
 
 		RSMBuffer rsmBuffer = {};
+
+		struct RSMLightData
+		{
+			DirectX::XMFLOAT4 lightColourAndIntensity;
+			float falloff;
+			BOOL isDirectionalLight;
+			float padding[2];
+		} rsmLightData;
+
+		PixelConstantBuffer<CommonBuffer> pcb{wnd.Gfx(), PS_CBUFFER_SLOT_COMMON};
+		VertexConstantBuffer<CommonBuffer> vcb{wnd.Gfx(), VS_CBUFFER_SLOT_COMMON};
+		PixelConstantBuffer<RSMLightData> rsmLightDataBuffer{wnd.Gfx(), PS_CBUFFER_SLOT_RSM_LIGHT};
 	};
 }

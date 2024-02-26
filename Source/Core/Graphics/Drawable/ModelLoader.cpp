@@ -26,7 +26,8 @@ namespace Kaka
 		                                         aiProcess_LimitBoneWeights |
 		                                         /*aiProcess_GenSmoothNormals |*/
 		                                         aiProcess_FindInvalidData |
-		                                         aiProcessPreset_TargetRealtime_Fast
+		                                         aiProcessPreset_TargetRealtime_Fast |
+		                                         aiProcess_PreTransformVertices
 		);
 
 		const std::filesystem::path rootFsPath = std::filesystem::path(aFilePath).parent_path();
@@ -318,9 +319,12 @@ namespace Kaka
 	//	};
 	//}
 
-	bool ModelLoader::LoadModel(ModelDataPtr& aOutModelData, const std::string& aFilePath)
+	bool ModelLoader::LoadStaticFBXModel(const Graphics& aGfx, const std::string& aFilePath, ModelDataPtr& aOutModelData)
 	{
 		TGA::FBXModel fbxModel;
+
+		const std::filesystem::path rootFsPath = std::filesystem::path(aFilePath).parent_path();
+		const std::string rootPath = rootFsPath.string() + "\\";
 
 		if (TGA::FBXImporter::LoadModel(aFilePath, fbxModel))
 		{
@@ -339,6 +343,35 @@ namespace Kaka
 
 				// Our own data
 				Mesh& mesh = aOutModelData.meshList->meshes[i];
+
+				// Get Material from .fbx
+				{
+					std::string textureFileName;
+
+					TGA::FBXMaterial* material = &fbxModel.Materials[fbxMesh.MaterialIndex];
+					std::string materialName = fbxModel.Materials[fbxMesh.MaterialIndex].MaterialName;
+					std::string diffuseTextureFileName = rootPath + material->Diffuse.Path;
+					std::string normalTextureFileName = rootPath + material->NormalMap.Path;
+					std::string materialTextureFileName = rootPath + material->Shininess.Path;
+
+					if (textures.contains(materialName))
+					{
+						//return &textures[materialName];
+						mesh.texture = &textures[materialName];
+					}
+					else
+					{
+						textures[materialName] = Texture(1u);
+						textures[materialName].LoadMaterialFromPaths(aGfx, diffuseTextureFileName, normalTextureFileName, materialTextureFileName);
+
+						//return &textures[aFilePath];
+						mesh.texture = &textures[materialName];
+					}
+
+					//std::string name = textureFileName.C_Str();
+
+					//meshList.materialNames.push_back(name);
+				}
 
 				std::vector<Vertex> vertices;
 				vertices.resize(fbxMesh.Vertices.size());

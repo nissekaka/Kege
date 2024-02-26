@@ -20,7 +20,7 @@ namespace Kaka
 		static bool LoadStaticModel(const Graphics& aGfx, const std::string& aFilePath, ModelDataPtr& aOutModelData);
 
 		//static bool LoadModel(ModelData* aOutModelData, const std::string& aFilePath);
-		static bool LoadModel(ModelDataPtr& aOutModelData, const std::string& aFilePath);
+		static bool LoadStaticFBXModel(const Graphics& aGfx, const std::string& aFilePath, ModelDataPtr& aOutModelData);
 		static bool LoadAnimatedModel(AnimatedModelDataPtr& aOutModelData, const std::string& aFilePath);
 		static bool LoadTexture(const Graphics& aGfx, AnimatedModelDataPtr& aOutModelData, const std::string& aFilePath);
 		static bool LoadTexture(const Graphics& aGfx, ModelDataPtr& aOutModelData, const std::string& aFilePath);

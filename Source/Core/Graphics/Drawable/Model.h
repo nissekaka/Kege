@@ -55,8 +55,8 @@ namespace Kaka
 
 	private:
 		//Sampler sampler = {};
-		VertexBuffer vertexBuffer = {};
-		IndexBuffer indexBuffer = {};
+		//VertexBuffer vertexBuffer = {};
+		//IndexBuffer indexBuffer = {};
 		PixelShader* pixelShader = nullptr;
 		VertexShader* vertexShader = nullptr;
 		std::vector<D3D11_INPUT_ELEMENT_DESC> ied;

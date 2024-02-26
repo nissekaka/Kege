@@ -19,6 +19,10 @@ cbuffer RSMData : register(b3)
     uint sampleCount;
     float R_MAX;
     float RSM_INTENSITY;
+    float2 padding;
+    float4 shadowColour;
+    float4 ambianceColour;
+    //float shadowIntensity;
 };
 
 
@@ -53,9 +57,9 @@ float3 IndirectLighting(float2 uv, float3 n, float3 x)
 
     if (usePoissonRSM)
     {
-        for (int i = 0; i < 64; i++)	// Sum contributions of sampling locations
+        for (int i = 0; i < 151; i++)	// Sum contributions of sampling locations
         {
-            const float2 coord = uv + R_MAX * POISSON_DISK_64[i];
+            const float2 coord = uv + R_MAX * POISSON_DISK_151[i];
             const float3 flux = RSM_FluxTex.Sample(clampedSampler, coord).rgb; // Collect components from corresponding RSM textures
             const float3 xp = RSM_WorldPositionTex.Sample(clampedSampler, coord).xyz; // Position (x_p) and normal (n_p) are in world coordinates too
             const float3 np = normalize(2.0f * RSM_NormalTex.Sample(clampedSampler, coord).xyz - 1.0f);
@@ -63,7 +67,7 @@ float3 IndirectLighting(float2 uv, float3 n, float3 x)
             float3 Ep = flux * ((max(0, dot(np, x - xp)) * max(0, dot(n, xp - x)))
 									/ pow(length(x - xp), 4));
 
-            Ep *= POISSON_DISK_64[i].x * POISSON_DISK_64[i].x; // Weighting contribution and normalizing
+            Ep *= POISSON_DISK_151[i].x * POISSON_DISK_151[i].x; // Weighting contribution and normalizing
 
             rsmOutput += Ep; // Accumulate
         }
@@ -77,10 +81,11 @@ float3 IndirectLighting(float2 uv, float3 n, float3 x)
         {
             //float2 offset = mul(Hammersley(i, sampleCount), rot);
             float2 offset = Hammersley(i, sampleCount);
+            offset = clamp(offset, 0.001f, 0.999f); // Prevents the offset from creating black artifacts
             const float r = offset.x * R_MAX;
             const float theta = offset.y * TWO_PI;
             const float2 coord = uv + float2(r * cos(theta), r * sin(theta));
-            const float weight = offset.x * offset.x;
+        	const float weight = offset.x * offset.x;
 
             const float3 flux = RSM_FluxTex.Sample(clampedSampler, coord).rgb; // Collect components from corresponding RSM textures
             const float3 xp = RSM_WorldPositionTex.Sample(clampedSampler, coord).xyz; // Position (x_p) and normal (n_p) are in world coordinates too
@@ -95,7 +100,7 @@ float3 IndirectLighting(float2 uv, float3 n, float3 x)
         }
     }
 
-    return RSM_INTENSITY * rsmOutput; // Modulate result with some intensity value
+    return rsmOutput * RSM_INTENSITY; // Modulate result with some intensity value
 }
 
 float4 main(DeferredVertexToPixel aInput) : SV_TARGET
@@ -108,7 +113,15 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
     const float3 normal = normalize(2.0f * normalTex.Sample(defaultSampler, uv).xyz - 1.0f);
     const float4 material = materialTex.Sample(defaultSampler, uv);
 
-    // Reflective Shadow Maps -- Indirect lighting -- START
+    const float roughness = material.g;
+    const float metalness = material.b;
+
+    const float3 specular = lerp((float3) 0.04f, albedo.rgb, metalness);
+    const float3 colour = lerp((float3) 0.0f, albedo.rgb, 1.0f - metalness);
+
+    const float3 toEye = normalize(cameraPosition.xyz - worldPosition);
+
+        // Reflective Shadow Maps -- Indirect lighting -- START
 
     const float4 directionalLightProjectedPositionTemp = mul(directionalLightCameraTransform, float4(worldPosition, 1.0f));
     float3 directionLightProjectedPosition = directionalLightProjectedPositionTemp.xyz / directionalLightProjectedPositionTemp.w;
@@ -118,20 +131,13 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
     float3 rsm = float3(0, 0, 0);
     if (useRSM)
     {
-        rsm = IndirectLighting(sampleUV, normal, worldPosition);
+        rsm = IndirectLighting(sampleUV, normal, worldPosition) * colour;
+        //rsm = IndirectLighting(sampleUV, normal, worldPosition);
     }
 
     // Reflective Shadow Maps -- Indirect lighting -- END
 
-    const float metalness = material.r;
-    const float roughness = material.r;
-
-    const float3 specular = lerp((float3) 0.04f, albedo.rgb, metalness);
-    const float3 colour = lerp((float3) 0.0f, albedo.rgb, 1.0f - metalness);
-
-    const float3 toEye = normalize(cameraPosition.xyz - worldPosition);
-
-    float shadowFactor = Shadow(directionalLightCameraTransform, float4(worldPosition, 1.0f)) + 0.1f;
+    float shadowFactor = Shadow(directionalLightCameraTransform, float4(worldPosition, 1.0f)) + shadowColour.w;
     shadowFactor = saturate(shadowFactor);
 
     float3 dirLightDir = directionalLightDirection;
@@ -139,8 +145,13 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 
     const float3 directionalLight = EvaluateDirectionalLight(colour, specular, normal,
     roughness, directionalLightColour, -dirLightDir, toEye) * directionalLightIntensity;
-    
-    const float3 finalColour = directionalLight * shadowFactor;
+
+    float3 finalColour = directionalLight * shadowFactor;
+
+    if (shadowFactor < 1.0f)
+    {
+        finalColour *= shadowColour.rgb;
+    }
 
     const float3 lightDir = normalize(directionalLightDirection);
     const float dotProduct = dot(lightDir, float3(0.0f, 1.0f, 0.0f));
@@ -149,6 +160,7 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
     const float3 ambiance = EvaluateAmbianceDynamicSky(defaultSampler, daySkyTex, nightSkyTex, blendFactor,
     normal, ambientOcclusionAndCustom.gba, toEye, roughness, ambientOcclusionAndCustom.r, colour, specular);
 
+    const float3 constantAmbiance = colour * ambianceColour.rgb * ambianceColour.w;
     //const float3 ambiance = EvaluateAmbiance(defaultSampler,
     //daySkyTex, normal, ambientOcclusionAndCustom.gba,
     //toEye, roughness, ambientOcclusionAndCustom.r, colour, specular);
@@ -161,7 +173,7 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
         {
             return float4(rsm, 1.0f);
         }
-        return float4(finalColour + ambiance * ambientLightIntensity + rsm, 1.0f);
+        return float4(finalColour + constantAmbiance + ambiance * ambientLightIntensity + rsm, 1.0f);
     }
-    return float4(finalColour + ambiance * ambientLightIntensity, 1.0f);
+    return saturate(float4(finalColour + constantAmbiance + ambiance * ambientLightIntensity, 1.0f));
 }

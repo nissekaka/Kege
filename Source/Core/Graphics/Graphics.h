@@ -204,7 +204,7 @@ namespace Kaka
 	private:
 		struct DownSampleBuffer
 		{
-			float bloomBlending = 0.5f;
+			float bloomBlending = 0.0f;
 			float bloomThreshold = 0.1f;
 			int uvScale = 2;
 			float padding;

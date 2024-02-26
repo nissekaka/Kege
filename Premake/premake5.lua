@@ -10,24 +10,26 @@ local USE_ABSOLUTE_PATHS = false
 local basePath = USE_ABSOLUTE_PATHS and os.realpath("../") or "../"
 
 local directories = {
-	root 			= basePath,
-    bin             = basePath .. "/Bin/",
-    shaders         = basePath .. "/Bin/Shaders/",
-	assets          = basePath .. "/Bin/Assets/",
-    temp         	= basePath .. "/Temp/",
+	root 			    = basePath,
+    bin                 = basePath .. "/Bin/",
+    shaders             = basePath .. "/Bin/Shaders/",
+	assets              = basePath .. "/Bin/Assets/",
+    temp         	    = basePath .. "/Temp/",
 
-    source          = basePath .. "/Source/",
-	core            = basePath .. "/Source/Core/",
-    game            = basePath .. "/Source/Game/",
+    source              = basePath .. "/Source/",
+	core                = basePath .. "/Source/Core/",
+    game                = basePath .. "/Source/Game/",
 
-	external        = basePath .. "/Source/External/",
-    externalDLL     = basePath .. "/Source/External/bin/",
-    externalInclude = basePath .. "/Source/External/include/",
-    externalLib     = basePath .. "/Source/External/lib/",
-    debugLib        = basePath .. "/Source/External/lib/Debug/",
-    releaseLib      = basePath .. "/Source/External/lib/Release/",
+	external            = basePath .. "/Source/External/",
+    externalDLL         = basePath .. "/Source/External/bin/",
+    externalInclude     = basePath .. "/Source/External/include/",
+    externalLib         = basePath .. "/Source/External/lib/",
+    externalDebugLib    = basePath .. "/Source/External/lib/Debug/",
+    externalReleaseLib  = basePath .. "/Source/External/lib/Release/",
 	
-    lib             = basePath .. "/Lib/",
+    debugLib            = basePath .. "/Lib/Debug/",
+    releaseLib          = basePath .. "/Lib/Release/",
+    lib                 = basePath .. "/Lib/"
 }
 
 local DO_LOGGING = true
@@ -71,26 +73,46 @@ end
 
 -- Find Libraries
 
-local function FindLibraries()
+local function FindDebugLibraries()
     LOG("\nFinding Libraries to link:")
     local foundNames = {}
     local out = {}
-    for _, lib in pairs(os.matchfiles(directories.lib.."**")) do    
-        if (path.getextension(lib) == ".lib") then
-            local name = path.getname(lib)
+    for _, debugLib in pairs(os.matchfiles(directories.debugLib.."**")) do    
+        if (path.getextension(debugLib) == ".lib") then
+            local name = path.getname(debugLib)
             if not foundNames[name] then
-                out[#out+1] = path.getname(lib)
+                out[#out+1] = path.getname(debugLib)
                 foundNames[name] = true
                 LOG(name)
             end
         end
     end
-    LOG("Successfully linked Libraries!\n")
+    LOG("Successfully linked Debug Libraries!\n")
+    return out
+end
+
+
+local function FindReleaseLibraries()
+    LOG("\nFinding Libraries to link:")
+    local foundNames = {}
+    local out = {}
+    for _, releaseLib in pairs(os.matchfiles(directories.releaseLib.."**")) do    
+        if (path.getextension(releaseLib) == ".lib") then
+            local name = path.getname(releaseLib)
+            if not foundNames[name] then
+                out[#out+1] = path.getname(releaseLib)
+                foundNames[name] = true
+                LOG(name)
+            end
+        end
+    end
+    LOG("Successfully linked Release Libraries!\n")
     return out
 end
 
 local EXTERNAL_LIBRARY_LIST = FindExternalLibraries()
-local LIBRARY_LIST = FindLibraries()
+local DEBUG_LIBRARY_LIST = FindDebugLibraries()
+local RELEASE_LIBRARY_LIST = FindReleaseLibraries()
 
 -- Create the Visual Studio solution
 
@@ -125,8 +147,6 @@ local LIBRARY_LIST = FindLibraries()
 project(PROJECT_CORE)
     LOG("\nCreating project "..PROJECT_CORE)
 	location(directories.temp)
-	debugdir(directories.lib)
-    targetdir(directories.lib)
 	targetname(PROJECT_CORE.."_%{cfg.buildcfg}")
 	objdir(directories.temp.."/"..PROJECT_CORE.."/%{cfg.buildcfg}")
 
@@ -159,11 +179,14 @@ project(PROJECT_CORE)
         defines "_DEBUG"
         runtime "Debug"
         symbols "on"
+        debugdir(directories.debugLib)
+        targetdir(directories.debugLib)
 		
 	filter 	"configurations:Release"
-        defines "_RELEASE"
+        defines "NDEBUG"
         runtime "Release"
 		optimize "on"
+        targetdir(directories.releaseLib)
 		
     filter "system:windows"
         kind "StaticLib"
@@ -192,8 +215,6 @@ project(PROJECT_CORE)
 project(PROJECT_EXTERNAL)
     LOG("\nCreating project "..PROJECT_EXTERNAL)
 	location(directories.temp)
-	debugdir(directories.lib)
-    targetdir(directories.lib)
 	targetname(PROJECT_EXTERNAL.."_%{cfg.buildcfg}")
 	objdir(directories.temp.."/"..PROJECT_EXTERNAL.."/%{cfg.buildcfg}")
 
@@ -223,6 +244,8 @@ project(PROJECT_EXTERNAL)
 		defines {"_DEBUG", "FBXSDK_SHARED"}
 		runtime "Debug"
 		symbols "on"
+        debugdir(directories.debugLib)
+        targetdir(directories.debugLib)
 		
 		libdirs { directories.externalInclude.."TGAFBXImporter/FBXSDK/lib/debug" }
 		links {
@@ -230,9 +253,10 @@ project(PROJECT_EXTERNAL)
 		}
 
         filter "configurations:Release"
-		defines {"_RELEASE",  "FBXSDK_SHARED"}
+		defines {"NDEBUG",  "FBXSDK_SHARED"}
 		runtime "Release"
 		optimize "on"
+        targetdir(directories.releaseLib)
 
 		libdirs { directories.externalInclude.."TGAFBXImporter/FBXSDK/lib/release" }
 		links {
@@ -240,10 +264,10 @@ project(PROJECT_EXTERNAL)
 		}
 		
 	filter 	"configurations:Release"
-        defines "_RELEASE"
+        defines "NDEBUG"
         runtime "Release"
 		optimize "on"
-        libdirs {directories.releaseLib}
+        libdirs {directories.externalReleaseLib}
 		
     filter "system:windows"
         kind "StaticLib"
@@ -280,21 +304,19 @@ project(PROJECT_GAME)
 		"WIN32",
 	}
 
-    links(LIBRARY_LIST)
     links(EXTERNAL_LIBRARY_LIST)
 	
 	libdirs {
-        directories.lib,
         directories.externalLib,
     }
-
+    
     includedirs {
         directories.source,
         directories.core,
         directories.externalInclude,
         directories.game,
     }
-
+    
 	files {
         directories.game.."**.h",
         directories.game.."**.hpp",
@@ -302,16 +324,24 @@ project(PROJECT_GAME)
     }
 	
 	filter 	"configurations:Debug"
-        defines "_DEBUG"
-        runtime "Debug"
-        symbols "on"
-        libdirs {directories.debugLib}
-		
+    defines "_DEBUG"
+    runtime "Debug"
+    symbols "on"
+    libdirs {
+        directories.debugLib,
+        directories.externalDebugLib
+    }
+    links(DEBUG_LIBRARY_LIST)
+    
 	filter 	"configurations:Release"
-        defines "_RELEASE"
-        runtime "Release"
-		optimize "on"
-        libdirs {directories.releaseLib}
+    defines "NDEBUG"
+    runtime "Release"
+    optimize "on"
+    libdirs {
+        directories.releaseLib,
+        directories.externalReleaseLib
+    }
+    links(RELEASE_LIBRARY_LIST)
 		
     filter "system:windows"
         kind("WindowedApp")

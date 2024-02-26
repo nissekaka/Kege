@@ -40,6 +40,13 @@ namespace Kaka
 			{
 				modelType = eModelType::Static;
 				ModelLoader::LoadStaticModel(aGfx, aFilePath, modelData);
+
+				for (Mesh& mesh : modelData.meshList->meshes)
+				{
+					mesh.vertexBuffer.Init(aGfx, mesh.vertices);
+					mesh.indexBuffer.Init(aGfx, mesh.indices);
+				}
+				//ModelLoader::LoadStaticModel(aGfx, aFilePath, modelData);
 				//ModelLoader::LoadModel(modelData, aFilePath);
 				//ModelLoader::LoadTexture(aGfx, modelData, aFilePath);
 
@@ -181,11 +188,9 @@ namespace Kaka
 			{
 				mesh.texture->Bind(aGfx);
 			}
-			vertexBuffer.Init(aGfx, mesh.vertices);
-			indexBuffer.Init(aGfx, mesh.indices);
 
-			vertexBuffer.Bind(aGfx);
-			indexBuffer.Bind(aGfx);
+			mesh.vertexBuffer.Bind(aGfx);
+			mesh.indexBuffer.Bind(aGfx);
 
 			std::vector<unsigned short> indices;
 			indices = mesh.indices;
@@ -227,11 +232,8 @@ namespace Kaka
 
 		for (AnimatedMesh& mesh : animatedModelData.meshList->meshes)
 		{
-			vertexBuffer.Init(aGfx, mesh.vertices);
-			indexBuffer.Init(aGfx, mesh.indices);
-
-			vertexBuffer.Bind(aGfx);
-			indexBuffer.Bind(aGfx);
+			mesh.vertexBuffer.Bind(aGfx);
+			mesh.indexBuffer.Bind(aGfx);
 
 			switch (shaderType)
 			{
