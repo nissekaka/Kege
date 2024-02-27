@@ -187,7 +187,7 @@ PixelOutput main(PixelInput aInput) : SV_TARGET
 
     // Shadows
 
-    const float shadowFactor = Shadow(directionalLightCameraTransform, float4(aInput.worldPos, 1.0f));
+    const float shadowFactor = Shadow(directionalLightCameraTransform, float4(aInput.worldPos, 1.0f), directionalLightShadowMap);
 
     // Lighting
 

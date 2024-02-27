@@ -40,6 +40,9 @@ namespace Kaka
 		DirectX::XMMATRIX& GetBoneTransform(int aBoneIndex);
 		DirectX::XMMATRIX& GetBoneTransform(const std::string& aBoneName);
 		DirectX::XMMATRIX GetBoneWorldTransform(int aBoneIndex) const;
+		void DrawDebugAABB(const Graphics& aGfx, const Mesh& aMesh) const;
+
+		AABB GetTranslatedAABB(const Mesh& aMesh) const;
 
 		void SetPixelShader(const Graphics& aGfx, const std::wstring& aFilePath);
 		void SetTexture(Texture* aTexture);

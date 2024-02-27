@@ -25,7 +25,7 @@ namespace Kaka
 		wnd(WINDOW_WIDTH, WINDOW_HEIGHT, L"Kaka")
 	{
 		camera.SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 90, 0.5f, 5000.0f);
-		directionalLightShadowCamera.SetOrthographic(WINDOW_WIDTH / 3.0f, WINDOW_HEIGHT / 3.0f, -500.0f, 500.0f);
+		wnd.Gfx().directionalLightRSMBuffer.GetCamera().SetOrthographic(WINDOW_WIDTH / 3.0f, WINDOW_HEIGHT / 3.0f, -500.0f, 500.0f);
 
 		for (int i = 0; i < NUM_POINT_LIGHTS; ++i)
 		{
@@ -77,7 +77,7 @@ namespace Kaka
 		//reflectionPlane.Init(wnd.Gfx(), terrain.GetSize() / 2.0f);
 		//reflectionPlane.SetPosition({terrain.GetSize() / 2.0f, reflectPlaneHeight, terrain.GetSize() / 2.0f});
 
-		directionalLightShadowCamera.SetPosition({0.0f, 70.0f, 0.0f});
+		wnd.Gfx().directionalLightRSMBuffer.GetCamera().SetPosition({0.0f, 70.0f, 0.0f});
 		camera.SetPosition({-11.0f, 28.0f, 26.0f});
 		camera.SetRotationDegrees(29.0f, 138.0f);
 
@@ -183,6 +183,8 @@ namespace Kaka
 		flashLightTest->innerAngle = 0.1f; // Radians
 		flashLightTest->outerAngle = 0.2f; // Radians
 		flashLightTest->colour = {1.0f, 0.9f, 0.6f};
+
+		wnd.Gfx().spotLightRSMBuffer[0].GetCamera().SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 140.0f, 0.5f, 5000.0f);
 
 		flashLightTest2 = &deferredLights.AddSpotLight();
 		flashLightTest2->position = camera.GetPosition();
@@ -388,6 +390,23 @@ namespace Kaka
 		{
 			flashLightTest->position = camera.GetPosition();
 			DirectX::XMStoreFloat3(&flashLightTest->direction, camera.GetForwardVector());
+			constexpr float scale = 10.0f;
+			flashLightTest->position.x += flashLightTest->direction.x * scale;
+			flashLightTest->position.y += flashLightTest->direction.y * scale;
+			flashLightTest->position.z += flashLightTest->direction.z * scale;
+
+			wnd.Gfx().spotLightRSMBuffer[0].GetCamera().SetPosition(flashLightTest->position);
+
+			//flashLightTest->position = camera.GetPosition();
+			//DirectX::XMStoreFloat3(&flashLightTest->direction, camera.GetForwardVector());
+			//DirectX::XMVECTOR position = DirectX::XMLoadFloat3(&flashLightTest->position);
+			//DirectX::XMFLOAT3 scale = {0.1f, 0.1f, 0.1f};
+			//position = DirectX::XMVectorMultiply(position, DirectX::XMVectorMultiply(camera.GetForwardVector(), DirectX::XMLoadFloat3(&scale)));
+			//DirectX::XMFLOAT3 newPos;
+			//DirectX::XMStoreFloat3(&newPos, position);
+
+			//wnd.Gfx().spotLightRSMBuffer[0].GetCamera().SetPosition(newPos);
+			//wnd.Gfx().spotLightRSMBuffer[0].GetCamera().SetDirection(flashLightTest->direction);
 			flashLightTest->direction = {flashLightTest->direction.x * -1.0f, flashLightTest->direction.y * -1.0f, flashLightTest->direction.z * -1.0f};
 
 			flashLightTest2->position = camera.GetPosition();
@@ -425,12 +444,13 @@ namespace Kaka
 		// TODO This needs to be done per light
 		// Shadow map pass -- BEGIN
 		{
-			wnd.Gfx().StartShadows(directionalLightShadowCamera, deferredLights.GetDirectionalLightData().lightDirection);
-			deferredLights.SetShadowCamera(directionalLightShadowCamera.GetInverseView() * directionalLightShadowCamera.GetProjection());
+			wnd.Gfx().StartShadows(wnd.Gfx().directionalLightRSMBuffer.GetCamera(), deferredLights.GetDirectionalLightData().lightDirection, wnd.Gfx().directionalLightRSMBuffer, PS_TEXTURE_SLOT_SHADOW_MAP_DIRECTIONAL);
+			deferredLights.SetShadowCamera(wnd.Gfx().directionalLightRSMBuffer.GetCamera().GetInverseView() * wnd.Gfx().directionalLightRSMBuffer.GetCamera().GetProjection());
+			deferredLights.SetSpotLightShadowCamera(wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetInverseView() * wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetProjection(), 0);
 			// TODO Currently only works for one directional light
 
-			wnd.Gfx().rsmBuffer.ClearTextures(wnd.Gfx().pContext.Get());
-			wnd.Gfx().rsmBuffer.SetAsActiveTarget(wnd.Gfx().pContext.Get(), wnd.Gfx().rsmBuffer.GetDepthStencilView());
+			wnd.Gfx().directionalLightRSMBuffer.ClearTextures(wnd.Gfx().pContext.Get());
+			wnd.Gfx().directionalLightRSMBuffer.SetAsActiveTarget(wnd.Gfx().pContext.Get());
 
 			wnd.Gfx().SetDepthStencilState(eDepthStencilStates::Normal);
 			// Need backface culling for Reflective Shadow Maps
@@ -457,6 +477,45 @@ namespace Kaka
 				}
 			}
 
+			//wnd.Gfx().ResetShadows(camera);
+		}
+		// Shadow map pass -- END
+
+		// Shadow map pass -- BEGIN
+		{
+			DirectX::XMFLOAT3 direction = deferredLights.GetSpotLightData(0).direction;
+			direction = {direction.x, direction.y * -1.0f, direction.z * -1.0f};
+			wnd.Gfx().StartShadows(wnd.Gfx().spotLightRSMBuffer[0].GetCamera(), direction, wnd.Gfx().spotLightRSMBuffer[0], PS_TEXTURE_SLOT_SHADOW_MAP_SPOT);
+			deferredLights.SetSpotLightShadowCamera(wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetInverseView() * wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetProjection(), 0);
+
+			wnd.Gfx().spotLightRSMBuffer[0].ClearTextures(wnd.Gfx().pContext.Get());
+			wnd.Gfx().spotLightRSMBuffer[0].SetAsActiveTarget(wnd.Gfx().pContext.Get());
+
+			wnd.Gfx().SetDepthStencilState(eDepthStencilStates::Normal);
+			// Need backface culling for Reflective Shadow Maps
+			wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
+
+			rsmLightData.lightColourAndIntensity =
+			{
+				deferredLights.GetSpotLightData(0).colour.x,
+				deferredLights.GetSpotLightData(0).colour.y,
+				deferredLights.GetSpotLightData(0).colour.z,
+				deferredLights.GetSpotLightData(0).intensity
+			};
+			rsmLightData.isDirectionalLight = FALSE;
+
+			rsmLightDataBuffer.Update(wnd.Gfx(), rsmLightData);
+			rsmLightDataBuffer.Bind(wnd.Gfx());
+
+			// Render everything that casts shadows
+			{
+				//terrain.Draw(wnd.Gfx());
+				for (Model& model : models)
+				{
+					model.Draw(wnd.Gfx(), aDeltaTime);
+				}
+			}
+
 			wnd.Gfx().ResetShadows(camera);
 		}
 		// Shadow map pass -- END
@@ -468,8 +527,8 @@ namespace Kaka
 
 			//wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
 
-			wnd.Gfx().rsmBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_RSM_SLOT);
-			wnd.Gfx().pContext->PSSetSamplers(0u, 1u, wnd.Gfx().pDefaultSampler.GetAddressOf());
+			wnd.Gfx().directionalLightRSMBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_RSM_SLOT);
+			//wnd.Gfx().pContext->PSSetSamplers(0u, 1u, wnd.Gfx().pDefaultSampler.GetAddressOf());
 
 			for (Model& model : models)
 			{
@@ -491,11 +550,13 @@ namespace Kaka
 			rsmPixelBuffer.Bind(wnd.Gfx());
 
 			// Lighting pass
-			wnd.Gfx().BindShadows();
+			wnd.Gfx().BindShadows(wnd.Gfx().directionalLightRSMBuffer, PS_TEXTURE_SLOT_SHADOW_MAP_DIRECTIONAL);
+			wnd.Gfx().BindShadows(wnd.Gfx().spotLightRSMBuffer[0], PS_TEXTURE_SLOT_SHADOW_MAP_SPOT);
 			deferredLights.Draw(wnd.Gfx());
-			wnd.Gfx().UnbindShadows();
+			wnd.Gfx().UnbindShadows(PS_TEXTURE_SLOT_SHADOW_MAP_DIRECTIONAL);
+			wnd.Gfx().UnbindShadows(PS_TEXTURE_SLOT_SHADOW_MAP_SPOT);
 
-			wnd.Gfx().rsmBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_RSM_SLOT);
+			wnd.Gfx().directionalLightRSMBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_RSM_SLOT);
 			wnd.Gfx().gBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_GBUFFER_SLOT);
 
 			// Skybox pass
@@ -649,21 +710,36 @@ namespace Kaka
 			ImGui::End();
 
 			// Draw all resources in RSMBuffer
-			if (ImGui::Begin("RSMBuffer"))
+			if (ImGui::Begin("RSMBuffer1"))
 			{
 				ImGui::Columns(2, nullptr, false);
 				ImGui::Text("World Position");
-				ImGui::Image(wnd.Gfx().rsmBuffer.GetShaderResourceViews()[0], ImVec2(512, 288));
+				ImGui::Image(wnd.Gfx().directionalLightRSMBuffer.GetShaderResourceViews()[0], ImVec2(512, 288));
 				ImGui::Text("Normal");
-				ImGui::Image(wnd.Gfx().rsmBuffer.GetShaderResourceViews()[1], ImVec2(512, 288));
+				ImGui::Image(wnd.Gfx().directionalLightRSMBuffer.GetShaderResourceViews()[1], ImVec2(512, 288));
 				ImGui::NextColumn();
 				ImGui::Text("Flux");
-				ImGui::Image(wnd.Gfx().rsmBuffer.GetShaderResourceViews()[2], ImVec2(512, 288));
+				ImGui::Image(wnd.Gfx().directionalLightRSMBuffer.GetShaderResourceViews()[2], ImVec2(512, 288));
 				ImGui::Text("Depth");
-				ImGui::Image(*wnd.Gfx().rsmBuffer.GetDepthShaderResourceView(), ImVec2(512, 288));
+				ImGui::Image(*wnd.Gfx().directionalLightRSMBuffer.GetDepthShaderResourceView(), ImVec2(512, 288));
 			}
 			ImGui::End();
 
+			// Draw all resources in RSMBuffer
+			if (ImGui::Begin("RSMBuffer2"))
+			{
+				ImGui::Columns(2, nullptr, false);
+				ImGui::Text("World Position");
+				ImGui::Image(wnd.Gfx().spotLightRSMBuffer[0].GetShaderResourceViews()[0], ImVec2(512, 288));
+				ImGui::Text("Normal");
+				ImGui::Image(wnd.Gfx().spotLightRSMBuffer[0].GetShaderResourceViews()[1], ImVec2(512, 288));
+				ImGui::NextColumn();
+				ImGui::Text("Flux");
+				ImGui::Image(wnd.Gfx().spotLightRSMBuffer[0].GetShaderResourceViews()[2], ImVec2(512, 288));
+				ImGui::Text("Depth");
+				ImGui::Image(*wnd.Gfx().spotLightRSMBuffer[0].GetDepthShaderResourceView(), ImVec2(512, 288));
+			}
+			ImGui::End();
 
 			deferredLights.ShowControlWindow();
 		}
@@ -697,27 +773,27 @@ namespace Kaka
 
 			switch (e->GetKeyCode())
 			{
-			case VK_ESCAPE:
-				if (wnd.CursorEnabled())
-				{
-					wnd.DisableCursor();
-					wnd.mouse.EnableRaw();
-				}
-				else
-				{
-					wnd.EnableCursor();
-					wnd.mouse.DisableRaw();
-				}
-				break;
-			case VK_F1:
-				showImGui = !showImGui;
-				break;
-			case VK_F2:
-				showStatsWindow = !showStatsWindow;
-				break;
-			case VK_F3:
-				drawLightDebug = !drawLightDebug;
-				break;
+				case VK_ESCAPE:
+					if (wnd.CursorEnabled())
+					{
+						wnd.DisableCursor();
+						wnd.mouse.EnableRaw();
+					}
+					else
+					{
+						wnd.EnableCursor();
+						wnd.mouse.DisableRaw();
+					}
+					break;
+				case VK_F1:
+					showImGui = !showImGui;
+					break;
+				case VK_F2:
+					showStatsWindow = !showStatsWindow;
+					break;
+				case VK_F3:
+					drawLightDebug = !drawLightDebug;
+					break;
 			}
 		}
 

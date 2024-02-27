@@ -1,4 +1,5 @@
 #pragma once
+#include "Utility/Camera.h"
 
 namespace Kaka
 {
@@ -16,10 +17,12 @@ namespace Kaka
 
 		static RSMBuffer Create(Graphics& aGfx, UINT aWidth, UINT aHeight);
 		void ClearTextures(ID3D11DeviceContext* aContext) const;
-		void SetAsActiveTarget(ID3D11DeviceContext* aContext, ID3D11DepthStencilView* aDepth = nullptr);
+		//void SetAsActiveTarget(ID3D11DeviceContext* aContext, ID3D11DepthStencilView* aDepth = nullptr);
+		void SetAsActiveTarget(ID3D11DeviceContext* aContext);
 		void SetAsResourceOnSlot(ID3D11DeviceContext* aContext, RSMBufferTexture aTexture, unsigned int aSlot);
 		void SetAllAsResources(ID3D11DeviceContext* aContext, unsigned int aSlot);
 		void ClearAllAsResourcesSlots(ID3D11DeviceContext* aContext, unsigned int aSlot);
+		Camera& GetCamera() { return camera; }
 
 		inline ID3D11ShaderResourceView* const* GetShaderResourceViews() const
 		{
@@ -48,5 +51,7 @@ namespace Kaka
 		Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencilTexture;
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> depthStencilShaderResourceView;
+
+		Camera camera;
 	};
 }

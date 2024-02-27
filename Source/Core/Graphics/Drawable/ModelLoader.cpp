@@ -19,15 +19,12 @@ namespace Kaka
 	{
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(aFilePath,
-		                                         aiProcess_Triangulate |
-		                                         aiProcess_JoinIdenticalVertices |
+		                                         /*aiProcess_GenBoundingBoxes |*/
 		                                         aiProcess_FlipUVs |
 		                                         aiProcess_ConvertToLeftHanded |
 		                                         aiProcess_LimitBoneWeights |
-		                                         /*aiProcess_GenSmoothNormals |*/
 		                                         aiProcess_FindInvalidData |
-		                                         aiProcessPreset_TargetRealtime_Fast |
-		                                         aiProcess_PreTransformVertices
+		                                         aiProcessPreset_TargetRealtime_Fast
 		);
 
 		const std::filesystem::path rootFsPath = std::filesystem::path(aFilePath).parent_path();
@@ -53,6 +50,21 @@ namespace Kaka
 
 			// Our own data
 			Mesh& mesh = aOutModelData.meshList->meshes[i];
+
+			// AABB
+			//mesh.aabb.minBound =
+			//{
+			//	aiMesh->mAABB.mMin.x,
+			//	aiMesh->mAABB.mMin.y,
+			//	aiMesh->mAABB.mMin.z
+			//};
+
+			//mesh.aabb.maxBound =
+			//{
+			//	aiMesh->mAABB.mMax.x,
+			//	aiMesh->mAABB.mMax.y,
+			//	aiMesh->mAABB.mMax.z
+			//};
 
 			// Get Material from .fbx
 			{
@@ -106,6 +118,31 @@ namespace Kaka
 				DirectX::XMFLOAT2 texCoord{0.0f, 0.0f};
 				DirectX::XMFLOAT3 tangent{0.0f, 0.0f, 0.0f};
 				DirectX::XMFLOAT3 bitangent{0.0f, 0.0f, 0.0f};
+
+				if (position.x < mesh.aabb.minBound.x)
+				{
+					mesh.aabb.minBound.x = position.x;
+				}
+				if (position.y < mesh.aabb.minBound.y)
+				{
+					mesh.aabb.minBound.y = position.y;
+				}
+				if (position.z < mesh.aabb.minBound.z)
+				{
+					mesh.aabb.minBound.z = position.z;
+				}
+				if (position.x > mesh.aabb.maxBound.x)
+				{
+					mesh.aabb.maxBound.x = position.x;
+				}
+				if (position.y > mesh.aabb.maxBound.y)
+				{
+					mesh.aabb.maxBound.y = position.y;
+				}
+				if (position.z > mesh.aabb.maxBound.z)
+				{
+					mesh.aabb.maxBound.z = position.z;
+				}
 
 				// Check if the mesh has texture coordinates
 				if (aiMesh->HasTextureCoords(0))

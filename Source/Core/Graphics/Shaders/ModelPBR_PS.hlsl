@@ -139,7 +139,7 @@ PixelOutput main(PixelInput aInput)
 
     // Shadows
 
-    const float shadowFactor = Shadow(directionalLightCameraTransform, float4(aInput.worldPos, 1.0f));
+    //const float shadowFactor = Shadow(directionalLightCameraTransform, float4(aInput.worldPos, 1.0f));
 
     // Lighting
 
@@ -183,7 +183,7 @@ PixelOutput main(PixelInput aInput)
 
 	// Final colour
     //const float3 emissiveColour = colour * emissive;
-    const float3 finalColour = saturate(ambientLight * ambientLightPower + directionalLight * shadowFactor + pointLight + spotLight);
+    const float3 finalColour = saturate(ambientLight * ambientLightPower + directionalLight /** shadowFactor*/ + pointLight + spotLight);
 
     output.colour = float4(finalColour, 1.0f);
 

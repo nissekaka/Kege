@@ -21,11 +21,12 @@ static std::string LIGHT_TYPE_NAME[] =
 
 struct DirectionalLightData
 {
-	DirectX::XMFLOAT3 lightDirection;
-	float lightIntensity;
-	DirectX::XMFLOAT3 lightColour;
-	float ambientLight;
-	DirectX::XMMATRIX shadowCamera;
+	DirectX::XMFLOAT3 lightDirection; // 12
+	float lightIntensity; // 16
+	DirectX::XMFLOAT3 lightColour; // 28
+	float ambientLight; // 32
+	DirectX::XMMATRIX shadowCamera; // 96
+	DirectX::XMMATRIX spotShadowCamera; // 160
 };
 
 struct PointLightData
@@ -48,7 +49,8 @@ struct SpotLightData
 	float innerAngle = {}; // 48
 	float outerAngle = {}; // 52
 	BOOL isActive = false; // 56
-	float padding[2] = {}; // 64
+	DirectX::XMMATRIX shadowCamera; // 120
+	float padding[2] = {}; // 128
 };
 
 struct LightConstantBuffer

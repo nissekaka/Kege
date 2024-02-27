@@ -163,6 +163,12 @@ namespace Kaka
 		directionalLightData.shadowCamera = aCamera;
 	}
 
+	void DeferredLights::SetSpotLightShadowCamera(const DirectX::XMMATRIX& aCamera, const int aIndex)
+	{
+		spotLightData[aIndex].shadowCamera = aCamera;
+		directionalLightData.spotShadowCamera = aCamera;
+	}
+
 	PointLightData& DeferredLights::AddPointLight()
 	{
 		pointLightData.emplace_back();

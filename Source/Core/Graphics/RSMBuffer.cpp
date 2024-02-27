@@ -119,18 +119,24 @@ namespace Kaka
 		aContext->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
-	void RSMBuffer::SetAsActiveTarget(ID3D11DeviceContext* aContext, ID3D11DepthStencilView* aDepth)
+	//void RSMBuffer::SetAsActiveTarget(ID3D11DeviceContext* aContext, ID3D11DepthStencilView* aDepth)
+	//{
+	//	if (aDepth)
+	//	{
+	//		aContext->OMSetRenderTargets(static_cast<int>(RSMBufferTexture::Count), renderTargetViews[0].GetAddressOf(),
+	//		                             aDepth);
+	//	}
+	//	else
+	//	{
+	//		aContext->OMSetRenderTargets(static_cast<int>(RSMBufferTexture::Count), renderTargetViews[0].GetAddressOf(),
+	//		                             nullptr);
+	//	}
+	//}
+
+	void RSMBuffer::SetAsActiveTarget(ID3D11DeviceContext* aContext)
 	{
-		if (aDepth)
-		{
-			aContext->OMSetRenderTargets(static_cast<int>(RSMBufferTexture::Count), renderTargetViews[0].GetAddressOf(),
-			                             aDepth);
-		}
-		else
-		{
-			aContext->OMSetRenderTargets(static_cast<int>(RSMBufferTexture::Count), renderTargetViews[0].GetAddressOf(),
-			                             nullptr);
-		}
+		aContext->OMSetRenderTargets(static_cast<int>(RSMBufferTexture::Count), renderTargetViews[0].GetAddressOf(),
+		                             depthStencilView.Get());
 	}
 
 	void RSMBuffer::SetAsResourceOnSlot(ID3D11DeviceContext* aContext, RSMBufferTexture aTexture, const unsigned int aSlot)

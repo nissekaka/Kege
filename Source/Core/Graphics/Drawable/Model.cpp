@@ -36,7 +36,7 @@ namespace Kaka
 		// Shaders
 		switch (shaderType)
 		{
-		case eShaderType::PBR:
+			case eShaderType::PBR:
 			{
 				modelType = eModelType::Static;
 				ModelLoader::LoadStaticModel(aGfx, aFilePath, modelData);
@@ -79,7 +79,7 @@ namespace Kaka
 				inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
 			}
 			break;
-		case eShaderType::AnimPBR:
+			case eShaderType::AnimPBR:
 			{
 				modelType = eModelType::Skeletal;
 
@@ -140,18 +140,18 @@ namespace Kaka
 	{
 		switch (modelType)
 		{
-		case eModelType::Static:
+			case eModelType::Static:
 			{
 				DrawStatic(aGfx);
 			}
 			break;
-		case eModelType::Skeletal:
+			case eModelType::Skeletal:
 			{
 				UpdatePtr(aDeltaTime);
 				DrawAnimated(aGfx);
 			}
 			break;
-		default: ;
+			default: ;
 		}
 	}
 
@@ -168,10 +168,13 @@ namespace Kaka
 		TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
 		transformConstantBuffer.Bind(aGfx);
 
+		bool isRegularPixelShader = true;
+
 		vertexShader->Bind(aGfx);
 		if (aGfx.HasPixelShaderOverride())
 		{
 			aGfx.GetPixelShaderOverride()->Bind(aGfx);
+			isRegularPixelShader = false;
 		}
 		else
 		{
@@ -184,6 +187,16 @@ namespace Kaka
 
 		for (Mesh& mesh : modelData.meshList->meshes)
 		{
+			if (!aGfx.IsBoundingBoxInFrustum(GetTranslatedAABB(mesh).minBound, GetTranslatedAABB(mesh).maxBound))
+			{
+				continue;
+			}
+
+			if (isRegularPixelShader)
+			{
+				//DrawDebugAABB(aGfx, mesh);
+			}
+
 			if (mesh.texture != nullptr)
 			{
 				mesh.texture->Bind(aGfx);
@@ -237,7 +250,7 @@ namespace Kaka
 
 			switch (shaderType)
 			{
-			case eShaderType::AnimPBR:
+				case eShaderType::AnimPBR:
 				{
 					// Bones
 					struct VSBoneConstant
@@ -487,6 +500,80 @@ namespace Kaka
 	DirectX::XMMATRIX Model::GetBoneWorldTransform(const int aBoneIndex) const
 	{
 		return animatedModelData.combinedTransforms[aBoneIndex] * GetTransform();
+	}
+
+	void Model::DrawDebugAABB(const Graphics& aGfx, const Mesh& aMesh) const
+	{
+		struct Cube
+		{
+			DirectX::XMFLOAT3 vertices[8];
+		};
+
+		const AABB aabb = aMesh.aabb;
+
+		Cube cube;
+		cube.vertices[0] = {aabb.minBound.x, aabb.minBound.y, aabb.minBound.z};
+		cube.vertices[1] = {aabb.minBound.x, aabb.maxBound.y, aabb.minBound.z};
+		cube.vertices[2] = {aabb.maxBound.x, aabb.maxBound.y, aabb.minBound.z};
+		cube.vertices[3] = {aabb.maxBound.x, aabb.minBound.y, aabb.minBound.z};
+		cube.vertices[4] = {aabb.minBound.x, aabb.minBound.y, aabb.maxBound.z};
+		cube.vertices[5] = {aabb.minBound.x, aabb.maxBound.y, aabb.maxBound.z};
+		cube.vertices[6] = {aabb.maxBound.x, aabb.maxBound.y, aabb.maxBound.z};
+		cube.vertices[7] = {aabb.maxBound.x, aabb.minBound.y, aabb.maxBound.z};
+
+		DirectX::XMFLOAT2 screenPos[8];
+
+		// Convert 3D positions to screen space
+		for (int i = 0; i < 8; ++i)
+		{
+			DirectX::XMMATRIX projectionMatrix = GetTransform() * aGfx.GetCameraInverseView();
+			projectionMatrix = projectionMatrix * aGfx.GetProjection();
+
+			DirectX::XMStoreFloat2(
+				&screenPos[i],
+				DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&cube.vertices[i]), projectionMatrix)
+			);
+
+			screenPos[i].x = (screenPos[i].x + 1.0f) * 0.5f * ImGui::GetIO().DisplaySize.x;
+			screenPos[i].y = (1.0f - screenPos[i].y) * 0.5f * ImGui::GetIO().DisplaySize.y;
+		}
+
+		// Draw lines between all screenpositions
+		for (int i = 0; i < 4; ++i)
+		{
+			ImGui::GetForegroundDrawList()->AddLine(
+				ImVec2(screenPos[i].x, screenPos[i].y),
+				ImVec2(screenPos[(i + 1) % 4].x, screenPos[(i + 1) % 4].y),
+				IM_COL32(255, 255, 255, 255)
+			);
+			ImGui::GetForegroundDrawList()->AddLine(
+				ImVec2(screenPos[i + 4].x, screenPos[i + 4].y),
+				ImVec2(screenPos[((i + 1) % 4) + 4].x, screenPos[((i + 1) % 4) + 4].y),
+				IM_COL32(255, 255, 255, 255)
+			);
+			ImGui::GetForegroundDrawList()->AddLine(
+				ImVec2(screenPos[i].x, screenPos[i].y),
+				ImVec2(screenPos[i + 4].x, screenPos[i + 4].y),
+				IM_COL32(255, 255, 255, 255)
+			);
+		}
+	}
+
+	AABB Model::GetTranslatedAABB(const Mesh& aMesh) const
+	{
+		const DirectX::XMMATRIX transform = GetTransform();
+		const DirectX::XMVECTOR minBound = DirectX::XMVector3Transform(
+			DirectX::XMLoadFloat3(&aMesh.aabb.minBound),
+			transform
+		);
+		const DirectX::XMVECTOR maxBound = DirectX::XMVector3Transform(
+			DirectX::XMLoadFloat3(&aMesh.aabb.maxBound),
+			transform
+		);
+		AABB aabb;
+		DirectX::XMStoreFloat3(&aabb.minBound, minBound);
+		DirectX::XMStoreFloat3(&aabb.maxBound, maxBound);
+		return aabb;
 	}
 
 	void Model::SetPixelShader(const Graphics& aGfx, const std::wstring& aFilePath)

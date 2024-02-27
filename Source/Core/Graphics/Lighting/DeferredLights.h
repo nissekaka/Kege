@@ -26,10 +26,12 @@ namespace Kaka
 		void Draw(Graphics& aGfx);
 		void ShowControlWindow();
 		void SetShadowCamera(const DirectX::XMMATRIX& aCamera);
+		void SetSpotLightShadowCamera(const DirectX::XMMATRIX& aCamera, const int aIndex);
 		PointLightData& AddPointLight();
 		SpotLightData& AddSpotLight();
 
 		DirectionalLightData& GetDirectionalLightData() { return directionalLightData; }
+		SpotLightData& GetSpotLightData(const int aIndex) { return spotLightData[aIndex]; }
 
 	private:
 		void CreateSphere(Graphics& aGfx);

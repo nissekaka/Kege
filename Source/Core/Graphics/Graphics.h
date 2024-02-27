@@ -5,11 +5,9 @@
 #include <d3dcompiler.h>
 #include <memory>
 #include <vector>
-
 #include "GBuffer.h"
 #include "RSMBuffer.h"
 #include "Shaders/ShaderFactory.h"
-
 
 #define KAKA_BG_COLOUR {0.1f, 0.2f, 0.3f, 1.0f}
 
@@ -101,6 +99,7 @@ namespace Kaka
 		UINT GetDrawcallCount() const;
 		void SetRenderTarget(eRenderTargetType aRenderTargetType, const bool aUseDepth = true) const;
 		void SetRenderTarget(eRenderTargetType aRenderTargetType, ID3D11DepthStencilView* aDepth) const;
+		void SetRenderTargetShadow(const RSMBuffer& aBuffer) const;
 		void SetAlphaBlend() const;
 		void SetVFXBlend() const;
 		void SetAdditiveBlend() const;
@@ -116,17 +115,15 @@ namespace Kaka
 		bool CreateDepthStencilStates();
 		bool CreateRasterizerStates();
 
-		//void BindWorldPositionTexture();
-		//void UnbindWorldPositionTexture();
 		void BindWaterReflectionTexture();
 		void BindPostProcessingTexture();
 		void BindBloomDownscaleTexture(const int aIndex);
 		DirectX::XMFLOAT2 GetCurrentResolution() const;
 
-		void StartShadows(Camera& aCamera, DirectX::XMFLOAT3 aLightDirection);
+		void StartShadows(Camera& aCamera, const DirectX::XMFLOAT3 aLightDirection, const RSMBuffer& aBuffer, UINT aSlot);
 		void ResetShadows(Camera& aCamera);
-		void BindShadows();
-		void UnbindShadows();
+		void BindShadows(const RSMBuffer& aBuffer, UINT aSlot);
+		void UnbindShadows(UINT aSlot);
 
 		void SetPixelShaderOverride(const std::wstring& aFileName) { pixelShaderOverride = ShaderFactory::GetPixelShader(*this, aFileName); }
 		void SetVertexShaderOverride(const std::wstring& aFileName) { vertexShaderOverride = ShaderFactory::GetVertexShader(*this, aFileName); }
@@ -143,8 +140,6 @@ namespace Kaka
 		bool IsImGuiEnabled() const;
 		UINT GetWidth() const;
 		UINT GetHeight() const;
-		void BindDepth();
-		void UnbindDepthSRV();
 
 	private:
 		bool imGuiEnabled = true;
@@ -199,7 +194,9 @@ namespace Kaka
 		VertexShader* vertexShaderOverride = nullptr;
 
 		GBuffer gBuffer;
-		RSMBuffer rsmBuffer;
+		//RSMBuffer rsmBuffer;
+		RSMBuffer directionalLightRSMBuffer;
+		std::vector<RSMBuffer> spotLightRSMBuffer;
 
 	private:
 		struct DownSampleBuffer

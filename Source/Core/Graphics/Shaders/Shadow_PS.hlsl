@@ -1,3 +1,4 @@
+#include "common.hlsli"
 #include "deferred_common.hlsli"
 
 struct PixelInput
@@ -14,7 +15,6 @@ struct PixelInput
 cbuffer RSMLightData : register(b0)
 {
     float4 lightColourAndIntensity;
-    float falloff;
     bool isDirectionalLight;
 }
 
@@ -48,7 +48,9 @@ RSMBufferOutput main(PixelInput aInput)
     }
     else
     {
-        output.flux = float4(albedo.rgb * lightColourAndIntensity.xyz, 1.0f) * lightColourAndIntensity.w * falloff;
+        float falloff = 1.0f;
+
+        output.flux = float4(albedo.rgb * lightColourAndIntensity.xyz, 1.0f) * saturate(lightColourAndIntensity.w);
     }
 
     output.normal = float4(pixelNormal, 1.0f);

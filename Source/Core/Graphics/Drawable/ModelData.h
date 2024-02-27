@@ -10,6 +10,19 @@ namespace Kaka
 
 	enum class eModelType { None, Static, Skeletal };
 
+	struct AABB
+	{
+		AABB() = default;
+
+		//AABB(DirectX::XMFLOAT3 aMin, DirectX::XMFLOAT3 aMax)
+		//	:
+		//	minBound(aMin),
+		//	maxBound(aMax) {}
+
+		DirectX::XMFLOAT3 minBound = {FLT_MAX, FLT_MAX, FLT_MAX};
+		DirectX::XMFLOAT3 maxBound = {FLT_MIN, FLT_MIN, FLT_MIN};
+	};
+
 	struct Bone
 	{
 		std::string name;
@@ -35,6 +48,7 @@ namespace Kaka
 		//Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
 		//Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
 		Texture* texture;
+		AABB aabb;
 	};
 
 	struct MeshList

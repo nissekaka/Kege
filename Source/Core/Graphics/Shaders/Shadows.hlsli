@@ -3,6 +3,7 @@
 #include "Poisson.hlsli"
 
 Texture2D directionalLightShadowMap : register(t14);
+Texture2D spotLightShadowMap : register(t15);
 
 cbuffer ShadowBuffer : register(b7)
 {
@@ -13,7 +14,7 @@ cbuffer ShadowBuffer : register(b7)
     float offsetScalePoissonDisk;
 }
 
-float PoissonDisk(float3 aDirectionLightProjectedPosition)
+float PoissonDisk(float3 aDirectionLightProjectedPosition, Texture2D aTexture)
 {
     const float computedZ = aDirectionLightProjectedPosition.z;
     const float bias = 0.001f;
@@ -30,7 +31,7 @@ float PoissonDisk(float3 aDirectionLightProjectedPosition)
     // Adjust sampleUV based on facing direction
         const float2 sampleUV = 0.5f + float2(0.5f, -0.5f) * (aDirectionLightProjectedPosition.xy) + sampleOffset * offsetScale;
 
-        const float shadowMapZ = directionalLightShadowMap.Sample(shadowSplr, sampleUV);
+        const float shadowMapZ = aTexture.Sample(shadowSplr, sampleUV);
 
         //shadowFactor -= (1.0f / 16.0f) * clamp(1.0f - shadowMapZ + bias, 0.0f, 1.0f);
         shadowFactor += (computedZ < shadowMapZ + bias) ? 1.0f : 0.0f;
@@ -39,7 +40,7 @@ float PoissonDisk(float3 aDirectionLightProjectedPosition)
     return shadowFactor / (float)sampleCount;
 }
 
-float PCF(float3 aDirectionLightProjectedPosition)
+float PCF(float3 aDirectionLightProjectedPosition, Texture2D aTexture)
 {
     const float computedZ = aDirectionLightProjectedPosition.z;
     const float bias = 0.001f;
@@ -57,7 +58,7 @@ float PCF(float3 aDirectionLightProjectedPosition)
         {
             const float2 sampleOffset = float2(i, j) / float(sampleCount);
             const float2 sampleUV = 0.5f + float2(0.5f, -0.5f) * (aDirectionLightProjectedPosition.xy + sampleOffset * offsetScale);
-            const float shadowMapZ = directionalLightShadowMap.Sample(shadowSplr, sampleUV);
+            const float shadowMapZ = aTexture.Sample(shadowSplr, sampleUV);
 
             shadowFactor += (computedZ < shadowMapZ + bias) ? 1.0f : 0.0f;
         }
@@ -67,26 +68,26 @@ float PCF(float3 aDirectionLightProjectedPosition)
     return shadowFactor / float(sampleCount * sampleCount);
 }
 
-float Shadow(const in float4x4 aCameraTransform, const in float4 aWorldPosition)
+float Shadow(const in float4x4 aCameraTransform, const in float4 aWorldPosition, Texture2D aTexture)
 {
-    const float4 directionalLightProjectedPositionTemp = mul(aCameraTransform, aWorldPosition);
-    float3 directionLightProjectedPosition = directionalLightProjectedPositionTemp.xyz / directionalLightProjectedPositionTemp.w;
+    const float4 lightProjectedPositionTemp = mul(aCameraTransform, aWorldPosition);
+    float3 lightProjectedPosition = lightProjectedPositionTemp.xyz / lightProjectedPositionTemp.w;
 
     float shadowFactor = 1.0f;
-    if (clamp(directionLightProjectedPosition.x, -1.0f, 1.0f) == directionLightProjectedPosition.x &&
-        clamp(directionLightProjectedPosition.y, -1.0f, 1.0f) == directionLightProjectedPosition.y)
+    if (clamp(lightProjectedPosition.x, -1.0f, 1.0f) == lightProjectedPosition.x &&
+        clamp(lightProjectedPosition.y, -1.0f, 1.0f) == lightProjectedPosition.y)
     {
         float shadowFactorPCF = 0.0f;
         float shadowFactorPoisson = 0.0f;
 
         if (usePoisson)
         {
-            shadowFactorPoisson = PoissonDisk(directionLightProjectedPosition);
+            shadowFactorPoisson = PoissonDisk(lightProjectedPosition, aTexture);
             shadowFactor = shadowFactorPoisson;
         }
         if (usePCF)
         {
-            shadowFactorPCF = PCF(directionLightProjectedPosition);
+            shadowFactorPCF = PCF(lightProjectedPosition, aTexture);
             shadowFactor = shadowFactorPCF;
         }
         if (usePoisson && usePCF)

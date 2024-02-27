@@ -164,7 +164,8 @@ namespace Kaka
 		HRESULT result;
 
 		gBuffer = GBuffer::Create(*this, width, height);
-		rsmBuffer = RSMBuffer::Create(*this, width, height);
+		directionalLightRSMBuffer = RSMBuffer::Create(*this, width, height);
+		spotLightRSMBuffer.emplace_back(RSMBuffer::Create(*this, width, height));
 
 		// Reflection texture
 		{
@@ -353,31 +354,31 @@ namespace Kaka
 
 		switch (aRenderTargetType)
 		{
-		case eRenderTargetType::None:
+			case eRenderTargetType::None:
 			{
 				pContext->OMSetRenderTargets(0u, nullptr, aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::Default:
+			case eRenderTargetType::Default:
 			{
 				pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::WaterReflect:
+			case eRenderTargetType::WaterReflect:
 			{
 				pContext->OMSetRenderTargets(1u, renderWaterReflect.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::PostProcessing:
+			case eRenderTargetType::PostProcessing:
 			{
 				pContext->OMSetRenderTargets(1u, postProcessing.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::ShadowMap:
-			{
-				pContext->OMSetRenderTargets(0u, nullptr, aUseDepth ? rsmBuffer.GetDepthStencilView() : NULL);
-			}
-			break;
+			//case eRenderTargetType::ShadowMap:
+			//{
+			//	pContext->OMSetRenderTargets(0u, nullptr, aUseDepth ? rsmBuffer.GetDepthStencilView() : NULL);
+			//}
+			//break;
 		}
 	}
 
@@ -387,32 +388,37 @@ namespace Kaka
 
 		switch (aRenderTargetType)
 		{
-		case eRenderTargetType::None:
+			case eRenderTargetType::None:
 			{
 				pContext->OMSetRenderTargets(0u, nullptr, aDepth);
 			}
 			break;
-		case eRenderTargetType::Default:
+			case eRenderTargetType::Default:
 			{
 				pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::WaterReflect:
+			case eRenderTargetType::WaterReflect:
 			{
 				pContext->OMSetRenderTargets(1u, renderWaterReflect.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::PostProcessing:
+			case eRenderTargetType::PostProcessing:
 			{
 				pContext->OMSetRenderTargets(1u, postProcessing.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::ShadowMap:
-			{
-				pContext->OMSetRenderTargets(0u, nullptr, rsmBuffer.GetDepthStencilView());
-			}
-			break;
+			//case eRenderTargetType::ShadowMap:
+			//{
+			//	pContext->OMSetRenderTargets(0u, nullptr, rsmBuffer.GetDepthStencilView());
+			//}
+			//break;
 		}
+	}
+
+	void Graphics::SetRenderTargetShadow(const RSMBuffer& aBuffer) const
+	{
+		pContext->OMSetRenderTargets(0u, nullptr, aBuffer.GetDepthStencilView());
 	}
 
 	void Graphics::SetAlphaBlend() const
@@ -500,22 +506,22 @@ namespace Kaka
 	{
 		switch (aBlendState)
 		{
-		case eBlendStates::Disabled:
+			case eBlendStates::Disabled:
 			{
 				pContext->OMSetBlendState(pBlendStates[(int)eBlendStates::Disabled].Get(), nullptr, 0x0f);
 			}
 			break;
-		case eBlendStates::Alpha:
+			case eBlendStates::Alpha:
 			{
 				pContext->OMSetBlendState(pBlendStates[(int)eBlendStates::Alpha].Get(), nullptr, 0x0f);
 			}
 			break;
-		case eBlendStates::VFX:
+			case eBlendStates::VFX:
 			{
 				pContext->OMSetBlendState(pBlendStates[(int)eBlendStates::VFX].Get(), nullptr, 0x0f);
 			}
 			break;
-		case eBlendStates::Additive:
+			case eBlendStates::Additive:
 			{
 				pContext->OMSetBlendState(pBlendStates[(int)eBlendStates::Additive].Get(), nullptr, 0x0f);
 			}
@@ -527,27 +533,27 @@ namespace Kaka
 	{
 		switch (aDepthStencilState)
 		{
-		case eDepthStencilStates::Normal:
+			case eDepthStencilStates::Normal:
 			{
 				pContext->OMSetDepthStencilState(pDepthStencilStates[(int)eDepthStencilStates::Normal].Get(), 0u);
 			}
 			break;
-		case eDepthStencilStates::ReadOnlyGreater:
+			case eDepthStencilStates::ReadOnlyGreater:
 			{
 				pContext->OMSetDepthStencilState(pDepthStencilStates[(int)eDepthStencilStates::ReadOnlyGreater].Get(), 0u);
 			}
 			break;
-		case eDepthStencilStates::ReadOnlyLessEqual:
+			case eDepthStencilStates::ReadOnlyLessEqual:
 			{
 				pContext->OMSetDepthStencilState(pDepthStencilStates[(int)eDepthStencilStates::ReadOnlyLessEqual].Get(), 0u);
 			}
 			break;
-		case eDepthStencilStates::ReadOnlyEmpty:
+			case eDepthStencilStates::ReadOnlyEmpty:
 			{
 				pContext->OMSetDepthStencilState(pDepthStencilStates[(int)eDepthStencilStates::ReadOnlyEmpty].Get(), 0u);
 			}
 			break;
-		default: ;
+			default: ;
 		}
 	}
 
@@ -555,22 +561,22 @@ namespace Kaka
 	{
 		switch (aRasterizerState)
 		{
-		case eRasterizerStates::BackfaceCulling:
+			case eRasterizerStates::BackfaceCulling:
 			{
 				pContext->RSSetState(pRasterizerStates[(int)eRasterizerStates::BackfaceCulling].Get());
 			}
 			break;
-		case eRasterizerStates::FrontfaceCulling:
+			case eRasterizerStates::FrontfaceCulling:
 			{
 				pContext->RSSetState(pRasterizerStates[(int)eRasterizerStates::FrontfaceCulling].Get());
 			}
 			break;
-		case eRasterizerStates::NoCulling:
+			case eRasterizerStates::NoCulling:
 			{
 				pContext->RSSetState(pRasterizerStates[(int)eRasterizerStates::NoCulling].Get());
 			}
 			break;
-		default: ;
+			default: ;
 		}
 	}
 
@@ -809,9 +815,9 @@ namespace Kaka
 		return {static_cast<float>(width), static_cast<float>(height)};
 	}
 
-	void Graphics::StartShadows(Camera& aCamera, const DirectX::XMFLOAT3 aLightDirection)
+	void Graphics::StartShadows(Camera& aCamera, const DirectX::XMFLOAT3 aLightDirection, const RSMBuffer& aBuffer, const UINT aSlot)
 	{
-		pContext->ClearDepthStencilView(rsmBuffer.GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+		pContext->ClearDepthStencilView(aBuffer.GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 		SetCamera(aCamera);
 		aCamera.SetDirection(aLightDirection);
@@ -819,7 +825,7 @@ namespace Kaka
 		SetPixelShaderOverride(L"Shaders\\Shadow_PS.cso");
 
 		ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
-		pContext->PSSetShaderResources(PS_TEXTURE_SLOT_SHADOW_MAP, 1u, nullSRVs);
+		pContext->PSSetShaderResources(aSlot, 1u, nullSRVs);
 	}
 
 	void Graphics::ResetShadows(Camera& aCamera)
@@ -828,18 +834,18 @@ namespace Kaka
 		SetCamera(aCamera);
 	}
 
-	void Graphics::BindShadows()
+	void Graphics::BindShadows(const RSMBuffer& aBuffer, const UINT aSlot)
 	{
 		//pContext->PSSetSamplers(1u, 1u, pShadowSampler.GetAddressOf());
 		//pContext->PSSetSamplers(2u, 1u, pShadowCompSampler.GetAddressOf());
 
-		pContext->PSSetShaderResources(PS_TEXTURE_SLOT_SHADOW_MAP, 1u, rsmBuffer.GetDepthShaderResourceView());
+		pContext->PSSetShaderResources(aSlot, 1u, aBuffer.GetDepthShaderResourceView());
 	}
 
-	void Graphics::UnbindShadows()
+	void Graphics::UnbindShadows(const UINT aSlot)
 	{
 		ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
-		pContext->PSSetShaderResources(PS_TEXTURE_SLOT_SHADOW_MAP, 1u, nullSRVs);
+		pContext->PSSetShaderResources(aSlot, 1u, nullSRVs);
 	}
 
 	void Graphics::EnableImGui()
@@ -867,24 +873,13 @@ namespace Kaka
 		return height;
 	}
 
-	//void Graphics::BindDepth()
-	//{
-	//	pContext->PSSetShaderResources(13u, 1u, pDepthShaderResourceView.GetAddressOf());
-	//}
-
-	//void Graphics::UnbindDepthSRV()
-	//{
-	//	ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
-	//	pContext->PSSetShaderResources(13u, 1, nullSRVs);
-	//}
-
 	Graphics::FrustumPlanes Graphics::ExtractFrustumPlanes() const
 	{
 		FrustumPlanes frustum;
 
 		// Extract the rows of the view-projection matrix
 		DirectX::XMFLOAT4X4 VP;
-		auto viewProjectionMatrix = GetCameraInverseView() * camera->GetProjection();
+		const DirectX::XMMATRIX viewProjectionMatrix = camera->GetInverseView() * camera->GetProjection();
 		DirectX::XMStoreFloat4x4(&VP, viewProjectionMatrix);
 
 		// Extract the frustum planes from the view-projection matrix
@@ -903,9 +898,11 @@ namespace Kaka
 		// Normalize the frustum planes
 		for (int i = 0; i < 6; ++i)
 		{
-			float length = std::sqrt(frustum.planes[i].x * frustum.planes[i].x +
+			float length = std::sqrt(
+				frustum.planes[i].x * frustum.planes[i].x +
 				frustum.planes[i].y * frustum.planes[i].y +
 				frustum.planes[i].z * frustum.planes[i].z);
+
 			frustum.planes[i] = DirectX::XMFLOAT4(frustum.planes[i].x / length,
 			                                      frustum.planes[i].y / length,
 			                                      frustum.planes[i].z / length,
@@ -920,29 +917,21 @@ namespace Kaka
 		const FrustumPlanes frustum = ExtractFrustumPlanes();
 		for (int i = 0; i < 6; ++i)
 		{
-			if (frustum.planes[i].x * aMin.x + frustum.planes[i].y * aMin.y + frustum.planes[i].z * aMin.z + frustum.
-				planes[i].w > 0.0f)
+			if (frustum.planes[i].x * aMin.x + frustum.planes[i].y * aMin.y + frustum.planes[i].z * aMin.z + frustum.planes[i].w > 0.0f)
 				continue;
-			if (frustum.planes[i].x * aMax.x + frustum.planes[i].y * aMin.y + frustum.planes[i].z * aMin.z + frustum.
-				planes[i].w > 0.0f)
+			if (frustum.planes[i].x * aMax.x + frustum.planes[i].y * aMin.y + frustum.planes[i].z * aMin.z + frustum.planes[i].w > 0.0f)
 				continue;
-			if (frustum.planes[i].x * aMin.x + frustum.planes[i].y * aMax.y + frustum.planes[i].z * aMin.z + frustum.
-				planes[i].w > 0.0f)
+			if (frustum.planes[i].x * aMin.x + frustum.planes[i].y * aMax.y + frustum.planes[i].z * aMin.z + frustum.planes[i].w > 0.0f)
 				continue;
-			if (frustum.planes[i].x * aMax.x + frustum.planes[i].y * aMax.y + frustum.planes[i].z * aMin.z + frustum.
-				planes[i].w > 0.0f)
+			if (frustum.planes[i].x * aMax.x + frustum.planes[i].y * aMax.y + frustum.planes[i].z * aMin.z + frustum.planes[i].w > 0.0f)
 				continue;
-			if (frustum.planes[i].x * aMin.x + frustum.planes[i].y * aMin.y + frustum.planes[i].z * aMax.z + frustum.
-				planes[i].w > 0.0f)
+			if (frustum.planes[i].x * aMin.x + frustum.planes[i].y * aMin.y + frustum.planes[i].z * aMax.z + frustum.planes[i].w > 0.0f)
 				continue;
-			if (frustum.planes[i].x * aMax.x + frustum.planes[i].y * aMin.y + frustum.planes[i].z * aMax.z + frustum.
-				planes[i].w > 0.0f)
+			if (frustum.planes[i].x * aMax.x + frustum.planes[i].y * aMin.y + frustum.planes[i].z * aMax.z + frustum.planes[i].w > 0.0f)
 				continue;
-			if (frustum.planes[i].x * aMin.x + frustum.planes[i].y * aMax.y + frustum.planes[i].z * aMax.z + frustum.
-				planes[i].w > 0.0f)
+			if (frustum.planes[i].x * aMin.x + frustum.planes[i].y * aMax.y + frustum.planes[i].z * aMax.z + frustum.planes[i].w > 0.0f)
 				continue;
-			if (frustum.planes[i].x * aMax.x + frustum.planes[i].y * aMax.y + frustum.planes[i].z * aMax.z + frustum.
-				planes[i].w > 0.0f)
+			if (frustum.planes[i].x * aMax.x + frustum.planes[i].y * aMax.y + frustum.planes[i].z * aMax.z + frustum.planes[i].w > 0.0f)
 				continue;
 
 			// If the bounding box is completely outside any frustum plane, it is not visible

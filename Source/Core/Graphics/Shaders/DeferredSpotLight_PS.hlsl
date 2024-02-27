@@ -1,5 +1,6 @@
 #include "deferred_common.hlsli"
 #include "PBRFunctions.hlsli"
+#include "Shadows.hlsli"
 
 cbuffer SpotLightData : register(b2)
 {
@@ -11,7 +12,22 @@ cbuffer SpotLightData : register(b2)
     float lightInnerAngle;
     float lightOuterAngle;
     bool lightIsActive;
+    float4x4 spotLightCameraTransform;
     float2 padding;
+};
+
+cbuffer RSMData : register(b3)
+{
+    bool useRSM;
+    bool onlyRSM;
+    bool usePoissonRSM;
+    uint sampleCount;
+    float R_MAX;
+    float RSM_INTENSITY;
+    float2 padding2;
+    float4 shadowColour;
+    float4 ambianceColour;
+    //float shadowIntensity;
 };
 
 float4 main(DeferredVertexToPixel aInput) : SV_TARGET
@@ -30,9 +46,18 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 
     const float3 toEye = normalize(cameraPosition.xyz - worldPosition);
 
-    const float3 spotLight = EvaluateSpotLight(colour, specular, normal, roughness, lightColour, lightIntensity,
+    float shadowFactor = Shadow(spotLightCameraTransform, float4(worldPosition, 1.0f), spotLightShadowMap) + shadowColour.w;
+    shadowFactor = saturate(shadowFactor);
+
+    float3 spotLight = EvaluateSpotLight(colour, specular, normal, roughness, lightColour, lightIntensity,
         lightRange, lightPosition, -lightDirection, lightOuterAngle, lightInnerAngle, toEye,
         worldPosition.xyz);
+
+    if (shadowFactor < 1.0f)
+    {
+        spotLight *= shadowFactor; //.rgb;
+        //spotLight *= shadowColour.rgb;
+    }
 
     return float4(spotLight.rgb, 1.0f);
 }

@@ -41,8 +41,6 @@ namespace Kaka
 		Timer timer;
 		Camera camera;
 
-		Camera directionalLightShadowCamera;
-
 		DeferredLights deferredLights;
 
 		std::vector<Sprite> sprites = {};
@@ -155,9 +153,8 @@ namespace Kaka
 		struct RSMLightData
 		{
 			DirectX::XMFLOAT4 lightColourAndIntensity;
-			float falloff;
 			BOOL isDirectionalLight;
-			float padding[2];
+			float padding[3];
 		} rsmLightData;
 
 		PixelConstantBuffer<CommonBuffer> pcb{wnd.Gfx(), PS_CBUFFER_SLOT_COMMON};

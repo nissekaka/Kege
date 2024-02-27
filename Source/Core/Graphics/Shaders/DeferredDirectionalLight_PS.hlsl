@@ -9,6 +9,7 @@ cbuffer DirectionalLight : register(b1)
     float3 directionalLightColour;
     float ambientLightIntensity;
     float4x4 directionalLightCameraTransform;
+    float4x4 spotLightCameraTransform;
 };
 
 cbuffer RSMData : register(b3)
@@ -131,13 +132,16 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
     float3 rsm = float3(0, 0, 0);
     if (useRSM)
     {
-        rsm = IndirectLighting(sampleUV, normal, worldPosition) * colour;
+        rsm = IndirectLighting(sampleUV, normal, worldPosition);// * colour;
         //rsm = IndirectLighting(sampleUV, normal, worldPosition);
     }
 
     // Reflective Shadow Maps -- Indirect lighting -- END
 
-    float shadowFactor = Shadow(directionalLightCameraTransform, float4(worldPosition, 1.0f)) + shadowColour.w;
+    //float spotShadowFactor = Shadow(spotLightCameraTransform, float4(worldPosition, 1.0f), spotLightShadowMap) + shadowColour.w;
+    //float dirShadowFactor = Shadow(directionalLightCameraTransform, float4(worldPosition, 1.0f), directionalLightShadowMap) + shadowColour.w;
+    float shadowFactor = Shadow(directionalLightCameraTransform, float4(worldPosition, 1.0f), directionalLightShadowMap) + shadowColour.w;
+    //float shadowFactor = min(dirShadowFactor, spotShadowFactor);
     shadowFactor = saturate(shadowFactor);
 
     float3 dirLightDir = directionalLightDirection;
