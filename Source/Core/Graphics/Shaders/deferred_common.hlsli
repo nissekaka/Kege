@@ -5,10 +5,14 @@ Texture2D normalTex : register(t2);
 Texture2D materialTex : register(t3);
 Texture2D ambientOcclusionTex : register(t4);
 Texture2D rsmTex : register(t5);
-// Reflective Shadow Map
-Texture2D RSM_WorldPositionTex : register(t6);
-Texture2D RSM_NormalTex : register(t7);
-Texture2D RSM_FluxTex : register(t8);
+// Reflective Shadow Map -- Directional light
+Texture2D rsmDirectionalWorldPositionTex : register(t6);
+Texture2D rsmDirectionalNormalTex : register(t7);
+Texture2D rsmDirectionalFluxTex : register(t8);
+// Reflective Shadow Map -- Spotlight
+Texture2D rsmSpotlightWorldPositionTex : register(t9);
+Texture2D rsmSpotlightNormalTex : register(t10);
+Texture2D rsmSpotlightFluxTex : register(t11);
 // Skybox
 TextureCube daySkyTex : register(t12);
 TextureCube nightSkyTex : register(t13);

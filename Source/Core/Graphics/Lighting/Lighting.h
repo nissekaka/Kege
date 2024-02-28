@@ -29,7 +29,7 @@ struct DirectionalLightData
 	DirectX::XMMATRIX spotShadowCamera; // 160
 };
 
-struct PointLightData
+struct PointlightData
 {
 	DirectX::XMFLOAT3 position = {}; // 12
 	float intensity = {}; // 16
@@ -39,7 +39,7 @@ struct PointLightData
 	float padding[3] = {}; // 48
 };
 
-struct SpotLightData
+struct SpotlightData
 {
 	DirectX::XMFLOAT3 position = {}; // 12
 	float intensity = {}; // 16
@@ -56,8 +56,8 @@ struct SpotLightData
 struct LightConstantBuffer
 {
 	DirectionalLightData myDirectionalLightData = {};
-	std::array<PointLightData, 128u> myPointLightData = {};
-	std::array<SpotLightData, 128u> mySpotLightData = {};
+	std::array<PointlightData, 128u> myPointLightData = {};
+	std::array<SpotlightData, 128u> mySpotLightData = {};
 	UINT myNumberOfPointLights = {};
 	UINT myNumberOfSpotLights = {};
 	float padding[2] = {};

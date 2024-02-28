@@ -11,7 +11,7 @@ namespace Kaka
 			WorldPosition,
 			Normal,
 			Flux,
-			Depth,
+			//Depth,
 			Count
 		};
 

@@ -7,8 +7,8 @@
 
 #include "Core/Graphics/PostProcessing/PostProcessing.h"
 #include "Core/Graphics/Lighting/DirectionalLight.h"
-#include "Core/Graphics/Lighting/PointLight.h"
-#include "Core/Graphics/Lighting/SpotLight.h"
+#include "Core/Graphics/Lighting/Pointlight.h"
+#include "Core/Graphics/Lighting/Spotlight.h"
 #include "Core/Graphics/Drawable/Model.h"
 #include "Core/Graphics/Drawable/Terrain.h"
 #include "Core/Graphics/Drawable/Skybox.h"
@@ -29,7 +29,7 @@ namespace Kaka
 
 	private:
 		void LoadModelThreaded(const std::string& aModelPath, Model& aModel);
-		void PointLightTest(float aDeltaTime);
+		//void PointLightTest(float aDeltaTime);
 		void Update(const float aDeltaTime);
 		void HandleInput(const float aDeltaTime);
 		void ShowStatsWindow();
@@ -44,22 +44,25 @@ namespace Kaka
 		DeferredLights deferredLights;
 
 		std::vector<Sprite> sprites = {};
-		std::vector<PointLight> pointLights = {};
-		std::vector<SpotLight> spotLights = {};
+		std::vector<Pointlight> pointlights = {};
+		std::vector<Spotlight> spotlights = {};
 
-		SpotLightData* flashLightTest = nullptr;
-		SpotLightData* flashLightTest2 = nullptr;
+		SpotlightData* flashlightInner = nullptr;
+		SpotlightData* flashlightOuter = nullptr;
 
-		//PointLightData* pointLightTest = nullptr;
-
-		float flashLightBleedAngleMultiplier = 2.0f;
-		float flashLightBleedIntensityFactor = 0.5f;
-		float pointLightPositionOffsetFactor = 1.0f;
-		float pointLightPositionInterpSpeed = 45.0f;
-		float pointLightColourInterpSpeed = 5.0f;
-		float pointLightIntensityInterpSpeed = 5.0f;
-		float pointLightIntensity = 5.0f;
-		float pointLightRadius = 50.0f;
+		float flashlightPositionInterpSpeed = 15.0f;
+		float flashlightDirectionInterpSpeed = 5.0f;
+		float flashlightBleedAngleMultiplier = 3.3f;
+		float flashlightBleedIntensityFactor = 0.3f;
+		float flashlightIntensityInterpSpeed = 20.0f;
+		float flashlightIntensity;
+		bool flashlightOn = true;
+		//float pointlightPositionOffsetFactorl = 1.0f;
+		//float pointlightPositionInterpSpeed = 45.0f;
+		//float pointlightColourInterpSpeed = 5.0f;
+		//float pointlightIntensityInterpSpeed = 5.0f;
+		//float pointlightIntensity = 5.0f;
+		//float pointlightRadius = 50.0f;
 
 	private:
 		bool showImGui = true;
@@ -69,7 +72,7 @@ namespace Kaka
 	private:
 		DirectX::XMFLOAT3 cameraInput = {0.0f, 0.0f, 0.0f};
 		DirectX::XMFLOAT3 cameraVelocity = {0.0f, 0.0f, 0.0f};
-		float cameraMoveInterpSpeed = 10.0f;
+		float cameraMoveInterpSpeed = 8.0f;
 		float cameraRotateInterpSpeed = 25.0f;
 		float cameraSpeed = 0.0f;
 		float cameraSpeedDefault = 3.0f;
@@ -84,6 +87,7 @@ namespace Kaka
 		Skybox skybox{};
 		float skyboxSpeed = 0.005f;
 		DirectX::XMFLOAT3 skyboxAngle = {};
+
 
 		struct CommonBuffer
 		{
@@ -148,13 +152,17 @@ namespace Kaka
 			//float shadowIntensity = 0.25f;
 		};
 
-		RSMBuffer rsmBuffer = {};
+		RSMBuffer rsmBufferDirectional = {};
+		RSMBuffer rsmBufferSpot = {};
 
 		struct RSMLightData
 		{
-			DirectX::XMFLOAT4 lightColourAndIntensity;
+			float colourAndIntensity[4];
+			float directionAndInnerAngle[4];
+			float lightPositionAndOuterAngle[4];
+			float range;
 			BOOL isDirectionalLight;
-			float padding[3];
+			float padding[2];
 		} rsmLightData;
 
 		PixelConstantBuffer<CommonBuffer> pcb{wnd.Gfx(), PS_CBUFFER_SLOT_COMMON};

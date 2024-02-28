@@ -1,12 +1,12 @@
 #include "stdafx.h"
-#include "SpotLight.h"
+#include "Spotlight.h"
 
 #include <Core/Utility/KakaMath.h>
 #include <External/include/imgui/imgui.h>
 
 namespace Kaka
 {
-	SpotLight::SpotLight(const Graphics& aGfx, const UINT aSlot)
+	Spotlight::Spotlight(const Graphics& aGfx, const UINT aSlot)
 		:
 		cBuffer(aGfx, aSlot)
 	{
@@ -18,7 +18,7 @@ namespace Kaka
 		Reset();
 	}
 
-	void SpotLight::Bind(const Graphics& aGfx, DirectX::FXMMATRIX aView)
+	void Spotlight::Bind(const Graphics& aGfx, DirectX::FXMMATRIX aView)
 	{
 		aView;
 		SpotLightBuffer dataCopy;
@@ -33,7 +33,7 @@ namespace Kaka
 		cBuffer.Bind(aGfx);
 	}
 
-	void SpotLight::ShowControlWindow(const char* aWindowName)
+	void Spotlight::ShowControlWindow(const char* aWindowName)
 	{
 		aWindowName = aWindowName ? aWindowName : "Spot Light";
 
@@ -73,7 +73,7 @@ namespace Kaka
 		ImGui::End();
 	}
 
-	DirectX::XMMATRIX SpotLight::GetTransform() const
+	DirectX::XMMATRIX Spotlight::GetTransform() const
 	{
 		return DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f) *
 			DirectX::XMMatrixRotationRollPitchYaw(0, 0, 0) *
@@ -81,47 +81,47 @@ namespace Kaka
 			                             spotLightData[index].position.z);
 	}
 
-	DirectX::XMFLOAT3 SpotLight::GetPosition() const
+	DirectX::XMFLOAT3 Spotlight::GetPosition() const
 	{
 		return spotLightData[index].position;
 	}
 
-	float SpotLight::GetRange() const
+	float Spotlight::GetRange() const
 	{
 		return spotLightData[index].range;
 	}
 
-	void SpotLight::SetPosition(const DirectX::XMFLOAT3 aPosition) const
+	void Spotlight::SetPosition(const DirectX::XMFLOAT3 aPosition) const
 	{
 		spotLightData[index].position = aPosition;
 	}
 
-	void SpotLight::SetColour(const DirectX::XMFLOAT3 aColour) const
+	void Spotlight::SetColour(const DirectX::XMFLOAT3 aColour) const
 	{
 		spotLightData[index].colour = aColour;
 	}
 
-	void SpotLight::SetIntensity(const float aIntensity) const
+	void Spotlight::SetIntensity(const float aIntensity) const
 	{
 		spotLightData[index].diffuseIntensity = aIntensity;
 	}
 
-	void SpotLight::SetDirection(const DirectX::XMFLOAT3 aDirection) const
+	void Spotlight::SetDirection(const DirectX::XMFLOAT3 aDirection) const
 	{
 		spotLightData[index].direction = aDirection;
 	}
 
-	void SpotLight::SetInnerAngle(const float aAngle) const
+	void Spotlight::SetInnerAngle(const float aAngle) const
 	{
 		spotLightData[index].innerAngle = aAngle;
 	}
 
-	void SpotLight::SetOuterAngle(const float aAngle) const
+	void Spotlight::SetOuterAngle(const float aAngle) const
 	{
 		spotLightData[index].outerAngle = aAngle;
 	}
 
-	void SpotLight::Reset() const
+	void Spotlight::Reset() const
 	{
 		spotLightData[index].position = {0.0f, 0.0f, 0.0f};
 		spotLightData[index].direction = {0.0f, -1.0f, 0.0f};
@@ -133,7 +133,7 @@ namespace Kaka
 		spotLightData[index].active = true;
 	}
 
-	void SpotLight::Draw(Graphics& aGfx) const
+	void Spotlight::Draw(Graphics& aGfx) const
 	{
 		const std::vector<Vertex> vertices = {
 			{{-1.0f, 0.0f, 0.0f}},

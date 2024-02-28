@@ -1,4 +1,4 @@
-struct PointLightData
+struct PointlightData
 {
     float3 position;
     float padding1;
@@ -12,7 +12,7 @@ struct PointLightData
     float3 padding4;
 };
 
-struct SpotLightData
+struct SpotlightData
 {
     float3 position;
     float padding1;

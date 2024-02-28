@@ -107,12 +107,36 @@ namespace Kaka
 		return position;
 	}
 
+	// R  U  F
+	// 00 01 02 03
+	// 10 11 12 13
+	// 20 21 22 23
+	// 30 31 32 33
+
 	DirectX::XMVECTOR Camera::GetForwardVector() const
 	{
 		return {
 			GetInverseView().r[0].m128_f32[2],
 			GetInverseView().r[1].m128_f32[2],
 			GetInverseView().r[2].m128_f32[2]
+		};
+	}
+
+	DirectX::XMVECTOR Camera::GetRightVector() const
+	{
+		return {
+			GetInverseView().r[0].m128_f32[0],
+			GetInverseView().r[1].m128_f32[0],
+			GetInverseView().r[2].m128_f32[0]
+		};
+	}
+
+	DirectX::XMVECTOR Camera::GetUpVector() const
+	{
+		return {
+			GetInverseView().r[0].m128_f32[1],
+			GetInverseView().r[1].m128_f32[1],
+			GetInverseView().r[2].m128_f32[1]
 		};
 	}
 

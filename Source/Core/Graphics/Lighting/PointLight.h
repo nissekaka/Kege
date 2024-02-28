@@ -7,10 +7,10 @@
 
 namespace Kaka
 {
-	class PointLight
+	class Pointlight
 	{
 	public:
-		PointLight(const Graphics& aGfx, const UINT aSlot = 0u);
+		Pointlight(const Graphics& aGfx, const UINT aSlot = 0u);
 		void Bind(const Graphics& aGfx, DirectX::FXMMATRIX aView);
 
 	public:
@@ -64,6 +64,6 @@ namespace Kaka
 		UINT index;
 	};
 
-	inline std::vector<PointLight::PointLightData> PointLight::pointLightData = {};
-	inline UINT PointLight::sharedIndex = 0;
+	inline std::vector<Pointlight::PointLightData> Pointlight::pointLightData = {};
+	inline UINT Pointlight::sharedIndex = 0;
 }

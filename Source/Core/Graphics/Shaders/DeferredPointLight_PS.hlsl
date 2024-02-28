@@ -1,7 +1,7 @@
 #include "deferred_common.hlsli"
 #include "PBRFunctions.hlsli"
 
-cbuffer PointLightData : register(b2)
+cbuffer PointlightData : register(b2)
 {
     float3 lightPosition;
     float lightIntensity;

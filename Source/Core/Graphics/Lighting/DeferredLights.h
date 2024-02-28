@@ -27,18 +27,18 @@ namespace Kaka
 		void ShowControlWindow();
 		void SetShadowCamera(const DirectX::XMMATRIX& aCamera);
 		void SetSpotLightShadowCamera(const DirectX::XMMATRIX& aCamera, const int aIndex);
-		PointLightData& AddPointLight();
-		SpotLightData& AddSpotLight();
+		PointlightData& AddPointLight();
+		SpotlightData& AddSpotLight();
 
 		DirectionalLightData& GetDirectionalLightData() { return directionalLightData; }
-		SpotLightData& GetSpotLightData(const int aIndex) { return spotLightData[aIndex]; }
+		SpotlightData& GetSpotLightData(const int aIndex) { return spotlightData[aIndex]; }
 
 	private:
 		void CreateSphere(Graphics& aGfx);
 		void CreateQuad(Graphics& aGfx);
 
 	private:
-		struct ConstantBuffer
+		struct DeferredConstantBuffer
 		{
 			float positionAndRange[4];
 			BOOL isDirectional;
@@ -53,12 +53,12 @@ namespace Kaka
 		VertexShader* lightVS = nullptr;
 
 		DirectionalLightData directionalLightData;
-		std::vector<PointLightData> pointLightData;
-		std::vector<SpotLightData> spotLightData;
+		std::vector<PointlightData> pointlightData;
+		std::vector<SpotlightData> spotlightData;
 
 		PixelShader* directionalLightPS = nullptr;
-		PixelShader* pointLightPS = nullptr;
-		PixelShader* spotLightPS = nullptr;
+		PixelShader* pointlightPS = nullptr;
+		PixelShader* spotlightPS = nullptr;
 
 		// Quad
 		VertexBuffer quadVertexBuffer = {};

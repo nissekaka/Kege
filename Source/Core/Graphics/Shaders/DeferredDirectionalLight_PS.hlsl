@@ -1,6 +1,7 @@
-#include "deferred_common.hlsli"
+//#include "deferred_common.hlsli"
 #include "PBRFunctions.hlsli"
-#include "Shadows.hlsli"
+//#include "Shadows.hlsli"
+#include "RSM.hlsli"
 
 cbuffer DirectionalLight : register(b1)
 {
@@ -20,89 +21,11 @@ cbuffer RSMData : register(b3)
     uint sampleCount;
     float R_MAX;
     float RSM_INTENSITY;
-    float2 padding;
+    float2 paddingRSM;
     float4 shadowColour;
     float4 ambianceColour;
     //float shadowIntensity;
 };
-
-
-#define PI (3.141592653)
-#define TWO_PI (2.0 * PI)
-
-// reverses the bits of the input
-uint MyBitfieldReverse(uint i)
-{
-    uint b = (uint(i) << 16u) | (uint(i) >> 16u);
-    b = (b & 0x55555555u) << 1u | (b & 0xAAAAAAAAu) >> 1u;
-    b = (b & 0x33333333u) << 2u | (b & 0xCCCCCCCCu) >> 2u;
-    b = (b & 0x0F0F0F0Fu) << 4u | (b & 0xF0F0F0F0u) >> 4u;
-    b = (b & 0x00FF00FFu) << 8u | (b & 0xFF00FF00u) >> 8u;
-    return b;
-}
-
-float2 Hammersley(uint i, uint N)
-{
-    return float2(float(i) / float(N), float(MyBitfieldReverse(i)) * 2.3283064365386963e-10);
-}
-
-float3 IndirectLighting(float2 uv, float3 n, float3 x)
-{
-    // The irradiance at a surface point x with normal n due to pixel light p is
-    //
-    //                   max{0,<np|x-xp>} max{0,<n| xp-x>}
-    // Ep(x, n) = phi(p) -----------------------------------             
-	//                              ||x-xp||^4
-
-    float3 rsmOutput = { 0.0f, 0.0f, 0.0f };
-
-    if (usePoissonRSM)
-    {
-        for (int i = 0; i < 151; i++)	// Sum contributions of sampling locations
-        {
-            const float2 coord = uv + R_MAX * POISSON_DISK_151[i];
-            const float3 flux = RSM_FluxTex.Sample(clampedSampler, coord).rgb; // Collect components from corresponding RSM textures
-            const float3 xp = RSM_WorldPositionTex.Sample(clampedSampler, coord).xyz; // Position (x_p) and normal (n_p) are in world coordinates too
-            const float3 np = normalize(2.0f * RSM_NormalTex.Sample(clampedSampler, coord).xyz - 1.0f);
-
-            float3 Ep = flux * ((max(0, dot(np, x - xp)) * max(0, dot(n, xp - x)))
-									/ pow(length(x - xp), 4));
-
-            Ep *= POISSON_DISK_151[i].x * POISSON_DISK_151[i].x; // Weighting contribution and normalizing
-
-            rsmOutput += Ep; // Accumulate
-        }
-    }
-    else
-    {
-        //const float t = currentTime;
-        //const float2x2 rot = float2x2(cos(t), -sin(t), sin(t), cos(t));
-
-        for (int i = 0; i < sampleCount; i++)	// Sum contributions of sampling locations
-        {
-            //float2 offset = mul(Hammersley(i, sampleCount), rot);
-            float2 offset = Hammersley(i, sampleCount);
-            offset = clamp(offset, 0.001f, 0.999f); // Prevents the offset from creating black artifacts
-            const float r = offset.x * R_MAX;
-            const float theta = offset.y * TWO_PI;
-            const float2 coord = uv + float2(r * cos(theta), r * sin(theta));
-        	const float weight = offset.x * offset.x;
-
-            const float3 flux = RSM_FluxTex.Sample(clampedSampler, coord).rgb; // Collect components from corresponding RSM textures
-            const float3 xp = RSM_WorldPositionTex.Sample(clampedSampler, coord).xyz; // Position (x_p) and normal (n_p) are in world coordinates too
-            const float3 np = normalize(2.0f * RSM_NormalTex.Sample(clampedSampler, coord).xyz - 1.0f);
-
-            float3 Ep = flux * ((max(0, dot(np, x - xp)) * max(0, dot(n, xp - x)))
-									/ pow(length(x - xp), 4));
-
-            Ep *= weight; // Weighting contribution and normalizing
-
-            rsmOutput += Ep; // Accumulate
-        }
-    }
-
-    return rsmOutput * RSM_INTENSITY; // Modulate result with some intensity value
-}
 
 float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 {
@@ -122,26 +45,24 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 
     const float3 toEye = normalize(cameraPosition.xyz - worldPosition);
 
-        // Reflective Shadow Maps -- Indirect lighting -- START
+	// Reflective Shadow Maps -- Indirect lighting -- START
 
-    const float4 directionalLightProjectedPositionTemp = mul(directionalLightCameraTransform, float4(worldPosition, 1.0f));
-    float3 directionLightProjectedPosition = directionalLightProjectedPositionTemp.xyz / directionalLightProjectedPositionTemp.w;
+    const float4 lightProjectedPositionTemp = mul(directionalLightCameraTransform, float4(worldPosition, 1.0f));
+    float3 lightProjectedPosition = lightProjectedPositionTemp.xyz / lightProjectedPositionTemp.w;
 
-    const float2 sampleUV = 0.5f + float2(0.5f, -0.5f) * (directionLightProjectedPosition.xy);
+    const float2 sampleUV = 0.5f + float2(0.5f, -0.5f) * (lightProjectedPosition.xy);
 
     float3 rsm = float3(0, 0, 0);
     if (useRSM)
     {
-        rsm = IndirectLighting(sampleUV, normal, worldPosition);// * colour;
-        //rsm = IndirectLighting(sampleUV, normal, worldPosition);
+        rsm = IndirectLighting(sampleUV, normal, worldPosition,
+        rsmDirectionalWorldPositionTex, rsmDirectionalFluxTex, rsmDirectionalNormalTex,
+        usePoissonRSM, R_MAX, sampleCount, RSM_INTENSITY);// * colour;
     }
 
     // Reflective Shadow Maps -- Indirect lighting -- END
 
-    //float spotShadowFactor = Shadow(spotLightCameraTransform, float4(worldPosition, 1.0f), spotLightShadowMap) + shadowColour.w;
-    //float dirShadowFactor = Shadow(directionalLightCameraTransform, float4(worldPosition, 1.0f), directionalLightShadowMap) + shadowColour.w;
-    float shadowFactor = Shadow(directionalLightCameraTransform, float4(worldPosition, 1.0f), directionalLightShadowMap) + shadowColour.w;
-    //float shadowFactor = min(dirShadowFactor, spotShadowFactor);
+    float shadowFactor = Shadow(lightProjectedPosition, directionalLightShadowMap) + shadowColour.w;
     shadowFactor = saturate(shadowFactor);
 
     float3 dirLightDir = directionalLightDirection;
@@ -165,11 +86,6 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
     normal, ambientOcclusionAndCustom.gba, toEye, roughness, ambientOcclusionAndCustom.r, colour, specular);
 
     const float3 constantAmbiance = colour * ambianceColour.rgb * ambianceColour.w;
-    //const float3 ambiance = EvaluateAmbiance(defaultSampler,
-    //daySkyTex, normal, ambientOcclusionAndCustom.gba,
-    //toEye, roughness, ambientOcclusionAndCustom.r, colour, specular);
-
-    //const float3 ambienceDirectionalLight = directionalLightColour * ambiance;
 
     if (useRSM)
     {

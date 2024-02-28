@@ -1,11 +1,11 @@
 #include "stdafx.h"
-#include "PointLight.h"
+#include "Pointlight.h"
 #include <External/include/imgui/imgui.h>
 #include <array>
 
 namespace Kaka
 {
-	PointLight::PointLight(const Graphics& aGfx, const UINT aSlot)
+	Pointlight::Pointlight(const Graphics& aGfx, const UINT aSlot)
 		:
 		cBuffer(aGfx, aSlot)
 	{
@@ -17,7 +17,7 @@ namespace Kaka
 		Reset();
 	}
 
-	void PointLight::Bind(const Graphics& aGfx, DirectX::FXMMATRIX aView)
+	void Pointlight::Bind(const Graphics& aGfx, DirectX::FXMMATRIX aView)
 	{
 		aView;
 		PointLightBuffer dataCopy;
@@ -33,7 +33,7 @@ namespace Kaka
 		cBuffer.Bind(aGfx);
 	}
 
-	void PointLight::ShowControlWindow(const char* aWindowName) const
+	void Pointlight::ShowControlWindow(const char* aWindowName) const
 	{
 		aWindowName = aWindowName ? aWindowName : "Point Light";
 
@@ -60,7 +60,7 @@ namespace Kaka
 		ImGui::End();
 	}
 
-	DirectX::XMMATRIX PointLight::GetTransform() const
+	DirectX::XMMATRIX Pointlight::GetTransform() const
 	{
 		return DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f) *
 			DirectX::XMMatrixRotationRollPitchYaw(0, 0, 0) *
@@ -68,43 +68,43 @@ namespace Kaka
 			                             pointLightData[index].position.z);
 	}
 
-	DirectX::XMFLOAT3 PointLight::GetPosition() const
+	DirectX::XMFLOAT3 Pointlight::GetPosition() const
 	{
 		return pointLightData[index].position;
 	}
 
-	float PointLight::GetRadius() const
+	float Pointlight::GetRadius() const
 	{
 		return pointLightData[index].radius;
 	}
 
-	void PointLight::SetPosition(const DirectX::XMFLOAT3 aPosition) const
+	void Pointlight::SetPosition(const DirectX::XMFLOAT3 aPosition) const
 	{
 		pointLightData[index].position = aPosition;
 	}
 
-	void PointLight::SetColour(const DirectX::XMFLOAT3 aColour) const
+	void Pointlight::SetColour(const DirectX::XMFLOAT3 aColour) const
 	{
 		pointLightData[index].colour = aColour;
 	}
 
-	void PointLight::SetIntensity(const float aIntensity) const
+	void Pointlight::SetIntensity(const float aIntensity) const
 	{
 		pointLightData[index].diffuseIntensity = aIntensity;
 	}
 
-	void PointLight::SetRadius(const float aRadius) const
+	void Pointlight::SetRadius(const float aRadius) const
 	{
 		pointLightData[index].radius = aRadius;
 	}
 
-	void PointLight::SetFalloff(const float aFalloff) const
+	void Pointlight::SetFalloff(const float aFalloff) const
 	{
 		pointLightData[index].falloff = aFalloff;
 	}
 
 
-	void PointLight::Reset() const
+	void Pointlight::Reset() const
 	{
 		pointLightData[index].position = {0.0f, 2.0f, 0.0f};
 		pointLightData[index].colour = {1.0f, 1.0f, 1.0f};
@@ -114,7 +114,7 @@ namespace Kaka
 		pointLightData[index].active = true;
 	}
 
-	void PointLight::Draw(Graphics& aGfx) const
+	void Pointlight::Draw(Graphics& aGfx) const
 	{
 		float size = 0.1f * pointLightData[index].radius;
 		const std::vector<Vertex> vertices = {
@@ -220,7 +220,7 @@ namespace Kaka
 		);
 	}
 
-	void PointLight::AttachToTransform(const DirectX::XMMATRIX aTransform) const
+	void Pointlight::AttachToTransform(const DirectX::XMMATRIX aTransform) const
 	{
 		const DirectX::XMFLOAT3 pos = {aTransform.r[3].m128_f32[0], aTransform.r[3].m128_f32[1], aTransform.r[3].m128_f32[2]};
 

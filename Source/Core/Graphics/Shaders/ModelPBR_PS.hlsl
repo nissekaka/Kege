@@ -26,13 +26,13 @@ cbuffer DirectionalLightBuffer : register(b1)
 
 cbuffer PointLightBuffer : register(b2)
 {
-    PointLightData plBuf[MAX_LIGHTS];
+    PointlightData plBuf[MAX_LIGHTS];
     uint activePointLights;
 }
 
 cbuffer SpotLightBuffer : register(b3)
 {
-    SpotLightData slBuf[MAX_LIGHTS];
+    SpotlightData slBuf[MAX_LIGHTS];
     uint activeSpotLights;
 }
 

@@ -68,26 +68,23 @@ float PCF(float3 aDirectionLightProjectedPosition, Texture2D aTexture)
     return shadowFactor / float(sampleCount * sampleCount);
 }
 
-float Shadow(const in float4x4 aCameraTransform, const in float4 aWorldPosition, Texture2D aTexture)
+float Shadow(const in float3 aProjectedPosition, Texture2D aTexture)
 {
-    const float4 lightProjectedPositionTemp = mul(aCameraTransform, aWorldPosition);
-    float3 lightProjectedPosition = lightProjectedPositionTemp.xyz / lightProjectedPositionTemp.w;
-
     float shadowFactor = 1.0f;
-    if (clamp(lightProjectedPosition.x, -1.0f, 1.0f) == lightProjectedPosition.x &&
-        clamp(lightProjectedPosition.y, -1.0f, 1.0f) == lightProjectedPosition.y)
+    if (clamp(aProjectedPosition.x, -1.0f, 1.0f) == aProjectedPosition.x &&
+        clamp(aProjectedPosition.y, -1.0f, 1.0f) == aProjectedPosition.y)
     {
         float shadowFactorPCF = 0.0f;
         float shadowFactorPoisson = 0.0f;
 
         if (usePoisson)
         {
-            shadowFactorPoisson = PoissonDisk(lightProjectedPosition, aTexture);
+            shadowFactorPoisson = PoissonDisk(aProjectedPosition, aTexture);
             shadowFactor = shadowFactorPoisson;
         }
         if (usePCF)
         {
-            shadowFactorPCF = PCF(lightProjectedPosition, aTexture);
+            shadowFactorPCF = PCF(aProjectedPosition, aTexture);
             shadowFactor = shadowFactorPCF;
         }
         if (usePoisson && usePCF)

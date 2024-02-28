@@ -22,13 +22,13 @@ cbuffer DirectionalLightBuffer : register(b1)
 
 cbuffer PointLightBuffer : register(b2)
 {
-    PointLightData plBuf[MAX_LIGHTS];
+    PointlightData plBuf[MAX_LIGHTS];
     uint activePointLights;
 }
 
 cbuffer SpotLightBuffer : register(b3)
 {
-    SpotLightData slBuf[MAX_LIGHTS];
+    SpotlightData slBuf[MAX_LIGHTS];
     uint activeSpotLights;
 }
 
@@ -187,7 +187,7 @@ PixelOutput main(PixelInput aInput) : SV_TARGET
 
     // Shadows
 
-    const float shadowFactor = Shadow(directionalLightCameraTransform, float4(aInput.worldPos, 1.0f), directionalLightShadowMap);
+    //const float shadowFactor = Shadow(directionalLightCameraTransform, float4(aInput.worldPos, 1.0f), directionalLightShadowMap);
 
     // Lighting
 
@@ -232,7 +232,7 @@ PixelOutput main(PixelInput aInput) : SV_TARGET
 	// Final colour
     //const float3 emissiveColour = colour * emissive;
     //const float3 finalColour = saturate(directionalLight * shadowFactor);
-    const float3 finalColour = saturate(ambientLight * ambientLightPower + directionalLight * shadowFactor + pointLight + spotLight);
+    const float3 finalColour = saturate(ambientLight * ambientLightPower + directionalLight/* * shadowFactor*/ + pointLight + spotLight);
 
     output.colour = float4(finalColour, 1.0f);
     return output;

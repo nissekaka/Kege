@@ -74,8 +74,8 @@ namespace Kaka
 		friend class Model;
 		friend class Bindable;
 		friend class DirectionalLight;
-		friend class PointLight;
-		friend class SpotLight;
+		friend class Pointlight;
+		friend class Spotlight;
 		friend class Terrain;
 		friend class Skybox;
 		friend class ReflectionPlane;

@@ -21,13 +21,13 @@ cbuffer DirectionalLight : register(b1)
 
 cbuffer PointLight : register(b2)
 {
-    PointLightData plBuf[MAX_LIGHTS];
+    PointlightData plBuf[MAX_LIGHTS];
     uint activePointLights;
 }
 
 cbuffer SpotLightBuffer : register(b3)
 {
-    SpotLightData slBuf[MAX_LIGHTS];
+    SpotlightData slBuf[MAX_LIGHTS];
     uint activeSpotLights;
 }
 
@@ -111,7 +111,7 @@ float4 main(PixelInput aInput) : SV_TARGET
 
     // Shadows
 
-    const float shadowFactor = Shadow(directionalLightCameraTransform, float4(aInput.worldPos, 1.0f), directionalLightShadowMap);
+    //const float shadowFactor = Shadow(directionalLightCameraTransform, float4(aInput.worldPos, 1.0f), directionalLightShadowMap);
 
     // Lighting
 
@@ -168,7 +168,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     const float2 offset = A * (maxValue + heightDerivative) / dist;
     const float3 reflection = reflectTex.Sample(splr, aInput.position.xy / clientResolution + offset).rgb;
 
-    const float3 result = lerp(reflection, finalColour * shadowFactor, 0.35f);
+    const float3 result = lerp(reflection, finalColour /*shadowFactor*/, 0.35f);
 
     return float4(result, 0.5f);
 }

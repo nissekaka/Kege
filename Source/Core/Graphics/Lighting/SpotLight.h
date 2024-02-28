@@ -6,10 +6,10 @@
 
 namespace Kaka
 {
-	class SpotLight
+	class Spotlight
 	{
 	public:
-		SpotLight(const Graphics& aGfx, UINT aSlot = 0u);
+		Spotlight(const Graphics& aGfx, UINT aSlot = 0u);
 		void Bind(const Graphics& aGfx, DirectX::FXMMATRIX aView);
 		void ShowControlWindow(const char* aWindowName = nullptr);
 		DirectX::XMMATRIX GetTransform() const;
@@ -61,6 +61,6 @@ namespace Kaka
 		UINT index;
 	};
 
-	inline std::vector<SpotLight::SpotLightData> SpotLight::spotLightData = {};
-	inline UINT SpotLight::sharedIndex = 0;
+	inline std::vector<Spotlight::SpotLightData> Spotlight::spotLightData = {};
+	inline UINT Spotlight::sharedIndex = 0;
 }

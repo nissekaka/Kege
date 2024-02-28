@@ -10,11 +10,11 @@ namespace Kaka
 	{
 		lightVS = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\DeferredLight_VS.cso");
 		directionalLightPS = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\DeferredDirectionalLight_PS.cso");
-		pointLightPS = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\DeferredPointLight_PS.cso");
-		spotLightPS = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\DeferredSpotLight_PS.cso");
+		pointlightPS = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\DeferredPointLight_PS.cso");
+		spotlightPS = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\DeferredSpotLight_PS.cso");
 
 		// Initial directional light values
-		directionalLightData.lightDirection = {-0.7f, -2.0f, 0.16f};
+		directionalLightData.lightDirection = {2.16f, -3.14f, -1.6f};
 		directionalLightData.lightColour = {1.0f, 0.8f, 0.6f};
 		directionalLightData.lightIntensity = 1.0f;
 		directionalLightData.ambientLight = 0.15f;
@@ -35,8 +35,8 @@ namespace Kaka
 		inputLayout.Init(aGfx, ied, lightVS->GetBytecode());
 		topology.Init(aGfx, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		pointLightData.reserve(POINT_LIGHT_RESERVE);
-		spotLightData.reserve(SPOT_LIGHT_RESERVE);
+		pointlightData.reserve(POINT_LIGHT_RESERVE);
+		spotlightData.reserve(SPOT_LIGHT_RESERVE);
 	}
 
 	void DeferredLights::Draw(Graphics& aGfx)
@@ -47,14 +47,14 @@ namespace Kaka
 
 		// Directional Light
 		{
-			ConstantBuffer lightBuffer{};
+			DeferredConstantBuffer lightBuffer{};
 			lightBuffer.positionAndRange[0] = 0.0f;
 			lightBuffer.positionAndRange[1] = 0.0f;
 			lightBuffer.positionAndRange[2] = 0.0f;
 			lightBuffer.positionAndRange[3] = 1.0f;
 			lightBuffer.isDirectional = TRUE;
 
-			VertexConstantBuffer<ConstantBuffer> vertexLightBuffer{aGfx, VS_CBUFFER_SLOT_LIGHT};
+			VertexConstantBuffer<DeferredConstantBuffer> vertexLightBuffer{aGfx, VS_CBUFFER_SLOT_LIGHT};
 			vertexLightBuffer.Update(aGfx, lightBuffer);
 			vertexLightBuffer.Bind(aGfx);
 
@@ -79,13 +79,13 @@ namespace Kaka
 			sphereVertexBuffer.Bind(aGfx);
 			sphereIndexBuffer.Bind(aGfx);
 
-			// Point Lights
+			// Pointlights
 			{
-				pointLightPS->Bind(aGfx);
+				pointlightPS->Bind(aGfx);
 
-				for (PointLightData& lightData : pointLightData)
+				for (PointlightData& lightData : pointlightData)
 				{
-					ConstantBuffer lightBuffer;
+					DeferredConstantBuffer lightBuffer;
 
 					lightBuffer.positionAndRange[0] = lightData.position.x;
 					lightBuffer.positionAndRange[1] = lightData.position.y;
@@ -93,11 +93,11 @@ namespace Kaka
 					lightBuffer.positionAndRange[3] = lightData.radius;
 					lightBuffer.isDirectional = FALSE;
 
-					VertexConstantBuffer<ConstantBuffer> vertexLightBuffer{aGfx, VS_CBUFFER_SLOT_LIGHT};
+					VertexConstantBuffer<DeferredConstantBuffer> vertexLightBuffer{aGfx, VS_CBUFFER_SLOT_LIGHT};
 					vertexLightBuffer.Update(aGfx, lightBuffer);
 					vertexLightBuffer.Bind(aGfx);
 
-					PixelConstantBuffer<PointLightData> pointLightBuffer{aGfx, PS_CBUFFER_SLOT_POINT_LIGHT};
+					PixelConstantBuffer<PointlightData> pointLightBuffer{aGfx, PS_CBUFFER_SLOT_POINT_LIGHT};
 					pointLightBuffer.Update(aGfx, lightData);
 					pointLightBuffer.Bind(aGfx);
 
@@ -105,13 +105,13 @@ namespace Kaka
 				}
 			}
 
-			// Spot Lights
+			// Spotlights
 			{
-				spotLightPS->Bind(aGfx);
+				spotlightPS->Bind(aGfx);
 
-				for (SpotLightData& lightData : spotLightData)
+				for (SpotlightData& lightData : spotlightData)
 				{
-					ConstantBuffer lightBuffer;
+					DeferredConstantBuffer lightBuffer;
 
 					lightBuffer.positionAndRange[0] = lightData.position.x;
 					lightBuffer.positionAndRange[1] = lightData.position.y;
@@ -119,11 +119,11 @@ namespace Kaka
 					lightBuffer.positionAndRange[3] = lightData.range;
 					lightBuffer.isDirectional = FALSE;
 
-					VertexConstantBuffer<ConstantBuffer> vertexLightBuffer{aGfx, VS_CBUFFER_SLOT_LIGHT};
+					VertexConstantBuffer<DeferredConstantBuffer> vertexLightBuffer{aGfx, VS_CBUFFER_SLOT_LIGHT};
 					vertexLightBuffer.Update(aGfx, lightBuffer);
 					vertexLightBuffer.Bind(aGfx);
 
-					PixelConstantBuffer<SpotLightData> spotLightBuffer{aGfx, PS_CBUFFER_SLOT_SPOT_LIGHT};
+					PixelConstantBuffer<SpotlightData> spotLightBuffer{aGfx, PS_CBUFFER_SLOT_SPOT_LIGHT};
 					spotLightBuffer.Update(aGfx, lightData);
 					spotLightBuffer.Bind(aGfx);
 
@@ -165,20 +165,20 @@ namespace Kaka
 
 	void DeferredLights::SetSpotLightShadowCamera(const DirectX::XMMATRIX& aCamera, const int aIndex)
 	{
-		spotLightData[aIndex].shadowCamera = aCamera;
+		spotlightData[aIndex].shadowCamera = aCamera;
 		directionalLightData.spotShadowCamera = aCamera;
 	}
 
-	PointLightData& DeferredLights::AddPointLight()
+	PointlightData& DeferredLights::AddPointLight()
 	{
-		pointLightData.emplace_back();
-		return pointLightData.back();
+		pointlightData.emplace_back();
+		return pointlightData.back();
 	}
 
-	SpotLightData& DeferredLights::AddSpotLight()
+	SpotlightData& DeferredLights::AddSpotLight()
 	{
-		spotLightData.emplace_back();
-		return spotLightData.back();
+		spotlightData.emplace_back();
+		return spotlightData.back();
 	}
 
 	void DeferredLights::CreateSphere(Graphics& aGfx)
