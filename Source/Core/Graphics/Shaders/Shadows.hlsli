@@ -14,9 +14,9 @@ cbuffer ShadowBuffer : register(b7)
     float offsetScalePoissonDisk;
 }
 
-float PoissonDisk(float3 aDirectionLightProjectedPosition, Texture2D aTexture)
+float PoissonDisk(float3 aLightProjectedPosition, Texture2D aTexture)
 {
-    const float computedZ = aDirectionLightProjectedPosition.z;
+    const float computedZ = aLightProjectedPosition.z;
     const float bias = 0.001f;
 
     float shadowFactor = 0.0f;
@@ -29,7 +29,7 @@ float PoissonDisk(float3 aDirectionLightProjectedPosition, Texture2D aTexture)
         const float2 sampleOffset = POISSON_DISK_64[i];
 
     // Adjust sampleUV based on facing direction
-        const float2 sampleUV = 0.5f + float2(0.5f, -0.5f) * (aDirectionLightProjectedPosition.xy) + sampleOffset * offsetScale;
+        const float2 sampleUV = 0.5f + float2(0.5f, -0.5f) * (aLightProjectedPosition.xy) + sampleOffset * offsetScale;
 
         const float shadowMapZ = aTexture.Sample(shadowSplr, sampleUV);
 
@@ -40,9 +40,9 @@ float PoissonDisk(float3 aDirectionLightProjectedPosition, Texture2D aTexture)
     return shadowFactor / (float)sampleCount;
 }
 
-float PCF(float3 aDirectionLightProjectedPosition, Texture2D aTexture)
+float PCF(float3 aLightProjectedPosition, Texture2D aTexture)
 {
-    const float computedZ = aDirectionLightProjectedPosition.z;
+    const float computedZ = aLightProjectedPosition.z;
     const float bias = 0.001f;
     
     float shadowFactor = 0.0f;
@@ -57,7 +57,7 @@ float PCF(float3 aDirectionLightProjectedPosition, Texture2D aTexture)
         for (int j = -sampleCount / 2; j <= sampleCount / 2; ++j)
         {
             const float2 sampleOffset = float2(i, j) / float(sampleCount);
-            const float2 sampleUV = 0.5f + float2(0.5f, -0.5f) * (aDirectionLightProjectedPosition.xy + sampleOffset * offsetScale);
+            const float2 sampleUV = 0.5f + float2(0.5f, -0.5f) * (aLightProjectedPosition.xy + sampleOffset * offsetScale);
             const float shadowMapZ = aTexture.Sample(shadowSplr, sampleUV);
 
             shadowFactor += (computedZ < shadowMapZ + bias) ? 1.0f : 0.0f;

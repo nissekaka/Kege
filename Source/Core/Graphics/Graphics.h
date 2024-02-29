@@ -30,7 +30,8 @@ namespace Kaka
 		Default,
 		WaterReflect,
 		PostProcessing,
-		ShadowMap,
+		RSMDownscaleDirectional,
+		RSMDownscaleSpot,
 	};
 
 	enum class eBlendStates
@@ -70,6 +71,7 @@ namespace Kaka
 	{
 		friend class GBuffer;
 		friend class RSMBuffer;
+		friend class IndirectLighting;
 		friend class DeferredLights;
 		friend class Model;
 		friend class Bindable;
@@ -165,7 +167,22 @@ namespace Kaka
 		RenderTarget renderWaterReflect;
 		RenderTarget postProcessing;
 
+		RenderTarget rsmDownscaleDirectional;
+		RenderTarget rsmDownscaleSpot;
+		int rsmDownscaleDivideFactor = 4;
+
 		std::vector<RenderTarget> bloomDownscale = {};
+
+		struct DownSampleBuffer
+		{
+			float bloomBlending = 0.0f;
+			float bloomThreshold = 0.1f;
+			int uvScale = 2;
+			float padding;
+		} bb;
+
+		int bloomDivideFactor = 2;
+		bool useBloom = true;
 		int bloomSteps = 5;
 
 		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pDefaultTarget;
@@ -199,15 +216,5 @@ namespace Kaka
 		std::vector<RSMBuffer> spotLightRSMBuffer;
 
 	private:
-		struct DownSampleBuffer
-		{
-			float bloomBlending = 0.0f;
-			float bloomThreshold = 0.1f;
-			int uvScale = 2;
-			float padding;
-		} bb;
-
-		int bloomDivideFactor = 2;
-		bool useBloom = true;
 	};
 }

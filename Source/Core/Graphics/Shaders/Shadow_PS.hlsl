@@ -52,31 +52,30 @@ RSMBufferOutput main(PixelInput aInput)
     else
     {
         float3 toLight = lightPositionAndOuterAngle.xyz - aInput.worldPos.xyz;
-        float lightDistance = length(toLight);
+        const float lightDistance = length(toLight);
         toLight = normalize(toLight);
 
-        float NdL = saturate(dot(aInput.worldNormal, toLight));
-        float lambert = NdL; // Angle attenuation
+        const float NdL = saturate(dot(aInput.worldNormal, toLight));
+        const float lambert = NdL; // Angle attenuation
 
-        float cosOuterAngle = cos(lightPositionAndOuterAngle.w);
-        float cosInnerAngle = cos(lightDirectionAndInnerAngle.w);
-        float3 lightDirection = -lightDirectionAndInnerAngle.xyz;
+        const float cosOuterAngle = cos(lightPositionAndOuterAngle.w);
+        const float cosInnerAngle = cos(lightDirectionAndInnerAngle.w);
+        const float3 lightDirection = -lightDirectionAndInnerAngle.xyz;
 
 		// Determine if pixel is within cone.
-        float theta = dot(toLight, normalize(-lightDirection));
+        const float theta = dot(toLight, normalize(-lightDirection));
 		// And if we're in the inner or outer radius.
-        float epsilon = cosInnerAngle - cosOuterAngle;
+        const float epsilon = cosInnerAngle - cosOuterAngle;
         float intensity = clamp((theta - cosOuterAngle) / epsilon, 0.0f, 1.0f);
         intensity *= intensity;
 	
-        float ue4Attenuation = ((pow(saturate(1 - lightDistance / range /*pow(lightDistance / range, 4.0f)*/), 2.0f)) / (pow(lightDistance, 2.0f) + 1)); // Unreal Engine 4 attenuation
-        float finalAttenuation = lambert * intensity * ue4Attenuation;
+        const float ue4Attenuation = ((pow(saturate(1 - lightDistance / range /*pow(lightDistance / range, 4.0f)*/), 2.0f)) / (pow(lightDistance, 2.0f) + 1)); // Unreal Engine 4 attenuation
+        const float finalAttenuation = lambert * intensity * ue4Attenuation;
 
         output.flux = float4(albedo.rgb * lightColourAndIntensity.rgb, 1.0f) * finalAttenuation * lightColourAndIntensity.w;
     }
 
     output.normal = float4(pixelNormal, 1.0f);
-    //output.normal = float4(aInput.worldNormal, 1.0f);
 
     return output;
 }

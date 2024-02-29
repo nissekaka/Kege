@@ -9,31 +9,21 @@
 
 namespace Kaka
 {
-	class Texture;
-	class PixelShader;
-	class VertexShader;
-
-	class PostProcessing
+	class IndirectLighting
 	{
 	public:
-		PostProcessing();
+		IndirectLighting() = default;
+		~IndirectLighting() = default;
 
 		void Init(const Graphics& aGfx);
 		void Draw(Graphics& aGfx);
-		void SetDownsamplePS();
-		void SetUpsamplePS();
-		void SetPostProcessPS();
 
 	private:
 		VertexBuffer vertexBuffer = {};
 		IndexBuffer indexBuffer = {};
 		//Texture texture{1u};
-		VertexShader* postProcessVS = nullptr;
-		PixelShader* postProcessPS = nullptr;
-		PixelShader* downsamplePS = nullptr;
-		PixelShader* upsamplePS = nullptr;
-
-		PixelShader* currentPS = nullptr;
+		VertexShader* indirectLightingVS = nullptr;
+		PixelShader* indirectLightingPS = nullptr;
 
 		std::vector<D3D11_INPUT_ELEMENT_DESC> ied;
 		InputLayout inputLayout;

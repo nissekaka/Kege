@@ -1,6 +1,4 @@
-//#include "deferred_common.hlsli"
 #include "PBRFunctions.hlsli"
-//#include "Shadows.hlsli"
 #include "RSM.hlsli"
 
 cbuffer SpotlightData : register(b2)
@@ -15,20 +13,6 @@ cbuffer SpotlightData : register(b2)
     bool lightIsActive;
     float4x4 spotLightCameraTransform;
     float2 padding;
-};
-
-cbuffer RSMData : register(b5)
-{
-    bool useRSM;
-    bool onlyRSM;
-    bool usePoissonRSM;
-    uint sampleCount;
-    float R_MAX;
-    float RSM_INTENSITY;
-    float2 paddingRSM;
-    float4 shadowColour;
-    float4 ambianceColour;
-    //float shadowIntensity;
 };
 
 float4 main(DeferredVertexToPixel aInput) : SV_TARGET
@@ -47,22 +31,8 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 
     const float3 toEye = normalize(cameraPosition.xyz - worldPosition);
 
-	// Reflective Shadow Maps -- Indirect lighting -- START
-
     const float4 lightProjectedPositionTemp = mul(spotLightCameraTransform, float4(worldPosition, 1.0f));
-    float3 lightProjectedPosition = lightProjectedPositionTemp.xyz / lightProjectedPositionTemp.w;
-
-    const float2 sampleUV = 0.5f + float2(0.5f, -0.5f) * (lightProjectedPosition.xy);
-
-    float3 rsm = float3(0, 0, 0);
-    if (useRSM)
-    {
-        rsm = IndirectLighting(sampleUV, normal, worldPosition,
-        rsmSpotlightWorldPositionTex, rsmSpotlightFluxTex, rsmSpotlightNormalTex,
-        usePoissonRSM, R_MAX, sampleCount, RSM_INTENSITY); // * colour;
-    }
-
-    // Reflective Shadow Maps -- Indirect lighting -- END
+    const float3 lightProjectedPosition = lightProjectedPositionTemp.xyz / lightProjectedPositionTemp.w;
 
     float shadowFactor = Shadow(lightProjectedPosition, spotLightShadowMap) + shadowColour.w;
     shadowFactor = saturate(shadowFactor);
@@ -73,17 +43,17 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 
     if (shadowFactor < 1.0f)
     {
-        spotLight *= shadowFactor; //.rgb;
-        //spotLight *= shadowColour.rgb;
+        spotLight *= shadowFactor;
     }
 
-    if (useRSM)
+    if (useSpotRSM)
     {
+        const float3 indirectLight = spotIndirectLightTex.Sample(defaultSampler, uv).rgb;
         if (onlyRSM)
         {
-            return float4(rsm, 1.0f);
+            return float4(indirectLight, 1.0f);
         }
-        return float4(spotLight + rsm, 1.0f);
+        return float4(spotLight.rgb + indirectLight, 1.0f);
     }
     return float4(spotLight.rgb, 1.0f);
 }

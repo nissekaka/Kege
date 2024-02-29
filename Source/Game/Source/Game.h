@@ -9,6 +9,7 @@
 #include "Core/Graphics/Lighting/DirectionalLight.h"
 #include "Core/Graphics/Lighting/Pointlight.h"
 #include "Core/Graphics/Lighting/Spotlight.h"
+#include "Core/Graphics/Lighting/IndirectLighting.h"
 #include "Core/Graphics/Drawable/Model.h"
 #include "Core/Graphics/Drawable/Terrain.h"
 #include "Core/Graphics/Drawable/Skybox.h"
@@ -105,6 +106,7 @@ namespace Kaka
 		CommonBuffer commonBuffer = {};
 
 		PostProcessing postProcessing;
+		IndirectLighting indirectLighting;
 
 		struct PostProcessingBuffer
 		{
@@ -140,16 +142,17 @@ namespace Kaka
 
 		struct RSMBuffer
 		{
-			BOOL useRSM = true;
-			BOOL onlyRSM = false;
 			BOOL usePoisson = false;
 			unsigned int sampleCount = 100;
 			float rMax = 0.08f; // Maximum sampling radius.
 			float rsmIntensity = 10.0f;
-			float padding[2];
 			DirectX::XMFLOAT4 shadowColour = {0.8f, 0.9f, 1.0f, 0.01f};
 			DirectX::XMFLOAT4 ambianceColour = {0.1f, 0.1f, 0.1f, 0.85f};
-			//float shadowIntensity = 0.25f;
+			DirectX::XMMATRIX lightCameraTransform;
+			BOOL useDirectionalRSM = true;
+			BOOL useSpotRSM = true;
+			BOOL onlyRSM = false;
+			unsigned int uvScale = 1;
 		};
 
 		RSMBuffer rsmBufferDirectional = {};

@@ -12,13 +12,13 @@ namespace Kaka
 
 	void PostProcessing::Init(const Graphics& aGfx)
 	{
-		postProcessVS.Init(aGfx, L"Shaders/PostProcessing_VS.cso");
-		postProcessPS.Init(aGfx, L"Shaders/PostProcessing_PS.cso");
+		postProcessVS = ShaderFactory::GetVertexShader(aGfx, L"Shaders/Fullscreen_VS.cso");
+		postProcessPS = ShaderFactory::GetPixelShader(aGfx, L"Shaders/PostProcessing_PS.cso");
 
-		downsamplePS.Init(aGfx, L"Shaders/Downsample_PS.cso");
-		upsamplePS.Init(aGfx, L"Shaders/Upsample_PS.cso");
+		downsamplePS = ShaderFactory::GetPixelShader(aGfx, L"Shaders/Downsample_PS.cso");
+		upsamplePS = ShaderFactory::GetPixelShader(aGfx, L"Shaders/Upsample_PS.cso");
 
-		currentPS = &postProcessPS;
+		currentPS = postProcessPS;
 
 		struct PVertex
 		{
@@ -61,9 +61,7 @@ namespace Kaka
 		}
 
 		vertexBuffer.Init(aGfx, vertices);
-		vertexBuffer.Bind(aGfx);
 		indexBuffer.Init(aGfx, indices);
-		indexBuffer.Bind(aGfx);
 
 		ied =
 		{
@@ -76,7 +74,8 @@ namespace Kaka
 				D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0
 			},
 		};
-		inputLayout.Init(aGfx, ied, postProcessVS.GetBytecode());
+
+		inputLayout.Init(aGfx, ied, postProcessVS->GetBytecode());
 		topology.Init(aGfx, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 
@@ -86,7 +85,7 @@ namespace Kaka
 		vertexBuffer.Bind(aGfx);
 		indexBuffer.Bind(aGfx);
 		currentPS->Bind(aGfx);
-		postProcessVS.Bind(aGfx);
+		postProcessVS->Bind(aGfx);
 		inputLayout.Bind(aGfx);
 		topology.Bind(aGfx);
 
@@ -98,16 +97,16 @@ namespace Kaka
 
 	void PostProcessing::SetDownsamplePS()
 	{
-		currentPS = &downsamplePS;
+		currentPS = downsamplePS;
 	}
 
 	void PostProcessing::SetUpsamplePS()
 	{
-		currentPS = &upsamplePS;
+		currentPS = upsamplePS;
 	}
 
 	void PostProcessing::SetPostProcessPS()
 	{
-		currentPS = &postProcessPS;
+		currentPS = postProcessPS;
 	}
 }

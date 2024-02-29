@@ -1,8 +1,20 @@
 #include "deferred_common.hlsli"
 #include "Shadows.hlsli"
 
-
-
+cbuffer RSMData : register(b3)
+{
+    bool usePoissonRSM;
+    uint sampleCount;
+    float R_MAX;
+    float RSM_INTENSITY;
+    float4 shadowColour;
+    float4 ambianceColour;
+    float4x4 lightCameraTransform;
+    bool useDirectionalRSM;
+    bool useSpotRSM;
+    bool onlyRSM;
+    uint uvScale;
+};
 
 #define PI (3.141592653)
 #define TWO_PI (2.0 * PI)

@@ -13,20 +13,6 @@ cbuffer DirectionalLight : register(b1)
     float4x4 spotLightCameraTransform;
 };
 
-cbuffer RSMData : register(b3)
-{
-    bool useRSM;
-    bool onlyRSM;
-    bool usePoissonRSM;
-    uint sampleCount;
-    float R_MAX;
-    float RSM_INTENSITY;
-    float2 paddingRSM;
-    float4 shadowColour;
-    float4 ambianceColour;
-    //float shadowIntensity;
-};
-
 float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 {
     const float2 uv = aInput.position.xy / clientResolution.xy;
@@ -45,22 +31,8 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 
     const float3 toEye = normalize(cameraPosition.xyz - worldPosition);
 
-	// Reflective Shadow Maps -- Indirect lighting -- START
-
     const float4 lightProjectedPositionTemp = mul(directionalLightCameraTransform, float4(worldPosition, 1.0f));
-    float3 lightProjectedPosition = lightProjectedPositionTemp.xyz / lightProjectedPositionTemp.w;
-
-    const float2 sampleUV = 0.5f + float2(0.5f, -0.5f) * (lightProjectedPosition.xy);
-
-    float3 rsm = float3(0, 0, 0);
-    if (useRSM)
-    {
-        rsm = IndirectLighting(sampleUV, normal, worldPosition,
-        rsmDirectionalWorldPositionTex, rsmDirectionalFluxTex, rsmDirectionalNormalTex,
-        usePoissonRSM, R_MAX, sampleCount, RSM_INTENSITY);// * colour;
-    }
-
-    // Reflective Shadow Maps -- Indirect lighting -- END
+    const float3 lightProjectedPosition = lightProjectedPositionTemp.xyz / lightProjectedPositionTemp.w;
 
     float shadowFactor = Shadow(lightProjectedPosition, directionalLightShadowMap) + shadowColour.w;
     shadowFactor = saturate(shadowFactor);
@@ -87,13 +59,14 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 
     const float3 constantAmbiance = colour * ambianceColour.rgb * ambianceColour.w;
 
-    if (useRSM)
+    if (useDirectionalRSM)
     {
+	    float3 indirectLight = directionalIndirectLightTex.Sample(defaultSampler, uv).rgb;
         if (onlyRSM)
         {
-            return float4(rsm, 1.0f);
+            return float4(indirectLight, 1.0f);
         }
-        return float4(finalColour + constantAmbiance + ambiance * ambientLightIntensity + rsm, 1.0f);
+        return saturate(float4(finalColour + constantAmbiance + ambiance * ambientLightIntensity + indirectLight, 1.0f));
     }
     return saturate(float4(finalColour + constantAmbiance + ambiance * ambientLightIntensity, 1.0f));
 }

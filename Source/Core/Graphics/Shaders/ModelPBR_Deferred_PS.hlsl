@@ -45,7 +45,7 @@ GBufferOutput main(PixelInput aInput)
     output.ambientOcclusionAndCustom = float4(ambientOcclusion, aInput.worldNormal); // gba are unused, put whatever data you want here!
     output.ambientOcclusionAndCustom.g = 0.0f;
 
-    output.rsm = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    //output.rsm = float4(0.0f, 0.0f, 0.0f, 1.0f);
     return output;
 }
 

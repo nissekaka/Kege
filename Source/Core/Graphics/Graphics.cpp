@@ -251,6 +251,62 @@ namespace Kaka
 			}
 		}
 
+		// Reflective Shadow Map downscale -- Directional
+		{
+			UINT rsmWidth = width / rsmDownscaleDivideFactor;
+			UINT rsmHeight = height / rsmDownscaleDivideFactor;
+
+			ID3D11Texture2D* rsmTexture;
+			D3D11_TEXTURE2D_DESC rsmDesc = {0};
+			rsmDesc.Width = rsmWidth;
+			rsmDesc.Height = rsmHeight;
+			rsmDesc.MipLevels = 1u;
+			rsmDesc.ArraySize = 1u;
+			rsmDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+			rsmDesc.SampleDesc.Count = 1u;
+			rsmDesc.SampleDesc.Quality = 0u;
+			rsmDesc.Usage = D3D11_USAGE_DEFAULT;
+			rsmDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+			rsmDesc.CPUAccessFlags = 0u;
+			rsmDesc.MiscFlags = 0u;
+			result = pDevice->CreateTexture2D(&rsmDesc, nullptr, &rsmTexture);
+			assert(SUCCEEDED(result));
+			result = pDevice->CreateShaderResourceView(rsmTexture, nullptr, &rsmDownscaleDirectional.pResource);
+			assert(SUCCEEDED(result));
+			result = pDevice->CreateRenderTargetView(rsmTexture, nullptr, &rsmDownscaleDirectional.pTarget);
+			assert(SUCCEEDED(result));
+
+			rsmTexture->Release();
+		}
+
+		// Reflective Shadow Map downscale -- Spot
+		{
+			UINT rsmWidth = width / rsmDownscaleDivideFactor;
+			UINT rsmHeight = height / rsmDownscaleDivideFactor;
+
+			ID3D11Texture2D* rsmTexture;
+			D3D11_TEXTURE2D_DESC rsmDesc = {0};
+			rsmDesc.Width = rsmWidth;
+			rsmDesc.Height = rsmHeight;
+			rsmDesc.MipLevels = 1u;
+			rsmDesc.ArraySize = 1u;
+			rsmDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+			rsmDesc.SampleDesc.Count = 1u;
+			rsmDesc.SampleDesc.Quality = 0u;
+			rsmDesc.Usage = D3D11_USAGE_DEFAULT;
+			rsmDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+			rsmDesc.CPUAccessFlags = 0u;
+			rsmDesc.MiscFlags = 0u;
+			result = pDevice->CreateTexture2D(&rsmDesc, nullptr, &rsmTexture);
+			assert(SUCCEEDED(result));
+			result = pDevice->CreateShaderResourceView(rsmTexture, nullptr, &rsmDownscaleSpot.pResource);
+			assert(SUCCEEDED(result));
+			result = pDevice->CreateRenderTargetView(rsmTexture, nullptr, &rsmDownscaleSpot.pTarget);
+			assert(SUCCEEDED(result));
+
+			rsmTexture->Release();
+		}
+
 		// TODO bools
 		CreateBlendStates();
 		CreateDepthStencilStates();
@@ -296,6 +352,8 @@ namespace Kaka
 		constexpr float colour[] = KAKA_BG_COLOUR;
 		pContext->ClearRenderTargetView(pDefaultTarget.Get(), colour);
 		pContext->ClearRenderTargetView(postProcessing.pTarget.Get(), colour);
+		pContext->ClearRenderTargetView(rsmDownscaleDirectional.pTarget.Get(), colour);
+		pContext->ClearRenderTargetView(rsmDownscaleSpot.pTarget.Get(), colour);
 		pContext->ClearDepthStencilView(pDepth.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0u);
 	}
 
@@ -374,6 +432,15 @@ namespace Kaka
 				pContext->OMSetRenderTargets(1u, postProcessing.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
+			case eRenderTargetType::RSMDownscaleDirectional:
+			{
+				pContext->OMSetRenderTargets(1u, rsmDownscaleDirectional.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
+			}
+			case eRenderTargetType::RSMDownscaleSpot:
+			{
+				pContext->OMSetRenderTargets(1u, rsmDownscaleSpot.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
+			}
+			break;
 			//case eRenderTargetType::ShadowMap:
 			//{
 			//	pContext->OMSetRenderTargets(0u, nullptr, aUseDepth ? rsmBuffer.GetDepthStencilView() : NULL);
@@ -408,6 +475,15 @@ namespace Kaka
 				pContext->OMSetRenderTargets(1u, postProcessing.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
+			case eRenderTargetType::RSMDownscaleDirectional:
+			{
+				pContext->OMSetRenderTargets(1u, rsmDownscaleDirectional.pTarget.GetAddressOf(), aDepth);
+			}
+			break;
+			case eRenderTargetType::RSMDownscaleSpot:
+			{
+				pContext->OMSetRenderTargets(1u, rsmDownscaleSpot.pTarget.GetAddressOf(), aDepth);
+			}
 			//case eRenderTargetType::ShadowMap:
 			//{
 			//	pContext->OMSetRenderTargets(0u, nullptr, rsmBuffer.GetDepthStencilView());
