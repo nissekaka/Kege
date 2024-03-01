@@ -48,7 +48,16 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 
     if (useSpotRSM)
     {
-        const float3 indirectLight = spotIndirectLightTex.Sample(defaultSampler, uv).rgb;
+        const float2 pixelOffset = float2(ddx(uv.x), ddy(uv.y));
+
+	    // Could have done one sample in the middle
+	    // But that results in some artifacts. This pattern gives a much smoother result
+        const float3 p00 = spotIndirectLightTex.Sample(defaultSampler, uv + pixelOffset * float2(-1.0f, -1.0f)).rgb;
+        const float3 p01 = spotIndirectLightTex.Sample(defaultSampler, uv + pixelOffset * float2(-1.0f, 1.0f)).rgb;
+        const float3 p10 = spotIndirectLightTex.Sample(defaultSampler, uv + pixelOffset * float2(1.0f, -1.0f)).rgb;
+        const float3 p11 = spotIndirectLightTex.Sample(defaultSampler, uv + pixelOffset * float2(1.0f, 1.0f)).rgb;
+
+        const float3 indirectLight = (p00 + p01 + p10 + p11);
         if (onlyRSM)
         {
             return float4(indirectLight, 1.0f);

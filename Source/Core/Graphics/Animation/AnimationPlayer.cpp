@@ -164,26 +164,6 @@ namespace Kaka
 		for (size_t i = 0; i < skeleton->bones.size(); i++)
 		{
 			{
-				const DirectX::XMMATRIX currentFramePose = aFromAnimation.finalTransforms[i];
-				const DirectX::XMMATRIX blendFramePose = aToAnimation.finalTransforms[i];
-
-				// Blended pose needs to be multiplication of decomposed matrices
-				DirectX::XMVECTOR currentScale, currentRotation, currentTranslation;
-				DirectX::XMVECTOR blendScale, blendRotation, blendTranslation;
-				DirectX::XMMatrixDecompose(&currentScale, &currentRotation, &currentTranslation, currentFramePose);
-				DirectX::XMMatrixDecompose(&blendScale, &blendRotation, &blendTranslation, blendFramePose);
-
-				DirectX::XMMATRIX blendedPose = DirectX::XMMatrixAffineTransformation(
-					DirectX::XMVectorLerp(currentScale, blendScale, aBlendFactor),
-					DirectX::XMVectorZero(),
-					DirectX::XMQuaternionSlerp(currentRotation, blendRotation, aBlendFactor),
-					DirectX::XMVectorLerp(currentTranslation, blendTranslation, aBlendFactor)
-				);
-
-				modelData->finalTransforms[i] = blendedPose;
-			}
-
-			{
 				const DirectX::XMMATRIX currentFramePose = aFromAnimation.combinedTransforms[i];
 				const DirectX::XMMATRIX blendFramePose = aToAnimation.combinedTransforms[i];
 
@@ -193,14 +173,14 @@ namespace Kaka
 				DirectX::XMMatrixDecompose(&currentScale, &currentRotation, &currentTranslation, currentFramePose);
 				DirectX::XMMatrixDecompose(&blendScale, &blendRotation, &blendTranslation, blendFramePose);
 
-				DirectX::XMMATRIX blendedPose = DirectX::XMMatrixAffineTransformation(
+				const DirectX::XMMATRIX blendedPose = DirectX::XMMatrixAffineTransformation(
 					DirectX::XMVectorLerp(currentScale, blendScale, aBlendFactor),
 					DirectX::XMVectorZero(),
 					DirectX::XMQuaternionSlerp(currentRotation, blendRotation, aBlendFactor),
 					DirectX::XMVectorLerp(currentTranslation, blendTranslation, aBlendFactor)
 				);
 
-				modelData->combinedTransforms[i] = blendedPose;
+				modelData->finalTransforms[i] = skeleton->bones[i].bindPose * blendedPose;
 			}
 		}
 	}
