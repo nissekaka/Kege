@@ -152,7 +152,7 @@ namespace Kaka
 			BOOL useDirectionalRSM = true;
 			BOOL useSpotRSM = true;
 			BOOL onlyRSM = false;
-			unsigned int uvScale = 1;
+			float uvScale = 1;
 		};
 
 		RSMBuffer rsmBufferDirectional = {};

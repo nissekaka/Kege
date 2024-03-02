@@ -98,12 +98,12 @@ namespace Kaka
 		rsmBufferDirectional.rMax = 0.07f;
 		rsmBufferDirectional.rsmIntensity = 5.0f;
 		rsmBufferDirectional.ambianceColour.w = 0.3f;
-		rsmBufferDirectional.uvScale = wnd.Gfx().rsmDownscaleDivideFactor;
+		rsmBufferDirectional.uvScale = wnd.Gfx().rsmDownscaleFactor;
 
 		rsmBufferSpot.sampleCount = 500;
 		rsmBufferSpot.rMax = 0.165f;
 		rsmBufferSpot.rsmIntensity = 0.3f;
-		rsmBufferSpot.uvScale = wnd.Gfx().rsmDownscaleDivideFactor;
+		rsmBufferSpot.uvScale = wnd.Gfx().rsmDownscaleFactor;
 
 		while (true)
 		{
@@ -753,30 +753,30 @@ namespace Kaka
 
 			switch (e->GetKeyCode())
 			{
-				case VK_ESCAPE:
-					if (wnd.CursorEnabled())
-					{
-						wnd.DisableCursor();
-						wnd.mouse.EnableRaw();
-					}
-					else
-					{
-						wnd.EnableCursor();
-						wnd.mouse.DisableRaw();
-					}
-					break;
-				case VK_F1:
-					showImGui = !showImGui;
-					break;
-				case VK_F2:
-					showStatsWindow = !showStatsWindow;
-					break;
-				case VK_F3:
-					drawLightDebug = !drawLightDebug;
-					break;
-				case 'F':
-					flashlightOn = !flashlightOn;
-					break;
+			case VK_ESCAPE:
+				if (wnd.CursorEnabled())
+				{
+					wnd.DisableCursor();
+					wnd.mouse.EnableRaw();
+				}
+				else
+				{
+					wnd.EnableCursor();
+					wnd.mouse.DisableRaw();
+				}
+				break;
+			case VK_F1:
+				showImGui = !showImGui;
+				break;
+			case VK_F2:
+				showStatsWindow = !showStatsWindow;
+				break;
+			case VK_F3:
+				drawLightDebug = !drawLightDebug;
+				break;
+			case 'F':
+				flashlightOn = !flashlightOn;
+				break;
 			}
 		}
 

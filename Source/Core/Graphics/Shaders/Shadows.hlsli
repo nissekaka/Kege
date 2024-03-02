@@ -24,6 +24,7 @@ float PoissonDisk(float3 aLightProjectedPosition, Texture2D aTexture)
     const int sampleCount = 64;
     const float offsetScale = offsetScalePoissonDisk;
 
+    [unroll(64)] // Unroll the loop (64 samples in the Poisson disk pattern)]
     for (int i = 0; i < sampleCount; ++i)
     {
         const float2 sampleOffset = POISSON_DISK_64[i];
@@ -52,8 +53,10 @@ float PCF(float3 aLightProjectedPosition, Texture2D aTexture)
 	// Offset scale decides how much the shadow edge is moved for "blurring"
     const float offsetScale = offsetScalePCF;
 
+    [unroll(25)] // Unroll the loop (max 25x25 samples in the PCF pattern)]
     for (int i = -sampleCount / 2; i <= sampleCount / 2; ++i)
     {
+        [unroll(25)]
         for (int j = -sampleCount / 2; j <= sampleCount / 2; ++j)
         {
             const float2 sampleOffset = float2(i, j) / float(sampleCount);

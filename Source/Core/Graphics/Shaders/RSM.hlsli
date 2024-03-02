@@ -13,7 +13,7 @@ cbuffer RSMData : register(b3)
     bool useDirectionalRSM;
     bool useSpotRSM;
     bool onlyRSM;
-    uint uvScale;
+    float uvScale;
 };
 
 #define PI (3.141592653)
@@ -67,6 +67,7 @@ float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Text
         //const float t = currentTime;
         //const float2x2 rot = float2x2(cos(t), -sin(t), sin(t), cos(t));
 
+        [unroll(500)]
         for (uint i = 0; i < aSampleCount; i++)	// Sum contributions of sampling locations
         {
             //float2 offset = mul(Hammersley(i, sampleCount), rot);

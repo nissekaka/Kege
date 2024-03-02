@@ -58,6 +58,7 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
         const float3 p11 = spotIndirectLightTex.Sample(defaultSampler, uv + pixelOffset * float2(1.0f, 1.0f)).rgb;
 
         const float3 indirectLight = (p00 + p01 + p10 + p11);
+        //const float3 indirectLight = spotIndirectLightTex.Sample(defaultSampler, uv);;
         if (onlyRSM)
         {
             return float4(indirectLight, 1.0f);

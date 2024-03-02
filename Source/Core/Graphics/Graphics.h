@@ -169,7 +169,7 @@ namespace Kaka
 
 		RenderTarget rsmDownscaleDirectional;
 		RenderTarget rsmDownscaleSpot;
-		int rsmDownscaleDivideFactor = 4;
+		float rsmDownscaleFactor = 0.5f;
 
 		std::vector<RenderTarget> bloomDownscale = {};
 
