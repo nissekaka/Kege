@@ -7,6 +7,8 @@ namespace Kaka
 	{
 		indirectLightingVS = ShaderFactory::GetVertexShader(aGfx, L"Shaders/Fullscreen_VS.cso");
 		indirectLightingPS = ShaderFactory::GetPixelShader(aGfx, L"Shaders/IndirectLighting_PS.cso");
+		indirectLightingCombinedPS = ShaderFactory::GetPixelShader(aGfx, L"Shaders/IndirectLightingCombined_PS.cso");
+		indirectLightingDefaultPS = indirectLightingPS;
 
 		struct PVertex
 		{
@@ -77,5 +79,17 @@ namespace Kaka
 		topology.Bind(aGfx);
 
 		aGfx.DrawIndexed(indexBuffer.GetCount());
+	}
+
+	void IndirectLighting::SetPixelShaderCombined(const bool aValue)
+	{
+		if (aValue)
+		{
+			indirectLightingPS = indirectLightingCombinedPS;
+		}
+		else
+		{
+			indirectLightingPS = indirectLightingDefaultPS;
+		}
 	}
 }

@@ -6,9 +6,9 @@ Texture2D materialTex : register(t3);
 Texture2D ambientOcclusionTex : register(t4);
 //Texture2D rsmTex : register(t5);
 // Reflective Shadow Map -- Directional light
-Texture2D rsmDirectionalWorldPositionTex : register(t6);
-Texture2D rsmDirectionalNormalTex : register(t7);
-Texture2D rsmDirectionalFluxTex : register(t8);
+Texture2D rsmWorldPositionTex : register(t6);
+Texture2D rsmNormalTex : register(t7);
+Texture2D rsmFluxTex : register(t8);
 
 Texture2D directionalIndirectLightTex : register(t9);
 Texture2D spotIndirectLightTex : register(t10);

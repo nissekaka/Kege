@@ -69,6 +69,7 @@ namespace Kaka
 		bool showImGui = true;
 		bool showStatsWindow = true;
 		bool drawLightDebug = false;
+		bool drawRSM = true;
 
 	private:
 		DirectX::XMFLOAT3 cameraInput = {0.0f, 0.0f, 0.0f};
@@ -149,10 +150,10 @@ namespace Kaka
 			DirectX::XMFLOAT4 shadowColour = {0.8f, 0.9f, 1.0f, 0.01f};
 			DirectX::XMFLOAT4 ambianceColour = {0.1f, 0.1f, 0.1f, 0.85f};
 			DirectX::XMMATRIX lightCameraTransform;
-			BOOL useDirectionalRSM = true;
-			BOOL useSpotRSM = true;
-			BOOL onlyRSM = false;
 			float uvScale = 1;
+			UINT currentPass = 0;
+			BOOL isDirectionalLight = true;
+			float weightMax = 0.1f;
 		};
 
 		RSMBuffer rsmBufferDirectional = {};
@@ -167,6 +168,14 @@ namespace Kaka
 			BOOL isDirectionalLight;
 			float padding[2];
 		} rsmLightData;
+
+		struct RSMCombinedBuffer
+		{
+			UINT currentPass = 0;
+			float padding[3];
+		} rsmCombinedBuffer;
+
+		int combinedPasses = 4;
 
 		PixelConstantBuffer<CommonBuffer> pcb{wnd.Gfx(), PS_CBUFFER_SLOT_COMMON};
 		VertexConstantBuffer<CommonBuffer> vcb{wnd.Gfx(), VS_CBUFFER_SLOT_COMMON};

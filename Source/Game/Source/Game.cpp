@@ -466,44 +466,67 @@ namespace Kaka
 
 		// Indirect lighting pass -- BEGIN
 		{
-			// Directional light
+			if (drawRSM)
+			{
+				// Directional light
+				wnd.Gfx().directionalLightRSMBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
+				rsmBufferDirectional.lightCameraTransform = wnd.Gfx().directionalLightRSMBuffer.GetCamera().GetInverseView() * wnd.Gfx().directionalLightRSMBuffer.GetCamera().GetProjection();
+				PixelConstantBuffer<RSMBuffer> rsmPixelBuffer{wnd.Gfx(), PS_CBUFFER_SLOT_RSM_DIRECTIONAL};
 
-			wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMDownscaleDirectional, nullptr);
+				for (int i = 0; i < 4; ++i)
+				{
+					if (i == 0)
+					{
+						wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMDownscaleDirectional, nullptr);
+					}
+					else
+					{
+						wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMFullscaleDirectional, nullptr);
+						wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTRUE_SLOT_INDIRECT_LIGHT_DIRECTIONAL, 1u, wnd.Gfx().rsmDownscaleDirectional.pResource.GetAddressOf());
+					}
 
-			wnd.Gfx().directionalLightRSMBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
+					rsmBufferDirectional.currentPass = i;
+					rsmBufferDirectional.isDirectionalLight = TRUE;
+					rsmPixelBuffer.Update(wnd.Gfx(), rsmBufferDirectional);
+					rsmPixelBuffer.Bind(wnd.Gfx());
 
-			// Prepare RSM for lighting pass
-			rsmBufferDirectional.lightCameraTransform = wnd.Gfx().directionalLightRSMBuffer.GetCamera().GetInverseView() * wnd.Gfx().directionalLightRSMBuffer.GetCamera().GetProjection();
-			PixelConstantBuffer<RSMBuffer> rsmPixelBuffer{wnd.Gfx(), PS_CBUFFER_SLOT_RSM_DIRECTIONAL};
-			rsmPixelBuffer.Update(wnd.Gfx(), rsmBufferDirectional);
-			rsmPixelBuffer.Bind(wnd.Gfx());
+					indirectLighting.Draw(wnd.Gfx());
+				}
 
-			indirectLighting.Draw(wnd.Gfx());
+				wnd.Gfx().directionalLightRSMBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
 
+				// Spot light
+				wnd.Gfx().spotLightRSMBuffer[0].SetAllAsResources(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
+				rsmBufferSpot.lightCameraTransform = wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetInverseView() * wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetProjection();
 
-			// Spot light
+				for (int i = 0; i < 4; ++i)
+				{
+					if (i == 0)
+					{
+						wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMDownscaleSpot, nullptr);
+					}
+					else
+					{
+						wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMFullscaleSpot, nullptr);
+						wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, wnd.Gfx().rsmDownscaleSpot.pResource.GetAddressOf());
+					}
 
-			wnd.Gfx().directionalLightRSMBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
+					rsmBufferSpot.currentPass = i;
+					rsmBufferSpot.isDirectionalLight = FALSE;
+					rsmPixelBuffer.Update(wnd.Gfx(), rsmBufferSpot);
+					rsmPixelBuffer.Bind(wnd.Gfx());
 
-			wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMDownscaleSpot, nullptr);
-			wnd.Gfx().spotLightRSMBuffer[0].SetAllAsResources(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
+					indirectLighting.Draw(wnd.Gfx());
+				}
 
-			rsmBufferSpot.lightCameraTransform = wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetInverseView() * wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetProjection();
-			rsmPixelBuffer.Update(wnd.Gfx(), rsmBufferSpot);
-			rsmPixelBuffer.Bind(wnd.Gfx());
-
-			indirectLighting.Draw(wnd.Gfx());
-
-			wnd.Gfx().spotLightRSMBuffer[0].ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
+				wnd.Gfx().spotLightRSMBuffer[0].ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
+			}
 		}
 		// Indirect lighting pass -- END
 
 		// Lighting pass
 		{
 			wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, nullptr);
-
-			wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTRUE_SLOT_INDIRECT_LIGHT_DIRECTIONAL, 1u, wnd.Gfx().rsmDownscaleDirectional.pResource.GetAddressOf());
-			wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, wnd.Gfx().rsmDownscaleSpot.pResource.GetAddressOf());
 
 			PixelConstantBuffer<ShadowBuffer> shadowPixelBuffer{wnd.Gfx(), PS_CBUFFER_SLOT_SHADOW};
 			shadowPixelBuffer.Update(wnd.Gfx(), shadowBuffer);
@@ -516,11 +539,27 @@ namespace Kaka
 			wnd.Gfx().UnbindShadows(PS_TEXTURE_SLOT_SHADOW_MAP_SPOT);
 		}
 
+		// Indirect combined pass -- BEGIN
+
+		if (drawRSM)
+		{
+			wnd.Gfx().SetBlendState(eBlendStates::Additive);
+
+			wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTRUE_SLOT_INDIRECT_LIGHT_DIRECTIONAL, 1u, wnd.Gfx().rsmFullscaleDirectional.pResource.GetAddressOf());
+			wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, wnd.Gfx().rsmFullscaleSpot.pResource.GetAddressOf());
+
+			indirectLighting.SetPixelShaderCombined(true);
+
+			indirectLighting.Draw(wnd.Gfx());
+
+			indirectLighting.SetPixelShaderCombined(false);
+			wnd.Gfx().SetBlendState(eBlendStates::Disabled);
+		}
+
+		// Indirect combined pass -- END
 
 		// Clear resources
 		{
-			//wnd.Gfx().directionalLightRSMBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
-			//wnd.Gfx().spotLightRSMBuffer[0].ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
 			wnd.Gfx().gBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_GBUFFER_SLOT);
 
 			ID3D11ShaderResourceView* const nullSRV[1] = {nullptr};
@@ -625,8 +664,8 @@ namespace Kaka
 			if (ImGui::Begin("RSM Directional"))
 			{
 				ImGui::Columns(2, nullptr, false);
-				ImGui::Checkbox("Use RSM##DirUse", (bool*)&rsmBufferSpot.useDirectionalRSM);
-				ImGui::Checkbox("Only RSM##DirOnl", (bool*)&rsmBufferDirectional.onlyRSM);
+				//ImGui::Checkbox("Use RSM##DirUse", (bool*)&rsmBufferDirectional.useDirectionalRSM);
+				//ImGui::Checkbox("Only RSM##DirOnl", (bool*)&rsmBufferDirectional.onlyRSM);
 				ImGui::Checkbox("Use Poisson##DirPoi", (bool*)&rsmBufferDirectional.usePoisson);
 				ImGui::DragInt("Sample count##DirSam", (int*)&rsmBufferDirectional.sampleCount, 1, 1, 2000);
 				ImGui::DragFloat("R Max##DirectMax", &rsmBufferDirectional.rMax, 0.001f, 0.0f, 5.0f, "%.3f");
@@ -639,12 +678,16 @@ namespace Kaka
 				ImGui::DragFloat("Ambiance intensity##DirAmbInt", &rsmBufferSpot.ambianceColour.w, 0.01f, 0.0f, 1.0f, "%.2f");
 
 				ImGui::NextColumn();
-				ImGui::Checkbox("Use RSM##SpoUse", (bool*)&rsmBufferSpot.useSpotRSM);
-				ImGui::Checkbox("Only RSM##SpoOnl", (bool*)&rsmBufferSpot.onlyRSM);
+				//ImGui::Checkbox("Use RSM##SpoUse", (bool*)&rsmBufferSpot.useSpotRSM);
+				//ImGui::Checkbox("Only RSM##SpoOnl", (bool*)&rsmBufferSpot.onlyRSM);
 				ImGui::Checkbox("Use Poisson##SpoPoi", (bool*)&rsmBufferSpot.usePoisson);
 				ImGui::DragInt("Sample count##SpoSam", (int*)&rsmBufferSpot.sampleCount, 1, 1, 2000);
 				ImGui::DragFloat("R Max##SpoMax", &rsmBufferSpot.rMax, 0.001f, 0.0f, 5.0f, "%.3f");
 				ImGui::DragFloat("RSM Intensity##SpoInt", &rsmBufferSpot.rsmIntensity, 0.01f, 0.0f, 100.0f, "%.2f");
+
+				ImGui::DragInt("Combined passes", &combinedPasses, 1, 1, 4);
+				ImGui::DragFloat("Weight max", &rsmBufferSpot.weightMax, 0.001f, 0.0f, 1.0f, "%.4f");
+				rsmBufferDirectional.weightMax = rsmBufferSpot.weightMax;
 			}
 			ImGui::End();
 			//for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
@@ -690,10 +733,10 @@ namespace Kaka
 			{
 				ImGui::Columns(2, nullptr, false);
 				ImGui::Text("Directional light");
-				ImGui::Image(wnd.Gfx().rsmDownscaleDirectional.pResource.Get(), ImVec2(512, 288));
+				ImGui::Image(wnd.Gfx().rsmFullscaleDirectional.pResource.Get(), ImVec2(512, 288));
 				ImGui::NextColumn();
 				ImGui::Text("Spot light");
-				ImGui::Image(wnd.Gfx().rsmDownscaleSpot.pResource.Get(), ImVec2(512, 288));
+				ImGui::Image(wnd.Gfx().rsmFullscaleSpot.pResource.Get(), ImVec2(512, 288));
 			}
 			ImGui::End();
 
@@ -753,30 +796,33 @@ namespace Kaka
 
 			switch (e->GetKeyCode())
 			{
-			case VK_ESCAPE:
-				if (wnd.CursorEnabled())
-				{
-					wnd.DisableCursor();
-					wnd.mouse.EnableRaw();
-				}
-				else
-				{
-					wnd.EnableCursor();
-					wnd.mouse.DisableRaw();
-				}
-				break;
-			case VK_F1:
-				showImGui = !showImGui;
-				break;
-			case VK_F2:
-				showStatsWindow = !showStatsWindow;
-				break;
-			case VK_F3:
-				drawLightDebug = !drawLightDebug;
-				break;
-			case 'F':
-				flashlightOn = !flashlightOn;
-				break;
+				case VK_ESCAPE:
+					if (wnd.CursorEnabled())
+					{
+						wnd.DisableCursor();
+						wnd.mouse.EnableRaw();
+					}
+					else
+					{
+						wnd.EnableCursor();
+						wnd.mouse.DisableRaw();
+					}
+					break;
+				case VK_F1:
+					showImGui = !showImGui;
+					break;
+				case VK_F2:
+					showStatsWindow = !showStatsWindow;
+					break;
+				case VK_F3:
+					drawLightDebug = !drawLightDebug;
+					break;
+				case 'F':
+					flashlightOn = !flashlightOn;
+					break;
+				case 'R':
+					drawRSM = !drawRSM;
+					break;
 			}
 		}
 

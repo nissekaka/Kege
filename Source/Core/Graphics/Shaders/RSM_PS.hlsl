@@ -53,24 +53,24 @@ RSMBufferOutput main(PixelInput aInput)
     {
         float3 toLight = lightPositionAndOuterAngle.xyz - aInput.worldPos.xyz;
         const float lightDistance = length(toLight);
-        toLight = normalize(toLight);
-
-        const float NdL = saturate(dot(aInput.worldNormal, toLight));
-        const float lambert = NdL; // Angle attenuation
+        toLight /= lightDistance; // Normalize in-place
 
         const float cosOuterAngle = cos(lightPositionAndOuterAngle.w);
         const float cosInnerAngle = cos(lightDirectionAndInnerAngle.w);
         const float3 lightDirection = -lightDirectionAndInnerAngle.xyz;
 
-		// Determine if pixel is within cone.
-        const float theta = dot(toLight, normalize(-lightDirection));
-		// And if we're in the inner or outer radius.
-        const float epsilon = cosInnerAngle - cosOuterAngle;
-        float intensity = clamp((theta - cosOuterAngle) / epsilon, 0.0f, 1.0f);
+		// Simplify cone check
+		const float theta = dot(toLight, -lightDirection);
+        float intensity = saturate((theta - cosOuterAngle) / (cosInnerAngle - cosOuterAngle));
         intensity *= intensity;
-	
-        const float ue4Attenuation = ((pow(saturate(1 - lightDistance / range /*pow(lightDistance / range, 4.0f)*/), 2.0f)) / (pow(lightDistance, 2.0f) + 1)); // Unreal Engine 4 attenuation
-        const float finalAttenuation = lambert * intensity * ue4Attenuation;
+
+		// Simplify ue4Attenuation without using pow
+        const float attenuationFactor = saturate(1 - lightDistance / range);
+        const float ue4Attenuation = attenuationFactor * attenuationFactor / (lightDistance * lightDistance + 1);
+
+		// Combine terms for final attenuation
+        const float finalAttenuation = saturate(theta) * intensity * ue4Attenuation;
+
 
         output.flux = float4(albedo.rgb * lightColourAndIntensity.rgb, 1.0f) * finalAttenuation * lightColourAndIntensity.w;
     }

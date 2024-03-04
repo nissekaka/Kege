@@ -17,6 +17,7 @@ namespace Kaka
 
 		void Init(const Graphics& aGfx);
 		void Draw(Graphics& aGfx);
+		void SetPixelShaderCombined(bool aValue);
 
 	private:
 		VertexBuffer vertexBuffer = {};
@@ -24,6 +25,8 @@ namespace Kaka
 		//Texture texture{1u};
 		VertexShader* indirectLightingVS = nullptr;
 		PixelShader* indirectLightingPS = nullptr;
+		PixelShader* indirectLightingDefaultPS = nullptr;
+		PixelShader* indirectLightingCombinedPS = nullptr;
 
 		std::vector<D3D11_INPUT_ELEMENT_DESC> ied;
 		InputLayout inputLayout;

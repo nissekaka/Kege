@@ -54,10 +54,10 @@ float PCF(float3 aLightProjectedPosition, Texture2D aTexture)
     const float offsetScale = offsetScalePCF;
 
     [unroll(25)] // Unroll the loop (max 25x25 samples in the PCF pattern)]
-    for (int i = -sampleCount / 2; i <= sampleCount / 2; ++i)
+    for (int i = -sampleCount / 2u; i <= sampleCount / 2u; ++i)
     {
         [unroll(25)]
-        for (int j = -sampleCount / 2; j <= sampleCount / 2; ++j)
+        for (int j = -sampleCount / 2u; j <= sampleCount / 2u; ++j)
         {
             const float2 sampleOffset = float2(i, j) / float(sampleCount);
             const float2 sampleUV = 0.5f + float2(0.5f, -0.5f) * (aLightProjectedPosition.xy + sampleOffset * offsetScale);

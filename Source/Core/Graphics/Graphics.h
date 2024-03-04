@@ -32,6 +32,8 @@ namespace Kaka
 		PostProcessing,
 		RSMDownscaleDirectional,
 		RSMDownscaleSpot,
+		RSMFullscaleDirectional,
+		RSMFullscaleSpot,
 	};
 
 	enum class eBlendStates
@@ -169,7 +171,10 @@ namespace Kaka
 
 		RenderTarget rsmDownscaleDirectional;
 		RenderTarget rsmDownscaleSpot;
-		float rsmDownscaleFactor = 0.5f;
+		float rsmDownscaleFactor = 0.25f;
+
+		RenderTarget rsmFullscaleDirectional;
+		RenderTarget rsmFullscaleSpot;
 
 		std::vector<RenderTarget> bloomDownscale = {};
 

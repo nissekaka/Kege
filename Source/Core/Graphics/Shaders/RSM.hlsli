@@ -10,19 +10,19 @@ cbuffer RSMData : register(b3)
     float4 shadowColour;
     float4 ambianceColour;
     float4x4 lightCameraTransform;
-    bool useDirectionalRSM;
-    bool useSpotRSM;
-    bool onlyRSM;
     float uvScale;
+    uint currentPass;
+    bool isDirectional;
+    float weightMax;
 };
 
 #define PI (3.141592653)
 #define TWO_PI (2.0 * PI)
 
 // Reverses the bits of the input
-uint MyBitfieldReverse(const uint aI)
+uint BitfieldReverse(const uint aBits)
 {
-    uint b = (uint(aI) << 16u) | (uint(aI) >> 16u);
+    uint b = (uint(aBits) << 16u) | (uint(aBits) >> 16u);
     b = (b & 0x55555555u) << 1u | (b & 0xAAAAAAAAu) >> 1u;
     b = (b & 0x33333333u) << 2u | (b & 0xCCCCCCCCu) >> 2u;
     b = (b & 0x0F0F0F0Fu) << 4u | (b & 0xF0F0F0F0u) >> 4u;
@@ -32,7 +32,7 @@ uint MyBitfieldReverse(const uint aI)
 
 float2 Hammersley(const uint aI, const uint aN)
 {
-    return float2(float(aI) / float(aN), float(MyBitfieldReverse(aI)) * 2.3283064365386963e-10);
+    return float2(float(aI) / float(aN), float(BitfieldReverse(aI)) * 2.3283064365386963e-10);
 }
 
 float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Texture2D aWorldPosTex, Texture2D aFluxTex, Texture2D aNormalTex, const bool aUsePoisson, const float aRMax, const uint aSampleCount, const float aIntensity)
@@ -67,7 +67,8 @@ float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Text
         //const float t = currentTime;
         //const float2x2 rot = float2x2(cos(t), -sin(t), sin(t), cos(t));
 
-        [unroll(500)]
+        //[unroll(2000)]
+        [loop]
         for (uint i = 0; i < aSampleCount; i++)	// Sum contributions of sampling locations
         {
             //float2 offset = mul(Hammersley(i, sampleCount), rot);
