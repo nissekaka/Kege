@@ -94,16 +94,19 @@ namespace Kaka
 			flashlightOuter->colour = flashlightInner->colour;
 		}
 
-		rsmBufferDirectional.sampleCount = 500;
-		rsmBufferDirectional.rMax = 0.07f;
-		rsmBufferDirectional.rsmIntensity = 5.0f;
-		rsmBufferDirectional.ambianceColour.w = 0.3f;
+		rsmBufferDirectional.sampleCount = 600;
+		rsmBufferDirectional.rMax = 0.11f;
+		rsmBufferDirectional.rsmIntensity = 10000.0f;
 		rsmBufferDirectional.uvScale = wnd.Gfx().rsmDownscaleFactor;
+		rsmBufferDirectional.isDirectionalLight = TRUE;
+		rsmBufferDirectional.weightMax = 0.0f;
 
-		rsmBufferSpot.sampleCount = 500;
+		rsmBufferSpot.sampleCount = 250;
 		rsmBufferSpot.rMax = 0.165f;
-		rsmBufferSpot.rsmIntensity = 0.3f;
+		rsmBufferSpot.rsmIntensity = 100.0f;
 		rsmBufferSpot.uvScale = wnd.Gfx().rsmDownscaleFactor;
+		rsmBufferSpot.isDirectionalLight = FALSE;
+		rsmBufferSpot.weightMax = 0.0f;
 
 		while (true)
 		{
@@ -125,133 +128,6 @@ namespace Kaka
 		aModel.Init();
 		modelLoadingMutex.unlock();
 	}
-
-	//void Game::PointLightTest(const float aDeltaTime)
-	//{
-	//	// World position buffer
-	//	ID3D11Texture2D* worldPosTexture = wnd.Gfx().gBuffer.GetTexture(0u);
-
-	//	// Create a staging buffer for the world position buffer
-	//	D3D11_TEXTURE2D_DESC stagingDesc;
-	//	ZeroMemory(&stagingDesc, sizeof(stagingDesc));
-	//	stagingDesc.Width = wnd.Gfx().GetCurrentResolution().x;
-	//	stagingDesc.Height = wnd.Gfx().GetCurrentResolution().y;
-	//	stagingDesc.MipLevels = 1;
-	//	stagingDesc.ArraySize = 1;
-	//	stagingDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	//	stagingDesc.SampleDesc.Count = 1;
-	//	stagingDesc.Usage = D3D11_USAGE_STAGING;
-	//	stagingDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-	//	stagingDesc.MiscFlags = 0;
-
-	//	ID3D11Texture2D* stagingTexture;
-	//	HRESULT hr = wnd.Gfx().pDevice->CreateTexture2D(&stagingDesc, nullptr, &stagingTexture);
-
-	//	if (SUCCEEDED(hr))
-	//	{
-	//		// Copy the data from the world position buffer to the staging buffer
-	//		wnd.Gfx().pContext->CopyResource(stagingTexture, worldPosTexture);
-
-	//		// Map the staging buffer
-	//		D3D11_MAPPED_SUBRESOURCE mappedResource;
-	//		hr = wnd.Gfx().pContext->Map(stagingTexture, 0, D3D11_MAP_READ, 0, &mappedResource);
-
-	//		// Read data from the mappedStagingResource
-
-	//		const UINT centerX = wnd.Gfx().GetCurrentResolution().x / 2;
-	//		const UINT centerY = wnd.Gfx().GetCurrentResolution().y / 2;
-
-	//		const float* pixelData = static_cast<float*>(mappedResource.pData) + (centerY * mappedResource.RowPitch / sizeof(float)) + centerX * 4;
-
-	//		DirectX::XMFLOAT3 worldPos = {pixelData[0], pixelData[1], pixelData[2]};
-
-	//		// If length of worldPos is 0, then we didn't hit anything
-	//		if (DirectX::XMVector3Length(DirectX::XMLoadFloat3(&worldPos)).m128_f32[0] > 0.0f)
-	//		{
-	//			// Move slightly out from the normal
-	//			DirectX::XMFLOAT3 cameraForward;
-	//			DirectX::XMStoreFloat3(&cameraForward, camera.GetForwardVector());
-	//			worldPos.x -= cameraForward.x * pointlightPositionOffsetFactorl;
-	//			worldPos.y -= cameraForward.y * pointlightPositionOffsetFactorl;
-	//			worldPos.z -= cameraForward.z * pointlightPositionOffsetFactorl;
-
-	//			// Lerp towards the world position
-	//			//pointLightTest->position.x = Interp(pointLightTest->position.x, worldPos.x, aDeltaTime * pointLightPositionInterpSpeed);
-	//			//pointLightTest->position.y = Interp(pointLightTest->position.y, worldPos.y, aDeltaTime * pointLightPositionInterpSpeed);
-	//			//pointLightTest->position.z = Interp(pointLightTest->position.z, worldPos.z, aDeltaTime * pointLightPositionInterpSpeed);
-	//			//pointLightTest->intensity = Interp(pointLightTest->intensity, pointLightIntensity, aDeltaTime * pointLightIntensityInterpSpeed);
-	//			//pointLightTest->radius = pointLightRadius;
-
-	//			{
-	//				// Colour buffer
-	//				ID3D11Texture2D* colourTexture = wnd.Gfx().gBuffer.GetTexture(1u);
-
-	//				// Create a staging buffer for the world position buffer
-	//				D3D11_TEXTURE2D_DESC stagingDesc;
-	//				ZeroMemory(&stagingDesc, sizeof(stagingDesc));
-	//				stagingDesc.Width = wnd.Gfx().GetCurrentResolution().x;
-	//				stagingDesc.Height = wnd.Gfx().GetCurrentResolution().y;
-	//				stagingDesc.MipLevels = 1;
-	//				stagingDesc.ArraySize = 1;
-	//				stagingDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	//				stagingDesc.SampleDesc.Count = 1;
-	//				stagingDesc.Usage = D3D11_USAGE_STAGING;
-	//				stagingDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-	//				stagingDesc.MiscFlags = 0;
-
-	//				ID3D11Texture2D* stagingTexture;
-	//				HRESULT hr = wnd.Gfx().pDevice->CreateTexture2D(&stagingDesc, nullptr, &stagingTexture);
-
-	//				if (SUCCEEDED(hr))
-	//				{
-	//					// Copy the data from the world position buffer to the staging buffer
-	//					wnd.Gfx().pContext->CopyResource(stagingTexture, colourTexture);
-
-	//					// Map the staging buffer
-	//					D3D11_MAPPED_SUBRESOURCE mappedResource;
-	//					hr = wnd.Gfx().pContext->Map(stagingTexture, 0, D3D11_MAP_READ, 0, &mappedResource);
-
-	//					// Read data from the mappedStagingResource
-
-	//					const UINT centerX = wnd.Gfx().GetCurrentResolution().x / 2;
-	//					const UINT centerY = wnd.Gfx().GetCurrentResolution().y / 2;
-
-	//					const unsigned char* pixelData = static_cast<unsigned char*>(mappedResource.pData) + (centerY * mappedResource.RowPitch / sizeof(unsigned char)) + centerX * 4;
-
-	//					unsigned char red = pixelData[0];
-	//					unsigned char green = pixelData[1];
-	//					unsigned char blue = pixelData[2];
-
-	//					// Convert to 0-1 range
-	//					DirectX::XMFLOAT3 colour = {(float)red / 255.0f, (float)green / 255.0f, (float)blue / 255.0f};
-	//					// If length of worldPos is 0, then we didn't hit anything
-	//					if (DirectX::XMVector3Length(DirectX::XMLoadFloat3(&colour)).m128_f32[0] > 0.0f)
-	//					{
-	//						//pointLightTest->colour.x = Interp(pointLightTest->colour.x, colour.x, aDeltaTime * pointLightColourInterpSpeed);
-	//						//pointLightTest->colour.y = Interp(pointLightTest->colour.y, colour.y, aDeltaTime * pointLightColourInterpSpeed);
-	//						//pointLightTest->colour.z = Interp(pointLightTest->colour.z, colour.z, aDeltaTime * pointLightColourInterpSpeed);
-	//					}
-
-	//					// Unmap the staging buffer
-	//					wnd.Gfx().pContext->Unmap(stagingTexture, 0);
-
-	//					// Release the staging buffer when done
-	//				}
-	//				stagingTexture->Release();
-	//			}
-	//		}
-	//		else
-	//		{
-	//			//pointLightTest->intensity = Interp(pointLightTest->intensity, 0.0f, aDeltaTime * pointLightIntensityInterpSpeed);
-	//		}
-
-	//		// Unmap the staging buffer
-	//		wnd.Gfx().pContext->Unmap(stagingTexture, 0);
-
-	//		// Release the staging buffer when done
-	//	}
-	//	stagingTexture->Release();
-	//}
 
 	void Game::Update(const float aDeltaTime)
 	{
@@ -473,7 +349,7 @@ namespace Kaka
 				rsmBufferDirectional.lightCameraTransform = wnd.Gfx().directionalLightRSMBuffer.GetCamera().GetInverseView() * wnd.Gfx().directionalLightRSMBuffer.GetCamera().GetProjection();
 				PixelConstantBuffer<RSMBuffer> rsmPixelBuffer{wnd.Gfx(), PS_CBUFFER_SLOT_RSM_DIRECTIONAL};
 
-				for (int i = 0; i < 4; ++i)
+				for (int i = 0; i < combinedPasses; ++i)
 				{
 					if (i == 0)
 					{
@@ -499,7 +375,7 @@ namespace Kaka
 				wnd.Gfx().spotLightRSMBuffer[0].SetAllAsResources(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
 				rsmBufferSpot.lightCameraTransform = wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetInverseView() * wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetProjection();
 
-				for (int i = 0; i < 4; ++i)
+				for (int i = 0; i < combinedPasses; ++i)
 				{
 					if (i == 0)
 					{
@@ -545,8 +421,16 @@ namespace Kaka
 		{
 			wnd.Gfx().SetBlendState(eBlendStates::Additive);
 
-			wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTRUE_SLOT_INDIRECT_LIGHT_DIRECTIONAL, 1u, wnd.Gfx().rsmFullscaleDirectional.pResource.GetAddressOf());
-			wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, wnd.Gfx().rsmFullscaleSpot.pResource.GetAddressOf());
+			if (combinedPasses > 1)
+			{
+				wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTRUE_SLOT_INDIRECT_LIGHT_DIRECTIONAL, 1u, wnd.Gfx().rsmFullscaleDirectional.pResource.GetAddressOf());
+				wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, wnd.Gfx().rsmDownscaleSpot.pResource.GetAddressOf());
+			}
+			else
+			{
+				wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTRUE_SLOT_INDIRECT_LIGHT_DIRECTIONAL, 1u, wnd.Gfx().rsmDownscaleDirectional.pResource.GetAddressOf());
+				wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, wnd.Gfx().rsmDownscaleSpot.pResource.GetAddressOf());
+			}
 
 			indirectLighting.SetPixelShaderCombined(true);
 
@@ -669,13 +553,14 @@ namespace Kaka
 				ImGui::Checkbox("Use Poisson##DirPoi", (bool*)&rsmBufferDirectional.usePoisson);
 				ImGui::DragInt("Sample count##DirSam", (int*)&rsmBufferDirectional.sampleCount, 1, 1, 2000);
 				ImGui::DragFloat("R Max##DirectMax", &rsmBufferDirectional.rMax, 0.001f, 0.0f, 5.0f, "%.3f");
-				ImGui::DragFloat("RSM Intensity##DirInt", &rsmBufferDirectional.rsmIntensity, 0.01f, 0.0f, 100.0f, "%.2f");
+				ImGui::DragFloat("RSM Intensity##DirInt", &rsmBufferDirectional.rsmIntensity, 10.0f, 0.0f, 100000.0f, "%.2f");
 				ImGui::SetNextItemWidth(150.0f);
 				ImGui::ColorPicker3("Shadow colour##DirShaCol", &rsmBufferSpot.shadowColour.x);
 				ImGui::DragFloat("Shadow intensity##DirShaInt", &rsmBufferSpot.shadowColour.w, 0.01f, 0.0f, 1.0f, "%.2f");
 				ImGui::SetNextItemWidth(150.0f);
 				ImGui::ColorPicker3("Ambiance colour##DirAmbCol", &rsmBufferSpot.ambianceColour.x);
 				ImGui::DragFloat("Ambiance intensity##DirAmbInt", &rsmBufferSpot.ambianceColour.w, 0.01f, 0.0f, 1.0f, "%.2f");
+				ImGui::DragFloat("Weight max##DirWeiMax", &rsmBufferDirectional.weightMax, 0.001f, 0.0f, 5.0f, "%.4f");
 
 				ImGui::NextColumn();
 				//ImGui::Checkbox("Use RSM##SpoUse", (bool*)&rsmBufferSpot.useSpotRSM);
@@ -683,11 +568,14 @@ namespace Kaka
 				ImGui::Checkbox("Use Poisson##SpoPoi", (bool*)&rsmBufferSpot.usePoisson);
 				ImGui::DragInt("Sample count##SpoSam", (int*)&rsmBufferSpot.sampleCount, 1, 1, 2000);
 				ImGui::DragFloat("R Max##SpoMax", &rsmBufferSpot.rMax, 0.001f, 0.0f, 5.0f, "%.3f");
-				ImGui::DragFloat("RSM Intensity##SpoInt", &rsmBufferSpot.rsmIntensity, 0.01f, 0.0f, 100.0f, "%.2f");
+				ImGui::DragFloat("RSM Intensity##SpoInt", &rsmBufferSpot.rsmIntensity, 10.0f, 0.0f, 100000.0f, "%.2f");
 
 				ImGui::DragInt("Combined passes", &combinedPasses, 1, 1, 4);
-				ImGui::DragFloat("Weight max", &rsmBufferSpot.weightMax, 0.001f, 0.0f, 1.0f, "%.4f");
-				rsmBufferDirectional.weightMax = rsmBufferSpot.weightMax;
+				ImGui::DragFloat("Weight max##SpoWeiMax", &rsmBufferSpot.weightMax, 0.001f, 0.0f, 5.0f, "%.4f");
+				ImGui::DragFloat("Divide N", &rsmBufferSpot.divideN, 0.1f, 0.0f, 5.0f, "%.1f");
+				ImGui::DragFloat("Divide P", &rsmBufferSpot.divideP, 0.1f, 0.0f, 5.0f, "%.1f");
+				rsmBufferDirectional.divideN = rsmBufferSpot.divideN;
+				rsmBufferDirectional.divideP = rsmBufferSpot.divideP;
 			}
 			ImGui::End();
 			//for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)

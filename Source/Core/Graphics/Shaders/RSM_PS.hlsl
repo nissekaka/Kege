@@ -23,13 +23,13 @@ cbuffer RSMLightData : register(b0)
 
 RSMBufferOutput main(PixelInput aInput)
 {
-    float4 albedo = colourTex.Sample(defaultSampler, aInput.texCoord).rgba;
+    float4 albedo = gColourTex.Sample(defaultSampler, aInput.texCoord).rgba;
     if (albedo.a < 0.5f)
     {
         discard;
     }
 
-    float3 normal = float3(normalTex.Sample(defaultSampler, aInput.texCoord).rg, 1.0f);
+    float3 normal = float3(gNormalTex.Sample(defaultSampler, aInput.texCoord).rg, 1.0f);
 
     normal = 2.0f * normal - 1.0f;
     normal.z = sqrt(1 - saturate(normal.x * normal.x + normal.y * normal.y));

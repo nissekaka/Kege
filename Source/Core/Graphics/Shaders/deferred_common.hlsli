@@ -1,17 +1,17 @@
 // GBuffer
-Texture2D worldPositionTex : register(t0);
-Texture2D colourTex : register(t1);
-Texture2D normalTex : register(t2);
-Texture2D materialTex : register(t3);
-Texture2D ambientOcclusionTex : register(t4);
+Texture2D gWorldPositionTex : register(t0);
+Texture2D gColourTex : register(t1);
+Texture2D gNormalTex : register(t2);
+Texture2D gMaterialTex : register(t3);
+Texture2D gAmbientOcclusionTex : register(t4);
 //Texture2D rsmTex : register(t5);
 // Reflective Shadow Map -- Directional light
 Texture2D rsmWorldPositionTex : register(t6);
 Texture2D rsmNormalTex : register(t7);
 Texture2D rsmFluxTex : register(t8);
 
-Texture2D directionalIndirectLightTex : register(t9);
-Texture2D spotIndirectLightTex : register(t10);
+Texture2D giDirectionalTex : register(t9);
+Texture2D giSpotTex : register(t10);
 // Reflective Shadow Map -- Spotlight
 //Texture2D rsmSpotlightWorldPositionTex : register(t9);
 //Texture2D rsmSpotlightNormalTex : register(t10);

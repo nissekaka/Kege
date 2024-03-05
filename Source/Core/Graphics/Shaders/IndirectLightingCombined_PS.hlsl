@@ -12,8 +12,8 @@ float4 main(const PixelInput aInput) : SV_TARGET
 {
     const float2 uv = aInput.position.xy / clientResolution.xy;
 
-    const float3 indirectLightDirectional = directionalIndirectLightTex.Sample(defaultSampler, uv);;
-    const float3 indirectLightSpot = spotIndirectLightTex.Sample(defaultSampler, uv);
+    const float3 indirectLightDirectional = giDirectionalTex.Sample(defaultSampler, uv);;
+    const float3 indirectLightSpot = giSpotTex.Sample(defaultSampler, uv);
 
     float3 indirectLight = indirectLightDirectional + indirectLightSpot;
 

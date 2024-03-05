@@ -14,6 +14,8 @@ cbuffer RSMData : register(b3)
     uint currentPass;
     bool isDirectional;
     float weightMax;
+    float divideN;
+    float divideP;
 };
 
 #define PI (3.141592653)
@@ -67,7 +69,7 @@ float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Text
         //const float t = currentTime;
         //const float2x2 rot = float2x2(cos(t), -sin(t), sin(t), cos(t));
 
-        //[unroll(2000)]
+        //[unroll(20)]
         [loop]
         for (uint i = 0; i < aSampleCount; i++)	// Sum contributions of sampling locations
         {
@@ -92,5 +94,5 @@ float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Text
         }
     }
 
-    return rsmOutput * aIntensity; // Modulate result with some intensity value
+    return rsmOutput / aSampleCount * aIntensity; // Modulate result with some intensity value
 }

@@ -90,7 +90,6 @@ namespace Kaka
 		float skyboxSpeed = 0.005f;
 		DirectX::XMFLOAT3 skyboxAngle = {};
 
-
 		struct CommonBuffer
 		{
 			DirectX::XMMATRIX worldToClipMatrix;
@@ -135,7 +134,7 @@ namespace Kaka
 			float offsetScalePCF = 0.004f;
 			int sampleCountPCF = 5;
 			BOOL usePoisson = true;
-			float offsetScalePoissonDisk = 0.0009f;
+			float offsetScalePoissonDisk = 0.0019f;
 			float padding[3];
 		};
 
@@ -148,13 +147,18 @@ namespace Kaka
 			float rMax = 0.08f; // Maximum sampling radius.
 			float rsmIntensity = 10.0f;
 			DirectX::XMFLOAT4 shadowColour = {0.8f, 0.9f, 1.0f, 0.01f};
-			DirectX::XMFLOAT4 ambianceColour = {0.1f, 0.1f, 0.1f, 0.85f};
+			DirectX::XMFLOAT4 ambianceColour = {0.8f, 0.9f, 1.0f, 0.3f};
 			DirectX::XMMATRIX lightCameraTransform;
 			float uvScale = 1;
 			UINT currentPass = 0;
 			BOOL isDirectionalLight = true;
 			float weightMax = 0.1f;
+			float divideN = 1.0f;
+			float divideP = 20.0f;
+			float padding[2];
 		};
+
+		static constexpr int RSM_MAX_SAMPLE_COUNT = 5000;
 
 		RSMBuffer rsmBufferDirectional = {};
 		RSMBuffer rsmBufferSpot = {};

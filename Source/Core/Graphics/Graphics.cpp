@@ -255,6 +255,8 @@ namespace Kaka
 		{
 			UINT rsmWidth = (float)width * rsmDownscaleFactor;
 			UINT rsmHeight = (float)height * rsmDownscaleFactor;
+			//UINT rsmWidth = width;
+			//UINT rsmHeight = height;
 
 			ID3D11Texture2D* rsmTexture;
 			D3D11_TEXTURE2D_DESC rsmDesc = {0};
@@ -283,6 +285,8 @@ namespace Kaka
 		{
 			UINT rsmWidth = (float)width * rsmDownscaleFactor;
 			UINT rsmHeight = (float)height * rsmDownscaleFactor;
+			//UINT rsmWidth = width;
+			//UINT rsmHeight = height;
 
 			ID3D11Texture2D* rsmTexture;
 			D3D11_TEXTURE2D_DESC rsmDesc = {0};
@@ -405,11 +409,13 @@ namespace Kaka
 			ImGui::NewFrame();
 		}
 
-		constexpr float colour[] = KAKA_BG_COLOUR;
+		constexpr float colour[] = {0.0f, 0.0f, 0.0f, 0.0f};
 		pContext->ClearRenderTargetView(pDefaultTarget.Get(), colour);
 		pContext->ClearRenderTargetView(postProcessing.pTarget.Get(), colour);
 		pContext->ClearRenderTargetView(rsmDownscaleDirectional.pTarget.Get(), colour);
+		pContext->ClearRenderTargetView(rsmFullscaleDirectional.pTarget.Get(), colour);
 		pContext->ClearRenderTargetView(rsmDownscaleSpot.pTarget.Get(), colour);
+		pContext->ClearRenderTargetView(rsmFullscaleSpot.pTarget.Get(), colour);
 		pContext->ClearDepthStencilView(pDepth.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0u);
 	}
 
