@@ -70,6 +70,8 @@ namespace Kaka
 		models.back().Init();
 		models.back().SetScale(0.1f);
 
+		flashlightTexture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\Flashlight_cookie.png", 5u);
+
 		// Flashlight setup
 		{
 			flashlightInner = &deferredLights.AddSpotLight();
@@ -407,6 +409,8 @@ namespace Kaka
 			PixelConstantBuffer<ShadowBuffer> shadowPixelBuffer{wnd.Gfx(), PS_CBUFFER_SLOT_SHADOW};
 			shadowPixelBuffer.Update(wnd.Gfx(), shadowBuffer);
 			shadowPixelBuffer.Bind(wnd.Gfx());
+
+			flashlightTexture->Bind(wnd.Gfx());
 
 			wnd.Gfx().BindShadows(wnd.Gfx().directionalLightRSMBuffer, PS_TEXTURE_SLOT_SHADOW_MAP_DIRECTIONAL);
 			wnd.Gfx().BindShadows(wnd.Gfx().spotLightRSMBuffer[0], PS_TEXTURE_SLOT_SHADOW_MAP_SPOT);

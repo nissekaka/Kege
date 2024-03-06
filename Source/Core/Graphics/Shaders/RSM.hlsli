@@ -4,18 +4,20 @@
 cbuffer RSMData : register(b3)
 {
     bool usePoissonRSM;
+    bool isDirectional;
     uint sampleCount;
-    float R_MAX;
-    float RSM_INTENSITY;
+    uint sampleCountLastPass;
+    uint currentPass;
+    float rMax;
+    float rsmIntensity;
+    float uvScale;
+    float weightMax;
+    float divideP;
+    float divideN;
+    float paddingRSM;
     float4 shadowColour;
     float4 ambianceColour;
     float4x4 lightCameraTransform;
-    float uvScale;
-    uint currentPass;
-    bool isDirectional;
-    float weightMax;
-    float divideN;
-    float divideP;
 };
 
 #define PI (3.141592653)

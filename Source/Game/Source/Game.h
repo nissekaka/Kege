@@ -58,6 +58,8 @@ namespace Kaka
 		float flashlightIntensityInterpSpeed = 20.0f;
 		float flashlightIntensity;
 		bool flashlightOn = true;
+
+		Texture* flashlightTexture;
 		//float pointlightPositionOffsetFactorl = 1.0f;
 		//float pointlightPositionInterpSpeed = 45.0f;
 		//float pointlightColourInterpSpeed = 5.0f;
@@ -143,19 +145,20 @@ namespace Kaka
 		struct RSMBuffer
 		{
 			BOOL usePoisson = false;
-			unsigned int sampleCount = 100;
+			BOOL isDirectionalLight = true;
+			UINT sampleCount = 100u;
+			UINT sampleCountLastPass = 100u;
+			UINT currentPass = 0;
 			float rMax = 0.08f; // Maximum sampling radius.
 			float rsmIntensity = 10.0f;
-			DirectX::XMFLOAT4 shadowColour = {0.8f, 0.9f, 1.0f, 0.01f};
-			DirectX::XMFLOAT4 ambianceColour = {0.8f, 0.9f, 1.0f, 0.3f};
-			DirectX::XMMATRIX lightCameraTransform;
 			float uvScale = 1;
-			UINT currentPass = 0;
-			BOOL isDirectionalLight = true;
 			float weightMax = 0.1f;
 			float divideN = 1.0f;
 			float divideP = 20.0f;
-			float padding[2];
+			float padding;
+			DirectX::XMFLOAT4 shadowColour = {0.8f, 0.9f, 1.0f, 0.01f};
+			DirectX::XMFLOAT4 ambianceColour = {0.8f, 0.9f, 1.0f, 0.3f};
+			DirectX::XMMATRIX lightCameraTransform;
 		};
 
 		static constexpr int RSM_MAX_SAMPLE_COUNT = 5000;

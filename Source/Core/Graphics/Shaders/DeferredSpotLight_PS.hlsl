@@ -37,33 +37,19 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
     float shadowFactor = Shadow(lightProjectedPosition, spotLightShadowMap) + shadowColour.w;
     shadowFactor = saturate(shadowFactor);
 
-    float3 spotLight = EvaluateSpotLight(colour, specular, normal, roughness, lightColour, lightIntensity,
+    float2 projectedPosition = lightProjectedPosition.xy;
+    projectedPosition.x *= clientResolution.x / clientResolution.y; // Because texture has aspect ratio 1:1
+    const float2 lightUV = 0.5f + float2(0.5f, -0.5f) * (projectedPosition.xy) / lightOuterAngle;
+    const float3 light = flashlightTex.Sample(defaultSampler, lightUV).rgb;
+
+    float3 spotlight = EvaluateSpotLight(colour, specular, normal, roughness, light * lightColour, lightIntensity,
         lightRange, lightPosition, -lightDirection, lightOuterAngle, lightInnerAngle, toEye,
         worldPosition.xyz);
 
     if (shadowFactor < 1.0f)
     {
-        spotLight *= shadowFactor;
+        spotlight *= shadowFactor;
     }
 
-    //if (useSpotRSM)
-    //{
-    //    //const float2 pixelOffset = float2(ddx(uv.x), ddy(uv.y));
-    //    //
-	   // //// Could have done one sample in the middle
-	   // //// But that results in some artifacts. This pattern gives a much smoother result
-    //    //const float3 p00 = spotIndirectLightTex.Sample(defaultSampler, uv + pixelOffset * float2(-1.0f, -1.0f)).rgb;
-    //    //const float3 p01 = spotIndirectLightTex.Sample(defaultSampler, uv + pixelOffset * float2(-1.0f, 1.0f)).rgb;
-    //    //const float3 p10 = spotIndirectLightTex.Sample(defaultSampler, uv + pixelOffset * float2(1.0f, -1.0f)).rgb;
-    //    //const float3 p11 = spotIndirectLightTex.Sample(defaultSampler, uv + pixelOffset * float2(1.0f, 1.0f)).rgb;
-    //    //
-    //    //const float3 indirectLight = (p00 + p01 + p10 + p11);
-    //    const float3 indirectLight = spotIndirectLightTex.Sample(defaultSampler, uv);;
-    //    if (onlyRSM)
-    //    {
-    //        return float4(indirectLight, 1.0f);
-    //    }
-    //    return float4(spotLight.rgb + indirectLight, 1.0f);
-    //}
-    return float4(spotLight.rgb, 1.0f);
+    return float4(spotlight.rgb, 1.0f);
 }

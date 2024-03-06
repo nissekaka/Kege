@@ -8,19 +8,12 @@ struct PixelInput
     float2 texCoord : TEXCOORD;
 };
 
-
 float4 main(const PixelInput aInput) : SV_TARGET
 {
     float3 rsm;
 
     if (currentPass == 0)
     {
-        // Only do the RSM sampling for every other pixel
-        //if ((int(floor(aInput.position.x)) % 2 == 0) || (int(floor(aInput.position.y)) % 2 == 0))
-        //{
-        //    return float4(0.0f, 0.0f, 0.0f, 0.0f);
-        //}
-
         const float2 uv = aInput.position.xy / clientResolution.xy / uvScale;
 
         //const float3 albedo = gColourTex.Sample(defaultSampler, uv).rgb;
@@ -34,7 +27,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
 
         rsm = IndirectLighting(sampleUV, normal, worldPosition,
                                         rsmWorldPositionTex, rsmFluxTex, rsmNormalTex,
-                                        usePoissonRSM, R_MAX, sampleCount, RSM_INTENSITY);// * albedo;
+                                        usePoissonRSM, rMax, sampleCount, rsmIntensity);// * albedo;
     }
     else
     {
@@ -120,7 +113,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
 
                 rsm = IndirectLighting(sampleUV, normal, worldPosition,
                                         rsmWorldPositionTex, rsmFluxTex, rsmNormalTex,
-                                        usePoissonRSM, R_MAX, /* TODO SERIALIZE */ 100u, RSM_INTENSITY); // * albedo;
+                                        usePoissonRSM, rMax, sampleCountLastPass, rsmIntensity); // * albedo;
             //rsm = float3(1.0f, 0.0f, 0.0f); // Red debug colour
             }
         }

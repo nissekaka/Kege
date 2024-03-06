@@ -29,7 +29,7 @@ float PoissonDisk(float3 aLightProjectedPosition, Texture2D aTexture)
     {
         const float2 sampleOffset = POISSON_DISK_64[i];
 
-    // Adjust sampleUV based on facing direction
+		// Adjust sampleUV based on facing direction
         const float2 sampleUV = 0.5f + float2(0.5f, -0.5f) * (aLightProjectedPosition.xy) + sampleOffset * offsetScale;
 
         const float shadowMapZ = aTexture.Sample(shadowSplr, sampleUV);
