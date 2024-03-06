@@ -72,6 +72,8 @@ namespace Kaka
 
 		flashlightTexture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\Flashlight_cookie.png", 5u);
 
+		dustParticle.Init(wnd.Gfx(), 0.1f, 5000u);
+
 		// Flashlight setup
 		{
 			flashlightInner = &deferredLights.AddSpotLight();
@@ -345,7 +347,6 @@ namespace Kaka
 		}
 		// GBuffer pass -- END
 
-
 		// Indirect lighting pass -- BEGIN
 		{
 			if (drawRSM)
@@ -469,6 +470,20 @@ namespace Kaka
 			skybox.Draw(wnd.Gfx());
 		}
 		// Skybox pass -- END
+
+		// Sprite pass -- BEGIN
+		{
+			wnd.Gfx().SetBlendState(eBlendStates::Additive);
+			//wnd.Gfx().SetDepthStencilState(eDepthStencilStates::ReadOnlyLessEqual);
+			wnd.Gfx().SetRasterizerState(eRasterizerStates::NoCulling);
+
+			dustParticle.Draw(wnd.Gfx());
+
+			wnd.Gfx().SetBlendState(eBlendStates::Disabled);
+			//wnd.Gfx().SetDepthStencilState(eDepthStencilStates::Normal);
+			wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
+		}
+		// Sprite pass -- END
 
 		// Post processing pass -- BEGIN
 		wnd.Gfx().HandleBloomScaling(postProcessing);

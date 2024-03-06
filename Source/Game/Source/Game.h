@@ -30,7 +30,6 @@ namespace Kaka
 
 	private:
 		void LoadModelThreaded(const std::string& aModelPath, Model& aModel);
-		//void PointLightTest(float aDeltaTime);
 		void Update(const float aDeltaTime);
 		void HandleInput(const float aDeltaTime);
 		void ShowStatsWindow();
@@ -60,12 +59,8 @@ namespace Kaka
 		bool flashlightOn = true;
 
 		Texture* flashlightTexture;
-		//float pointlightPositionOffsetFactorl = 1.0f;
-		//float pointlightPositionInterpSpeed = 45.0f;
-		//float pointlightColourInterpSpeed = 5.0f;
-		//float pointlightIntensityInterpSpeed = 5.0f;
-		//float pointlightIntensity = 5.0f;
-		//float pointlightRadius = 50.0f;
+
+		Sprite dustParticle;
 
 	private:
 		bool showImGui = true;

@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Sprite.h"
 
+#include <random>
+
 #include "ModelLoader.h"
 #include "Core/Graphics/Drawable/Vertex.h"
 #include "External/include/imgui/imgui.h"
@@ -8,40 +10,40 @@
 
 namespace Kaka
 {
-	void Sprite::Init(const Graphics& aGfx, float aSize)
+	void Sprite::Init(const Graphics& aGfx, const float aSize, const unsigned int aNumberOfSprites)
 	{
 		constexpr float uvFactor = 1.0f;
 
-		Vertex v0 = {};
-		v0.position = DirectX::XMFLOAT3(-aSize, 0.0f, aSize);
-		v0.normal = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
-		v0.v = 0.0f;
-		v0.tangent = DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
-		v0.bitangent = DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
+		SpriteVertex v0 = {};
+		v0.position = DirectX::XMFLOAT4(-aSize, 0.0f, aSize, 1.0f);
+		v0.texCoord = DirectX::XMFLOAT2(0.0f / uvFactor, 0.0f / uvFactor);
+
+		//v0.u = 0.0f;
+		//v0.v = 0.0f;
 		vertices.push_back(v0);
 
-		Vertex v1 = {};
-		v1.position = DirectX::XMFLOAT3(aSize, 0.0f, aSize);
-		v1.normal = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
+		SpriteVertex v1 = {};
+		v1.position = DirectX::XMFLOAT4(aSize, 0.0f, aSize, 1.0f);
+		//v0.u = 0.0f;
+		//v0.v = 1.0f / uvFactor;
 		v1.texCoord = DirectX::XMFLOAT2(0.0f / uvFactor, 1.0f / uvFactor);
-		v1.tangent = DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
-		v1.bitangent = DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
+
 		vertices.push_back(v1);
 
-		Vertex v2 = {};
-		v2.position = DirectX::XMFLOAT3(aSize, 0.0f, -aSize);
-		v2.normal = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
+		SpriteVertex v2 = {};
+		v2.position = DirectX::XMFLOAT4(aSize, 0.0f, -aSize, 1.0f);
+		//v2.u = 1.0f / uvFactor;
+		//v2.v = 1.0f / uvFactor;
 		v2.texCoord = DirectX::XMFLOAT2(1.0f / uvFactor, 1.0f / uvFactor);
-		v2.tangent = DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
-		v2.bitangent = DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
+
 		vertices.push_back(v2);
 
-		Vertex v3 = {};
-		v3.position = DirectX::XMFLOAT3(-aSize, 0.0f, -aSize);
-		v3.normal = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
+		SpriteVertex v3 = {};
+		v3.position = DirectX::XMFLOAT4(-aSize, 0.0f, -aSize, 1.0f);
+		//v3.u = 1.0f / uvFactor;
+		//v3.v = 0.0f;
 		v3.texCoord = DirectX::XMFLOAT2(1.0f / uvFactor, 0.0f / uvFactor);
-		v3.tangent = DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
-		v3.bitangent = DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
+
 		vertices.push_back(v3);
 
 		indices.push_back(0);
@@ -55,19 +57,58 @@ namespace Kaka
 
 		sampler.Init(aGfx, 0u);
 
-		vertexBuffer.Init(aGfx, vertices);
+		D3D11_BUFFER_DESC bufferDesc = {};
+		bufferDesc.ByteWidth = sizeof(SpriteVertex) * 4;
+		bufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
+		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+		D3D11_SUBRESOURCE_DATA subresourceData = {};
+		subresourceData.pSysMem = vertices.data();
+
+		ID3D11Device* device = aGfx.pDevice.Get();
+		HRESULT result = device->CreateBuffer(&bufferDesc, &subresourceData, &vertexBuffer);
+		assert(SUCCEEDED(result));
+
+		//vertexBuffer.Init(aGfx, vertices);
 		indexBuffer.Init(aGfx, indices);
+
+		// Create instance buffer
+		D3D11_BUFFER_DESC instanceBufferDesc = {};
+
+		instanceBufferDesc.ByteWidth = sizeof(DirectX::XMMATRIX) * 8192;
+		instanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+		instanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		instanceBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+		result = aGfx.pDevice->CreateBuffer(&instanceBufferDesc, nullptr, &instanceBuffer);
+		assert(SUCCEEDED(result));
+
+		//D3D11_BUFFER_DESC spriteRenderBufferDesc = {};
+
+		//spriteRenderBufferDesc.ByteWidth = sizeof(SpriteRenderBuffer);
+		//spriteRenderBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+		//spriteRenderBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		//spriteRenderBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+		//result = aGfx.pDevice->CreateBuffer(&spriteRenderBufferDesc, nullptr, &spriteRenderBuffer);
+		//assert(SUCCEEDED(result));
 
 		vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\Sprite_VS.cso");
 		pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Sprite_PS.cso");
 
 		inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
-		topology.Init(aGfx, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		rasterizer.Init(aGfx, eCullingMode::None);
-		depthStencil.Init(aGfx, DepthStencil::Mode::DepthFirst);
+		transforms.resize(aNumberOfSprites);
+		rotations.resize(aNumberOfSprites);
 
-		mTransform = DirectX::XMMatrixIdentity();
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		for (unsigned int i = 0; i < transforms.size(); ++i)
+		{
+			// Set random position between -20, 0, -20 and 20, 0, 20
+			std::uniform_real_distribution<float> dis(-100.0f, 100.0f);
+			SetPosition({dis(gen), dis(gen), dis(gen)}, i);
+		}
 	}
 
 	void Sprite::Draw(Graphics& aGfx)
@@ -75,8 +116,28 @@ namespace Kaka
 		sampler.Bind(aGfx);
 		texture->Bind(aGfx);
 
-		vertexBuffer.Bind(aGfx);
+		unsigned int strides[2];
+		unsigned int offsets[2];
+		ID3D11Buffer* bufferPointers[2];
+
+
+		strides[0] = sizeof(SpriteVertex);
+		strides[1] = sizeof(DirectX::XMMATRIX);
+
+		offsets[0] = 0;
+		offsets[1] = 0;
+
+		bufferPointers[0] = vertexBuffer;
+		bufferPointers[1] = instanceBuffer;
+
+		aGfx.pContext->IASetVertexBuffers(0, 2, bufferPointers, strides, offsets);
+
+		//vertexBuffer.Bind(aGfx);
 		indexBuffer.Bind(aGfx);
+
+		inputLayout.Bind(aGfx);
+
+		const unsigned int instanceCount = transforms.size();
 
 		// Rotate the sprite to face the camera
 		const DirectX::XMVECTOR cameraForward = aGfx.camera->GetForwardVector();
@@ -87,30 +148,43 @@ namespace Kaka
 		DirectX::XMVECTOR cameraUp = DirectX::XMVector3Cross(cameraForward, cameraRight);
 		cameraUp = DirectX::XMVector3Normalize(cameraUp);
 
-		// X
-		mTransform.r[0].m128_f32[0] = cameraRight.m128_f32[0];
-		mTransform.r[0].m128_f32[1] = cameraRight.m128_f32[1];
-		mTransform.r[0].m128_f32[2] = cameraRight.m128_f32[2];
+		for (unsigned int i = 0; i < instanceCount; ++i)
+		{
+			// X
+			transforms[i].r[0].m128_f32[0] = cameraRight.m128_f32[0];
+			transforms[i].r[0].m128_f32[1] = cameraRight.m128_f32[1];
+			transforms[i].r[0].m128_f32[2] = cameraRight.m128_f32[2];
 
-		// Y
-		mTransform.r[1].m128_f32[0] = cameraForward.m128_f32[0];
-		mTransform.r[1].m128_f32[1] = cameraForward.m128_f32[1];
-		mTransform.r[1].m128_f32[2] = cameraForward.m128_f32[2];
+			// Y
+			transforms[i].r[1].m128_f32[0] = cameraForward.m128_f32[0];
+			transforms[i].r[1].m128_f32[1] = cameraForward.m128_f32[1];
+			transforms[i].r[1].m128_f32[2] = cameraForward.m128_f32[2];
 
-		// Z
-		mTransform.r[2].m128_f32[0] = cameraUp.m128_f32[0];
-		mTransform.r[2].m128_f32[1] = cameraUp.m128_f32[1];
-		mTransform.r[2].m128_f32[2] = cameraUp.m128_f32[2];
+			// Z
+			transforms[i].r[2].m128_f32[0] = cameraUp.m128_f32[0];
+			transforms[i].r[2].m128_f32[1] = cameraUp.m128_f32[1];
+			transforms[i].r[2].m128_f32[2] = cameraUp.m128_f32[2];
 
-		// Apply rotation so that the sprite can spin around the axis pointing towards the camera
-		mTransform = DirectX::XMMatrixRotationRollPitchYaw(0.0f, rotation, 0.0f) * mTransform;
+			// Apply rotation so that the sprite can spin around the axis pointing towards the camera
+			transforms[i] = DirectX::XMMatrixRotationRollPitchYaw(0.0f, rotations[i], 0.0f) * transforms[i];
 
-		DirectX::XMFLOAT3 position = GetPosition();
-		mTransform *= DirectX::XMMatrixScaling(transform.scale, transform.scale, transform.scale);
-		SetPosition(position);
+			DirectX::XMFLOAT3 position = GetPosition(i);
+			//transforms[i] *= DirectX::XMMatrixScaling(transforms[i].r[3].m128_f32[0], transforms[i].r[3].m128_f32[1], transforms[i].r[3].m128_f32[2]);
 
-		TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
-		transformConstantBuffer.Bind(aGfx);
+			SetPosition(position, i);
+		}
+
+		D3D11_MAPPED_SUBRESOURCE mappedResource = {};
+		aGfx.pContext->Map(instanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+		memcpy(
+			mappedResource.pData,
+			transforms.data(),
+			sizeof(DirectX::XMMATRIX) * instanceCount
+		);
+		aGfx.pContext->Unmap(instanceBuffer, 0);
+
+		//TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
+		//transformConstantBuffer.Bind(aGfx);
 
 		pixelShader->Bind(aGfx);
 
@@ -118,70 +192,66 @@ namespace Kaka
 		psConstantBuffer.Bind(aGfx);
 
 		vertexShader->Bind(aGfx);
-		inputLayout.Bind(aGfx);
-		topology.Bind(aGfx);
-		rasterizer.Bind(aGfx);
-		depthStencil.Bind(aGfx);
 
-		aGfx.DrawIndexed(static_cast<UINT>(std::size(indices)));
+		//aGfx.DrawIndexed(static_cast<UINT>(std::size(indices)));
+		aGfx.DrawIndexedInstanced(6u, instanceCount);
 
 		// Unbind shader resources
 		ID3D11ShaderResourceView* nullSRVs[4] = {nullptr};
 		aGfx.pContext->PSSetShaderResources(2u, 4u, nullSRVs);
 	}
 
-	void Sprite::SetPosition(const DirectX::XMFLOAT3 aPosition)
+	void Sprite::SetPosition(const DirectX::XMFLOAT3 aPosition, const unsigned int aIndex)
 	{
 		// Set position directly in transform
-		mTransform.r[3] = DirectX::XMVectorSet(aPosition.x, aPosition.y, aPosition.z, 1.0f);
-		transform.x = aPosition.x;
-		transform.y = aPosition.y;
-		transform.z = aPosition.z;
+		transforms[aIndex].r[3] = DirectX::XMVectorSet(aPosition.x, aPosition.y, aPosition.z, 1.0f);
 	}
 
-	void Sprite::SetScale(const float aScale)
+	void Sprite::SetScale(const float aScale, const unsigned int aIndex)
 	{
-		transform.scale = aScale;
-		DirectX::XMFLOAT3 position = GetPosition();
-		mTransform *= DirectX::XMMatrixScaling(aScale, aScale, aScale);
-		SetPosition(position);
+		DirectX::XMFLOAT3 position = GetPosition(aIndex);
+		transforms[aIndex] *= DirectX::XMMatrixScaling(aScale, aScale, aScale);
+		SetPosition(position, aIndex);
 	}
 
-	void Sprite::SetRotation(float aRotation)
+	void Sprite::SetRotation(float aRotation, const unsigned int aIndex)
 	{
-		rotation = aRotation;
+		rotations[aIndex] = aRotation;
 	}
 
 	DirectX::XMMATRIX Sprite::GetTransform() const
 	{
-		return mTransform;
+		return DirectX::XMMatrixIdentity();
+		//return transforms;
 	}
 
-	DirectX::XMFLOAT3 Sprite::GetPosition() const
+	DirectX::XMFLOAT3 Sprite::GetPosition(unsigned int aIndex) const
 	{
 		DirectX::XMFLOAT3 position = {
-			mTransform.r[3].m128_f32[0],
-			mTransform.r[3].m128_f32[1],
-			mTransform.r[3].m128_f32[2]
+			transforms[aIndex].r[3].m128_f32[0],
+			transforms[aIndex].r[3].m128_f32[1],
+			transforms[aIndex].r[3].m128_f32[2]
 		};
 		return position;
 	}
 
 	void Sprite::ShowControlWindow(const char* aWindowName)
 	{
-		aWindowName = aWindowName ? aWindowName : "Sprite";
+		//aWindowName = aWindowName ? aWindowName : "Sprite";
 
-		if (ImGui::Begin(aWindowName))
-		{
-			ImGui::Text("Orientation");
-			ImGui::SliderAngle("X", mTransform.r[0].m128_f32 + 0, -180.0f, 180.0f);
-			ImGui::SliderAngle("Y", mTransform.r[0].m128_f32 + 1, -180.0f, 180.0f);
-			ImGui::SliderAngle("Z", mTransform.r[0].m128_f32 + 2, -180.0f, 180.0f);
-			ImGui::Text("Position");
-			ImGui::DragFloat3("XYZ", mTransform.r[3].m128_f32);
-			ImGui::Text("Scale");
-			ImGui::DragFloat("XYZ", mTransform.r[4].m128_f32, 0.1f, 0.0f, 10.0f, "%.1f");
-		}
-		ImGui::End();
+		//if (ImGui::Begin(aWindowName))
+		//{
+		//	ImGui::Text("Orientation");
+		//	ImGui::SliderAngle("X", transforms.r[0].m128_f32 + 0, -180.0f, 180.0f);
+		//	ImGui::SliderAngle("Y", transforms.r[0].m128_f32 + 1, -180.0f, 180.0f);
+		//	ImGui::SliderAngle("Z", transforms.r[0].m128_f32 + 2, -180.0f, 180.0f);
+		//	ImGui::Text("Position");
+		//	ImGui::DragFloat3("XYZ", transforms.r[3].m128_f32);
+		//	ImGui::Text("Scale");
+		//	ImGui::DragFloat("XYZ", transforms.r[4].m128_f32, 0.1f, 0.0f, 10.0f, "%.1f");
+		//}
+		//ImGui::End();
 	}
+
+	void Sprite::Update(float aDeltaTime) { }
 }

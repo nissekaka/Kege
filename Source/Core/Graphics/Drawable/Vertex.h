@@ -14,6 +14,12 @@ namespace Kaka
 		DirectX::XMFLOAT3 bitangent;
 	};
 
+	struct SpriteVertex
+	{
+		DirectX::XMFLOAT4 position;
+		DirectX::XMFLOAT2 texCoord;
+	};
+
 	struct BoneVertex
 	{
 		DirectX::XMFLOAT3 position;
