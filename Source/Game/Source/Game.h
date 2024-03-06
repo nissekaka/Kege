@@ -53,8 +53,8 @@ namespace Kaka
 
 		float flashlightPositionInterpSpeed = 15.0f;
 		float flashlightDirectionInterpSpeed = 5.0f;
-		float flashlightBleedAngleMultiplier = 3.3f;
-		float flashlightBleedIntensityFactor = 0.3f;
+		float flashlightBleedAngleMultiplier = 1.9f;
+		float flashlightBleedIntensityFactor = 0.23f;
 		float flashlightIntensityInterpSpeed = 20.0f;
 		float flashlightIntensity;
 		bool flashlightOn = true;
@@ -142,10 +142,26 @@ namespace Kaka
 
 		ShadowBuffer shadowBuffer = {};
 
+		enum class eRSMMode
+		{
+			NoAlbedo,
+			WithAlbedo,
+			Debug,
+			Count
+		};
+
+		std::string ModeEnumToString[3]
+		{
+			"No albedo",
+			"With albedo",
+			"Debug"
+		};
+
 		struct RSMBuffer
 		{
 			BOOL usePoisson = false;
 			BOOL isDirectionalLight = true;
+			UINT mode = 0u;
 			UINT sampleCount = 100u;
 			UINT sampleCountLastPass = 100u;
 			UINT currentPass = 0;
@@ -155,7 +171,6 @@ namespace Kaka
 			float weightMax = 0.1f;
 			float divideN = 1.0f;
 			float divideP = 20.0f;
-			float padding;
 			DirectX::XMFLOAT4 shadowColour = {0.8f, 0.9f, 1.0f, 0.01f};
 			DirectX::XMFLOAT4 ambianceColour = {0.8f, 0.9f, 1.0f, 0.3f};
 			DirectX::XMMATRIX lightCameraTransform;

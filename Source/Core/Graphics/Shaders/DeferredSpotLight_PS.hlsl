@@ -11,8 +11,9 @@ cbuffer SpotlightData : register(b2)
     float lightInnerAngle;
     float lightOuterAngle;
     bool lightIsActive;
+    bool useTexture;
     float4x4 spotLightCameraTransform;
-    float2 padding;
+    float padding;
 };
 
 float4 main(DeferredVertexToPixel aInput) : SV_TARGET
@@ -37,12 +38,18 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
     float shadowFactor = Shadow(lightProjectedPosition, spotLightShadowMap) + shadowColour.w;
     shadowFactor = saturate(shadowFactor);
 
-    float2 projectedPosition = lightProjectedPosition.xy;
-    projectedPosition.x *= clientResolution.x / clientResolution.y; // Because texture has aspect ratio 1:1
-    const float2 lightUV = 0.5f + float2(0.5f, -0.5f) * (projectedPosition.xy) / lightOuterAngle;
-    const float3 light = flashlightTex.Sample(defaultSampler, lightUV).rgb;
+    float3 lightFromTexture = float3(1.0f, 1.0f, 1.0f);
 
-    float3 spotlight = EvaluateSpotLight(colour, specular, normal, roughness, light * lightColour, lightIntensity,
+    if (useTexture)
+    {
+        float2 projectedPosition = lightProjectedPosition.xy;
+        projectedPosition.x *= clientResolution.x / clientResolution.y; // Because texture has aspect ratio 1:1
+        const float2 lightUV = 0.5f + float2(0.5f, -0.5f) * (projectedPosition.xy) / lightOuterAngle;
+
+        lightFromTexture = flashlightTex.Sample(defaultSampler, lightUV).rgb;
+    }
+
+    float3 spotlight = EvaluateSpotLight(colour, specular, normal, roughness, lightFromTexture * lightColour, lightIntensity,
         lightRange, lightPosition, -lightDirection, lightOuterAngle, lightInnerAngle, toEye,
         worldPosition.xyz);
 

@@ -83,6 +83,7 @@ namespace Kaka
 			flashlightInner->innerAngle = 0.13f; // Radians
 			flashlightInner->outerAngle = 0.17f; // Radians
 			flashlightInner->colour = {1.0f, 0.9f, 0.6f};
+			flashlightInner->useTexture = TRUE;
 
 			wnd.Gfx().spotLightRSMBuffer[0].GetCamera().SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 120.0f, 0.5f, 5000.0f);
 
@@ -94,21 +95,24 @@ namespace Kaka
 			flashlightOuter->innerAngle = flashlightInner->innerAngle; // Radians
 			flashlightOuter->outerAngle = std::clamp(flashlightInner->outerAngle * 10.0f, flashlightOuter->outerAngle, 3.14f); // Radians
 			flashlightOuter->colour = flashlightInner->colour;
+			flashlightOuter->useTexture = FALSE;
 		}
 
-		rsmBufferDirectional.sampleCount = 600;
+		rsmBufferDirectional.sampleCount = 600u;
+		rsmBufferDirectional.sampleCountLastPass = 50u;
 		rsmBufferDirectional.rMax = 0.11f;
-		rsmBufferDirectional.rsmIntensity = 10000.0f;
+		rsmBufferDirectional.rsmIntensity = 15000.0f;
 		rsmBufferDirectional.uvScale = wnd.Gfx().rsmDownscaleFactor;
 		rsmBufferDirectional.isDirectionalLight = TRUE;
-		rsmBufferDirectional.weightMax = 0.0f;
+		rsmBufferDirectional.weightMax = 3.7f;
 
-		rsmBufferSpot.sampleCount = 250;
+		rsmBufferSpot.sampleCount = 250u;
+		rsmBufferSpot.sampleCountLastPass = 50u;
 		rsmBufferSpot.rMax = 0.165f;
 		rsmBufferSpot.rsmIntensity = 100.0f;
 		rsmBufferSpot.uvScale = wnd.Gfx().rsmDownscaleFactor;
 		rsmBufferSpot.isDirectionalLight = FALSE;
-		rsmBufferSpot.weightMax = 0.0f;
+		rsmBufferSpot.weightMax = 3.8f;
 
 		while (true)
 		{
@@ -578,6 +582,9 @@ namespace Kaka
 				ImGui::DragFloat("Weight max##SpoWeiMax", &rsmBufferSpot.weightMax, 0.001f, 0.0f, 5.0f, "%.4f");
 				ImGui::DragFloat("Divide N", &rsmBufferSpot.divideN, 0.1f, 0.0f, 5.0f, "%.1f");
 				ImGui::DragFloat("Divide P", &rsmBufferSpot.divideP, 0.1f, 0.0f, 5.0f, "%.1f");
+				ImGui::DragInt("Final sample count", (int*)&rsmBufferSpot.sampleCountLastPass, 1, 0, 600);
+				ImGui::SliderInt("Mode", (int*)&rsmBufferDirectional.mode, 0, (int)eRSMMode::Count - 1, ModeEnumToString[rsmBufferDirectional.mode].c_str());
+				rsmBufferDirectional.sampleCountLastPass = rsmBufferSpot.sampleCountLastPass;
 				rsmBufferDirectional.divideN = rsmBufferSpot.divideN;
 				rsmBufferDirectional.divideP = rsmBufferSpot.divideP;
 			}

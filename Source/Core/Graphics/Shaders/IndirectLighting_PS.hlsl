@@ -27,7 +27,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
 
         rsm = IndirectLighting(sampleUV, normal, worldPosition,
                                         rsmWorldPositionTex, rsmFluxTex, rsmNormalTex,
-                                        usePoissonRSM, rMax, sampleCount, rsmIntensity);// * albedo;
+                                        usePoissonRSM, rMax, sampleCount, rsmIntensity); // * albedo;
     }
     else
     {
@@ -48,8 +48,20 @@ float4 main(const PixelInput aInput) : SV_TARGET
             offsets[3] = float2(1.0f, 0.0f);
         }
 
-        const float2 uv = aInput.position.xy / clientResolution.xy;
-
+        float2 uv;
+        if (currentPass == 1)
+        {
+            uv = (aInput.position.xy + float2(1.0f, 1.0f)) / clientResolution.xy;
+        }
+        if (currentPass == 2)
+        {
+            uv = (aInput.position.xy + float2(1.0f, 0.0f)) / clientResolution.xy;
+        }
+        if (currentPass == 3)
+        {
+            uv = (aInput.position.xy + float2(0.0f, 1.0f)) / clientResolution.xy;
+        }
+            
         float3 accumIndirectLight = float3(0.0f, 0.0f, 0.0f);
         float accumWeight = 0.0f;
 
@@ -100,23 +112,42 @@ float4 main(const PixelInput aInput) : SV_TARGET
 		// Normalize by the total weight to get the final result
         rsm = accumIndirectLight / accumWeight;
 
-        if (currentPass == 3)
-        {
+        //if (currentPass == 3)
+        //{
             if (accumWeight <= weightMax)
             {
                 //const float3 albedo = gColourTex.Sample(defaultSampler, uv).rgb;
 
-                const float4 lightProjectedPositionTemp = mul(lightCameraTransform, float4(worldPosition, 1.0f));
-                const float3 lightProjectedPosition = lightProjectedPositionTemp.xyz / lightProjectedPositionTemp.w;
+                if (mode == 0)
+                {
+                    const float4 lightProjectedPositionTemp = mul(lightCameraTransform, float4(worldPosition, 1.0f));
+                    const float3 lightProjectedPosition = lightProjectedPositionTemp.xyz / lightProjectedPositionTemp.w;
 
-                const float2 sampleUV = 0.5f + float2(0.5f, -0.5f) * (lightProjectedPosition.xy);
+                    const float2 sampleUV = 0.5f + float2(0.5f, -0.5f) * (lightProjectedPosition.xy);
 
-                rsm = IndirectLighting(sampleUV, normal, worldPosition,
+                    rsm = IndirectLighting(sampleUV, normal, worldPosition,
                                         rsmWorldPositionTex, rsmFluxTex, rsmNormalTex,
-                                        usePoissonRSM, rMax, sampleCountLastPass, rsmIntensity); // * albedo;
-            //rsm = float3(1.0f, 0.0f, 0.0f); // Red debug colour
+                                        usePoissonRSM, rMax, sampleCountLastPass, rsmIntensity);
+                }
+                if (mode == 1)
+                {
+                    const float3 albedo = gColourTex.Sample(defaultSampler, uv).rgb;
+
+                    const float4 lightProjectedPositionTemp = mul(lightCameraTransform, float4(worldPosition, 1.0f));
+                    const float3 lightProjectedPosition = lightProjectedPositionTemp.xyz / lightProjectedPositionTemp.w;
+
+                    const float2 sampleUV = 0.5f + float2(0.5f, -0.5f) * (lightProjectedPosition.xy);
+
+                    rsm = IndirectLighting(sampleUV, normal, worldPosition,
+                                        rsmWorldPositionTex, rsmFluxTex, rsmNormalTex,
+                                        usePoissonRSM, rMax, sampleCountLastPass, rsmIntensity) * albedo;
+                }
+                if (mode == 2)
+                {
+                    rsm = float3(1.0f, 0.0f, 0.0f); // Red debug colour
+                }
             }
-        }
+        //}
     }
     return float4(rsm, 1.0f);
 }

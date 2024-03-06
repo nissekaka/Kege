@@ -5,6 +5,7 @@ cbuffer RSMData : register(b3)
 {
     bool usePoissonRSM;
     bool isDirectional;
+    uint mode;
     uint sampleCount;
     uint sampleCountLastPass;
     uint currentPass;
@@ -12,9 +13,8 @@ cbuffer RSMData : register(b3)
     float rsmIntensity;
     float uvScale;
     float weightMax;
-    float divideP;
     float divideN;
-    float paddingRSM;
+    float divideP;
     float4 shadowColour;
     float4 ambianceColour;
     float4x4 lightCameraTransform;

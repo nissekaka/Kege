@@ -49,8 +49,9 @@ struct SpotlightData
 	float innerAngle = {}; // 48
 	float outerAngle = {}; // 52
 	BOOL isActive = false; // 56
-	DirectX::XMMATRIX shadowCamera; // 120
-	float padding[2] = {}; // 128
+	BOOL useTexture = true; // 60
+	DirectX::XMMATRIX shadowCamera; // 124
+	float padding = {}; // 128
 };
 
 struct LightConstantBuffer
