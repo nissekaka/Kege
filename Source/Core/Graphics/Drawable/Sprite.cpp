@@ -15,7 +15,7 @@ namespace Kaka
 		Vertex v0 = {};
 		v0.position = DirectX::XMFLOAT3(-aSize, 0.0f, aSize);
 		v0.normal = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
-		v0.texCoord = DirectX::XMFLOAT2(0.0f / uvFactor, 0.0f / uvFactor);
+		v0.v = 0.0f;
 		v0.tangent = DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
 		v0.bitangent = DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
 		vertices.push_back(v0);
