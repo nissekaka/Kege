@@ -60,7 +60,8 @@ namespace Kaka
 
 		Texture* flashlightTexture;
 
-		Sprite dustParticle;
+		Sprite dustParticles;
+		Sprite smokeParticles;
 
 	private:
 		bool showImGui = true;

@@ -1,5 +1,3 @@
-
-#include "common.hlsli"
 #include "RSM.hlsli"
 
 struct PixelInput

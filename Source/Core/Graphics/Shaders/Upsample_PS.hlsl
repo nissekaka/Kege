@@ -1,4 +1,4 @@
-#include "common.hlsli"
+#include "deferred_common.hlsli"
 
 cbuffer Bloom : register(b1)
 {
@@ -24,10 +24,10 @@ float4 main(PixelInput aInput) : SV_TARGET
     const float2 pixelOffset = float2(ddx(aInput.texCoord.x), ddy(aInput.texCoord.y));
 	// Could have done one sample in the middle
 	// But that results in some artifacts. This pattern gives a much smoother result
-    const float3 p00 = fullscreenTexture.Sample(splr, aInput.texCoord + pixelOffset * float2(-1.0f, -1.0f)).rgb;
-    const float3 p01 = fullscreenTexture.Sample(splr, aInput.texCoord + pixelOffset * float2(-1.0f, 1.0f)).rgb;
-    const float3 p10 = fullscreenTexture.Sample(splr, aInput.texCoord + pixelOffset * float2(1.0f, -1.0f)).rgb;
-    const float3 p11 = fullscreenTexture.Sample(splr, aInput.texCoord + pixelOffset * float2(1.0f, 1.0f)).rgb;
+    const float3 p00 = fullscreenTexture.Sample(defaultSampler, aInput.texCoord + pixelOffset * float2(-1.0f, -1.0f)).rgb;
+    const float3 p01 = fullscreenTexture.Sample(defaultSampler, aInput.texCoord + pixelOffset * float2(-1.0f, 1.0f)).rgb;
+    const float3 p10 = fullscreenTexture.Sample(defaultSampler, aInput.texCoord + pixelOffset * float2(1.0f, -1.0f)).rgb;
+    const float3 p11 = fullscreenTexture.Sample(defaultSampler, aInput.texCoord + pixelOffset * float2(1.0f, 1.0f)).rgb;
 
     returnValue.rgb = bloomThreshold * (p00 + p01 + p10 + p11);
     returnValue.a = bloomBlending;

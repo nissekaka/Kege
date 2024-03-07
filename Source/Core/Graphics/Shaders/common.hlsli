@@ -3,28 +3,28 @@
 //#define USE_LIGHTS
 //#define USE_NOISE
 
-cbuffer CommonBuffer : register(b4)
-{
-    float4x4 worldToClipMatrix;
-    float4x4 view;
-    float4x4 projection;
-    float4x4 clipToWorldMatrix;
-    float4x4 viewInverse;
-    float4 cameraPosition;
-    float2 clientResolution;
-    float currentTime;
-}
+//cbuffer CommonBuffer : register(b4)
+//{
+//    float4x4 worldToClipMatrix;
+//    float4x4 view;
+//    float4x4 projection;
+//    float4x4 clipToWorldMatrix;
+//    float4x4 viewInverse;
+//    float4 cameraPosition;
+//    float2 clientResolution;
+//    float currentTime;
+//}
 
-int GetNumMips(TextureCube cubeTex)
-{
-    int iWidth = 0;
-    int iheight = 0;
-    int numMips = 0;
-    cubeTex.GetDimensions(0, iWidth, iheight, numMips);
-    return numMips;
-}
+//int GetNumMips(TextureCube cubeTex)
+//{
+//    int iWidth = 0;
+//    int iheight = 0;
+//    int numMips = 0;
+//    cubeTex.GetDimensions(0, iWidth, iheight, numMips);
+//    return numMips;
+//}
 
-SamplerState splr : register(s0);
+//SamplerState splr : register(s0);
 
 //cbuffer CommonBuffer : register(b0)
 //{
@@ -128,8 +128,8 @@ SamplerState splr : register(s0);
 
 //TextureCube environmentTexture;
 
-TextureCube dayTex : register(t0);
-TextureCube nightTex : register(t1);
+//TextureCube dayTex : register(t0);
+//TextureCube nightTex : register(t1);
 
 //Texture2D albedoTexture : register(t1);
 //Texture2D normalTexture : register(t2);

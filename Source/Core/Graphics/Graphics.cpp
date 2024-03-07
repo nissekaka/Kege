@@ -7,7 +7,6 @@
 
 #include "GraphicsConstants.h"
 #include "Drawable/ModelLoader.h"
-#include "Shaders/ShaderFactory.h"
 
 namespace WRL = Microsoft::WRL;
 

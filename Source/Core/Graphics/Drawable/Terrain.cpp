@@ -9,7 +9,7 @@
 #include <cmath>
 #include <random>
 
-#include "Graphics/Shaders/ShaderFactory.h"
+#include "Graphics/ShaderFactory.h"
 
 namespace Kaka
 {

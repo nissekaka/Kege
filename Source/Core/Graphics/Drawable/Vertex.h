@@ -18,6 +18,9 @@ namespace Kaka
 	{
 		DirectX::XMFLOAT4 position;
 		DirectX::XMFLOAT2 texCoord;
+		DirectX::XMFLOAT3 normal;
+		DirectX::XMFLOAT3 tangent;
+		DirectX::XMFLOAT3 bitangent;
 	};
 
 	struct BoneVertex

@@ -7,7 +7,7 @@
 #include <TGAFBXImporter/source/Internal.inl>
 #include <wrl/client.h>
 
-#include "Graphics/Shaders/ShaderFactory.h"
+#include "Graphics/ShaderFactory.h"
 #include "TGAFBXImporter/source/FBXImporter.h"
 
 namespace Kaka
@@ -168,13 +168,10 @@ namespace Kaka
 		TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
 		transformConstantBuffer.Bind(aGfx);
 
-		bool isRegularPixelShader = true;
-
 		vertexShader->Bind(aGfx);
 		if (aGfx.HasPixelShaderOverride())
 		{
 			aGfx.GetPixelShaderOverride()->Bind(aGfx);
-			isRegularPixelShader = false;
 		}
 		else
 		{
@@ -190,11 +187,6 @@ namespace Kaka
 			if (!aGfx.IsBoundingBoxInFrustum(GetTranslatedAABB(mesh).minBound, GetTranslatedAABB(mesh).maxBound))
 			{
 				continue;
-			}
-
-			if (isRegularPixelShader)
-			{
-				//DrawDebugAABB(aGfx, mesh);
 			}
 
 			if (mesh.texture != nullptr)
@@ -213,7 +205,7 @@ namespace Kaka
 
 		// Unbind shader resources
 		ID3D11ShaderResourceView* nullSRVs[3] = {nullptr};
-		aGfx.pContext->PSSetShaderResources(0u, 3u, nullSRVs);
+		aGfx.pContext->PSSetShaderResources(1u, 3u, nullSRVs);
 	}
 
 	void Model::DrawAnimated(Graphics& aGfx)

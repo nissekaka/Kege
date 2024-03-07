@@ -5,45 +5,46 @@
 
 #include "ModelLoader.h"
 #include "Core/Graphics/Drawable/Vertex.h"
-#include "External/include/imgui/imgui.h"
-#include "Utility/Camera.h"
+#include "Core/Utility/Camera.h"
+#include "Core/Utility/KakaMath.h"
+#include <External/include/imgui/imgui.h>
 
 namespace Kaka
 {
-	void Sprite::Init(const Graphics& aGfx, const float aSize, const unsigned int aNumberOfSprites)
+	void Sprite::Init(const Graphics& aGfx, const float aSize, const unsigned int aNumberOfSprites, bool aIsVfx, const std::string& aFile)
 	{
 		constexpr float uvFactor = 1.0f;
 
 		SpriteVertex v0 = {};
 		v0.position = DirectX::XMFLOAT4(-aSize, 0.0f, aSize, 1.0f);
 		v0.texCoord = DirectX::XMFLOAT2(0.0f / uvFactor, 0.0f / uvFactor);
-
-		//v0.u = 0.0f;
-		//v0.v = 0.0f;
+		v0.normal = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
+		v0.tangent = DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
+		v0.bitangent = DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
 		vertices.push_back(v0);
 
 		SpriteVertex v1 = {};
 		v1.position = DirectX::XMFLOAT4(aSize, 0.0f, aSize, 1.0f);
-		//v0.u = 0.0f;
-		//v0.v = 1.0f / uvFactor;
 		v1.texCoord = DirectX::XMFLOAT2(0.0f / uvFactor, 1.0f / uvFactor);
-
+		v1.normal = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
+		v1.tangent = DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
+		v1.bitangent = DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
 		vertices.push_back(v1);
 
 		SpriteVertex v2 = {};
 		v2.position = DirectX::XMFLOAT4(aSize, 0.0f, -aSize, 1.0f);
-		//v2.u = 1.0f / uvFactor;
-		//v2.v = 1.0f / uvFactor;
 		v2.texCoord = DirectX::XMFLOAT2(1.0f / uvFactor, 1.0f / uvFactor);
-
+		v2.normal = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
+		v2.tangent = DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
+		v2.bitangent = DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
 		vertices.push_back(v2);
 
 		SpriteVertex v3 = {};
 		v3.position = DirectX::XMFLOAT4(-aSize, 0.0f, -aSize, 1.0f);
-		//v3.u = 1.0f / uvFactor;
-		//v3.v = 0.0f;
 		v3.texCoord = DirectX::XMFLOAT2(1.0f / uvFactor, 0.0f / uvFactor);
-
+		v3.normal = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
+		v3.tangent = DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
+		v3.bitangent = DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
 		vertices.push_back(v3);
 
 		indices.push_back(0);
@@ -53,9 +54,7 @@ namespace Kaka
 		indices.push_back(2);
 		indices.push_back(3);
 
-		texture = ModelLoader::LoadTexture(aGfx, "Assets\\Textures\\SpriteCloud.png");
-
-		sampler.Init(aGfx, 0u);
+		texture = ModelLoader::LoadTexture(aGfx, aFile, 1u);
 
 		D3D11_BUFFER_DESC bufferDesc = {};
 		bufferDesc.ByteWidth = sizeof(SpriteVertex) * 4;
@@ -75,7 +74,8 @@ namespace Kaka
 		// Create instance buffer
 		D3D11_BUFFER_DESC instanceBufferDesc = {};
 
-		instanceBufferDesc.ByteWidth = sizeof(DirectX::XMMATRIX) * 8192;
+		instanceBufferDesc.ByteWidth = sizeof(DirectX::XMMATRIX) * 24576;
+		// 8192 + 8192 + 8192 = 24576
 		instanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 		instanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		instanceBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -94,32 +94,57 @@ namespace Kaka
 		//assert(SUCCEEDED(result));
 
 		vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\Sprite_VS.cso");
-		pixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Sprite_PS.cso");
+
+		vfxPixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Sprite_PS.cso");
+		deferredPixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Sprite_Deferred_PS.cso");
+
+		if (aIsVfx)
+		{
+			pixelShader = vfxPixelShader;
+		}
+		else
+		{
+			pixelShader = deferredPixelShader;
+		}
 
 		inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
 
 		transforms.resize(aNumberOfSprites);
-		rotations.resize(aNumberOfSprites);
+		travelAngles.resize(aNumberOfSprites);
+		travelSpeeds.resize(aNumberOfSprites);
+		travelRadiuses.resize(aNumberOfSprites);
 
 		std::random_device rd;
 		std::mt19937 gen(rd());
+
 		for (unsigned int i = 0; i < transforms.size(); ++i)
 		{
 			// Set random position between -20, 0, -20 and 20, 0, 20
-			std::uniform_real_distribution<float> dis(-100.0f, 100.0f);
-			SetPosition({dis(gen), dis(gen), dis(gen)}, i);
+			std::uniform_real_distribution<float> xDist(-150.0f, 130.0f);
+			std::uniform_real_distribution<float> yDist(0.0f, 150.0f);
+			std::uniform_real_distribution<float> zDist(-70.0f, 70.0f);
+			std::uniform_real_distribution<float> distSize(0.5f, 2.0f);
+			float scale = distSize(gen);
+			transforms[i] = DirectX::XMMatrixScaling(scale, scale, scale);
+
+			SetPosition({xDist(gen), yDist(gen), zDist(gen)}, i);
+			startPositions.push_back(GetPosition(i));
+
+			std::uniform_real_distribution<float> radiusDist(0.5f, 10.0f);
+			std::uniform_real_distribution<float> speedDist(0.1f, 0.5f);
+			travelRadiuses[i] = radiusDist(gen);
+			travelSpeeds[i] = speedDist(gen);
+			travelAngles[i] = PI;
 		}
 	}
 
 	void Sprite::Draw(Graphics& aGfx)
 	{
-		sampler.Bind(aGfx);
 		texture->Bind(aGfx);
 
 		unsigned int strides[2];
 		unsigned int offsets[2];
 		ID3D11Buffer* bufferPointers[2];
-
 
 		strides[0] = sizeof(SpriteVertex);
 		strides[1] = sizeof(DirectX::XMMATRIX);
@@ -132,47 +157,13 @@ namespace Kaka
 
 		aGfx.pContext->IASetVertexBuffers(0, 2, bufferPointers, strides, offsets);
 
-		//vertexBuffer.Bind(aGfx);
 		indexBuffer.Bind(aGfx);
-
 		inputLayout.Bind(aGfx);
 
 		const unsigned int instanceCount = transforms.size();
 
-		// Rotate the sprite to face the camera
-		const DirectX::XMVECTOR cameraForward = aGfx.camera->GetForwardVector();
-
-		// Get right vector from cross product of forward and up
-		DirectX::XMVECTOR cameraRight = DirectX::XMVector3Cross(DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), cameraForward);
-		cameraRight = DirectX::XMVector3Normalize(cameraRight);
-		DirectX::XMVECTOR cameraUp = DirectX::XMVector3Cross(cameraForward, cameraRight);
-		cameraUp = DirectX::XMVector3Normalize(cameraUp);
-
-		for (unsigned int i = 0; i < instanceCount; ++i)
-		{
-			// X
-			transforms[i].r[0].m128_f32[0] = cameraRight.m128_f32[0];
-			transforms[i].r[0].m128_f32[1] = cameraRight.m128_f32[1];
-			transforms[i].r[0].m128_f32[2] = cameraRight.m128_f32[2];
-
-			// Y
-			transforms[i].r[1].m128_f32[0] = cameraForward.m128_f32[0];
-			transforms[i].r[1].m128_f32[1] = cameraForward.m128_f32[1];
-			transforms[i].r[1].m128_f32[2] = cameraForward.m128_f32[2];
-
-			// Z
-			transforms[i].r[2].m128_f32[0] = cameraUp.m128_f32[0];
-			transforms[i].r[2].m128_f32[1] = cameraUp.m128_f32[1];
-			transforms[i].r[2].m128_f32[2] = cameraUp.m128_f32[2];
-
-			// Apply rotation so that the sprite can spin around the axis pointing towards the camera
-			transforms[i] = DirectX::XMMatrixRotationRollPitchYaw(0.0f, rotations[i], 0.0f) * transforms[i];
-
-			DirectX::XMFLOAT3 position = GetPosition(i);
-			//transforms[i] *= DirectX::XMMatrixScaling(transforms[i].r[3].m128_f32[0], transforms[i].r[3].m128_f32[1], transforms[i].r[3].m128_f32[2]);
-
-			SetPosition(position, i);
-		}
+		TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
+		transformConstantBuffer.Bind(aGfx);
 
 		D3D11_MAPPED_SUBRESOURCE mappedResource = {};
 		aGfx.pContext->Map(instanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -183,17 +174,16 @@ namespace Kaka
 		);
 		aGfx.pContext->Unmap(instanceBuffer, 0);
 
-		//TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
-		//transformConstantBuffer.Bind(aGfx);
-
-		pixelShader->Bind(aGfx);
-
-		PixelConstantBuffer<PSMaterialConstant> psConstantBuffer(aGfx, pmc, 0u);
-		psConstantBuffer.Bind(aGfx);
-
 		vertexShader->Bind(aGfx);
+		if (aGfx.HasPixelShaderOverride())
+		{
+			aGfx.GetPixelShaderOverride()->Bind(aGfx);
+		}
+		else
+		{
+			pixelShader->Bind(aGfx);
+		}
 
-		//aGfx.DrawIndexed(static_cast<UINT>(std::size(indices)));
 		aGfx.DrawIndexedInstanced(6u, instanceCount);
 
 		// Unbind shader resources
@@ -214,10 +204,10 @@ namespace Kaka
 		SetPosition(position, aIndex);
 	}
 
-	void Sprite::SetRotation(float aRotation, const unsigned int aIndex)
-	{
-		rotations[aIndex] = aRotation;
-	}
+	//void Sprite::SetRotation(float aRotation, const unsigned int aIndex)
+	//{
+	//	rotations[aIndex] = aRotation;
+	//}
 
 	DirectX::XMMATRIX Sprite::GetTransform() const
 	{
@@ -253,5 +243,38 @@ namespace Kaka
 		//ImGui::End();
 	}
 
-	void Sprite::Update(float aDeltaTime) { }
+	void Sprite::Update(const Graphics& aGfx, float aDeltaTime)
+	{
+		const unsigned int instanceCount = transforms.size();
+
+		// Rotate the sprite to face the camera
+		const DirectX::XMVECTOR cameraForward = aGfx.camera->GetForwardVector();
+
+		// Get right vector from cross product of forward and up
+		DirectX::XMVECTOR cameraRight = DirectX::XMVector3Cross(DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), cameraForward);
+		cameraRight = DirectX::XMVector3Normalize(cameraRight);
+		DirectX::XMVECTOR cameraUp = DirectX::XMVector3Cross(cameraForward, cameraRight);
+		cameraUp = DirectX::XMVector3Normalize(cameraUp);
+
+
+		for (unsigned int i = 0; i < instanceCount; ++i)
+		{
+			travelAngles[i] -= travelSpeeds[i] * aDeltaTime;
+
+			transforms[i].r[3].m128_f32[0] = travelRadiuses[i] * std::cos(travelAngles[i]) + startPositions[i].x;
+			transforms[i].r[3].m128_f32[2] = travelRadiuses[i] * std::sin(travelAngles[i]) + startPositions[i].z;
+
+			if (travelAngles[i] > 2 * PI)
+			{
+				travelAngles[i] -= 2 * PI;
+			}
+
+			// Set the rotation to face the camera
+			transforms[i].r[0] = cameraRight;
+			transforms[i].r[1] = cameraForward;
+			transforms[i].r[2] = cameraUp;
+
+			transforms[i] = transforms[i];
+		}
+	}
 }

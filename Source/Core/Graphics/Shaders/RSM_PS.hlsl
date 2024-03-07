@@ -24,7 +24,7 @@ cbuffer RSMLightData : register(b0)
 RSMBufferOutput main(PixelInput aInput)
 {
     float4 albedo = gColourTex.Sample(defaultSampler, aInput.texCoord).rgba;
-    if (albedo.a < 0.5f)
+    if (albedo.a < 0.1f)
     {
         discard;
     }

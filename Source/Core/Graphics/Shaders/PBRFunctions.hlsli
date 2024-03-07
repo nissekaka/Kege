@@ -114,6 +114,15 @@ float3 Specular(float3 specularColor, float3 h, float3 v, float a, float NdL, fl
     return ((NormalDistribution_GGX(a, NdH) * Geometric_Smith_Schlick_GGX(a, NdV, NdL)) * Fresnel_Schlick(specularColor, h, v)) / (4.0f * NdL * NdV + 0.0001f);
 }
 
+int GetNumMips(TextureCube cubeTex)
+{
+    int iWidth = 0;
+    int iheight = 0;
+    int numMips = 0;
+    cubeTex.GetDimensions(0, iWidth, iheight, numMips);
+    return numMips;
+}
+
 float3 EvaluateAmbiance(SamplerState samplerState, TextureCube lysBurleyCube, float3 vN, float3 VNUnit, float3 toEye, float perceptualRoughness, float ao, float3 dfcol, float3 spccol)
 {
     int numMips = GetNumMips(lysBurleyCube);

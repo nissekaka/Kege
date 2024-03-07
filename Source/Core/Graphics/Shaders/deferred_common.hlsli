@@ -23,6 +23,18 @@ TextureCube nightSkyTex : register(t13);
 SamplerState defaultSampler : register(s0);
 SamplerState clampedSampler : register(s2);
 
+cbuffer CommonBuffer : register(b4)
+{
+    float4x4 worldToClipMatrix;
+    float4x4 view;
+    float4x4 projection;
+    float4x4 clipToWorldMatrix;
+    float4x4 viewInverse;
+    float4 cameraPosition;
+    float2 clientResolution;
+    float currentTime;
+}
+
 struct GBufferOutput
 {
     float4 worldPosition : SV_TARGET0;

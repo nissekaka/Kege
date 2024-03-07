@@ -72,7 +72,8 @@ namespace Kaka
 
 		flashlightTexture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\Flashlight_cookie.png", 5u);
 
-		dustParticle.Init(wnd.Gfx(), 0.1f, 5000u);
+		dustParticles.Init(wnd.Gfx(), 0.025f, 24000u, false, "Assets\\Textures\\particle.png");
+		//smokeParticles.Init(wnd.Gfx(), 25.0f, 1000u, true, "Assets\\Textures\\SpriteCloud.png");
 
 		// Flashlight setup
 		{
@@ -257,6 +258,9 @@ namespace Kaka
 		skyboxAngle.y += skyboxSpeed * aDeltaTime;
 		skybox.Rotate(skyboxAngle);
 
+		dustParticles.Update(wnd.Gfx(), aDeltaTime);
+		//smokeParticles.Update(wnd.Gfx(), aDeltaTime);
+
 		wnd.Gfx().SetDepthStencilState(eDepthStencilStates::Normal);
 		// Need backface culling for Reflective Shadow Maps
 		wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
@@ -287,6 +291,10 @@ namespace Kaka
 				{
 					model.Draw(wnd.Gfx(), aDeltaTime);
 				}
+
+				//wnd.Gfx().SetRasterizerState(eRasterizerStates::NoCulling);
+				//dustParticles.Draw(wnd.Gfx());
+				//wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
 			}
 		}
 		// ---------- SHADOW MAP PASS -- DIRECTIONAL LIGHT ---------- END
@@ -325,6 +333,10 @@ namespace Kaka
 				{
 					model.Draw(wnd.Gfx(), aDeltaTime);
 				}
+
+				wnd.Gfx().SetRasterizerState(eRasterizerStates::NoCulling);
+				dustParticles.Draw(wnd.Gfx());
+				wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
 			}
 
 			wnd.Gfx().ResetShadows(camera);
@@ -341,6 +353,10 @@ namespace Kaka
 			{
 				model.Draw(wnd.Gfx(), aDeltaTime);
 			}
+
+			//wnd.Gfx().SetRasterizerState(eRasterizerStates::NoCulling);
+			dustParticles.Draw(wnd.Gfx());
+			//wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
 
 			wnd.Gfx().SetRenderTarget(eRenderTargetType::None, nullptr);
 			wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_GBUFFER_SLOT);
@@ -451,15 +467,6 @@ namespace Kaka
 
 		// Indirect combined pass -- END
 
-		// Clear resources
-		{
-			wnd.Gfx().gBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_GBUFFER_SLOT);
-
-			ID3D11ShaderResourceView* const nullSRV[1] = {nullptr};
-			wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTRUE_SLOT_INDIRECT_LIGHT_DIRECTIONAL, 1u, nullSRV);
-			wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, nullSRV);
-		}
-
 		// Skybox pass -- BEGIN
 		{
 			wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, wnd.Gfx().gBuffer.GetDepthStencilView());
@@ -473,17 +480,23 @@ namespace Kaka
 
 		// Sprite pass -- BEGIN
 		{
-			wnd.Gfx().SetBlendState(eBlendStates::Additive);
-			//wnd.Gfx().SetDepthStencilState(eDepthStencilStates::ReadOnlyLessEqual);
-			wnd.Gfx().SetRasterizerState(eRasterizerStates::NoCulling);
+			//wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_GBUFFER_SLOT);
+			//wnd.Gfx().SetBlendState(eBlendStates::Additive);
 
-			dustParticle.Draw(wnd.Gfx());
+			//smokeParticles.Draw(wnd.Gfx());
 
-			wnd.Gfx().SetBlendState(eBlendStates::Disabled);
-			//wnd.Gfx().SetDepthStencilState(eDepthStencilStates::Normal);
-			wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
+			//wnd.Gfx().SetBlendState(eBlendStates::Disabled);
 		}
 		// Sprite pass -- END
+
+		// Clear resources
+		{
+			wnd.Gfx().gBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_GBUFFER_SLOT);
+
+			ID3D11ShaderResourceView* const nullSRV[1] = {nullptr};
+			wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTRUE_SLOT_INDIRECT_LIGHT_DIRECTIONAL, 1u, nullSRV);
+			wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, nullSRV);
+		}
 
 		// Post processing pass -- BEGIN
 		wnd.Gfx().HandleBloomScaling(postProcessing);

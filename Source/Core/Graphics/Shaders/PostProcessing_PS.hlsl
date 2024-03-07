@@ -1,4 +1,4 @@
-#include "common.hlsli"
+#include "deferred_common.hlsli"
 #include "PostprocessTonemap.hlsli"
 
 struct PixelInput
@@ -21,14 +21,14 @@ cbuffer Parameters : register(b1)
 
 float4 main(const PixelInput aInput) : SV_TARGET
 {
-    const float4 colour = fullscreenTexture.Sample(splr, aInput.texCoord).rgba;
+    const float4 colour = fullscreenTexture.Sample(defaultSampler, aInput.texCoord).rgba;
 
 	if (colour.a < 0.1f)
     {
         discard;
     }
 
-	const float4 bloom = bloomSampleTexture.Sample(splr, aInput.texCoord).rgba;
+	const float4 bloom = bloomSampleTexture.Sample(defaultSampler, aInput.texCoord).rgba;
 
     float3 newColour = colour + bloom;
 

@@ -1,5 +1,5 @@
 #include "VFX_Commons.hlsli"
-#include "../common.hlsli"
+#include "../deferred_common.hlsli"
 
 
 VFXOutput main(VFXVertexToPixelInput aInput)

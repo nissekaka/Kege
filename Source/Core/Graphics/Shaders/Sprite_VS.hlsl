@@ -1,15 +1,16 @@
-//cbuffer Transform : register(b0)
-//{
-//    matrix objectToWorld;
-//    matrix objectToClip;
-//}
-
-#include "common.hlsli"
+cbuffer Transform : register(b0)
+{
+    matrix objectToWorld; // Uneccessary
+    matrix objectToClip;
+}
 
 struct VertexInput
 {
     float4 position : SV_POSITION;
     float2 texCoord : TEXCOORD;
+    float3 normal : NORMAL;
+    float3 tan : TANGENT;
+    float3 bitan : BITANGENT;
     matrix instanceTransform : INSTANCE_TRANSFORM;
 };
 
@@ -18,19 +19,29 @@ struct PixelInput
     float3 worldPos : POSITION;
     float4 position : SV_POSITION;
     float2 texCoord : TEXCOORD;
+    float3 normal : NORMAL;
+    float3 worldNormal : WORLDNORMAL;
+    float3 tangent : TANGENT;
+    float3 bitan : BITANGENT;
 };
 
 PixelInput main(const VertexInput aInput)
 {
     PixelInput output;
 
-    const float3x3 objectToWorldRotation = aInput.instanceTransform;
-    const float4 position = aInput.position;
-    output.worldPos = mul(aInput.instanceTransform, position).xyz;
-    const matrix objectToClip = mul(worldToClipMatrix, aInput.instanceTransform);
-    output.position = mul(objectToClip, position);
-    output.texCoord = aInput.texCoord;
+    const matrix instObjectToWorld = aInput.instanceTransform;
+    const matrix instObjectToClip = mul(objectToClip, instObjectToWorld);
 
+    const float3x3 objectToWorldRotation = objectToWorld;
+    const float4 position = aInput.position;
+    output.worldPos = mul(instObjectToWorld, position).xyz;
+    output.position = mul(instObjectToClip, position);
+    output.texCoord = aInput.texCoord;
+    output.normal = mul(objectToWorldRotation, aInput.normal);
+    output.tangent = mul(objectToWorldRotation, aInput.tan);
+    output.bitan = mul(objectToWorldRotation, aInput.bitan);
+
+    output.worldNormal = aInput.normal;
     
     return output;
 }

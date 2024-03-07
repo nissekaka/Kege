@@ -7,7 +7,7 @@
 #include <vector>
 #include "GBuffer.h"
 #include "RSMBuffer.h"
-#include "Shaders/ShaderFactory.h"
+#include "ShaderFactory.h"
 
 #define KAKA_BG_COLOUR {0.1f, 0.2f, 0.3f, 1.0f}
 

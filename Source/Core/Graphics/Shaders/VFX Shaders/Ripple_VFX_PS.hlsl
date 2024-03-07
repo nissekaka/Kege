@@ -1,5 +1,5 @@
 #include "VFX_Commons.hlsli"
-#include "../common.hlsli"
+#include "../deferred_common.hlsli"
 
 Texture2D worldPosTex : register(t12);
 
@@ -8,7 +8,7 @@ VFXOutput main(VFXVertexToPixelInput aInput)
     VFXOutput output;
 
     const float2 uv = aInput.position.xy / clientResolution.xy;
-    const float3 worldPosition = worldPosTex.Sample(splr, uv).rgb;
+    const float3 worldPosition = worldPosTex.Sample(defaultSampler, uv).rgb;
 
     float dist = length(worldPosition - aInput.worldPos);
 

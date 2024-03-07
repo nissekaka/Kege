@@ -1,6 +1,6 @@
+#include "deferred_common.hlsli"
 #include "Light.hlsli"
 #include "PBRFunctions.hlsli"
-#include "Shadows.hlsli"
 
 static const uint MAX_LIGHTS = 50u; // Needs to be the same in PointLight
 
@@ -61,9 +61,9 @@ float4 main(PixelInput aInput) : SV_TARGET
     float waveOffset = sin(currentTime * WaveFrequency) * WaveAmplitude;
     const float2 texCoord = aInput.texCoord + float2(waveOffset, waveOffset);
 
-    float3 colour = colourTex.Sample(splr, texCoord).rgb;
-    float3 normal = normalTex.Sample(splr, texCoord).xyz;
-    const float3 material = materialTex.Sample(splr, texCoord).rgb;
+    float3 colour = colourTex.Sample(defaultSampler, texCoord).rgb;
+    float3 normal = normalTex.Sample(defaultSampler, texCoord).xyz;
+    const float3 material = materialTex.Sample(defaultSampler, texCoord).rgb;
 
     float3 ambientLight = { 0.0f, 0.0f, 0.0f };
     float3 directionalLight = { 0.0f, 0.0f, 0.0f };
@@ -121,7 +121,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     const float blendFactor = (dotProduct + 1.0) / 2.0f;
 
     // Ambient light
-    ambientLight = EvaluateAmbianceDynamicSky(splr, dayTex, nightTex, blendFactor,
+    ambientLight = EvaluateAmbianceDynamicSky(defaultSampler, daySkyTex, nightSkyTex, blendFactor,
     normal, aInput.normal.xyz, toEye, roughness, ambientOcclusion, colour, specular);
 
 	// Directional light
@@ -166,7 +166,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     // Dividing by dist to make waves smaller at distance
     // Scaling by Amplitude parameter
     const float2 offset = A * (maxValue + heightDerivative) / dist;
-    const float3 reflection = reflectTex.Sample(splr, aInput.position.xy / clientResolution + offset).rgb;
+    const float3 reflection = reflectTex.Sample(defaultSampler, aInput.position.xy / clientResolution + offset).rgb;
 
     const float3 result = lerp(reflection, finalColour /*shadowFactor*/, 0.35f);
 
