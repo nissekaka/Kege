@@ -243,7 +243,7 @@ namespace Kaka
 		//ImGui::End();
 	}
 
-	void Sprite::Update(const Graphics& aGfx, float aDeltaTime)
+	void Sprite::Update(const Graphics& aGfx, const float aDeltaTime)
 	{
 		const unsigned int instanceCount = transforms.size();
 
@@ -257,24 +257,32 @@ namespace Kaka
 		cameraUp = DirectX::XMVector3Normalize(cameraUp);
 
 
-		for (unsigned int i = 0; i < instanceCount; ++i)
+		for (; updateIndex < updateCounter; ++updateIndex)
 		{
-			travelAngles[i] -= travelSpeeds[i] * aDeltaTime;
+			travelAngles[updateIndex] -= travelSpeeds[updateIndex] * aDeltaTime;
 
-			transforms[i].r[3].m128_f32[0] = travelRadiuses[i] * std::cos(travelAngles[i]) + startPositions[i].x;
-			transforms[i].r[3].m128_f32[2] = travelRadiuses[i] * std::sin(travelAngles[i]) + startPositions[i].z;
+			transforms[updateIndex].r[3].m128_f32[0] = travelRadiuses[updateIndex] * std::cos(travelAngles[updateIndex]) + startPositions[updateIndex].x;
+			transforms[updateIndex].r[3].m128_f32[2] = travelRadiuses[updateIndex] * std::sin(travelAngles[updateIndex]) + startPositions[updateIndex].z;
 
-			if (travelAngles[i] > 2 * PI)
+			if (travelAngles[updateIndex] > 2 * PI)
 			{
-				travelAngles[i] -= 2 * PI;
+				travelAngles[updateIndex] -= 2 * PI;
 			}
 
 			// Set the rotation to face the camera
-			transforms[i].r[0] = cameraRight;
-			transforms[i].r[1] = cameraForward;
-			transforms[i].r[2] = cameraUp;
+			transforms[updateIndex].r[0] = cameraRight;
+			transforms[updateIndex].r[1] = cameraForward;
+			transforms[updateIndex].r[2] = cameraUp;
 
-			transforms[i] = transforms[i];
+			transforms[updateIndex] = transforms[updateIndex];
+		}
+
+		updateCounter += updateIncrease;
+
+		if (updateCounter >= instanceCount)
+		{
+			updateCounter = 0;
+			updateIndex = 0;
 		}
 	}
 }

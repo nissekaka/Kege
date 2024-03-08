@@ -67,5 +67,9 @@ namespace Kaka
 		std::vector<float> travelAngles = {};
 
 		Texture* texture = nullptr;
+
+		unsigned int updateCounter = 0;
+		unsigned int updateIndex = 0;
+		unsigned int updateIncrease = 4000;
 	};
 }
