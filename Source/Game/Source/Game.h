@@ -53,7 +53,7 @@ namespace Kaka
 		float flashlightPositionInterpSpeed = 15.0f;
 		float flashlightDirectionInterpSpeed = 5.0f;
 		float flashlightBleedAngleMultiplier = 1.9f;
-		float flashlightBleedIntensityFactor = 0.23f;
+		float flashlightBleedIntensityFactor = 0.05f;
 		float flashlightIntensityInterpSpeed = 20.0f;
 		float flashlightIntensity;
 		bool flashlightOn = true;

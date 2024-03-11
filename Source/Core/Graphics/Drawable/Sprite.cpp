@@ -9,11 +9,14 @@
 #include "Core/Utility/KakaMath.h"
 #include <External/include/imgui/imgui.h>
 
+
 namespace Kaka
 {
 	void Sprite::Init(const Graphics& aGfx, const float aSize, const unsigned int aNumberOfSprites, bool aIsVfx, const std::string& aFile)
 	{
 		constexpr float uvFactor = 1.0f;
+
+		updateIncrease = aNumberOfSprites / 2;
 
 		SpriteVertex v0 = {};
 		v0.position = DirectX::XMFLOAT4(-aSize, 0.0f, aSize, 1.0f);
@@ -74,8 +77,9 @@ namespace Kaka
 		// Create instance buffer
 		D3D11_BUFFER_DESC instanceBufferDesc = {};
 
-		instanceBufferDesc.ByteWidth = sizeof(DirectX::XMMATRIX) * 24576;
-		// 8192 + 8192 + 8192 = 24576
+		instanceBufferDesc.ByteWidth = sizeof(DirectX::XMMATRIX) * 262144;
+		// 128 * 1024 = 131072
+		// 131072 * 2 = 262144
 		instanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 		instanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		instanceBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -121,9 +125,9 @@ namespace Kaka
 		{
 			// Set random position between -20, 0, -20 and 20, 0, 20
 			std::uniform_real_distribution<float> xDist(-150.0f, 130.0f);
-			std::uniform_real_distribution<float> yDist(0.0f, 150.0f);
+			std::uniform_real_distribution<float> yDist(0.0f, 40.0f);
 			std::uniform_real_distribution<float> zDist(-70.0f, 70.0f);
-			std::uniform_real_distribution<float> distSize(0.5f, 2.0f);
+			std::uniform_real_distribution<float> distSize(0.5f, 1.25f);
 			float scale = distSize(gen);
 			transforms[i] = DirectX::XMMatrixScaling(scale, scale, scale);
 
@@ -136,6 +140,8 @@ namespace Kaka
 			travelSpeeds[i] = speedDist(gen);
 			travelAngles[i] = PI;
 		}
+
+		updateCounter += updateIncrease;
 	}
 
 	void Sprite::Draw(Graphics& aGfx)
@@ -243,7 +249,17 @@ namespace Kaka
 		//ImGui::End();
 	}
 
-	void Sprite::Update(const Graphics& aGfx, const float aDeltaTime)
+	bool Sprite::IsInSpotlightCone(DirectX::XMFLOAT3 aWorldPosition, const SpotlightData& aSpotlightData)
+	{
+		const DirectX::XMFLOAT3 toLight = DirectX::XMFLOAT3(aSpotlightData.position.x - aWorldPosition.x, aSpotlightData.position.y - aWorldPosition.y, aSpotlightData.position.z - aWorldPosition.z);
+		const float distToLight = DirectX::XMVector3Length(DirectX::XMLoadFloat3(&toLight)).m128_f32[0];
+		const DirectX::XMFLOAT3 lightDir = aSpotlightData.direction;
+		const float angle = DirectX::XMVector3Dot(DirectX::XMLoadFloat3(&toLight), DirectX::XMLoadFloat3(&lightDir)).m128_f32[0] / distToLight;
+
+		return (angle > cos(aSpotlightData.innerAngle + (aSpotlightData.outerAngle - aSpotlightData.innerAngle) / 2.0f)) && (distToLight < aSpotlightData.range);
+	}
+
+	void Sprite::Update(const Graphics& aGfx, const float aDeltaTime, const SpotlightData& aSpotlightData)
 	{
 		const unsigned int instanceCount = transforms.size();
 
@@ -257,8 +273,13 @@ namespace Kaka
 		cameraUp = DirectX::XMVector3Normalize(cameraUp);
 
 
-		for (; updateIndex < updateCounter; ++updateIndex)
+		for (updateIndex; updateIndex < updateCounter; ++updateIndex)
 		{
+			//if (!IsInSpotlightCone(GetPosition(updateIndex), aSpotlightData))
+			//{
+			//	continue;
+			//}
+
 			travelAngles[updateIndex] -= travelSpeeds[updateIndex] * aDeltaTime;
 
 			transforms[updateIndex].r[3].m128_f32[0] = travelRadiuses[updateIndex] * std::cos(travelAngles[updateIndex]) + startPositions[updateIndex].x;
@@ -273,13 +294,11 @@ namespace Kaka
 			transforms[updateIndex].r[0] = cameraRight;
 			transforms[updateIndex].r[1] = cameraForward;
 			transforms[updateIndex].r[2] = cameraUp;
-
-			transforms[updateIndex] = transforms[updateIndex];
 		}
 
 		updateCounter += updateIncrease;
 
-		if (updateCounter >= instanceCount)
+		if (updateCounter > instanceCount)
 		{
 			updateCounter = 0;
 			updateIndex = 0;

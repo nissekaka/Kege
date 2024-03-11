@@ -169,6 +169,25 @@ namespace Kaka
 		directionalLightData.spotShadowCamera = aCamera;
 	}
 
+	void DeferredLights::BindFlashlightBuffer(const Graphics& aGfx)
+	{
+		DeferredConstantBuffer lightBuffer;
+
+		lightBuffer.positionAndRange[0] = spotlightData[0].position.x;
+		lightBuffer.positionAndRange[1] = spotlightData[0].position.y;
+		lightBuffer.positionAndRange[2] = spotlightData[0].position.z;
+		lightBuffer.positionAndRange[3] = spotlightData[0].range;
+		lightBuffer.isDirectional = FALSE;
+
+		VertexConstantBuffer<DeferredConstantBuffer> vertexLightBuffer{aGfx, VS_CBUFFER_SLOT_LIGHT};
+		vertexLightBuffer.Update(aGfx, lightBuffer);
+		vertexLightBuffer.Bind(aGfx);
+
+		PixelConstantBuffer<SpotlightData> spotLightBuffer{aGfx, PS_CBUFFER_SLOT_SPOT_LIGHT};
+		spotLightBuffer.Update(aGfx, spotlightData[0]);
+		spotLightBuffer.Bind(aGfx);
+	}
+
 	PointlightData& DeferredLights::AddPointLight()
 	{
 		pointlightData.emplace_back();

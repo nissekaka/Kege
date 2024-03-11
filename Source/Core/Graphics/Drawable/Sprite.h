@@ -2,6 +2,7 @@
 #include "Drawable.h"
 #include "Core/Graphics/Graphics.h"
 #include "Core/Graphics/Bindable/BindableCommon.h"
+#include "Core/Graphics/Lighting/Lighting.h"
 
 namespace Kaka
 {
@@ -21,7 +22,8 @@ namespace Kaka
 
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
-		void Update(const Graphics& aGfx, float aDeltaTime);
+		bool IsInSpotlightCone(DirectX::XMFLOAT3 aWorldPosition, const SpotlightData& aSpotlightData);
+		void Update(const Graphics& aGfx, const float aDeltaTime, const SpotlightData& aSpotlightData);
 
 	private:
 		//Sampler sampler = {};
@@ -70,6 +72,6 @@ namespace Kaka
 
 		unsigned int updateCounter = 0;
 		unsigned int updateIndex = 0;
-		unsigned int updateIncrease = 4000;
+		unsigned int updateIncrease = 0;
 	};
 }

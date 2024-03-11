@@ -72,7 +72,7 @@ namespace Kaka
 
 		flashlightTexture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\Flashlight_cookie.png", 5u);
 
-		dustParticles.Init(wnd.Gfx(), 0.025f, 24000u, false, "Assets\\Textures\\particle.png");
+		dustParticles.Init(wnd.Gfx(), 0.0175f, 250000u, true, "Assets\\Textures\\particle.png");
 		//smokeParticles.Init(wnd.Gfx(), 25.0f, 1000u, true, "Assets\\Textures\\SpriteCloud.png");
 
 		// Flashlight setup
@@ -80,11 +80,11 @@ namespace Kaka
 			flashlightInner = &deferredLights.AddSpotLight();
 			//flashlightInner->position = camera.GetPosition();
 			//DirectX::XMStoreFloat3(&flashlightInner->direction, camera.GetForwardVector());
-			flashlightInner->intensity = 2000.0f;
+			flashlightInner->intensity = 5000.0f;
 			flashlightIntensity = flashlightInner->intensity;
 			flashlightInner->range = 1000.0f;
 			flashlightInner->innerAngle = 0.13f; // Radians
-			flashlightInner->outerAngle = 0.17f; // Radians
+			flashlightInner->outerAngle = 0.32f; // Radians
 			flashlightInner->colour = {1.0f, 0.9f, 0.6f};
 			flashlightInner->useTexture = TRUE;
 
@@ -258,7 +258,7 @@ namespace Kaka
 		skyboxAngle.y += skyboxSpeed * aDeltaTime;
 		skybox.Rotate(skyboxAngle);
 
-		dustParticles.Update(wnd.Gfx(), aDeltaTime);
+		dustParticles.Update(wnd.Gfx(), aDeltaTime, deferredLights.GetSpotLightData(0));
 		//smokeParticles.Update(wnd.Gfx(), aDeltaTime);
 
 		wnd.Gfx().SetDepthStencilState(eDepthStencilStates::Normal);
@@ -334,9 +334,9 @@ namespace Kaka
 					model.Draw(wnd.Gfx(), aDeltaTime);
 				}
 
-				wnd.Gfx().SetRasterizerState(eRasterizerStates::NoCulling);
-				dustParticles.Draw(wnd.Gfx());
-				wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
+				//wnd.Gfx().SetRasterizerState(eRasterizerStates::NoCulling);
+				//dustParticles.Draw(wnd.Gfx());
+				//wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
 			}
 
 			wnd.Gfx().ResetShadows(camera);
@@ -355,7 +355,7 @@ namespace Kaka
 			}
 
 			//wnd.Gfx().SetRasterizerState(eRasterizerStates::NoCulling);
-			dustParticles.Draw(wnd.Gfx());
+			//dustParticles.Draw(wnd.Gfx());
 			//wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
 
 			wnd.Gfx().SetRenderTarget(eRenderTargetType::None, nullptr);
@@ -480,12 +480,14 @@ namespace Kaka
 
 		// Sprite pass -- BEGIN
 		{
-			//wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_GBUFFER_SLOT);
-			//wnd.Gfx().SetBlendState(eBlendStates::Additive);
+			wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_GBUFFER_SLOT);
+			wnd.Gfx().SetBlendState(eBlendStates::Additive);
 
+			deferredLights.BindFlashlightBuffer(wnd.Gfx());
+			dustParticles.Draw(wnd.Gfx());
 			//smokeParticles.Draw(wnd.Gfx());
 
-			//wnd.Gfx().SetBlendState(eBlendStates::Disabled);
+			wnd.Gfx().SetBlendState(eBlendStates::Disabled);
 		}
 		// Sprite pass -- END
 

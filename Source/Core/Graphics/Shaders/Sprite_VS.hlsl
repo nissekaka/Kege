@@ -1,3 +1,5 @@
+#include "deferred_common.hlsli"
+
 cbuffer Transform : register(b0)
 {
     matrix objectToWorld; // Uneccessary
@@ -32,7 +34,7 @@ PixelInput main(const VertexInput aInput)
     const matrix instObjectToWorld = aInput.instanceTransform;
     const matrix instObjectToClip = mul(objectToClip, instObjectToWorld);
 
-    const float3x3 objectToWorldRotation = objectToWorld;
+    const float3x3 objectToWorldRotation = view;
     const float4 position = aInput.position;
     output.worldPos = mul(instObjectToWorld, position).xyz;
     output.position = mul(instObjectToClip, position);

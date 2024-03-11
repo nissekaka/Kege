@@ -27,6 +27,7 @@ namespace Kaka
 		void ShowControlWindow();
 		void SetShadowCamera(const DirectX::XMMATRIX& aCamera);
 		void SetSpotLightShadowCamera(const DirectX::XMMATRIX& aCamera, const int aIndex);
+		void BindFlashlightBuffer(const Graphics& aGfx);
 		PointlightData& AddPointLight();
 		SpotlightData& AddSpotLight();
 
