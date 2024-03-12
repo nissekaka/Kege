@@ -14,6 +14,7 @@ struct VertexInput
     float3 tan : TANGENT;
     float3 bitan : BITANGENT;
     matrix instanceTransform : INSTANCE_TRANSFORM;
+    float4 colour : INSTANCE_COLOUR;
 };
 
 struct PixelInput
@@ -25,6 +26,7 @@ struct PixelInput
     float3 worldNormal : WORLDNORMAL;
     float3 tangent : TANGENT;
     float3 bitan : BITANGENT;
+    float4 colour : INSTANCE_COLOUR;
 };
 
 PixelInput main(const VertexInput aInput)
@@ -42,7 +44,7 @@ PixelInput main(const VertexInput aInput)
     output.normal = mul(objectToWorldRotation, aInput.normal);
     output.tangent = mul(objectToWorldRotation, aInput.tan);
     output.bitan = mul(objectToWorldRotation, aInput.bitan);
-
+    output.colour = aInput.colour;
     output.worldNormal = aInput.normal;
     
     return output;

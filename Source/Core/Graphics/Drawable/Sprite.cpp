@@ -16,7 +16,7 @@ namespace Kaka
 	{
 		constexpr float uvFactor = 1.0f;
 
-		updateIncrease = aNumberOfSprites / 2;
+		updateIncrease = aNumberOfSprites / 1;
 
 		SpriteVertex v0 = {};
 		v0.position = DirectX::XMFLOAT4(-aSize, 0.0f, aSize, 1.0f);
@@ -77,7 +77,7 @@ namespace Kaka
 		// Create instance buffer
 		D3D11_BUFFER_DESC instanceBufferDesc = {};
 
-		instanceBufferDesc.ByteWidth = sizeof(DirectX::XMMATRIX) * 262144;
+		instanceBufferDesc.ByteWidth = sizeof(SpriteRenderBuffer) * 262144;
 		// 128 * 1024 = 131072
 		// 131072 * 2 = 262144
 		instanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -113,32 +113,39 @@ namespace Kaka
 
 		inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
 
-		transforms.resize(aNumberOfSprites);
+		instanceData.resize(aNumberOfSprites);
 		travelAngles.resize(aNumberOfSprites);
 		travelSpeeds.resize(aNumberOfSprites);
 		travelRadiuses.resize(aNumberOfSprites);
+		fadeSpeeds.resize(aNumberOfSprites);
+		alphas.resize(aNumberOfSprites);
 
 		std::random_device rd;
 		std::mt19937 gen(rd());
 
-		for (unsigned int i = 0; i < transforms.size(); ++i)
+		for (unsigned int i = 0; i < instanceData.size(); ++i)
 		{
 			// Set random position between -20, 0, -20 and 20, 0, 20
 			std::uniform_real_distribution<float> xDist(-150.0f, 130.0f);
 			std::uniform_real_distribution<float> yDist(0.0f, 40.0f);
 			std::uniform_real_distribution<float> zDist(-70.0f, 70.0f);
 			std::uniform_real_distribution<float> distSize(0.5f, 1.25f);
+			std::uniform_real_distribution<float> alphaDist(0.1f, 0.6f);
+			std::uniform_real_distribution<float> fadeDist(5.0f, 10.0f);
 			float scale = distSize(gen);
-			transforms[i] = DirectX::XMMatrixScaling(scale, scale, scale);
+			instanceData[i].instanceTransform = DirectX::XMMatrixScaling(scale, scale, scale);
+			alphas[i] = alphaDist(gen);
+			instanceData[i].colour = {1.0f, 1.0f, 1.0f, alphas[i]};
 
 			SetPosition({xDist(gen), yDist(gen), zDist(gen)}, i);
 			startPositions.push_back(GetPosition(i));
 
 			std::uniform_real_distribution<float> radiusDist(0.5f, 10.0f);
-			std::uniform_real_distribution<float> speedDist(0.1f, 0.5f);
+			std::uniform_real_distribution<float> speedDist(0.05f, 0.3f);
 			travelRadiuses[i] = radiusDist(gen);
 			travelSpeeds[i] = speedDist(gen);
 			travelAngles[i] = PI;
+			fadeSpeeds[i] = fadeDist(gen);
 		}
 
 		updateCounter += updateIncrease;
@@ -153,7 +160,7 @@ namespace Kaka
 		ID3D11Buffer* bufferPointers[2];
 
 		strides[0] = sizeof(SpriteVertex);
-		strides[1] = sizeof(DirectX::XMMATRIX);
+		strides[1] = sizeof(SpriteRenderBuffer);
 
 		offsets[0] = 0;
 		offsets[1] = 0;
@@ -166,7 +173,7 @@ namespace Kaka
 		indexBuffer.Bind(aGfx);
 		inputLayout.Bind(aGfx);
 
-		const unsigned int instanceCount = transforms.size();
+		const unsigned int instanceCount = instanceData.size();
 
 		TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
 		transformConstantBuffer.Bind(aGfx);
@@ -175,8 +182,8 @@ namespace Kaka
 		aGfx.pContext->Map(instanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 		memcpy(
 			mappedResource.pData,
-			transforms.data(),
-			sizeof(DirectX::XMMATRIX) * instanceCount
+			instanceData.data(),
+			sizeof(SpriteRenderBuffer) * instanceCount
 		);
 		aGfx.pContext->Unmap(instanceBuffer, 0);
 
@@ -200,13 +207,13 @@ namespace Kaka
 	void Sprite::SetPosition(const DirectX::XMFLOAT3 aPosition, const unsigned int aIndex)
 	{
 		// Set position directly in transform
-		transforms[aIndex].r[3] = DirectX::XMVectorSet(aPosition.x, aPosition.y, aPosition.z, 1.0f);
+		instanceData[aIndex].instanceTransform.r[3] = DirectX::XMVectorSet(aPosition.x, aPosition.y, aPosition.z, 1.0f);
 	}
 
 	void Sprite::SetScale(const float aScale, const unsigned int aIndex)
 	{
 		DirectX::XMFLOAT3 position = GetPosition(aIndex);
-		transforms[aIndex] *= DirectX::XMMatrixScaling(aScale, aScale, aScale);
+		instanceData[aIndex].instanceTransform *= DirectX::XMMatrixScaling(aScale, aScale, aScale);
 		SetPosition(position, aIndex);
 	}
 
@@ -224,9 +231,9 @@ namespace Kaka
 	DirectX::XMFLOAT3 Sprite::GetPosition(unsigned int aIndex) const
 	{
 		DirectX::XMFLOAT3 position = {
-			transforms[aIndex].r[3].m128_f32[0],
-			transforms[aIndex].r[3].m128_f32[1],
-			transforms[aIndex].r[3].m128_f32[2]
+			instanceData[aIndex].instanceTransform.r[3].m128_f32[0],
+			instanceData[aIndex].instanceTransform.r[3].m128_f32[1],
+			instanceData[aIndex].instanceTransform.r[3].m128_f32[2]
 		};
 		return position;
 	}
@@ -259,9 +266,9 @@ namespace Kaka
 		return (angle > cos(aSpotlightData.innerAngle + (aSpotlightData.outerAngle - aSpotlightData.innerAngle) / 2.0f)) && (distToLight < aSpotlightData.range);
 	}
 
-	void Sprite::Update(const Graphics& aGfx, const float aDeltaTime, const SpotlightData& aSpotlightData)
+	void Sprite::Update(const Graphics& aGfx, const float aDeltaTime)
 	{
-		const unsigned int instanceCount = transforms.size();
+		const unsigned int instanceCount = instanceData.size();
 
 		// Rotate the sprite to face the camera
 		const DirectX::XMVECTOR cameraForward = aGfx.camera->GetForwardVector();
@@ -272,8 +279,9 @@ namespace Kaka
 		DirectX::XMVECTOR cameraUp = DirectX::XMVector3Cross(cameraForward, cameraRight);
 		cameraUp = DirectX::XMVector3Normalize(cameraUp);
 
+		elapsedTime += aDeltaTime;
 
-		for (updateIndex; updateIndex < updateCounter; ++updateIndex)
+		for (int updateIndex = 0; updateIndex < instanceCount; ++updateIndex)
 		{
 			//if (!IsInSpotlightCone(GetPosition(updateIndex), aSpotlightData))
 			//{
@@ -282,26 +290,28 @@ namespace Kaka
 
 			travelAngles[updateIndex] -= travelSpeeds[updateIndex] * aDeltaTime;
 
-			transforms[updateIndex].r[3].m128_f32[0] = travelRadiuses[updateIndex] * std::cos(travelAngles[updateIndex]) + startPositions[updateIndex].x;
-			transforms[updateIndex].r[3].m128_f32[2] = travelRadiuses[updateIndex] * std::sin(travelAngles[updateIndex]) + startPositions[updateIndex].z;
+			instanceData[updateIndex].instanceTransform.r[3].m128_f32[0] = travelRadiuses[updateIndex] * std::cos(travelAngles[updateIndex]) + startPositions[updateIndex].x;
+			instanceData[updateIndex].instanceTransform.r[3].m128_f32[2] = travelRadiuses[updateIndex] * std::sin(travelAngles[updateIndex]) + startPositions[updateIndex].z;
 
 			if (travelAngles[updateIndex] > 2 * PI)
 			{
 				travelAngles[updateIndex] -= 2 * PI;
 			}
 
+			instanceData[updateIndex].colour.w = std::clamp(cos(elapsedTime + fadeSpeeds[updateIndex]) * 0.5f + 0.5f, 0.0f, alphas[updateIndex]);
+
 			// Set the rotation to face the camera
-			transforms[updateIndex].r[0] = cameraRight;
-			transforms[updateIndex].r[1] = cameraForward;
-			transforms[updateIndex].r[2] = cameraUp;
+			instanceData[updateIndex].instanceTransform.r[0] = cameraRight;
+			instanceData[updateIndex].instanceTransform.r[1] = cameraForward;
+			instanceData[updateIndex].instanceTransform.r[2] = cameraUp;
 		}
 
-		updateCounter += updateIncrease;
+		//updateCounter += updateIncrease;
 
-		if (updateCounter > instanceCount)
-		{
-			updateCounter = 0;
-			updateIndex = 0;
-		}
+		//if (updateCounter >= instanceCount)
+		//{
+		//	updateCounter = 0;
+		//	updateIndex = 0;
+		//}
 	}
 }

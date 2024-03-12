@@ -23,7 +23,7 @@ namespace Kaka
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
 		bool IsInSpotlightCone(DirectX::XMFLOAT3 aWorldPosition, const SpotlightData& aSpotlightData);
-		void Update(const Graphics& aGfx, const float aDeltaTime, const SpotlightData& aSpotlightData);
+		void Update(const Graphics& aGfx, const float aDeltaTime);
 
 	private:
 		//Sampler sampler = {};
@@ -45,6 +45,7 @@ namespace Kaka
 			{"INSTANCE_TRANSFORM", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1},
 			{"INSTANCE_TRANSFORM", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1},
 			{"INSTANCE_TRANSFORM", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1},
+			{"INSTANCE_COLOUR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1}
 		};
 
 		InputLayout inputLayout;
@@ -60,13 +61,21 @@ namespace Kaka
 		//ID3D11Buffer* spriteRenderBuffer = nullptr;
 
 	private:
-		struct SpriteRenderBuffer { };
+		struct SpriteRenderBuffer
+		{
+			DirectX::XMMATRIX instanceTransform;
+			DirectX::XMFLOAT4 colour;
+		};
 
-		std::vector<DirectX::XMMATRIX> transforms = {};
+		std::vector<SpriteRenderBuffer> instanceData = {};
 		std::vector<DirectX::XMFLOAT3> startPositions = {};
 		std::vector<float> travelRadiuses = {};
 		std::vector<float> travelSpeeds = {};
 		std::vector<float> travelAngles = {};
+		std::vector<float> fadeSpeeds = {};
+		std::vector<float> alphas = {};
+
+		float elapsedTime = 0.0f;
 
 		Texture* texture = nullptr;
 

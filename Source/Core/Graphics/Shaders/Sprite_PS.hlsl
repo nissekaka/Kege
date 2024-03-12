@@ -1,4 +1,5 @@
 #include "deferred_common.hlsli"
+#include "Shadows.hlsli"
 
 struct PixelInput
 {
@@ -9,9 +10,8 @@ struct PixelInput
     float3 worldNormal : WORLDNORMAL;
     float3 tangent : TANGENT;
     float3 bitan : BITANGENT;
+    float4 colour : INSTANCE_COLOUR;
 };
-
-//Texture2D colourTex : register(t11);
 
 cbuffer SpotlightData : register(b2)
 {
@@ -41,34 +41,24 @@ bool IsInSpotlightCone(float3 aWorldPosition)
 float4 main(PixelInput aInput) : SV_TARGET
 {
     float4 colour = gColourTex.Sample(defaultSampler, aInput.texCoord).rgba;
+    colour.rgb *= aInput.colour.rgb;
 
-    if (colour.a < 0.1f)
-    {
-        discard;
-    }
-
-    const float2 uv = aInput.position.xy / clientResolution.xy;
-    const float3 worldPosition = gWorldPositionTex.Sample(defaultSampler, uv).rgb;
-
-    const float distToWorld = length(worldPosition - aInput.worldPos);
     const float distToLight = length(lightPosition - aInput.worldPos);
-
-    // Smoothstep the alpha
-    const float worldAlpha = smoothstep(0.0, 15.0f, distToWorld);
-    float lightAlpha = 0.0f;
+    
+    float spotlightAlpha = 0.0f;
     if (IsInSpotlightCone(aInput.worldPos) && lightIntensity > 500.0f)
     {
-		if (distToLight < 100.0f)
+        if (distToLight < 100.0f)
         {
-            lightAlpha = smoothstep(100.0f, 0.0f, distToLight);
+            spotlightAlpha = smoothstep(100.0f, 0.0f, distToLight);
         }
         else
         {
-            lightAlpha = 0.0f;
+            spotlightAlpha = 0.0f;
         }
     }
 
-    colour.a = min(worldAlpha, lightAlpha) * 0.2f;
+    colour.a *= spotlightAlpha * aInput.colour.a;
 
-	return float4(colour);
+    return float4(colour);
 }

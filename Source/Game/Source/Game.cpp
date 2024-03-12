@@ -258,7 +258,7 @@ namespace Kaka
 		skyboxAngle.y += skyboxSpeed * aDeltaTime;
 		skybox.Rotate(skyboxAngle);
 
-		dustParticles.Update(wnd.Gfx(), aDeltaTime, deferredLights.GetSpotLightData(0));
+		dustParticles.Update(wnd.Gfx(), aDeltaTime);
 		//smokeParticles.Update(wnd.Gfx(), aDeltaTime);
 
 		wnd.Gfx().SetDepthStencilState(eDepthStencilStates::Normal);
@@ -725,33 +725,33 @@ namespace Kaka
 
 			switch (e->GetKeyCode())
 			{
-				case VK_ESCAPE:
-					if (wnd.CursorEnabled())
-					{
-						wnd.DisableCursor();
-						wnd.mouse.EnableRaw();
-					}
-					else
-					{
-						wnd.EnableCursor();
-						wnd.mouse.DisableRaw();
-					}
-					break;
-				case VK_F1:
-					showImGui = !showImGui;
-					break;
-				case VK_F2:
-					showStatsWindow = !showStatsWindow;
-					break;
-				case VK_F3:
-					drawLightDebug = !drawLightDebug;
-					break;
-				case 'F':
-					flashlightOn = !flashlightOn;
-					break;
-				case 'R':
-					drawRSM = !drawRSM;
-					break;
+			case VK_ESCAPE:
+				if (wnd.CursorEnabled())
+				{
+					wnd.DisableCursor();
+					wnd.mouse.EnableRaw();
+				}
+				else
+				{
+					wnd.EnableCursor();
+					wnd.mouse.DisableRaw();
+				}
+				break;
+			case VK_F1:
+				showImGui = !showImGui;
+				break;
+			case VK_F2:
+				showStatsWindow = !showStatsWindow;
+				break;
+			case VK_F3:
+				drawLightDebug = !drawLightDebug;
+				break;
+			case 'F':
+				flashlightOn = !flashlightOn;
+				break;
+			case 'R':
+				drawRSM = !drawRSM;
+				break;
 			}
 		}
 
