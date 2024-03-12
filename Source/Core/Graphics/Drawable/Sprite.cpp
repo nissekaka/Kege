@@ -77,9 +77,10 @@ namespace Kaka
 		// Create instance buffer
 		D3D11_BUFFER_DESC instanceBufferDesc = {};
 
-		instanceBufferDesc.ByteWidth = sizeof(SpriteRenderBuffer) * 262144;
+		instanceBufferDesc.ByteWidth = sizeof(SpriteRenderBuffer) * 524288;
 		// 128 * 1024 = 131072
 		// 131072 * 2 = 262144
+		// 262144 * 2 = 524288
 		instanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 		instanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		instanceBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -126,11 +127,11 @@ namespace Kaka
 		for (unsigned int i = 0; i < instanceData.size(); ++i)
 		{
 			// Set random position between -20, 0, -20 and 20, 0, 20
-			std::uniform_real_distribution<float> xDist(-150.0f, 130.0f);
-			std::uniform_real_distribution<float> yDist(0.0f, 40.0f);
+			std::uniform_real_distribution<float> xDist(-70.0f, 70.0f);
+			std::uniform_real_distribution<float> yDist(0.0f, 20.0f);
 			std::uniform_real_distribution<float> zDist(-70.0f, 70.0f);
 			std::uniform_real_distribution<float> distSize(0.5f, 1.25f);
-			std::uniform_real_distribution<float> alphaDist(0.1f, 0.6f);
+			std::uniform_real_distribution<float> alphaDist(0.05f, 0.4f);
 			std::uniform_real_distribution<float> fadeDist(5.0f, 10.0f);
 			float scale = distSize(gen);
 			instanceData[i].instanceTransform = DirectX::XMMatrixScaling(scale, scale, scale);
@@ -141,7 +142,7 @@ namespace Kaka
 			startPositions.push_back(GetPosition(i));
 
 			std::uniform_real_distribution<float> radiusDist(0.5f, 10.0f);
-			std::uniform_real_distribution<float> speedDist(0.05f, 0.3f);
+			std::uniform_real_distribution<float> speedDist(0.01f, 0.1f);
 			travelRadiuses[i] = radiusDist(gen);
 			travelSpeeds[i] = speedDist(gen);
 			travelAngles[i] = PI;
