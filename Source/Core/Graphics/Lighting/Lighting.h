@@ -26,7 +26,10 @@ struct DirectionalLightData
 	DirectX::XMFLOAT3 lightColour; // 28
 	float ambientLight; // 32
 	DirectX::XMMATRIX shadowCamera; // 96
-	DirectX::XMMATRIX spotShadowCamera; // 160
+	int numberOfVolumetricSteps; // 100
+	float volumetricScattering; // 104
+	float volumetricIntensity; // 108
+	float padding; // 112
 };
 
 struct PointlightData

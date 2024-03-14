@@ -33,10 +33,11 @@ PixelInput main(const VertexInput aInput)
 {
     PixelInput output;
 
+    
     const matrix instObjectToWorld = aInput.instanceTransform;
     const matrix instObjectToClip = mul(objectToClip, instObjectToWorld);
 
-    const float3x3 objectToWorldRotation = view;
+    const float3x3 objectToWorldRotation = objectToWorld;
     const float4 position = aInput.position;
     output.worldPos = mul(instObjectToWorld, position).xyz;
     output.position = mul(instObjectToClip, position);

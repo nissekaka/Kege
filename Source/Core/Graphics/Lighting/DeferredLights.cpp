@@ -18,6 +18,9 @@ namespace Kaka
 		directionalLightData.lightColour = {1.0f, 0.8f, 0.6f};
 		directionalLightData.lightIntensity = 1.0f;
 		directionalLightData.ambientLight = 0.15f;
+		directionalLightData.numberOfVolumetricSteps = 15;
+		directionalLightData.volumetricScattering = 0.12f;
+		directionalLightData.volumetricIntensity = 1.0f;
 
 		CreateQuad(aGfx);
 
@@ -154,6 +157,10 @@ namespace Kaka
 			ImGui::DragFloat("Intensity##LightIntensity", &directionalLightData.lightIntensity, 0.01f, 0.0f, 100.0f, "%.2f");
 			ImGui::Text("Ambient");
 			ImGui::DragFloat("Intensity##AmbientIntensity", &directionalLightData.ambientLight, 0.01f, 0.0f, 100.0f, "%.2f");
+			ImGui::Text("Volumetric Scattering");
+			ImGui::DragInt("Steps##VolumetricSteps", &directionalLightData.numberOfVolumetricSteps, 1.0f, 0, 15);
+			ImGui::DragFloat("Scattering##VolumetricScattering", &directionalLightData.volumetricScattering, 0.01f, 0.0f, 10.0f, "%.2f");
+			ImGui::DragFloat("Intensity##VolumetricIntensity", &directionalLightData.volumetricIntensity, 0.01f, 0.0f, 10.0f, "%.2f");
 		}
 		ImGui::End();
 	}
@@ -166,7 +173,6 @@ namespace Kaka
 	void DeferredLights::SetSpotLightShadowCamera(const DirectX::XMMATRIX& aCamera, const int aIndex)
 	{
 		spotlightData[aIndex].shadowCamera = aCamera;
-		directionalLightData.spotShadowCamera = aCamera;
 	}
 
 	void DeferredLights::BindFlashlightBuffer(const Graphics& aGfx)

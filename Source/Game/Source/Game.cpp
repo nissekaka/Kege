@@ -258,7 +258,7 @@ namespace Kaka
 		skyboxAngle.y += skyboxSpeed * aDeltaTime;
 		skybox.Rotate(skyboxAngle);
 
-		dustParticles.Update(wnd.Gfx(), aDeltaTime);
+		//dustParticles.Update(wnd.Gfx(), aDeltaTime);
 		//smokeParticles.Update(wnd.Gfx(), aDeltaTime);
 
 		wnd.Gfx().SetDepthStencilState(eDepthStencilStates::Normal);
@@ -480,14 +480,13 @@ namespace Kaka
 
 		// Sprite pass -- BEGIN
 		{
-			wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_GBUFFER_SLOT);
-			wnd.Gfx().SetBlendState(eBlendStates::Additive);
+			//wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_GBUFFER_SLOT);
+			//wnd.Gfx().SetBlendState(eBlendStates::Additive);
 
-			deferredLights.BindFlashlightBuffer(wnd.Gfx());
-			dustParticles.Draw(wnd.Gfx());
-			//smokeParticles.Draw(wnd.Gfx());
+			//deferredLights.BindFlashlightBuffer(wnd.Gfx());
+			//dustParticles.Draw(wnd.Gfx());
 
-			wnd.Gfx().SetBlendState(eBlendStates::Disabled);
+			//wnd.Gfx().SetBlendState(eBlendStates::Disabled);
 		}
 		// Sprite pass -- END
 
