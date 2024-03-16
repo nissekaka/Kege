@@ -13,17 +13,17 @@ struct PixelInput
     float4 colour : INSTANCE_COLOUR;
 };
 
-cbuffer DirectionalLight : register(b1)
-{
-    float3 directionalLightDirection;
-    float directionalLightIntensity;
-    float3 directionalLightColour;
-    float ambientLightIntensity;
-    float4x4 directionalLightCameraTransform;
-    int numberOfVolumetricSteps;
-    float volumetricScattering;
-    float volumetricIntensity;
-};
+//cbuffer DirectionalLight : register(b1)
+//{
+//    float3 directionalLightDirection;
+//    float directionalLightIntensity;
+//    float3 directionalLightColour;
+//    float ambientLightIntensity;
+//    float4x4 directionalLightCameraTransform;
+//    int numberOfVolumetricSteps;
+//    float volumetricScattering;
+//    float volumetricIntensity;
+//};
 
 cbuffer SpotlightData : register(b2)
 {
@@ -37,7 +37,13 @@ cbuffer SpotlightData : register(b2)
     bool lightIsActive;
     bool useTexture;
     float4x4 spotLightCameraTransform;
-    float padding;
+    bool useVolumetricLight;
+    uint numberOfVolumetricSteps;
+    float volumetricScattering;
+    float volumetricIntensity;
+    float volumetricAngle;
+    float volumetricRange;
+    float volumetricFade;
 };
 
 bool IsInSpotlightCone(float3 aWorldPosition)
@@ -47,12 +53,12 @@ bool IsInSpotlightCone(float3 aWorldPosition)
     const float3 lightDir = normalize(toLight);
     const float angle = dot(lightDir, lightDirection);
 
-    return (angle > cos(lightInnerAngle + (lightOuterAngle - lightInnerAngle) / 2.0f)) && (distToLight < lightRange);
+    return (angle > cos(volumetricAngle)) && (distToLight < volumetricRange);
 }
 
 float4 main(PixelInput aInput) : SV_TARGET
 {
-    const float2 uv = aInput.position.xy / clientResolution.xy;
+    //const float2 uv = aInput.position.xy / clientResolution.xy;
 
     float4 colour = gColourTex.Sample(defaultSampler, aInput.texCoord).rgba;
     colour.rgb *= aInput.colour.rgb;
@@ -96,7 +102,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     //    }
     //}
 
-    colour.a *= (spotlightAlpha + directionalLightAlpha) * aInput.colour.a;
+    colour.a *= (spotlightAlpha + directionalLightAlpha) * aInput.colour.a * 0.5f;
 
     return float4(colour);
 }

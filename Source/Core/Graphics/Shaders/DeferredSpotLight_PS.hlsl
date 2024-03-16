@@ -1,5 +1,6 @@
 #include "PBRFunctions.hlsli"
 #include "RSM.hlsli"
+#include "Volumetric.hlsli"
 
 cbuffer SpotlightData : register(b2)
 {
@@ -13,8 +14,24 @@ cbuffer SpotlightData : register(b2)
     bool lightIsActive;
     bool useTexture;
     float4x4 spotLightCameraTransform;
-    float padding;
+    bool useVolumetricLight;
+    uint numberOfVolumetricSteps;
+    float volumetricScattering;
+    float volumetricIntensity;
+    float volumetricAngle;
+    float volumetricRange;
+    float volumetricFade;
 };
+
+bool IsInSpotlightCone(float3 aWorldPosition, float aAngle)
+{
+    const float3 toLight = lightPosition - aWorldPosition;
+    const float distToLight = length(toLight);
+    const float3 lightDir = normalize(toLight);
+    const float angle = dot(lightDir, lightDirection);
+
+    return (angle > cos(aAngle)) && (distToLight < lightRange);
+}
 
 float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 {
@@ -49,6 +66,41 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
         lightFromTexture = flashlightTex.Sample(defaultSampler, lightUV).rgb;
     }
 
+    float3 volumetric = float3(0.0f, 0.0f, 0.0f);
+    if (useVolumetricLight && lightIntensity > 500.0f)
+    {
+        float3 V = worldPosition - cameraPosition.xyz;
+
+        const float stepSize = length(V) / (float) numberOfVolumetricSteps;
+        V = normalize(V);
+        const float3 step = V * stepSize;
+ 
+        float3 position = cameraPosition.xyz;
+        position += step * DITHER_PATTERN[int(uv.x * clientResolution.x) % 4][int(uv.y * clientResolution.y) % 4];
+        
+		[unroll(15)]
+        for (int i = 0; i < numberOfVolumetricSteps; i++)
+        {
+            if (IsInSpotlightCone(position, volumetricAngle))
+            {
+                const float distToCamera = length(position - cameraPosition.xyz);
+
+                float intensity = 0.0f;
+                if (distToCamera < volumetricRange)
+                {
+                    const float fadeStart = volumetricRange - volumetricFade;
+
+                    // Use smoothstep to interpolate between 1.0 and 0.0 based on the distance to the camera
+                    intensity = smoothstep(volumetricRange, fadeStart, distToCamera);
+                }
+                volumetric += CalcScattering(dot(V, -lightDirection), volumetricScattering) * lightColour * intensity;
+            }
+            position += step;
+        }
+        volumetric /= (float) numberOfVolumetricSteps;
+        volumetric *= volumetricIntensity;
+    }
+
     float3 spotlight = EvaluateSpotLight(colour, specular, normal, roughness, lightFromTexture * lightColour, lightIntensity,
         lightRange, lightPosition, -lightDirection, lightOuterAngle, lightInnerAngle, toEye,
         worldPosition.xyz);
@@ -58,5 +110,5 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
         spotlight *= shadowFactor;
     }
 
-    return float4(spotlight.rgb, 1.0f);
+    return float4(spotlight.rgb + volumetric, 1.0f);
 }

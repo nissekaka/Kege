@@ -87,6 +87,13 @@ namespace Kaka
 			flashlightInner->outerAngle = 0.32f; // Radians
 			flashlightInner->colour = {1.0f, 0.9f, 0.6f};
 			flashlightInner->useTexture = TRUE;
+			flashlightInner->useVolumetricLight = TRUE;
+			flashlightInner->numberOfVolumetricSteps = 15u;
+			flashlightInner->volumetricScattering = 0.12f;
+			flashlightInner->volumetricIntensity = 3.0f;
+			flashlightInner->volumetricAngle = DegToRad(5.0f);
+			flashlightInner->volumetricRange = 30.0f;
+			flashlightInner->volumetricFade = 25.0f;
 
 			wnd.Gfx().spotLightRSMBuffer[0].GetCamera().SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 120.0f, 0.5f, 5000.0f);
 
@@ -258,7 +265,7 @@ namespace Kaka
 		skyboxAngle.y += skyboxSpeed * aDeltaTime;
 		skybox.Rotate(skyboxAngle);
 
-		//dustParticles.Update(wnd.Gfx(), aDeltaTime);
+		dustParticles.Update(wnd.Gfx(), aDeltaTime);
 		//smokeParticles.Update(wnd.Gfx(), aDeltaTime);
 
 		wnd.Gfx().SetDepthStencilState(eDepthStencilStates::Normal);
@@ -291,10 +298,6 @@ namespace Kaka
 				{
 					model.Draw(wnd.Gfx(), aDeltaTime);
 				}
-
-				//wnd.Gfx().SetRasterizerState(eRasterizerStates::NoCulling);
-				//dustParticles.Draw(wnd.Gfx());
-				//wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
 			}
 		}
 		// ---------- SHADOW MAP PASS -- DIRECTIONAL LIGHT ---------- END
@@ -333,10 +336,6 @@ namespace Kaka
 				{
 					model.Draw(wnd.Gfx(), aDeltaTime);
 				}
-
-				//wnd.Gfx().SetRasterizerState(eRasterizerStates::NoCulling);
-				//dustParticles.Draw(wnd.Gfx());
-				//wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
 			}
 
 			wnd.Gfx().ResetShadows(camera);
@@ -353,10 +352,6 @@ namespace Kaka
 			{
 				model.Draw(wnd.Gfx(), aDeltaTime);
 			}
-
-			//wnd.Gfx().SetRasterizerState(eRasterizerStates::NoCulling);
-			//dustParticles.Draw(wnd.Gfx());
-			//wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
 
 			wnd.Gfx().SetRenderTarget(eRenderTargetType::None, nullptr);
 			wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_GBUFFER_SLOT);
@@ -480,13 +475,13 @@ namespace Kaka
 
 		// Sprite pass -- BEGIN
 		{
-			//wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_GBUFFER_SLOT);
-			//wnd.Gfx().SetBlendState(eBlendStates::Additive);
+			wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_GBUFFER_SLOT);
+			wnd.Gfx().SetBlendState(eBlendStates::Additive);
 
-			//deferredLights.BindFlashlightBuffer(wnd.Gfx());
-			//dustParticles.Draw(wnd.Gfx());
+			deferredLights.BindFlashlightBuffer(wnd.Gfx());
+			dustParticles.Draw(wnd.Gfx());
 
-			//wnd.Gfx().SetBlendState(eBlendStates::Disabled);
+			wnd.Gfx().SetBlendState(eBlendStates::Disabled);
 		}
 		// Sprite pass -- END
 
@@ -550,23 +545,18 @@ namespace Kaka
 				ImGui::DragFloat("Bleed intensity mul", &flashlightBleedIntensityFactor, 0.01f, 0.0f, 1.0f, "%.2f");
 				ImGui::SetNextItemWidth(150.0f);
 				ImGui::DragFloat("Bleed angle mul", &flashlightBleedAngleMultiplier, 0.1f, 0.0f, 10.0f, "%.2f");
-				//ImGui::NextColumn();
-				//ImGui::SetColumnWidth(0, 250.0f);
-				//ImGui::Text("Point light");
-				//ImGui::SetNextItemWidth(150.0f);
-				//ImGui::DragFloat("Offset factor", &pointlightPositionOffsetFactorl, 0.01f, 0.0f, 10.0f, "%.2f");
-				//ImGui::SetNextItemWidth(150.0f);
-				//ImGui::DragFloat("Position speed", &pointlightPositionInterpSpeed, 1.0f, 0.0f, 500.0f, "%.2f");
-				//ImGui::SetNextItemWidth(150.0f);
-				//ImGui::DragFloat("Colour speed", &pointlightColourInterpSpeed, 1.0f, 0.0f, 500.0f, "%.2f");
-				//ImGui::SetNextItemWidth(150.0f);
-				//ImGui::DragFloat("Intensity speed", &pointlightIntensityInterpSpeed, 1.0f, 0.0f, 500.0f, "%.2f");
-				//ImGui::SetNextItemWidth(150.0f);
-				//ImGui::DragFloat("Intensity##PointIntensity", &pointlightIntensity, 1.0f, 0.0f, 10000.0f, "%.2f");
-				//ImGui::SetNextItemWidth(150.0f);
-				//ImGui::DragFloat("Radius", &pointlightRadius, 1.0f, 0.0f, 1000.0f, "%.2f");
-				//ImGui::SetNextItemWidth(150.0f);
-				//ImGui::ColorPicker3("Colour##PointColour", &pointLightTest->colour.x);
+				ImGui::Text("Volumetric");
+				ImGui::Checkbox("Use volumetric", (bool*)&flashlightInner->useVolumetricLight);
+				ImGui::SetNextItemWidth(150.0f);
+				ImGui::DragInt("Steps##VolStep", (int*)&flashlightInner->numberOfVolumetricSteps, 1, 1, 15);
+				ImGui::SetNextItemWidth(150.0f);
+				ImGui::DragFloat("Scattering##VolScat", &flashlightInner->volumetricScattering, 0.01f, 0.0f, 1.0f, "%.2f");
+				ImGui::SetNextItemWidth(150.0f);
+				ImGui::DragFloat("Intensity##VolInt", &flashlightInner->volumetricIntensity, 0.01f, 0.0f, 10.0f, "%.2f");
+				ImGui::SetNextItemWidth(150.0f);
+				ImGui::SliderAngle("Angle##VolAng", &flashlightInner->volumetricAngle, 0, 90, "%.2f");
+				ImGui::DragFloat("Range##VolRan", &flashlightInner->volumetricRange, 0.1f, 0.0f, 100.0f, "%.2f");
+				ImGui::DragFloat("Fade##VolFad", &flashlightInner->volumetricFade, 0.1f, 0.0f, 100.0f, "%.2f");
 			}
 			ImGui::End();
 
