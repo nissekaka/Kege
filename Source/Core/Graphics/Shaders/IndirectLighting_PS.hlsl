@@ -27,7 +27,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
 
         rsm = IndirectLighting(sampleUV, normal, worldPosition,
                                         rsmWorldPositionTex, rsmFluxTex, rsmNormalTex,
-                                        usePoissonRSM, rMax, sampleCount, rsmIntensity); // * albedo;
+                                        usePoissonRSM, rMax, sampleCount, rsmIntensity, type); // * albedo;
     }
     else
     {
@@ -127,7 +127,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
 
                     rsm = IndirectLighting(sampleUV, normal, worldPosition,
                                         rsmWorldPositionTex, rsmFluxTex, rsmNormalTex,
-                                        usePoissonRSM, rMax, sampleCountLastPass, rsmIntensity);
+                                        usePoissonRSM, rMax, sampleCountLastPass, rsmIntensity, 2u);
                 }
                 if (mode == 1)
                 {
@@ -140,7 +140,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
 
                     rsm = IndirectLighting(sampleUV, normal, worldPosition,
                                         rsmWorldPositionTex, rsmFluxTex, rsmNormalTex,
-                                        usePoissonRSM, rMax, sampleCountLastPass, rsmIntensity) * albedo;
+                                        usePoissonRSM, rMax, sampleCountLastPass, rsmIntensity, 2u) * albedo;
                 }
                 if (mode == 2)
                 {

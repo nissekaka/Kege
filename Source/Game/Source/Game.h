@@ -161,12 +161,14 @@ namespace Kaka
 			UINT sampleCount = 100u;
 			UINT sampleCountLastPass = 100u;
 			UINT currentPass = 0;
+			UINT type = 0;
 			float rMax = 0.08f; // Maximum sampling radius.
 			float rsmIntensity = 10.0f;
 			float uvScale = 1;
 			float weightMax = 0.1f;
 			float divideN = 1.0f;
 			float divideP = 20.0f;
+			float padding[3] = {};
 			DirectX::XMFLOAT4 shadowColour = {0.8f, 0.9f, 1.0f, 0.01f};
 			DirectX::XMFLOAT4 ambianceColour = {0.8f, 0.9f, 1.0f, 0.3f};
 			DirectX::XMMATRIX lightCameraTransform;
@@ -201,6 +203,28 @@ namespace Kaka
 
 		//ID3D11ShaderResourceView* hammersleySRV = nullptr;
 
+		static constexpr unsigned int HAMMERSLEY_DIR_COUNT = 512u;
+		static constexpr unsigned int HAMMERSLEY_SPOT_COUNT = 128u;
+		static constexpr unsigned int HAMMERSLEY_FINAL_COUNT = 64u;
+
+		struct HammerDataDirectional
+		{
+			float x[HAMMERSLEY_DIR_COUNT] = {};
+			float y[HAMMERSLEY_DIR_COUNT] = {};
+		} hammerDataDirectional;
+
+		struct HammerDataSpot
+		{
+			float x[HAMMERSLEY_SPOT_COUNT] = {};
+			float y[HAMMERSLEY_SPOT_COUNT] = {};
+		} hammerDataSpot;
+
+		struct HammerDataFinal
+		{
+			float x[HAMMERSLEY_FINAL_COUNT] = {};
+			float y[HAMMERSLEY_FINAL_COUNT] = {};
+		} hammerDataFinal;
+
 		//struct HammersleyData
 		//{
 		//	DirectX::XMFLOAT2 pointsDir[2000] = {}; // Bytes = 16000
@@ -212,6 +236,8 @@ namespace Kaka
 		//	float padding = {};
 		//} hData;
 
-		//PixelConstantBuffer<HammersleyData> hammersleyBuffer{wnd.Gfx(), 0u};
+		PixelConstantBuffer<HammerDataDirectional> hammersleyDirectionalBuffer{wnd.Gfx(), 5u};
+		PixelConstantBuffer<HammerDataSpot> hammersleySpotBuffer{wnd.Gfx(), 6u};
+		PixelConstantBuffer<HammerDataFinal> hammersleyFinalBuffer{wnd.Gfx(), 7u};
 	};
 }

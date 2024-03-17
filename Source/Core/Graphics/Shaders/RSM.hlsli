@@ -1,6 +1,21 @@
 #include "deferred_common.hlsli"
 #include "Shadows.hlsli"
 
+cbuffer HammersleyDataDirectional : register(b5)
+{
+    float4 hSamplesDirectional[256];
+};
+
+cbuffer HammersleyDataSpot : register(b6)
+{
+    float4 hSamplesSpot[64];
+};
+
+cbuffer HammersleyDataFinal : register(b7)
+{
+    float4 hSamplesFinal[32];
+};
+
 cbuffer RSMData : register(b3)
 {
     bool usePoissonRSM;
@@ -9,12 +24,14 @@ cbuffer RSMData : register(b3)
     uint sampleCount;
     uint sampleCountLastPass;
     uint currentPass;
+    uint type;
     float rMax;
     float rsmIntensity;
     float uvScale;
     float weightMax;
     float divideN;
     float divideP;
+    float3 padding;
     float4 shadowColour;
     float4 ambianceColour;
     float4x4 lightCameraTransform;
@@ -39,7 +56,7 @@ float2 Hammersley(const uint aI, const uint aN)
     return float2(float(aI) / float(aN), float(BitfieldReverse(aI)) * 2.3283064365386963e-10);
 }
 
-float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Texture2D aWorldPosTex, Texture2D aFluxTex, Texture2D aNormalTex, const bool aUsePoisson, const float aRMax, const uint aSampleCount, const float aIntensity)
+float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Texture2D aWorldPosTex, Texture2D aFluxTex, Texture2D aNormalTex, const bool aUsePoisson, const float aRMax, const uint aSampleCount, const float aIntensity, const uint aType)
 {
     // The irradiance at a surface point x with normal n due to pixel light p is
     //
@@ -68,16 +85,30 @@ float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Text
     }
     else
     {
-        //const float t = currentTime;
-        //const float2x2 rot = float2x2(cos(t), -sin(t), sin(t), cos(t));
-
-        //[unroll(20)]
-        [loop]
+		[loop]
         for (uint i = 0; i < aSampleCount; i++)	// Sum contributions of sampling locations
         {
             //float2 offset = mul(Hammersley(i, sampleCount), rot);
             float2 offset = Hammersley(i, aSampleCount);
-            offset = clamp(offset, 0.001f, 0.999f); // Prevents the offset from creating black artifacts
+            //float2 offset;
+
+            //if (aType == 0)
+            //{
+            //    offset.x = hSamplesDirectional[i >> 2][i & 3];
+            //    offset.y = hSamplesDirectional[(i >> 2) + (aSampleCount >> 2)][i & 3];
+            //}
+            //else if (aType == 1)
+            //{
+            //    offset.x = hSamplesSpot[i >> 2][i & 3];;
+            //    offset.y = hSamplesSpot[(i >> 2) + (aSampleCount >> 2)][i & 3];
+            //}
+            //else
+            //{
+            //    offset.x = hSamplesFinal[i >> 2][i & 3];;;
+            //    offset.y = hSamplesFinal[(i >> 2) + (aSampleCount >> 2)][i & 3];
+            //}
+
+            //offset = clamp(offset, 0.001f, 0.999f); // Prevents the offset from creating black artifacts
             const float r = offset.x * aRMax;
             const float theta = offset.y * TWO_PI;
             const float2 coord = aUv + float2(r * cos(theta), r * sin(theta));

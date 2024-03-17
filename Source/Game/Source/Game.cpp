@@ -129,16 +129,18 @@ namespace Kaka
 			flashlightOuter->volumetricAlpha = 0.2f;
 		}
 
-		rsmBufferDirectional.sampleCount = 600u;
-		rsmBufferDirectional.sampleCountLastPass = 50u;
+		rsmBufferDirectional.type = 0u;
+		rsmBufferDirectional.sampleCount = HAMMERSLEY_DIR_COUNT;
+		rsmBufferDirectional.sampleCountLastPass = HAMMERSLEY_FINAL_COUNT;
 		rsmBufferDirectional.rMax = 0.11f;
 		rsmBufferDirectional.rsmIntensity = 15000.0f;
 		rsmBufferDirectional.uvScale = wnd.Gfx().rsmDownscaleFactor;
 		rsmBufferDirectional.isDirectionalLight = TRUE;
 		rsmBufferDirectional.weightMax = 3.7f;
 
-		rsmBufferSpot.sampleCount = 250u;
-		rsmBufferSpot.sampleCountLastPass = 50u;
+		rsmBufferSpot.type = 1u;
+		rsmBufferSpot.sampleCount = HAMMERSLEY_SPOT_COUNT;
+		rsmBufferSpot.sampleCountLastPass = HAMMERSLEY_FINAL_COUNT;
 		rsmBufferSpot.rMax = 0.165f;
 		rsmBufferSpot.rsmIntensity = 100.0f;
 		rsmBufferSpot.uvScale = wnd.Gfx().rsmDownscaleFactor;
@@ -201,6 +203,31 @@ namespace Kaka
 		//{
 		//	hData.pointsFinal[i] = (Hammersley(i, hData.finalCount));
 		//}
+
+		for (int i = 0; i < HAMMERSLEY_DIR_COUNT; ++i)
+		{
+			const DirectX::XMFLOAT2 point = Hammersley(i, HAMMERSLEY_DIR_COUNT);
+			hammerDataDirectional.x[i] = point.x;
+			hammerDataDirectional.y[i] = point.y;
+		}
+
+		for (int i = 0; i < HAMMERSLEY_SPOT_COUNT; ++i)
+		{
+			const DirectX::XMFLOAT2 point = Hammersley(i, HAMMERSLEY_SPOT_COUNT);
+			hammerDataSpot.x[i] = point.x;
+			hammerDataSpot.y[i] = point.y;
+		}
+
+		for (int i = 0; i < HAMMERSLEY_FINAL_COUNT; ++i)
+		{
+			const DirectX::XMFLOAT2 point = Hammersley(i, HAMMERSLEY_FINAL_COUNT);
+			hammerDataFinal.x[i] = point.x;
+			hammerDataFinal.y[i] = point.y;
+		}
+
+		hammersleyDirectionalBuffer.Update(wnd.Gfx(), hammerDataDirectional);
+		hammersleySpotBuffer.Update(wnd.Gfx(), hammerDataSpot);
+		hammersleyFinalBuffer.Update(wnd.Gfx(), hammerDataFinal);
 
 		while (true)
 		{
@@ -343,7 +370,7 @@ namespace Kaka
 		skyboxAngle.y += skyboxSpeed * aDeltaTime;
 		skybox.Rotate(skyboxAngle);
 
-		//dustParticles.Update(wnd.Gfx(), aDeltaTime);
+		dustParticles.Update(wnd.Gfx(), aDeltaTime);
 		//smokeParticles.Update(wnd.Gfx(), aDeltaTime);
 
 		wnd.Gfx().SetDepthStencilState(eDepthStencilStates::Normal);
@@ -448,8 +475,9 @@ namespace Kaka
 		{
 			if (drawRSM)
 			{
-				//hammersleyBuffer.Update(wnd.Gfx(), hData);
-				//hammersleyBuffer.Bind(wnd.Gfx());
+				//hammersleyDirectionalBuffer.Bind(wnd.Gfx());
+				//hammersleyFinalBuffer.Bind(wnd.Gfx());
+				//hammersleySpotBuffer.Bind(wnd.Gfx());
 
 				// Directional light
 				wnd.Gfx().directionalLightRSMBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
@@ -477,9 +505,6 @@ namespace Kaka
 				}
 
 				wnd.Gfx().directionalLightRSMBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
-
-				//hammersleyBuffer.Update(wnd.Gfx(), hDataSpot);
-				//hammersleyBuffer.Bind(wnd.Gfx());
 
 				// Spot light
 				wnd.Gfx().spotLightRSMBuffer[0].SetAllAsResources(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
@@ -536,7 +561,7 @@ namespace Kaka
 			if (combinedPasses > 1)
 			{
 				wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTRUE_SLOT_INDIRECT_LIGHT_DIRECTIONAL, 1u, wnd.Gfx().rsmFullscaleDirectional.pResource.GetAddressOf());
-				wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, wnd.Gfx().rsmDownscaleSpot.pResource.GetAddressOf());
+				wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, wnd.Gfx().rsmFullscaleSpot.pResource.GetAddressOf());
 			}
 			else
 			{
@@ -715,7 +740,8 @@ namespace Kaka
 				ImGui::DragFloat("Divide N", &rsmBufferSpot.divideN, 0.1f, 0.0f, 5.0f, "%.1f");
 				ImGui::DragFloat("Divide P", &rsmBufferSpot.divideP, 0.1f, 0.0f, 5.0f, "%.1f");
 				ImGui::DragInt("Final sample count", (int*)&rsmBufferSpot.sampleCountLastPass, 1, 0, 600);
-				ImGui::SliderInt("Mode", (int*)&rsmBufferDirectional.mode, 0, (int)eRSMMode::Count - 1, ModeEnumToString[rsmBufferDirectional.mode].c_str());
+				ImGui::SliderInt("Mode", (int*)&rsmBufferSpot.mode, 0, (int)eRSMMode::Count - 1, ModeEnumToString[rsmBufferDirectional.mode].c_str());
+				rsmBufferDirectional.mode = rsmBufferSpot.mode;
 				rsmBufferDirectional.sampleCountLastPass = rsmBufferSpot.sampleCountLastPass;
 				rsmBufferDirectional.divideN = rsmBufferSpot.divideN;
 				rsmBufferDirectional.divideP = rsmBufferSpot.divideP;
