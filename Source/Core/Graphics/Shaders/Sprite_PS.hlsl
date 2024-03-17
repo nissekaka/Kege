@@ -13,18 +13,6 @@ struct PixelInput
     float4 colour : INSTANCE_COLOUR;
 };
 
-//cbuffer DirectionalLight : register(b1)
-//{
-//    float3 directionalLightDirection;
-//    float directionalLightIntensity;
-//    float3 directionalLightColour;
-//    float ambientLightIntensity;
-//    float4x4 directionalLightCameraTransform;
-//    int numberOfVolumetricSteps;
-//    float volumetricScattering;
-//    float volumetricIntensity;
-//};
-
 cbuffer FlashlightData : register(b2)
 {
     float3 lightPosition;

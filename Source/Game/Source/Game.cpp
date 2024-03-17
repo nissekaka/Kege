@@ -18,6 +18,22 @@ constexpr int TERRAIN_SIZE = 0;
 constexpr int MODELS_TO_LOAD_THREADED = 10;
 constexpr float SHADOW_RESOLUTION_DIVIDER = 4.0f;
 
+// Reverses the bits of the input
+unsigned int BitfieldReverse(const unsigned int aBits)
+{
+	unsigned int b = (unsigned int(aBits) << 16u) | (unsigned int(aBits) >> 16u);
+	b = (b & 0x55555555u) << 1u | (b & 0xAAAAAAAAu) >> 1u;
+	b = (b & 0x33333333u) << 2u | (b & 0xCCCCCCCCu) >> 2u;
+	b = (b & 0x0F0F0F0Fu) << 4u | (b & 0xF0F0F0F0u) >> 4u;
+	b = (b & 0x00FF00FFu) << 8u | (b & 0xFF00FF00u) >> 8u;
+	return b;
+}
+
+DirectX::XMFLOAT2 Hammersley(const unsigned int aI, const unsigned int aN)
+{
+	return DirectX::XMFLOAT2(float(aI) / float(aN), float(BitfieldReverse(aI)) * 2.3283064365386963e-10);
+}
+
 namespace Kaka
 {
 	Game::Game()
@@ -128,6 +144,63 @@ namespace Kaka
 		rsmBufferSpot.uvScale = wnd.Gfx().rsmDownscaleFactor;
 		rsmBufferSpot.isDirectionalLight = FALSE;
 		rsmBufferSpot.weightMax = 3.8f;
+
+
+		//// Set up compute shader resources
+		//ID3D11Buffer* hammersleyBuffer;
+		//// Create the buffer to store Hammersley sequence, the size should be equal to sample count
+		//{
+		//	D3D11_BUFFER_DESC bufferDesc = {};
+		//	bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		//	bufferDesc.ByteWidth = sizeof(DirectX::XMFLOAT2) * 600;
+		//	bufferDesc.CPUAccessFlags = 0;
+		//	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		//	bufferDesc.StructureByteStride = sizeof(DirectX::XMFLOAT2);
+		//	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+
+		//	wnd.Gfx().pDevice->CreateBuffer(&bufferDesc, nullptr, &hammersleyBuffer);
+		//}
+
+		//D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+		//srvDesc.Format = DXGI_FORMAT_R32G32_FLOAT;;
+		//srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+		//srvDesc.Buffer.FirstElement = 0;
+		//srvDesc.Buffer.NumElements = 600;
+		//srvDesc.Buffer.ElementWidth = sizeof(DirectX::XMFLOAT2);
+		//srvDesc.Buffer.ElementOffset = 0;
+		//wnd.Gfx().pDevice->CreateShaderResourceView(hammersleyBuffer, &srvDesc, &hammersleySRV);
+
+		//// Set the compute shader resources
+		//wnd.Gfx().pContext->CSSetShaderResources(0, 1, &hammersleySRV);
+
+		//ComputeShader* computeShader = ShaderFactory::GetComputeShader(wnd.Gfx(), L"Shaders\\RSMSampling_CS.cso");
+
+		//// Dispatch the compute shader
+		//computeShader->Bind(wnd.Gfx());
+		//wnd.Gfx().pContext->Dispatch(600, 1, 1);
+
+		//// Unbind resources after dispatch
+		//ID3D11ShaderResourceView* nullSRV = nullptr;
+		//wnd.Gfx().pContext->CSSetShaderResources(0, 1, &nullSRV);
+
+		//hData.dirCount = 600;
+		//hData.spotCount = 256;
+		//hData.finalCount = 64;
+
+		//for (int i = 0; i < hData.dirCount; ++i)
+		//{
+		//	hData.pointsDir[i] = (Hammersley(i, hData.dirCount));
+		//}
+
+		//for (int i = 0; i < hData.spotCount; ++i)
+		//{
+		//	hData.pointsSpot[i] = (Hammersley(i, hData.spotCount));
+		//}
+
+		//for (int i = 0; i < hData.finalCount; ++i)
+		//{
+		//	hData.pointsFinal[i] = (Hammersley(i, hData.finalCount));
+		//}
 
 		while (true)
 		{
@@ -270,7 +343,7 @@ namespace Kaka
 		skyboxAngle.y += skyboxSpeed * aDeltaTime;
 		skybox.Rotate(skyboxAngle);
 
-		dustParticles.Update(wnd.Gfx(), aDeltaTime);
+		//dustParticles.Update(wnd.Gfx(), aDeltaTime);
 		//smokeParticles.Update(wnd.Gfx(), aDeltaTime);
 
 		wnd.Gfx().SetDepthStencilState(eDepthStencilStates::Normal);
@@ -368,10 +441,16 @@ namespace Kaka
 		}
 		// GBuffer pass -- END
 
+		//// Bind the hammersley shader resource view to slot 11
+		//wnd.Gfx().pContext->PSSetShaderResources(11, 1, &hammersleySRV);
+
 		// Indirect lighting pass -- BEGIN
 		{
 			if (drawRSM)
 			{
+				//hammersleyBuffer.Update(wnd.Gfx(), hData);
+				//hammersleyBuffer.Bind(wnd.Gfx());
+
 				// Directional light
 				wnd.Gfx().directionalLightRSMBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
 				rsmBufferDirectional.lightCameraTransform = wnd.Gfx().directionalLightRSMBuffer.GetCamera().GetInverseView() * wnd.Gfx().directionalLightRSMBuffer.GetCamera().GetProjection();
@@ -398,6 +477,9 @@ namespace Kaka
 				}
 
 				wnd.Gfx().directionalLightRSMBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
+
+				//hammersleyBuffer.Update(wnd.Gfx(), hDataSpot);
+				//hammersleyBuffer.Bind(wnd.Gfx());
 
 				// Spot light
 				wnd.Gfx().spotLightRSMBuffer[0].SetAllAsResources(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);

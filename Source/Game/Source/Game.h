@@ -198,5 +198,20 @@ namespace Kaka
 		PixelConstantBuffer<CommonBuffer> pcb{wnd.Gfx(), PS_CBUFFER_SLOT_COMMON};
 		VertexConstantBuffer<CommonBuffer> vcb{wnd.Gfx(), VS_CBUFFER_SLOT_COMMON};
 		PixelConstantBuffer<RSMLightData> rsmLightDataBuffer{wnd.Gfx(), PS_CBUFFER_SLOT_RSM_LIGHT};
+
+		//ID3D11ShaderResourceView* hammersleySRV = nullptr;
+
+		//struct HammersleyData
+		//{
+		//	DirectX::XMFLOAT2 pointsDir[2000] = {}; // Bytes = 16000
+		//	DirectX::XMFLOAT2 pointsSpot[256] = {}; // Bytes = 18048
+		//	DirectX::XMFLOAT2 pointsFinal[64] = {}; // Bytes = 18560
+		//	unsigned int dirCount = {}; // 18564
+		//	unsigned int spotCount = {}; // 18568
+		//	unsigned int finalCount = {}; // 18572
+		//	float padding = {};
+		//} hData;
+
+		//PixelConstantBuffer<HammersleyData> hammersleyBuffer{wnd.Gfx(), 0u};
 	};
 }
