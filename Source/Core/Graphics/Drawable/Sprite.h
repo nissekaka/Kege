@@ -23,6 +23,8 @@ namespace Kaka
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
 		bool IsInSpotlightCone(DirectX::XMFLOAT3 aWorldPosition, const SpotlightData& aSpotlightData);
+		void UpdateTransforms(float aDeltaTime, DirectX::XMVECTOR aCameraForward, DirectX::XMVECTOR aCameraRight, DirectX::XMVECTOR aCameraUp, int aUpdateStart, int aUpdateEnd);
+		void UpdateTransform(float aDeltaTime, unsigned instanceCount, DirectX::XMVECTOR cameraForward, DirectX::XMVECTOR cameraRight, DirectX::XMVECTOR cameraUp);
 		void Update(const Graphics& aGfx, const float aDeltaTime);
 
 	private:

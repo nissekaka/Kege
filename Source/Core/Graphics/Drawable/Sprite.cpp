@@ -2,6 +2,7 @@
 #include "Sprite.h"
 
 #include <random>
+#include <thread>
 
 #include "ModelLoader.h"
 #include "Core/Graphics/Drawable/Vertex.h"
@@ -101,8 +102,8 @@ namespace Kaka
 		for (unsigned int i = 0; i < instanceData.size(); ++i)
 		{
 			// Set random position between -20, 0, -20 and 20, 0, 20
-			std::uniform_real_distribution<float> xDist(-70.0f, 70.0f);
-			std::uniform_real_distribution<float> yDist(0.0f, 20.0f);
+			std::uniform_real_distribution<float> xDist(-150.0f, 130.0f);
+			std::uniform_real_distribution<float> yDist(0.0f, 80.0f);
 			std::uniform_real_distribution<float> zDist(-70.0f, 70.0f);
 			std::uniform_real_distribution<float> distSize(0.5f, 1.25f);
 			std::uniform_real_distribution<float> alphaDist(0.05f, 0.4f);
@@ -254,6 +255,29 @@ namespace Kaka
 		return (angle > cos(aSpotlightData.innerAngle + (aSpotlightData.outerAngle - aSpotlightData.innerAngle) / 2.0f)) && (distToLight < aSpotlightData.range);
 	}
 
+	void Sprite::UpdateTransforms(const float aDeltaTime, const DirectX::XMVECTOR aCameraForward, const DirectX::XMVECTOR aCameraRight, const DirectX::XMVECTOR aCameraUp, int aUpdateStart, int aUpdateEnd)
+	{
+		for (; aUpdateStart < aUpdateEnd; ++aUpdateStart)
+		{
+			travelAngles[aUpdateStart] -= travelSpeeds[aUpdateStart] * aDeltaTime;
+
+			instanceData[aUpdateStart].instanceTransform.r[3].m128_f32[0] = travelRadiuses[aUpdateStart] * std::cos(travelAngles[aUpdateStart]) + startPositions[aUpdateStart].x;
+			instanceData[aUpdateStart].instanceTransform.r[3].m128_f32[2] = travelRadiuses[aUpdateStart] * std::sin(travelAngles[aUpdateStart]) + startPositions[aUpdateStart].z;
+
+			if (travelAngles[aUpdateStart] > 2 * PI)
+			{
+				travelAngles[aUpdateStart] -= 2 * PI;
+			}
+
+			instanceData[aUpdateStart].colour.w = std::clamp(cos(elapsedTime + fadeSpeeds[aUpdateStart]) * 0.5f + 0.5f, 0.0f, alphas[aUpdateStart]);
+
+			// Set the rotation to face the camera
+			instanceData[aUpdateStart].instanceTransform.r[0] = aCameraRight;
+			instanceData[aUpdateStart].instanceTransform.r[1] = aCameraForward;
+			instanceData[aUpdateStart].instanceTransform.r[2] = aCameraUp;
+		}
+	}
+
 	void Sprite::Update(const Graphics& aGfx, const float aDeltaTime)
 	{
 		const unsigned int instanceCount = instanceData.size();
@@ -269,31 +293,19 @@ namespace Kaka
 
 		elapsedTime += aDeltaTime;
 
-		for (int updateIndex = 0; updateIndex < instanceCount; ++updateIndex)
+		constexpr int threadCount = 6;
+
+		std::thread threads[threadCount];
+		for (int i = 0; i < threadCount; ++i)
 		{
-			//if (!IsInSpotlightCone(GetPosition(updateIndex), aSpotlightData))
-			//{
-			//	continue;
-			//}
-
-			travelAngles[updateIndex] -= travelSpeeds[updateIndex] * aDeltaTime;
-
-			instanceData[updateIndex].instanceTransform.r[3].m128_f32[0] = travelRadiuses[updateIndex] * std::cos(travelAngles[updateIndex]) + startPositions[updateIndex].x;
-			instanceData[updateIndex].instanceTransform.r[3].m128_f32[2] = travelRadiuses[updateIndex] * std::sin(travelAngles[updateIndex]) + startPositions[updateIndex].z;
-
-			if (travelAngles[updateIndex] > 2 * PI)
-			{
-				travelAngles[updateIndex] -= 2 * PI;
-			}
-
-			instanceData[updateIndex].colour.w = std::clamp(cos(elapsedTime + fadeSpeeds[updateIndex]) * 0.5f + 0.5f, 0.0f, alphas[updateIndex]);
-
-			// Set the rotation to face the camera
-			instanceData[updateIndex].instanceTransform.r[0] = cameraRight;
-			instanceData[updateIndex].instanceTransform.r[1] = cameraForward;
-			instanceData[updateIndex].instanceTransform.r[2] = cameraUp;
+			threads[i] = std::thread(&Sprite::UpdateTransforms, this, aDeltaTime, cameraForward, cameraRight, cameraUp, i * (instanceCount / threadCount), (i + 1) * (instanceCount / threadCount));
+			threads[i].detach();
 		}
 
+		//for (int i = 0; i < 20; ++i)
+		//{
+		//	threads[i].join();
+		//}
 		//updateCounter += updateIncrease;
 
 		//if (updateCounter >= instanceCount)
