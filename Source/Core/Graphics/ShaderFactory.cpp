@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "ShaderFactory.h"
+
 #include "Core/Graphics/Bindable/PixelShader.h"
 #include "Core/Graphics/Bindable/VertexShader.h"
+#include "Core/Graphics/Bindable/ComputeShader.h"
 
 namespace Kaka
 {
@@ -29,5 +31,18 @@ namespace Kaka
 		vertexShaders[aFileName].Init(aGfx, aFileName);
 
 		return &vertexShaders[aFileName];
+	}
+
+	ComputeShader* ShaderFactory::GetComputeShader(const Graphics& aGfx, const std::wstring& aFileName)
+	{
+		if (computeShaders.contains(aFileName))
+		{
+			return &computeShaders[aFileName];
+		}
+
+		computeShaders[aFileName] = ComputeShader();
+		computeShaders[aFileName].Init(aGfx, aFileName);
+
+		return &computeShaders[aFileName];
 	}
 }

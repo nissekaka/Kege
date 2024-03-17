@@ -15,3 +15,4 @@
 #include "VertexShader.h"
 #include "Rasterizer.h"
 #include "DepthStencil.h"
+#include "ComputeShader.h"

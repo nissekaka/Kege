@@ -136,10 +136,14 @@ local RELEASE_LIBRARY_LIST = FindReleaseLibraries()
         shadertype("Pixel")
         shaderobjectfileoutput(directories.shaders .. "/%%(Filename).cso")
 		
-
     filter("files:**VS.hlsl or **VertexShader.hlsl")
         removeflags("ExcludeFromBuild")
         shadertype("Vertex")
+        shaderobjectfileoutput(directories.shaders .. "/%%(Filename).cso")
+
+    filter("files:**CS.hlsl or **ComputeShader.hlsl")
+        removeflags("ExcludeFromBuild")
+        shadertype("Compute")
         shaderobjectfileoutput(directories.shaders .. "/%%(Filename).cso")
 
 -- Core Project

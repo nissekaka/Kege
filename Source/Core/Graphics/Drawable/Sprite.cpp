@@ -9,7 +9,6 @@
 #include "Core/Utility/KakaMath.h"
 #include <External/include/imgui/imgui.h>
 
-
 namespace Kaka
 {
 	void Sprite::Init(const Graphics& aGfx, const float aSize, const unsigned int aNumberOfSprites, bool aIsVfx, const std::string& aFile)
@@ -71,32 +70,7 @@ namespace Kaka
 		HRESULT result = device->CreateBuffer(&bufferDesc, &subresourceData, &vertexBuffer);
 		assert(SUCCEEDED(result));
 
-		//vertexBuffer.Init(aGfx, vertices);
 		indexBuffer.Init(aGfx, indices);
-
-		// Create instance buffer
-		D3D11_BUFFER_DESC instanceBufferDesc = {};
-
-		instanceBufferDesc.ByteWidth = sizeof(SpriteRenderBuffer) * 524288;
-		// 128 * 1024 = 131072
-		// 131072 * 2 = 262144
-		// 262144 * 2 = 524288
-		instanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-		instanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		instanceBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-
-		result = aGfx.pDevice->CreateBuffer(&instanceBufferDesc, nullptr, &instanceBuffer);
-		assert(SUCCEEDED(result));
-
-		//D3D11_BUFFER_DESC spriteRenderBufferDesc = {};
-
-		//spriteRenderBufferDesc.ByteWidth = sizeof(SpriteRenderBuffer);
-		//spriteRenderBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-		//spriteRenderBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		//spriteRenderBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-
-		//result = aGfx.pDevice->CreateBuffer(&spriteRenderBufferDesc, nullptr, &spriteRenderBuffer);
-		//assert(SUCCEEDED(result));
 
 		vertexShader = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\Sprite_VS.cso");
 
@@ -150,6 +124,19 @@ namespace Kaka
 		}
 
 		updateCounter += updateIncrease;
+
+		// Create instance buffer
+		D3D11_BUFFER_DESC instanceBufferDesc = {};
+
+		const unsigned int instanceCount = instanceData.size();
+
+		instanceBufferDesc.ByteWidth = sizeof(InstanceData) * instanceCount;
+		instanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+		instanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		instanceBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+		result = aGfx.pDevice->CreateBuffer(&instanceBufferDesc, nullptr, &instanceBuffer);
+		assert(SUCCEEDED(result));
 	}
 
 	void Sprite::Draw(Graphics& aGfx)
@@ -161,7 +148,7 @@ namespace Kaka
 		ID3D11Buffer* bufferPointers[2];
 
 		strides[0] = sizeof(SpriteVertex);
-		strides[1] = sizeof(SpriteRenderBuffer);
+		strides[1] = sizeof(InstanceData);
 
 		offsets[0] = 0;
 		offsets[1] = 0;
@@ -184,7 +171,7 @@ namespace Kaka
 		memcpy(
 			mappedResource.pData,
 			instanceData.data(),
-			sizeof(SpriteRenderBuffer) * instanceCount
+			sizeof(InstanceData) * instanceCount
 		);
 		aGfx.pContext->Unmap(instanceBuffer, 0);
 

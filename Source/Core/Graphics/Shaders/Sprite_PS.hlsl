@@ -25,84 +25,62 @@ struct PixelInput
 //    float volumetricIntensity;
 //};
 
-cbuffer SpotlightData : register(b2)
+cbuffer FlashlightData : register(b2)
 {
     float3 lightPosition;
-    float lightIntensity;
-    float3 lightDirection;
-    float lightRange;
-    float3 lightColour;
-    float lightInnerAngle;
-    float lightOuterAngle;
-    bool lightIsActive;
-    bool useTexture;
-    float4x4 spotLightCameraTransform;
-    bool useVolumetricLight;
-    uint numberOfVolumetricSteps;
-    float volumetricScattering;
-    float volumetricIntensity;
-    float volumetricAngle;
     float volumetricRange;
-    float volumetricFade;
+    float3 lightDirection;
+    float angleInner;
+    float angleOuter;
+    float intensityInner;
+    float intensityOuter;
+    float alphaInner;
+    float alphaOuter;
 };
 
-bool IsInSpotlightCone(float3 aWorldPosition)
+bool IsInSpotlightCone(float3 aWorldPosition, float aAngle)
 {
     const float3 toLight = lightPosition - aWorldPosition;
     const float distToLight = length(toLight);
     const float3 lightDir = normalize(toLight);
     const float angle = dot(lightDir, lightDirection);
 
-    return (angle > cos(volumetricAngle)) && (distToLight < volumetricRange);
+    return (angle > cos(aAngle)) && (distToLight < volumetricRange);
 }
 
 float4 main(PixelInput aInput) : SV_TARGET
 {
-    //const float2 uv = aInput.position.xy / clientResolution.xy;
-
     float4 colour = gColourTex.Sample(defaultSampler, aInput.texCoord).rgba;
     colour.rgb *= aInput.colour.rgb;
 
     const float distToLight = length(lightPosition - aInput.worldPos);
     
     float spotlightAlpha = 0.0f;
-    float directionalLightAlpha = 0.0f;
-    if (IsInSpotlightCone(aInput.worldPos) && lightIntensity > 500.0f)
+    if (IsInSpotlightCone(aInput.worldPos, angleInner) && intensityInner > 200.0f)
     {
         if (distToLight < 100.0f)
         {
-            spotlightAlpha = smoothstep(100.0f, 0.0f, distToLight);
+            spotlightAlpha = smoothstep(100.0f, 0.0f, distToLight) * alphaInner;
         }
         else
         {
             spotlightAlpha = 0.0f;
         }
     }
-    //else
-    //{
-    //    //float3 V = aInput.worldPos - cameraPosition.xyz;
+    else if (IsInSpotlightCone(aInput.worldPos, angleOuter) && intensityOuter > 200.0f)
+    {
+        if (distToLight < 100.0f)
+        {
+            spotlightAlpha = smoothstep(100.0f, 0.0f, distToLight) * alphaOuter;
+        }
+        else
+        {
+            spotlightAlpha = 0.0f;
+        }
+    }
 
-    //    //const float stepSize = length(V) / 20.0f;
-    //    //V = normalize(V);
-    //    //const float3 step = V * stepSize;
- 
-    //    //float3 position = cameraPosition.xyz;
-    //    //position += step;// * DITHER_PATTERN[int(uv.x * clientResolution.x) % 4][int(uv.y * clientResolution.y) % 4];
-        
-    //    const float4 lightSpacePositionTemp = mul(directionalLightCameraTransform, float4(aInput.worldPos, 1.0f));
-    //    const float3 lightSpacePosition = lightSpacePositionTemp.xyz / lightSpacePositionTemp.w;
 
-    //    const float2 sampleUV = 0.5f + float2(0.5f, -0.5f) * lightSpacePosition.xy;
-
-    //    const float shadowMapValue = directionalLightShadowMap.Sample(defaultSampler, sampleUV).r;
-
-    //    if (shadowMapValue + 0.57f < lightSpacePosition.z)
-    //    {
-    //        directionalLightAlpha = 1.0f;
-    //    }
-    //}
-
-    colour.a *= (spotlightAlpha + directionalLightAlpha) * aInput.colour.a * 0.5f;
+    colour.a *= spotlightAlpha * aInput.colour.a;
 
     return float4(colour);
 }

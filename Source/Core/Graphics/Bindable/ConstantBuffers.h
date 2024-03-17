@@ -87,4 +87,20 @@ namespace Kaka
 			GetContext(aGfx)->PSSetConstantBuffers(slot, 1u, pConstantBuffer.GetAddressOf());
 		}
 	};
+
+	template <class C>
+	class ComputeConstantBuffer : public ConstantBuffer<C>
+	{
+		using ConstantBuffer<C>::pConstantBuffer;
+		using ConstantBuffer<C>::slot;
+		using Bindable::GetContext;
+
+	public:
+		using ConstantBuffer<C>::ConstantBuffer;
+
+		void Bind(const Graphics& aGfx) override
+		{
+			GetContext(aGfx)->CSSetConstantBuffers(slot, 1u, pConstantBuffer.GetAddressOf());
+		}
+	};
 }

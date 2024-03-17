@@ -67,7 +67,7 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
     }
 
     float3 volumetric = float3(0.0f, 0.0f, 0.0f);
-    if (useVolumetricLight && lightIntensity > 500.0f)
+    if (useVolumetricLight && lightIntensity > 100.0f)
     {
         float3 V = worldPosition - cameraPosition.xyz;
 

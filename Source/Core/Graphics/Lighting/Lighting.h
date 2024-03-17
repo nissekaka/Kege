@@ -61,7 +61,8 @@ struct SpotlightData
 	float volumetricAngle = {}; // 144
 	float volumetricRange = {}; // 148
 	float volumetricFade = {}; // 152
-	float padding[2] = {}; // 160
+	float volumetricAlpha = {}; // 156
+	float padding = {}; // 160
 };
 
 struct LightConstantBuffer

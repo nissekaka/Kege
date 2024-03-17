@@ -177,20 +177,44 @@ namespace Kaka
 
 	void DeferredLights::BindFlashlightBuffer(const Graphics& aGfx)
 	{
-		DeferredConstantBuffer lightBuffer;
+		//DeferredConstantBuffer lightBuffer;
 
-		lightBuffer.positionAndRange[0] = spotlightData[0].position.x;
-		lightBuffer.positionAndRange[1] = spotlightData[0].position.y;
-		lightBuffer.positionAndRange[2] = spotlightData[0].position.z;
-		lightBuffer.positionAndRange[3] = spotlightData[0].range;
-		lightBuffer.isDirectional = FALSE;
+		//lightBuffer.positionAndRange[0] = spotlightData[0].position.x;
+		//lightBuffer.positionAndRange[1] = spotlightData[0].position.y;
+		//lightBuffer.positionAndRange[2] = spotlightData[0].position.z;
+		//lightBuffer.positionAndRange[3] = spotlightData[0].range;
+		//lightBuffer.isDirectional = FALSE;
 
-		VertexConstantBuffer<DeferredConstantBuffer> vertexLightBuffer{aGfx, VS_CBUFFER_SLOT_LIGHT};
-		vertexLightBuffer.Update(aGfx, lightBuffer);
-		vertexLightBuffer.Bind(aGfx);
+		//VertexConstantBuffer<DeferredConstantBuffer> vertexLightBuffer{aGfx, VS_CBUFFER_SLOT_LIGHT};
+		//vertexLightBuffer.Update(aGfx, lightBuffer);
+		//vertexLightBuffer.Bind(aGfx);
 
-		PixelConstantBuffer<SpotlightData> spotLightBuffer{aGfx, PS_CBUFFER_SLOT_SPOT_LIGHT};
-		spotLightBuffer.Update(aGfx, spotlightData[0]);
+		struct FlashlightData
+		{
+			DirectX::XMFLOAT3 lightPosition;
+			float volumetricRange;
+			DirectX::XMFLOAT3 lightDirection;
+			float volumetricAngleInner;
+			float volumetricAngleOuter;
+			float lightIntensityInner;
+			float lightIntensityOuter;
+			float alphaInner;
+			float alphaOuter;
+			float padding[3];
+		} flashlightData;
+
+		flashlightData.lightPosition = spotlightData[0].position;
+		flashlightData.volumetricRange = spotlightData[0].volumetricRange;
+		flashlightData.lightDirection = spotlightData[0].direction;
+		flashlightData.volumetricAngleInner = spotlightData[0].volumetricAngle;
+		flashlightData.volumetricAngleOuter = spotlightData[1].volumetricAngle;
+		flashlightData.lightIntensityInner = spotlightData[0].intensity;
+		flashlightData.lightIntensityOuter = spotlightData[1].intensity;
+		flashlightData.alphaInner = spotlightData[0].volumetricAlpha;
+		flashlightData.alphaOuter = spotlightData[1].volumetricAlpha;
+
+		PixelConstantBuffer<FlashlightData> spotLightBuffer{aGfx, PS_CBUFFER_SLOT_SPOT_LIGHT};
+		spotLightBuffer.Update(aGfx, flashlightData);
 		spotLightBuffer.Bind(aGfx);
 	}
 

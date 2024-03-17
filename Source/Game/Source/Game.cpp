@@ -72,14 +72,12 @@ namespace Kaka
 
 		flashlightTexture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\Flashlight_cookie.png", 5u);
 
-		dustParticles.Init(wnd.Gfx(), 0.0125f, 500000u, true, "Assets\\Textures\\particle.png");
+		dustParticles.Init(wnd.Gfx(), 0.0125f, 524288u, true, "Assets\\Textures\\particle.png");
 		//smokeParticles.Init(wnd.Gfx(), 25.0f, 1000u, true, "Assets\\Textures\\SpriteCloud.png");
 
 		// Flashlight setup
 		{
 			flashlightInner = &deferredLights.AddSpotLight();
-			//flashlightInner->position = camera.GetPosition();
-			//DirectX::XMStoreFloat3(&flashlightInner->direction, camera.GetForwardVector());
 			flashlightInner->intensity = 5000.0f;
 			flashlightIntensity = flashlightInner->intensity;
 			flashlightInner->range = 1000.0f;
@@ -94,18 +92,25 @@ namespace Kaka
 			flashlightInner->volumetricAngle = DegToRad(5.0f);
 			flashlightInner->volumetricRange = 30.0f;
 			flashlightInner->volumetricFade = 25.0f;
+			flashlightInner->volumetricAlpha = 0.5f;
 
 			wnd.Gfx().spotLightRSMBuffer[0].GetCamera().SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 120.0f, 0.5f, 5000.0f);
 
 			flashlightOuter = &deferredLights.AddSpotLight();
-			//flashlightOuter->position = camera.GetPosition();
-			//DirectX::XMStoreFloat3(&flashlightOuter->direction, camera.GetForwardVector());
 			flashlightOuter->intensity = flashlightInner->intensity * 0.5f;
 			flashlightOuter->range = flashlightInner->range;
 			flashlightOuter->innerAngle = flashlightInner->innerAngle; // Radians
 			flashlightOuter->outerAngle = std::clamp(flashlightInner->outerAngle * 10.0f, flashlightOuter->outerAngle, 3.14f); // Radians
 			flashlightOuter->colour = flashlightInner->colour;
 			flashlightOuter->useTexture = FALSE;
+			flashlightOuter->useVolumetricLight = TRUE;
+			flashlightOuter->numberOfVolumetricSteps = 15u;
+			flashlightOuter->volumetricScattering = 0.12f;
+			flashlightOuter->volumetricIntensity = 0.5f;
+			flashlightOuter->volumetricAngle = DegToRad(15.0f);
+			flashlightOuter->volumetricRange = 30.0f;
+			flashlightOuter->volumetricFade = 25.0f;
+			flashlightOuter->volumetricAlpha = 0.2f;
 		}
 
 		rsmBufferDirectional.sampleCount = 600u;
@@ -306,8 +311,13 @@ namespace Kaka
 		{
 			DirectX::XMFLOAT3 direction = deferredLights.GetSpotLightData(0).direction;
 			direction = {direction.x, direction.y * -1.0f, direction.z * -1.0f};
-			wnd.Gfx().StartShadows(wnd.Gfx().spotLightRSMBuffer[0].GetCamera(), direction, wnd.Gfx().spotLightRSMBuffer[0], PS_TEXTURE_SLOT_SHADOW_MAP_SPOT);
-			deferredLights.SetSpotLightShadowCamera(wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetInverseView() * wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetProjection(), 0);
+
+			Camera& shadowCamera = wnd.Gfx().spotLightRSMBuffer[0].GetCamera();
+			const DirectX::XMMATRIX spotlightInverseViewProj = shadowCamera.GetInverseView() * shadowCamera.GetProjection();
+
+			wnd.Gfx().StartShadows(shadowCamera, direction, wnd.Gfx().spotLightRSMBuffer[0], PS_TEXTURE_SLOT_SHADOW_MAP_SPOT);
+			deferredLights.SetSpotLightShadowCamera(spotlightInverseViewProj, 0);
+			deferredLights.SetSpotLightShadowCamera(spotlightInverseViewProj, 1);
 
 			wnd.Gfx().spotLightRSMBuffer[0].ClearTextures(wnd.Gfx().pContext.Get());
 			wnd.Gfx().spotLightRSMBuffer[0].SetAsActiveTarget(wnd.Gfx().pContext.Get());
@@ -545,18 +555,39 @@ namespace Kaka
 				ImGui::DragFloat("Bleed intensity mul", &flashlightBleedIntensityFactor, 0.01f, 0.0f, 1.0f, "%.2f");
 				ImGui::SetNextItemWidth(150.0f);
 				ImGui::DragFloat("Bleed angle mul", &flashlightBleedAngleMultiplier, 0.1f, 0.0f, 10.0f, "%.2f");
-				ImGui::Text("Volumetric");
-				ImGui::Checkbox("Use volumetric", (bool*)&flashlightInner->useVolumetricLight);
+				ImGui::NextColumn();
+				ImGui::Text("Volumetric - Inner");
+				ImGui::Checkbox("Use volumetric##UseVol1", (bool*)&flashlightInner->useVolumetricLight);
 				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragInt("Steps##VolStep", (int*)&flashlightInner->numberOfVolumetricSteps, 1, 1, 15);
+				ImGui::DragInt("Steps##VolStep1", (int*)&flashlightInner->numberOfVolumetricSteps, 1, 1, 15);
 				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragFloat("Scattering##VolScat", &flashlightInner->volumetricScattering, 0.01f, 0.0f, 1.0f, "%.2f");
+				ImGui::DragFloat("Scattering##VolScat1", &flashlightInner->volumetricScattering, 0.01f, 0.0f, 1.0f, "%.2f");
 				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragFloat("Intensity##VolInt", &flashlightInner->volumetricIntensity, 0.01f, 0.0f, 10.0f, "%.2f");
+				ImGui::DragFloat("Intensity##VolInt1", &flashlightInner->volumetricIntensity, 0.01f, 0.0f, 10.0f, "%.2f");
 				ImGui::SetNextItemWidth(150.0f);
-				ImGui::SliderAngle("Angle##VolAng", &flashlightInner->volumetricAngle, 0, 90, "%.2f");
-				ImGui::DragFloat("Range##VolRan", &flashlightInner->volumetricRange, 0.1f, 0.0f, 100.0f, "%.2f");
-				ImGui::DragFloat("Fade##VolFad", &flashlightInner->volumetricFade, 0.1f, 0.0f, 100.0f, "%.2f");
+				ImGui::SliderAngle("Angle##VolAng1", &flashlightInner->volumetricAngle, 0, 90, "%.2f");
+				ImGui::SetNextItemWidth(150.0f);
+				ImGui::DragFloat("Range##VolRan1", &flashlightInner->volumetricRange, 0.1f, 0.0f, 100.0f, "%.2f");
+				ImGui::SetNextItemWidth(150.0f);
+				ImGui::DragFloat("Fade##VolFad1", &flashlightInner->volumetricFade, 0.1f, 0.0f, 100.0f, "%.2f");
+				ImGui::SetNextItemWidth(150.0f);
+				ImGui::DragFloat("Alpha##VolAlp1", &flashlightInner->volumetricAlpha, 0.01f, 0.0f, 1.0f, "%.2f");
+				ImGui::Text("Volumetric - Outer");
+				ImGui::Checkbox("Use volumetric##UseVol2", (bool*)&flashlightOuter->useVolumetricLight);
+				ImGui::SetNextItemWidth(150.0f);
+				ImGui::DragInt("Steps##VolStep2", (int*)&flashlightOuter->numberOfVolumetricSteps, 1, 1, 15);
+				ImGui::SetNextItemWidth(150.0f);
+				ImGui::DragFloat("Scattering##VolScat2", &flashlightOuter->volumetricScattering, 0.01f, 0.0f, 1.0f, "%.2f");
+				ImGui::SetNextItemWidth(150.0f);
+				ImGui::DragFloat("Intensity##VolInt2", &flashlightOuter->volumetricIntensity, 0.01f, 0.0f, 10.0f, "%.2f");
+				ImGui::SetNextItemWidth(150.0f);
+				ImGui::SliderAngle("Angle##VolAng2", &flashlightOuter->volumetricAngle, 0, 90, "%.2f");
+				ImGui::SetNextItemWidth(150.0f);
+				ImGui::DragFloat("Range##VolRan2", &flashlightOuter->volumetricRange, 0.1f, 0.0f, 100.0f, "%.2f");
+				ImGui::SetNextItemWidth(150.0f);
+				ImGui::DragFloat("Fade##VolFad2", &flashlightOuter->volumetricFade, 0.1f, 0.0f, 100.0f, "%.2f");
+				ImGui::SetNextItemWidth(150.0f);
+				ImGui::DragFloat("Alpha##VolAlp2", &flashlightOuter->volumetricAlpha, 0.01f, 0.0f, 1.0f, "%.2f");
 			}
 			ImGui::End();
 

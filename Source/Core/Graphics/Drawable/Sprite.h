@@ -61,13 +61,13 @@ namespace Kaka
 		//ID3D11Buffer* spriteRenderBuffer = nullptr;
 
 	private:
-		struct SpriteRenderBuffer
+		struct InstanceData
 		{
 			DirectX::XMMATRIX instanceTransform;
 			DirectX::XMFLOAT4 colour;
 		};
 
-		std::vector<SpriteRenderBuffer> instanceData = {};
+		std::vector<InstanceData> instanceData = {};
 		std::vector<DirectX::XMFLOAT3> startPositions = {};
 		std::vector<float> travelRadiuses = {};
 		std::vector<float> travelSpeeds = {};
