@@ -43,29 +43,29 @@ float4 main(PixelInput aInput) : SV_TARGET
 
     const float distToLight = length(lightPosition - aInput.worldPos);
     
-    float spotlightAlpha = 1.0f;
-    //if (IsInSpotlightCone(aInput.worldPos, angleInner) && intensityInner > 200.0f)
-    //{
-    //    if (distToLight < 100.0f)
-    //    {
-    //        spotlightAlpha = smoothstep(100.0f, 0.0f, distToLight) * alphaInner;
-    //    }
-    //    else
-    //    {
-    //        spotlightAlpha = 0.0f;
-    //    }
-    //}
-    //else if (IsInSpotlightCone(aInput.worldPos, angleOuter) && intensityOuter > 200.0f)
-    //{
-    //    if (distToLight < 100.0f)
-    //    {
-    //        spotlightAlpha = smoothstep(100.0f, 0.0f, distToLight) * alphaOuter;
-    //    }
-    //    else
-    //    {
-    //        spotlightAlpha = 0.0f;
-    //    }
-    //}
+    float spotlightAlpha = 0.0f;
+    if (IsInSpotlightCone(aInput.worldPos, angleInner) && intensityInner > 200.0f)
+    {
+        if (distToLight < 100.0f)
+        {
+            spotlightAlpha = smoothstep(100.0f, 0.0f, distToLight) * alphaInner;
+        }
+        else
+        {
+            spotlightAlpha = 0.0f;
+        }
+    }
+    else if (IsInSpotlightCone(aInput.worldPos, angleOuter) && intensityOuter > 200.0f)
+    {
+        if (distToLight < 100.0f)
+        {
+            spotlightAlpha = smoothstep(100.0f, 0.0f, distToLight) * alphaOuter;
+        }
+        else
+        {
+            spotlightAlpha = 0.0f;
+        }
+    }
 
 
     colour.a *= spotlightAlpha * aInput.colour.a;
