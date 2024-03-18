@@ -89,7 +89,7 @@ namespace Kaka
 		flashlightTexture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\Flashlight_cookie.png", 5u);
 		// 524288 * 4 = 2 097 152
 		// 524288 * 2 = 1 048 576
-		dustParticles.Init(wnd.Gfx(), 0.0125f, 524288u, true, "Assets\\Textures\\particle.png");
+		dustParticles.Init(wnd.Gfx(), 0.0125f, 2097152u, true, "Assets\\Textures\\particle.png");
 		//smokeParticles.Init(wnd.Gfx(), 25.0f, 1000u, true, "Assets\\Textures\\SpriteCloud.png");
 
 		// Flashlight setup

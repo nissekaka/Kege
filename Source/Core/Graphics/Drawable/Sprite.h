@@ -35,6 +35,8 @@ namespace Kaka
 		PixelShader* pixelShader = nullptr;
 		VertexShader* vertexShader = nullptr;
 
+		ComputeShader* computeShader = nullptr;
+
 		const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 		{
 			{"SV_POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
@@ -43,11 +45,13 @@ namespace Kaka
 			{"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
 			{"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
 			// Data from the instance buffer
-			{"INSTANCE_TRANSFORM", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1},
-			{"INSTANCE_TRANSFORM", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1},
-			{"INSTANCE_TRANSFORM", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1},
-			{"INSTANCE_TRANSFORM", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1},
-			{"INSTANCE_COLOUR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1}
+			// Instance ID
+			{"INSTANCE_ID", 0, DXGI_FORMAT_R32_UINT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1},
+			//{"INSTANCE_TRANSFORM", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1},
+			//{"INSTANCE_TRANSFORM", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1},
+			//{"INSTANCE_TRANSFORM", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1},
+			//{"INSTANCE_TRANSFORM", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1},
+			//{"INSTANCE_COLOUR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1}
 		};
 
 		InputLayout inputLayout;
@@ -60,7 +64,15 @@ namespace Kaka
 
 		ID3D11Buffer* vertexBuffer = nullptr;
 		ID3D11Buffer* instanceBuffer = nullptr;
-		//ID3D11Buffer* spriteRenderBuffer = nullptr;
+
+		ID3D11Buffer* instanceCompBuffer = nullptr;
+		ID3D11Buffer* srcParticleCompBuffer = nullptr;
+		//ID3D11Buffer* destBufferTransform = nullptr;
+		ID3D11Buffer* destParticleCompBuffer = nullptr;
+		ID3D11ShaderResourceView* srcTransformSRV = nullptr;
+		ID3D11ShaderResourceView* srcParticleSRV = nullptr;
+		ID3D11UnorderedAccessView* instanceUAV = nullptr;
+		ID3D11UnorderedAccessView* particleUAV = nullptr;
 
 	private:
 		struct InstanceData
@@ -69,13 +81,31 @@ namespace Kaka
 			DirectX::XMFLOAT4 colour;
 		};
 
+		std::vector<unsigned int> instanceIds = {};
+
+		struct ParticleData
+		{
+			DirectX::XMFLOAT3 startPosition;
+			float travelAngle;
+			DirectX::XMFLOAT4 colour;
+			float travelRadius;
+			float travelSpeed;
+			float fadeSpeed;
+			float padding;
+		};
+
 		std::vector<InstanceData> instanceData = {};
-		std::vector<DirectX::XMFLOAT3> startPositions = {};
-		std::vector<float> travelRadiuses = {};
-		std::vector<float> travelSpeeds = {};
-		std::vector<float> travelAngles = {};
-		std::vector<float> fadeSpeeds = {};
-		std::vector<float> alphas = {};
+		//std::vector<ParticleData> particleData = {};
+
+		struct ParticleConstants
+		{
+			DirectX::XMVECTOR cameraForward = {};
+			DirectX::XMVECTOR cameraRight = {};
+			DirectX::XMVECTOR cameraUp = {};
+			float deltaTime = {};
+			float elapsedTime = {};
+			float padding[2] = {};
+		} particleConstants;
 
 		float elapsedTime = 0.0f;
 

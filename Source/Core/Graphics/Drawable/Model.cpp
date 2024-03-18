@@ -36,7 +36,7 @@ namespace Kaka
 		// Shaders
 		switch (shaderType)
 		{
-			case eShaderType::PBR:
+		case eShaderType::PBR:
 			{
 				modelType = eModelType::Static;
 				ModelLoader::LoadStaticModel(aGfx, aFilePath, modelData);
@@ -79,7 +79,7 @@ namespace Kaka
 				inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
 			}
 			break;
-			case eShaderType::AnimPBR:
+		case eShaderType::AnimPBR:
 			{
 				modelType = eModelType::Skeletal;
 
@@ -127,6 +127,7 @@ namespace Kaka
 
 		inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
 		topology.Init(aGfx, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		topology.Bind(aGfx);
 		//rasterizer.Init(aGfx);
 		//depthStencil.Init(aGfx, DepthStencil::Mode::Write);
 	}
@@ -140,18 +141,18 @@ namespace Kaka
 	{
 		switch (modelType)
 		{
-			case eModelType::Static:
+		case eModelType::Static:
 			{
 				DrawStatic(aGfx);
 			}
 			break;
-			case eModelType::Skeletal:
+		case eModelType::Skeletal:
 			{
 				UpdatePtr(aDeltaTime);
 				DrawAnimated(aGfx);
 			}
 			break;
-			default: ;
+		default: ;
 		}
 	}
 
@@ -178,7 +179,6 @@ namespace Kaka
 			pixelShader->Bind(aGfx);
 		}
 		inputLayout.Bind(aGfx);
-		topology.Bind(aGfx);
 		//rasterizer.Bind(aGfx);
 		//depthStencil.Bind(aGfx);
 
@@ -197,10 +197,7 @@ namespace Kaka
 			mesh.vertexBuffer.Bind(aGfx);
 			mesh.indexBuffer.Bind(aGfx);
 
-			std::vector<unsigned short> indices;
-			indices = mesh.indices;
-
-			aGfx.DrawIndexed(static_cast<UINT>(std::size(indices)));
+			aGfx.DrawIndexed(mesh.indexBuffer.GetCount());
 		}
 
 		// Unbind shader resources
@@ -242,7 +239,7 @@ namespace Kaka
 
 			switch (shaderType)
 			{
-				case eShaderType::AnimPBR:
+			case eShaderType::AnimPBR:
 				{
 					// Bones
 					struct VSBoneConstant

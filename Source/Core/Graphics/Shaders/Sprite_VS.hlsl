@@ -13,9 +13,18 @@ struct VertexInput
     float3 normal : NORMAL;
     float3 tan : TANGENT;
     float3 bitan : BITANGENT;
-    matrix instanceTransform : INSTANCE_TRANSFORM;
-    float4 colour : INSTANCE_COLOUR;
+    uint instanceID : SV_InstanceID;
+	//matrix instanceTransform : INSTANCE_TRANSFORM;
+    //float4 colour : INSTANCE_COLOUR;
 };
+
+struct InstanceData
+{
+    matrix instanceTransform;
+    float4 colour;
+};
+
+StructuredBuffer<InstanceData> instanceDataBuffer : register(t11);
 
 struct PixelInput
 {
@@ -32,9 +41,8 @@ struct PixelInput
 PixelInput main(const VertexInput aInput)
 {
     PixelInput output;
-
     
-    const matrix instObjectToWorld = aInput.instanceTransform;
+    const matrix instObjectToWorld = instanceDataBuffer[aInput.instanceID].instanceTransform;
     const matrix instObjectToClip = mul(objectToClip, instObjectToWorld);
 
     const float3x3 objectToWorldRotation = objectToWorld;
@@ -45,7 +53,7 @@ PixelInput main(const VertexInput aInput)
     output.normal = mul(objectToWorldRotation, aInput.normal);
     output.tangent = mul(objectToWorldRotation, aInput.tan);
     output.bitan = mul(objectToWorldRotation, aInput.bitan);
-    output.colour = aInput.colour;
+    output.colour = instanceDataBuffer[aInput.instanceID].colour;
     output.worldNormal = aInput.normal;
     
     return output;

@@ -78,6 +78,8 @@ namespace Kaka
 		vfxPixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Sprite_PS.cso");
 		deferredPixelShader = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Sprite_Deferred_PS.cso");
 
+		computeShader = ShaderFactory::GetComputeShader(aGfx, L"Shaders\\DustParticles_CS.cso");
+
 		if (aIsVfx)
 		{
 			pixelShader = vfxPixelShader;
@@ -90,17 +92,16 @@ namespace Kaka
 		inputLayout.Init(aGfx, ied, vertexShader->GetBytecode());
 
 		instanceData.resize(aNumberOfSprites);
-		travelAngles.resize(aNumberOfSprites);
-		travelSpeeds.resize(aNumberOfSprites);
-		travelRadiuses.resize(aNumberOfSprites);
-		fadeSpeeds.resize(aNumberOfSprites);
-		alphas.resize(aNumberOfSprites);
+		std::vector<ParticleData> particleData = {};
+		particleData.resize(aNumberOfSprites);
+		instanceIds.resize(aNumberOfSprites);
 
 		std::random_device rd;
 		std::mt19937 gen(rd());
 
 		for (unsigned int i = 0; i < instanceData.size(); ++i)
 		{
+			instanceIds[i] = i;
 			// Set random position between -20, 0, -20 and 20, 0, 20
 			std::uniform_real_distribution<float> xDist(-150.0f, 130.0f);
 			std::uniform_real_distribution<float> yDist(0.0f, 80.0f);
@@ -110,34 +111,163 @@ namespace Kaka
 			std::uniform_real_distribution<float> fadeDist(5.0f, 10.0f);
 			float scale = distSize(gen);
 			instanceData[i].instanceTransform = DirectX::XMMatrixScaling(scale, scale, scale);
-			alphas[i] = alphaDist(gen);
-			instanceData[i].colour = {1.0f, 1.0f, 1.0f, alphas[i]};
+			particleData[i].colour = {1.0f, 1.0f, 1.0f, alphaDist(gen)};
+			instanceData[i].colour = particleData[i].colour;
 
 			SetPosition({xDist(gen), yDist(gen), zDist(gen)}, i);
-			startPositions.push_back(GetPosition(i));
+			particleData[i].startPosition = GetPosition(i);
 
 			std::uniform_real_distribution<float> radiusDist(0.5f, 10.0f);
 			std::uniform_real_distribution<float> speedDist(0.01f, 0.1f);
-			travelRadiuses[i] = radiusDist(gen);
-			travelSpeeds[i] = speedDist(gen);
-			travelAngles[i] = PI;
-			fadeSpeeds[i] = fadeDist(gen);
+			particleData[i].travelRadius = radiusDist(gen);
+			particleData[i].travelSpeed = speedDist(gen);
+			particleData[i].travelAngle = PI;
+			particleData[i].fadeSpeed = fadeDist(gen);
 		}
 
 		updateCounter += updateIncrease;
 
-		// Create instance buffer
-		D3D11_BUFFER_DESC instanceBufferDesc = {};
-
 		const unsigned int instanceCount = instanceData.size();
+		{
+			// Create instance buffer
+			D3D11_BUFFER_DESC instanceBufferDesc = {};
 
-		instanceBufferDesc.ByteWidth = sizeof(InstanceData) * instanceCount;
-		instanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-		instanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		instanceBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-		result = aGfx.pDevice->CreateBuffer(&instanceBufferDesc, nullptr, &instanceBuffer);
-		assert(SUCCEEDED(result));
+			instanceBufferDesc.ByteWidth = sizeof(unsigned int) * instanceCount;
+			instanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+			instanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+			instanceBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+			D3D11_SUBRESOURCE_DATA initData;
+			initData.pSysMem = instanceIds.data();
+			result = aGfx.pDevice->CreateBuffer(&instanceBufferDesc, nullptr, &instanceBuffer);
+			assert(SUCCEEDED(result));
+		}
+
+		/// ---------- [ Compute stuff ] ----------
+
+		/// Transform buffer
+
+		{
+			// Buffer in GPU memory
+
+			D3D11_BUFFER_DESC descGPUBuffer;
+			ZeroMemory(&descGPUBuffer, sizeof(descGPUBuffer));
+			descGPUBuffer.BindFlags = D3D11_BIND_UNORDERED_ACCESS |
+				D3D11_BIND_SHADER_RESOURCE;
+			descGPUBuffer.ByteWidth = sizeof(InstanceData) * instanceCount;
+			descGPUBuffer.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+			descGPUBuffer.StructureByteStride = sizeof(InstanceData);
+
+			D3D11_SUBRESOURCE_DATA initData;
+			initData.pSysMem = instanceData.data();
+			result = aGfx.pDevice->CreateBuffer(&descGPUBuffer, &initData, &instanceCompBuffer);
+			assert(SUCCEEDED(result));
+
+			// Shader view
+
+			D3D11_BUFFER_DESC descBuf;
+			ZeroMemory(&descBuf, sizeof(descBuf));
+			instanceCompBuffer->GetDesc(&descBuf);
+
+			D3D11_SHADER_RESOURCE_VIEW_DESC descView;
+			ZeroMemory(&descView, sizeof(descView));
+			descView.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
+			descView.BufferEx.FirstElement = 0;
+
+			descView.Format = DXGI_FORMAT_UNKNOWN;
+			descView.BufferEx.NumElements = descBuf.ByteWidth / descBuf.StructureByteStride;
+			result = aGfx.pDevice->CreateShaderResourceView(instanceCompBuffer, &descView, &srcTransformSRV);
+			assert(SUCCEEDED(result));
+
+			// Unordered access view
+
+			D3D11_BUFFER_DESC descUAVBuf;
+			ZeroMemory(&descUAVBuf, sizeof(descUAVBuf));
+			instanceCompBuffer->GetDesc(&descUAVBuf);
+
+			D3D11_UNORDERED_ACCESS_VIEW_DESC descUAVView;
+			ZeroMemory(&descUAVView, sizeof(descUAVView));
+			descUAVView.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+			descUAVView.Buffer.FirstElement = 0;
+
+			// Format must be must be DXGI_FORMAT_UNKNOWN, when creating 
+			// a View of a Structured Buffer
+			descUAVView.Format = DXGI_FORMAT_UNKNOWN;
+			descUAVView.Buffer.NumElements = descUAVBuf.ByteWidth / descUAVBuf.StructureByteStride;
+			result = aGfx.pDevice->CreateUnorderedAccessView(instanceCompBuffer, &descUAVView, &instanceUAV);
+			assert(SUCCEEDED(result));
+		}
+
+		/// Particle buffer
+
+		{
+			// Buffer in GPU memory
+
+			D3D11_BUFFER_DESC descGPUBuffer;
+			ZeroMemory(&descGPUBuffer, sizeof(descGPUBuffer));
+			descGPUBuffer.BindFlags = D3D11_BIND_UNORDERED_ACCESS |
+				D3D11_BIND_SHADER_RESOURCE;
+			descGPUBuffer.ByteWidth = sizeof(ParticleData) * instanceCount;
+			descGPUBuffer.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+			descGPUBuffer.StructureByteStride = sizeof(ParticleData);
+
+			D3D11_SUBRESOURCE_DATA initData;
+			initData.pSysMem = particleData.data();
+			result = aGfx.pDevice->CreateBuffer(&descGPUBuffer, &initData, &srcParticleCompBuffer);
+
+			// Shader view
+
+			D3D11_BUFFER_DESC descBuf;
+			ZeroMemory(&descBuf, sizeof(descBuf));
+			srcParticleCompBuffer->GetDesc(&descBuf);
+
+			D3D11_SHADER_RESOURCE_VIEW_DESC descView;
+			ZeroMemory(&descView, sizeof(descView));
+			descView.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
+			descView.BufferEx.FirstElement = 0;
+
+			descView.Format = DXGI_FORMAT_UNKNOWN;
+			descView.BufferEx.NumElements = descBuf.ByteWidth / descBuf.StructureByteStride;
+			result = aGfx.pDevice->CreateShaderResourceView(srcParticleCompBuffer, &descView, &srcParticleSRV);
+			assert(SUCCEEDED(result));
+		}
+
+		/// Output - Particle buffer
+
+		{
+			// Buffer in GPU memory
+
+			D3D11_BUFFER_DESC descGPUBuffer;
+			ZeroMemory(&descGPUBuffer, sizeof(descGPUBuffer));
+			descGPUBuffer.BindFlags = D3D11_BIND_UNORDERED_ACCESS |
+				D3D11_BIND_SHADER_RESOURCE;
+			descGPUBuffer.ByteWidth = sizeof(ParticleData) * instanceCount;
+			descGPUBuffer.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+			descGPUBuffer.StructureByteStride = sizeof(ParticleData);
+
+			D3D11_SUBRESOURCE_DATA initData;
+			initData.pSysMem = particleData.data();
+			result = aGfx.pDevice->CreateBuffer(&descGPUBuffer, &initData, &destParticleCompBuffer);
+
+			// Unordered access view
+
+			D3D11_BUFFER_DESC descBuf;
+			ZeroMemory(&descBuf, sizeof(descBuf));
+			destParticleCompBuffer->GetDesc(&descBuf);
+
+			D3D11_UNORDERED_ACCESS_VIEW_DESC descView;
+			ZeroMemory(&descView, sizeof(descView));
+			descView.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+			descView.Buffer.FirstElement = 0;
+
+			// Format must be must be DXGI_FORMAT_UNKNOWN, when creating 
+			// a View of a Structured Buffer
+			descView.Format = DXGI_FORMAT_UNKNOWN;
+			descView.Buffer.NumElements = descBuf.ByteWidth / descBuf.StructureByteStride;
+			result = aGfx.pDevice->CreateUnorderedAccessView(destParticleCompBuffer, &descView, &particleUAV);
+			assert(SUCCEEDED(result));
+		}
 	}
 
 	void Sprite::Draw(Graphics& aGfx)
@@ -149,10 +279,14 @@ namespace Kaka
 		ID3D11Buffer* bufferPointers[2];
 
 		strides[0] = sizeof(SpriteVertex);
-		strides[1] = sizeof(InstanceData);
+		strides[1] = sizeof(unsigned int);
 
 		offsets[0] = 0;
 		offsets[1] = 0;
+
+		//aGfx.pContext->CopyResource(instanceBuffer, instanceCompBuffer);
+
+		aGfx.pContext->VSSetShaderResources(11u, 1u, &srcTransformSRV);
 
 		bufferPointers[0] = vertexBuffer;
 		bufferPointers[1] = instanceBuffer;
@@ -167,14 +301,17 @@ namespace Kaka
 		TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
 		transformConstantBuffer.Bind(aGfx);
 
-		D3D11_MAPPED_SUBRESOURCE mappedResource = {};
-		aGfx.pContext->Map(instanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-		memcpy(
-			mappedResource.pData,
-			instanceData.data(),
-			sizeof(InstanceData) * instanceCount
-		);
-		aGfx.pContext->Unmap(instanceBuffer, 0);
+		//aGfx.pContext->UpdateSubresource(instanceBuffer, 0, nullptr, srcBufferTransform, 0, 0);
+
+
+		//D3D11_MAPPED_SUBRESOURCE mappedResource = {};
+		//aGfx.pContext->Map(instanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+		//memcpy(
+		//	mappedResource.pData,
+		//	instanceData.data(),
+		//	sizeof(InstanceData) * instanceCount
+		//);
+		//aGfx.pContext->Unmap(instanceBuffer, 0);
 
 		vertexShader->Bind(aGfx);
 		if (aGfx.HasPixelShaderOverride())
@@ -187,6 +324,10 @@ namespace Kaka
 		}
 
 		aGfx.DrawIndexedInstanced(6u, instanceCount);
+
+		ID3D11ShaderResourceView* ppSRVNULL[2] = {NULL, NULL};
+
+		aGfx.pContext->VSSetShaderResources(11u, 2u, ppSRVNULL);
 
 		// Unbind shader resources
 		ID3D11ShaderResourceView* nullSRVs[4] = {nullptr};
@@ -257,25 +398,26 @@ namespace Kaka
 
 	void Sprite::UpdateTransforms(const float aDeltaTime, const DirectX::XMVECTOR aCameraForward, const DirectX::XMVECTOR aCameraRight, const DirectX::XMVECTOR aCameraUp, int aUpdateStart, int aUpdateEnd)
 	{
-		for (; aUpdateStart < aUpdateEnd; ++aUpdateStart)
-		{
-			travelAngles[aUpdateStart] -= travelSpeeds[aUpdateStart] * aDeltaTime;
+		//for (; aUpdateStart < aUpdateEnd; ++aUpdateStart)
+		//{
+		//	particleData[aUpdateStart].travelAngle -= particleData[aUpdateStart].travelSpeed * aDeltaTime;
 
-			instanceData[aUpdateStart].instanceTransform.r[3].m128_f32[0] = travelRadiuses[aUpdateStart] * std::cos(travelAngles[aUpdateStart]) + startPositions[aUpdateStart].x;
-			instanceData[aUpdateStart].instanceTransform.r[3].m128_f32[2] = travelRadiuses[aUpdateStart] * std::sin(travelAngles[aUpdateStart]) + startPositions[aUpdateStart].z;
+		//	instanceData[aUpdateStart].instanceTransform.r[3].m128_f32[0] = particleData[aUpdateStart].travelRadius * std::cos(particleData[aUpdateStart].travelAngle) + particleData[aUpdateStart].startPosition.x;
+		//	instanceData[aUpdateStart].instanceTransform.r[3].m128_f32[1] = particleData[aUpdateStart].travelRadius * std::sin(particleData[aUpdateStart].travelAngle) + particleData[aUpdateStart].startPosition.y;
+		//	instanceData[aUpdateStart].instanceTransform.r[3].m128_f32[2] = particleData[aUpdateStart].travelRadius * std::sin(particleData[aUpdateStart].travelAngle) + particleData[aUpdateStart].startPosition.z;
 
-			if (travelAngles[aUpdateStart] > 2 * PI)
-			{
-				travelAngles[aUpdateStart] -= 2 * PI;
-			}
+		//	if (particleData[aUpdateStart].travelAngle > 2 * PI)
+		//	{
+		//		particleData[aUpdateStart].travelAngle -= 2 * PI;
+		//	}
 
-			instanceData[aUpdateStart].colour.w = std::clamp(cos(elapsedTime + fadeSpeeds[aUpdateStart]) * 0.5f + 0.5f, 0.0f, alphas[aUpdateStart]);
+		//	instanceData[aUpdateStart].colour.w = std::clamp(cos(elapsedTime + particleData[aUpdateStart].fadeSpeed) * 0.5f + 0.5f, 0.0f, particleData[aUpdateStart].colour.w);
 
-			// Set the rotation to face the camera
-			instanceData[aUpdateStart].instanceTransform.r[0] = aCameraRight;
-			instanceData[aUpdateStart].instanceTransform.r[1] = aCameraForward;
-			instanceData[aUpdateStart].instanceTransform.r[2] = aCameraUp;
-		}
+		//	// Set the rotation to face the camera
+		//	instanceData[aUpdateStart].instanceTransform.r[0] = aCameraRight;
+		//	instanceData[aUpdateStart].instanceTransform.r[1] = aCameraForward;
+		//	instanceData[aUpdateStart].instanceTransform.r[2] = aCameraUp;
+		//}
 	}
 
 	void Sprite::Update(const Graphics& aGfx, const float aDeltaTime)
@@ -293,14 +435,45 @@ namespace Kaka
 
 		elapsedTime += aDeltaTime;
 
-		constexpr int threadCount = 6;
+		particleConstants.elapsedTime = elapsedTime;
+		particleConstants.deltaTime = aDeltaTime;
+		particleConstants.cameraForward = cameraForward;
+		particleConstants.cameraRight = cameraRight;
+		particleConstants.cameraUp = cameraUp;
 
-		std::thread threads[threadCount];
-		for (int i = 0; i < threadCount; ++i)
-		{
-			threads[i] = std::thread(&Sprite::UpdateTransforms, this, aDeltaTime, cameraForward, cameraRight, cameraUp, i * (instanceCount / threadCount), (i + 1) * (instanceCount / threadCount));
-			threads[i].detach();
-		}
+		ComputeConstantBuffer<ParticleConstants> particleConstantBuffer{aGfx, 0u};
+		particleConstantBuffer.Update(aGfx, particleConstants);
+		particleConstantBuffer.Bind(aGfx);
+
+		ID3D11UnorderedAccessView* ppUAViewNULL[1] = {NULL};
+		ID3D11ShaderResourceView* ppSRVNULL[2] = {NULL, NULL};
+
+		computeShader->Bind(aGfx);
+
+		// Transform buffer - Slot 0
+		//aGfx.pContext->CSSetShaderResources(0u, 1u, &srcTransformSRV);
+		aGfx.pContext->CSSetUnorderedAccessViews(0u, 1u, &instanceUAV,NULL);
+		// Particle buffer - Slot 1
+		aGfx.pContext->CSSetShaderResources(1u, 1u, &srcParticleSRV);
+		aGfx.pContext->CSSetUnorderedAccessViews(1u, 1u, &particleUAV, NULL);
+
+		aGfx.pContext->Dispatch(1024u, 1u, 1u);
+
+		aGfx.pContext->CSSetShader(NULL, NULL, 0u);
+		aGfx.pContext->CSSetUnorderedAccessViews(0u, 1u, ppUAViewNULL, NULL);
+		aGfx.pContext->CSSetShaderResources(0u, 2u, ppSRVNULL);
+		aGfx.pContext->CSSetUnorderedAccessViews(1u, 1u, ppUAViewNULL, NULL);
+		aGfx.pContext->CSSetShaderResources(1u, 2u, ppSRVNULL);
+
+
+		//constexpr int threadCount = 6;
+
+		//std::thread threads[threadCount];
+		//for (int i = 0; i < threadCount; ++i)
+		//{
+		//	threads[i] = std::thread(&Sprite::UpdateTransforms, this, aDeltaTime, cameraForward, cameraRight, cameraUp, i * (instanceCount / threadCount), (i + 1) * (instanceCount / threadCount));
+		//	threads[i].detach();
+		//}
 
 		//for (int i = 0; i < 20; ++i)
 		//{
