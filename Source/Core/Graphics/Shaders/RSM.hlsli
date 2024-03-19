@@ -92,9 +92,9 @@ float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Text
         for (int i = 0; i < 151; i++)	// Sum contributions of sampling locations
         {
             const float2 coord = aUv + aRMax * POISSON_DISK_151[i];
-            const float3 xp = aWorldPosTex.Sample(clampedSampler, coord).xyz; // Position (x_p) and normal (n_p) are in world coordinates too
-            const float3 flux = aFluxTex.Sample(clampedSampler, coord).rgb; // Collect components from corresponding RSM textures
-            const float3 np = normalize(2.0f * aNormalTex.Sample(clampedSampler, coord).xyz - 1.0f);
+            const float3 xp = aWorldPosTex.Sample(linearSampler, coord).xyz; // Position (x_p) and normal (n_p) are in world coordinates too
+            const float3 flux = aFluxTex.Sample(linearSampler, coord).rgb; // Collect components from corresponding RSM textures
+            const float3 np = normalize(2.0f * aNormalTex.Sample(linearSampler, coord).xyz - 1.0f);
 
             float3 Ep = flux * ((max(0, dot(np, aX - xp)) * max(0, dot(aN, xp - aX)))
 									/ pow(length(aX - xp), 4));
@@ -143,9 +143,9 @@ float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Text
             const float2 coord = aUv + float2(r * cos(theta), r * sin(theta));
             const float weight = offset.x * offset.x;
 
-            const float3 xp = aWorldPosTex.Sample(clampedSampler, coord).xyz; // Position (x_p) and normal (n_p) are in world coordinates too
-            const float3 flux = aFluxTex.Sample(clampedSampler, coord).rgb; // Collect components from corresponding RSM textures
-            const float3 np = normalize(2.0f * aNormalTex.Sample(clampedSampler, coord).xyz - 1.0f);
+            const float3 xp = aWorldPosTex.Sample(linearSampler, coord).xyz; // Position (x_p) and normal (n_p) are in world coordinates too
+            const float3 flux = aFluxTex.Sample(linearSampler, coord).rgb; // Collect components from corresponding RSM textures
+            const float3 np = normalize(2.0f * aNormalTex.Sample(linearSampler, coord).xyz - 1.0f);
 
             float3 Ep = flux * ((max(0, dot(np, aX - xp)) * max(0, dot(aN, xp - aX)))
 									/ pow(length(aX - xp), 4));

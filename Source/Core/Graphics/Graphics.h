@@ -210,7 +210,7 @@ namespace Kaka
 
 		Microsoft::WRL::ComPtr<ID3D11SamplerState> pDefaultSampler;
 		Microsoft::WRL::ComPtr<ID3D11SamplerState> pShadowSampler;
-		Microsoft::WRL::ComPtr<ID3D11SamplerState> pClampedSampler;
+		Microsoft::WRL::ComPtr<ID3D11SamplerState> pLinearClampedSampler;
 		//Microsoft::WRL::ComPtr<ID3D11SamplerState> pShadowCompSampler;
 		Microsoft::WRL::ComPtr<ID3D11SamplerState> pVFXSampler;
 
