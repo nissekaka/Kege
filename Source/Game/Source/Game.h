@@ -211,7 +211,8 @@ namespace Kaka
 		struct TAABuffer
 		{
 			unsigned int mode = 0u;
-			float padding[3];
+			float denoise = 3.0f;
+			float padding[2];
 		} taaBuffer;
 
 		//struct HammerDataDirectional

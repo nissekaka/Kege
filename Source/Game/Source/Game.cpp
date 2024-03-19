@@ -674,6 +674,7 @@ namespace Kaka
 				ImGui::SetNextItemWidth(100);
 				ImGui::SliderFloat("Bloom threshold", &wnd.Gfx().bb.bloomThreshold, 0.0f, 1.0f);
 				ImGui::DragInt("TAA Mode", (int*)&taaBuffer.mode, 1, 0, 2);
+				ImGui::DragFloat("Denoise strength", &taaBuffer.denoise, 0.01f, 0.0f, 10.0f, "%.2f");
 			}
 			ImGui::End();
 
