@@ -67,7 +67,6 @@ float4 main(PixelInput aInput) : SV_TARGET
         }
     }
 
-
     colour.a *= spotlightAlpha * aInput.colour.a;
 
     return float4(colour);

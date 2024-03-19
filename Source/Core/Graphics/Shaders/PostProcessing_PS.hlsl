@@ -17,18 +17,41 @@ cbuffer Parameters : register(b1)
     float3 blackpoint;
     float contrast;
     float saturation;
+    float blur;
 };
 
 float4 main(const PixelInput aInput) : SV_TARGET
 {
-    const float4 colour = fullscreenTexture.Sample(defaultSampler, aInput.texCoord).rgba;
+    float4 colour = fullscreenTexture.Sample(defaultSampler, aInput.texCoord).rgba;
 
 	if (colour.a < 0.1f)
     {
         discard;
     }
 
-	const float4 bloom = bloomSampleTexture.Sample(defaultSampler, aInput.texCoord).rgba;
+    float4 bloom = bloomSampleTexture.Sample(defaultSampler, aInput.texCoord).rgba;
+
+    // Blur
+    const float twoPi = 6.28318530718; // Pi*2
+    
+    const float directions = 16.0; // BLUR DIRECTIONS (Default 16.0 - More is better but slower)
+    const float quality = 3.0; // BLUR QUALITY (Default 4.0 - More is better but slower)
+
+    const float2 radius = blur / clientResolution.xy;
+    
+    // Blur calculations
+    for (float d = 0.0; d < twoPi; d += twoPi / directions)
+    {
+        for (float i = 1.0 / quality; i <= 1.0; i += 1.0 / quality)
+        {
+            colour += fullscreenTexture.Sample(defaultSampler, aInput.texCoord + float2(cos(d), sin(d)) * radius * i);
+            bloom += bloomSampleTexture.Sample(defaultSampler, aInput.texCoord + float2(cos(d), sin(d)) * radius * i);
+        }
+    }
+    
+    // Output to screen
+    colour /= quality * directions - 15.0f;
+    bloom /= quality * directions - 15.0f;
 
     float3 newColour = colour + bloom;
 

@@ -56,7 +56,28 @@ float2 Hammersley(const uint aI, const uint aN)
     return float2(float(aI) / float(aN), float(BitfieldReverse(aI)) * 2.3283064365386963e-10);
 }
 
-float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Texture2D aWorldPosTex, Texture2D aFluxTex, Texture2D aNormalTex, const bool aUsePoisson, const float aRMax, const uint aSampleCount, const float aIntensity, const uint aType)
+float IGN(float2 pixel)
+{
+    return fmod(52.9829189f * fmod(0.06711056f * float(pixel.x) + 0.00583715f * float(pixel.y), 1.0f), 1.0f);
+}
+
+float2 hash22(float2 p)
+{
+    float3 p3 = frac(float3(p.xyx) * float3(.1031, .1030, .0973));
+    p3 += dot(p3, p3.yzx + 33.33);
+    return frac((p3.xx + p3.yz) * p3.zy);
+
+}
+
+float2 hash23(float3 p3)
+{
+    p3 = frac(p3 * float3(.1031, .1030, .0973));
+    p3 += dot(p3, p3.yzx + 33.33);
+    return frac((p3.xx + p3.yz) * p3.zy);
+}
+
+
+float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Texture2D aWorldPosTex, Texture2D aFluxTex, Texture2D aNormalTex, const bool aUsePoisson, const float aRMax, const uint aSampleCount, const float aIntensity, const uint aType, const float2 aPixel)
 {
     // The irradiance at a surface point x with normal n due to pixel light p is
     //
@@ -85,11 +106,19 @@ float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Text
     }
     else
     {
+        float2 pixel = aPixel;
+        float2 o = hash23(float3(pixel.x, pixel.y, currentTime * 1000.0f));
+        //float2 o2 = IGN(pixel) + hash22(float2(currentTime * 1000.0f, 0.f));
+
 		[loop]
         for (uint i = 0; i < aSampleCount; i++)	// Sum contributions of sampling locations
         {
             //float2 offset = mul(Hammersley(i, sampleCount), rot);
             float2 offset = Hammersley(i, aSampleCount);
+ 
+
+            offset.xy += o;
+            offset.xy = fmod(offset.xy, 1.0f);
             //float2 offset;
 
             //if (aType == 0)

@@ -23,6 +23,8 @@ namespace Kaka
 		void SetDownsamplePS();
 		void SetUpsamplePS();
 		void SetPostProcessPS();
+		void SetFullscreenPS();
+		void SetTemporalAliasingPS();
 
 	private:
 		VertexBuffer vertexBuffer = {};
@@ -32,6 +34,8 @@ namespace Kaka
 		PixelShader* postProcessPS = nullptr;
 		PixelShader* downsamplePS = nullptr;
 		PixelShader* upsamplePS = nullptr;
+		PixelShader* fullscreenPS = nullptr;
+		PixelShader* temporalAliasingPS = nullptr;
 
 		PixelShader* currentPS = nullptr;
 

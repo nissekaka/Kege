@@ -372,6 +372,56 @@ namespace Kaka
 			rsmTexture->Release();
 		}
 
+		// Fullscreen
+		{
+			ID3D11Texture2D* fullTexture;
+			D3D11_TEXTURE2D_DESC fullDesc = {0};
+			fullDesc.Width = width;
+			fullDesc.Height = height;
+			fullDesc.MipLevels = 1u;
+			fullDesc.ArraySize = 1u;
+			fullDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+			fullDesc.SampleDesc.Count = 1u;
+			fullDesc.SampleDesc.Quality = 0u;
+			fullDesc.Usage = D3D11_USAGE_DEFAULT;
+			fullDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+			fullDesc.CPUAccessFlags = 0u;
+			fullDesc.MiscFlags = 0u;
+			result = pDevice->CreateTexture2D(&fullDesc, nullptr, &fullTexture);
+			assert(SUCCEEDED(result));
+			result = pDevice->CreateShaderResourceView(fullTexture, nullptr, &fullscreen.pResource);
+			assert(SUCCEEDED(result));
+			result = pDevice->CreateRenderTargetView(fullTexture, nullptr, &fullscreen.pTarget);
+			assert(SUCCEEDED(result));
+
+			fullTexture->Release();
+		}
+
+		// TAA
+		{
+			ID3D11Texture2D* taaTexture;
+			D3D11_TEXTURE2D_DESC taaDesc = {0};
+			taaDesc.Width = width;
+			taaDesc.Height = height;
+			taaDesc.MipLevels = 1u;
+			taaDesc.ArraySize = 1u;
+			taaDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+			taaDesc.SampleDesc.Count = 1u;
+			taaDesc.SampleDesc.Quality = 0u;
+			taaDesc.Usage = D3D11_USAGE_DEFAULT;
+			taaDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+			taaDesc.CPUAccessFlags = 0u;
+			taaDesc.MiscFlags = 0u;
+			result = pDevice->CreateTexture2D(&taaDesc, nullptr, &taaTexture);
+			assert(SUCCEEDED(result));
+			result = pDevice->CreateShaderResourceView(taaTexture, nullptr, &temporalAliasing.pResource);
+			assert(SUCCEEDED(result));
+			result = pDevice->CreateRenderTargetView(taaTexture, nullptr, &temporalAliasing.pTarget);
+			assert(SUCCEEDED(result));
+
+			taaTexture->Release();
+		}
+
 		// TODO bools
 		CreateBlendStates();
 		CreateDepthStencilStates();
@@ -415,7 +465,7 @@ namespace Kaka
 		}
 
 		constexpr float colour[] = {0.0f, 0.0f, 0.0f, 0.0f};
-		pContext->ClearRenderTargetView(pDefaultTarget.Get(), colour);
+		//pContext->ClearRenderTargetView(pDefaultTarget.Get(), colour);
 		pContext->ClearRenderTargetView(postProcessing.pTarget.Get(), colour);
 		pContext->ClearRenderTargetView(rsmDownscaleDirectional.pTarget.Get(), colour);
 		pContext->ClearRenderTargetView(rsmFullscaleDirectional.pTarget.Get(), colour);
@@ -479,50 +529,60 @@ namespace Kaka
 
 		switch (aRenderTargetType)
 		{
-		case eRenderTargetType::None:
+			case eRenderTargetType::None:
 			{
 				pContext->OMSetRenderTargets(0u, nullptr, aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::Default:
+			case eRenderTargetType::Default:
 			{
 				pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::WaterReflect:
+			case eRenderTargetType::WaterReflect:
 			{
 				pContext->OMSetRenderTargets(1u, renderWaterReflect.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::PostProcessing:
+			case eRenderTargetType::PostProcessing:
 			{
 				pContext->OMSetRenderTargets(1u, postProcessing.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::RSMDownscaleDirectional:
+			case eRenderTargetType::RSMDownscaleDirectional:
 			{
 				pContext->OMSetRenderTargets(1u, rsmDownscaleDirectional.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
-		case eRenderTargetType::RSMDownscaleSpot:
+			case eRenderTargetType::RSMDownscaleSpot:
 			{
 				pContext->OMSetRenderTargets(1u, rsmDownscaleSpot.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::RSMFullscaleDirectional:
+			case eRenderTargetType::RSMFullscaleDirectional:
 			{
 				pContext->OMSetRenderTargets(1u, rsmFullscaleDirectional.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::RSMFullscaleSpot:
+			case eRenderTargetType::RSMFullscaleSpot:
 			{
 				pContext->OMSetRenderTargets(1u, rsmFullscaleSpot.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		//case eRenderTargetType::ShadowMap:
-		//{
-		//	pContext->OMSetRenderTargets(0u, nullptr, aUseDepth ? rsmBuffer.GetDepthStencilView() : NULL);
-		//}
-		//break;
+			case eRenderTargetType::Fullscreen:
+			{
+				pContext->OMSetRenderTargets(1u, fullscreen.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
+			}
+			break;
+			case eRenderTargetType::TAA:
+			{
+				pContext->OMSetRenderTargets(1u, temporalAliasing.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
+			}
+			break;
+			//case eRenderTargetType::ShadowMap:
+			//{
+			//	pContext->OMSetRenderTargets(0u, nullptr, aUseDepth ? rsmBuffer.GetDepthStencilView() : NULL);
+			//}
+			//break;
 		}
 	}
 
@@ -532,51 +592,61 @@ namespace Kaka
 
 		switch (aRenderTargetType)
 		{
-		case eRenderTargetType::None:
+			case eRenderTargetType::None:
 			{
 				pContext->OMSetRenderTargets(0u, nullptr, aDepth);
 			}
 			break;
-		case eRenderTargetType::Default:
+			case eRenderTargetType::Default:
 			{
 				pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::WaterReflect:
+			case eRenderTargetType::WaterReflect:
 			{
 				pContext->OMSetRenderTargets(1u, renderWaterReflect.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::PostProcessing:
+			case eRenderTargetType::PostProcessing:
 			{
 				pContext->OMSetRenderTargets(1u, postProcessing.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::RSMDownscaleDirectional:
+			case eRenderTargetType::RSMDownscaleDirectional:
 			{
 				pContext->OMSetRenderTargets(1u, rsmDownscaleDirectional.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::RSMDownscaleSpot:
+			case eRenderTargetType::RSMDownscaleSpot:
 			{
 				pContext->OMSetRenderTargets(1u, rsmDownscaleSpot.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::RSMFullscaleDirectional:
+			case eRenderTargetType::RSMFullscaleDirectional:
 			{
 				pContext->OMSetRenderTargets(1u, rsmFullscaleDirectional.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::RSMFullscaleSpot:
+			case eRenderTargetType::RSMFullscaleSpot:
 			{
 				pContext->OMSetRenderTargets(1u, rsmFullscaleSpot.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		//case eRenderTargetType::ShadowMap:
-		//{
-		//	pContext->OMSetRenderTargets(0u, nullptr, rsmBuffer.GetDepthStencilView());
-		//}
-		//break;
+			case eRenderTargetType::Fullscreen:
+			{
+				pContext->OMSetRenderTargets(1u, fullscreen.pTarget.GetAddressOf(), aDepth);
+			}
+			break;
+			case eRenderTargetType::TAA:
+			{
+				pContext->OMSetRenderTargets(1u, temporalAliasing.pTarget.GetAddressOf(), aDepth);
+			}
+			break;
+			//case eRenderTargetType::ShadowMap:
+			//{
+			//	pContext->OMSetRenderTargets(0u, nullptr, rsmBuffer.GetDepthStencilView());
+			//}
+			//break;
 		}
 	}
 
@@ -653,13 +723,13 @@ namespace Kaka
 
 			aPostProcessor.SetPostProcessPS();
 
-			pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), nullptr);
+			pContext->OMSetRenderTargets(1u, fullscreen.pTarget.GetAddressOf(), nullptr);
 			pContext->PSSetShaderResources(0u, 1u, postProcessing.pResource.GetAddressOf());
 			pContext->PSSetShaderResources(1u, 1u, bloomDownscale[0].pResource.GetAddressOf());
 		}
 		else
 		{
-			pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), nullptr);
+			pContext->OMSetRenderTargets(1u, fullscreen.pTarget.GetAddressOf(), nullptr);
 			pContext->PSSetShaderResources(0u, 1u, postProcessing.pResource.GetAddressOf());
 			ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
 			pContext->PSSetShaderResources(1u, 1, nullSRVs);
@@ -670,22 +740,22 @@ namespace Kaka
 	{
 		switch (aBlendState)
 		{
-		case eBlendStates::Disabled:
+			case eBlendStates::Disabled:
 			{
 				pContext->OMSetBlendState(pBlendStates[(int)eBlendStates::Disabled].Get(), nullptr, 0x0f);
 			}
 			break;
-		case eBlendStates::Alpha:
+			case eBlendStates::Alpha:
 			{
 				pContext->OMSetBlendState(pBlendStates[(int)eBlendStates::Alpha].Get(), nullptr, 0x0f);
 			}
 			break;
-		case eBlendStates::VFX:
+			case eBlendStates::VFX:
 			{
 				pContext->OMSetBlendState(pBlendStates[(int)eBlendStates::VFX].Get(), nullptr, 0x0f);
 			}
 			break;
-		case eBlendStates::Additive:
+			case eBlendStates::Additive:
 			{
 				pContext->OMSetBlendState(pBlendStates[(int)eBlendStates::Additive].Get(), nullptr, 0x0f);
 			}
@@ -697,27 +767,27 @@ namespace Kaka
 	{
 		switch (aDepthStencilState)
 		{
-		case eDepthStencilStates::Normal:
+			case eDepthStencilStates::Normal:
 			{
 				pContext->OMSetDepthStencilState(pDepthStencilStates[(int)eDepthStencilStates::Normal].Get(), 0u);
 			}
 			break;
-		case eDepthStencilStates::ReadOnlyGreater:
+			case eDepthStencilStates::ReadOnlyGreater:
 			{
 				pContext->OMSetDepthStencilState(pDepthStencilStates[(int)eDepthStencilStates::ReadOnlyGreater].Get(), 0u);
 			}
 			break;
-		case eDepthStencilStates::ReadOnlyLessEqual:
+			case eDepthStencilStates::ReadOnlyLessEqual:
 			{
 				pContext->OMSetDepthStencilState(pDepthStencilStates[(int)eDepthStencilStates::ReadOnlyLessEqual].Get(), 0u);
 			}
 			break;
-		case eDepthStencilStates::ReadOnlyEmpty:
+			case eDepthStencilStates::ReadOnlyEmpty:
 			{
 				pContext->OMSetDepthStencilState(pDepthStencilStates[(int)eDepthStencilStates::ReadOnlyEmpty].Get(), 0u);
 			}
 			break;
-		default: ;
+			default: ;
 		}
 	}
 
@@ -725,22 +795,22 @@ namespace Kaka
 	{
 		switch (aRasterizerState)
 		{
-		case eRasterizerStates::BackfaceCulling:
+			case eRasterizerStates::BackfaceCulling:
 			{
 				pContext->RSSetState(pRasterizerStates[(int)eRasterizerStates::BackfaceCulling].Get());
 			}
 			break;
-		case eRasterizerStates::FrontfaceCulling:
+			case eRasterizerStates::FrontfaceCulling:
 			{
 				pContext->RSSetState(pRasterizerStates[(int)eRasterizerStates::FrontfaceCulling].Get());
 			}
 			break;
-		case eRasterizerStates::NoCulling:
+			case eRasterizerStates::NoCulling:
 			{
 				pContext->RSSetState(pRasterizerStates[(int)eRasterizerStates::NoCulling].Get());
 			}
 			break;
-		default: ;
+			default: ;
 		}
 	}
 

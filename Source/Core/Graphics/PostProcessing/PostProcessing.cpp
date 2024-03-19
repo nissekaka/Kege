@@ -17,6 +17,8 @@ namespace Kaka
 
 		downsamplePS = ShaderFactory::GetPixelShader(aGfx, L"Shaders/Downsample_PS.cso");
 		upsamplePS = ShaderFactory::GetPixelShader(aGfx, L"Shaders/Upsample_PS.cso");
+		fullscreenPS = ShaderFactory::GetPixelShader(aGfx, L"Shaders/Fullscreen_PS.cso");
+		temporalAliasingPS = ShaderFactory::GetPixelShader(aGfx, L"Shaders/TAA_PS.cso");
 
 		currentPS = postProcessPS;
 
@@ -108,5 +110,15 @@ namespace Kaka
 	void PostProcessing::SetPostProcessPS()
 	{
 		currentPS = postProcessPS;
+	}
+
+	void PostProcessing::SetFullscreenPS()
+	{
+		currentPS = fullscreenPS;
+	}
+
+	void PostProcessing::SetTemporalAliasingPS()
+	{
+		currentPS = temporalAliasingPS;
 	}
 }

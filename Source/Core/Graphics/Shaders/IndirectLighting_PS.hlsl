@@ -16,7 +16,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
     {
         const float2 uv = aInput.position.xy / clientResolution.xy / uvScale;
 
-        //const float3 albedo = gColourTex.Sample(defaultSampler, uv).rgb;
+        const float3 albedo = gColourTex.Sample(defaultSampler, uv).rgb;
         const float3 worldPosition = gWorldPositionTex.Sample(defaultSampler, uv).rgb;
         const float3 normal = normalize(2.0f * gNormalTex.Sample(defaultSampler, uv).xyz - 1.0f);
 
@@ -27,7 +27,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
 
         rsm = IndirectLighting(sampleUV, normal, worldPosition,
                                         rsmWorldPositionTex, rsmFluxTex, rsmNormalTex,
-                                        usePoissonRSM, rMax, sampleCount, rsmIntensity, type); // * albedo;
+                                        usePoissonRSM, rMax, sampleCount, rsmIntensity, type, aInput.position.xy) * albedo;
     }
     else
     {
@@ -116,7 +116,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
         //{
             if (accumWeight <= weightMax)
             {
-                //const float3 albedo = gColourTex.Sample(defaultSampler, uv).rgb;
+                const float3 albedo = gColourTex.Sample(defaultSampler, uv).rgb;
 
                 if (mode == 0)
                 {
@@ -127,8 +127,8 @@ float4 main(const PixelInput aInput) : SV_TARGET
 
                     rsm = IndirectLighting(sampleUV, normal, worldPosition,
                                         rsmWorldPositionTex, rsmFluxTex, rsmNormalTex,
-                                        usePoissonRSM, rMax, sampleCountLastPass, rsmIntensity, 2u);
-                }
+                                        usePoissonRSM, rMax, sampleCountLastPass, rsmIntensity, 2u, aInput.position.xy) * albedo;
+            }
                 if (mode == 1)
                 {
                     const float3 albedo = gColourTex.Sample(defaultSampler, uv).rgb;
@@ -140,8 +140,8 @@ float4 main(const PixelInput aInput) : SV_TARGET
 
                     rsm = IndirectLighting(sampleUV, normal, worldPosition,
                                         rsmWorldPositionTex, rsmFluxTex, rsmNormalTex,
-                                        usePoissonRSM, rMax, sampleCountLastPass, rsmIntensity, 2u) * albedo;
-                }
+                                        usePoissonRSM, rMax, sampleCountLastPass, rsmIntensity, 2u, aInput.position.xy) * albedo;
+            }
                 if (mode == 2)
                 {
                     rsm = float3(1.0f, 0.0f, 0.0f); // Red debug colour
@@ -149,5 +149,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
             }
         //}
     }
-    return float4(rsm, 1.0f);
+
+    float alpha = length(rsm) > 0.0f ? 1.0f : 0.0f;
+    return float4(rsm, alpha);
 }

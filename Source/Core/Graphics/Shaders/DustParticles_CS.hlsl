@@ -33,26 +33,30 @@ RWStructuredBuffer<ParticleData> particleData : register(u1);
 [numthreads(1024, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
 {
-	const uint updateIndex = DTid.x;
-
-    // Update particle properties
-    particleData[updateIndex].travelAngle -= particleData[updateIndex].travelSpeed * deltaTime;
-
-    matrix transform = transpose(instanceData[updateIndex].instanceTransform);
-
-    transform[3][0] = particleData[updateIndex].travelRadius * cos(particleData[updateIndex].travelAngle) + particleData[updateIndex].startPosition.x;
-    transform[3][1] = particleData[updateIndex].travelRadius * sin(particleData[updateIndex].travelAngle) + particleData[updateIndex].startPosition.y;
-    transform[3][2] = particleData[updateIndex].travelRadius * sin(particleData[updateIndex].travelAngle) + particleData[updateIndex].startPosition.z;
-    transform[0] = cameraRight;
-    transform[1] = cameraForward;
-    transform[2] = cameraUp;
-
-    instanceData[updateIndex].instanceTransform = transpose(transform);
-
-    if (particleData[updateIndex].travelAngle > 2 * PI)
+    [unroll(2)]
+    for (int i = 0; i < 2; ++i)
     {
-        particleData[updateIndex].travelAngle -= 2 * PI;
-    }
+        const uint updateIndex = DTid.x + 1048576 * i;
 
-    instanceData[updateIndex].colour.w = clamp(cos(elapsedTime + particleData[updateIndex].fadeSpeed) * 0.5 + 0.5, 0.0, particleData[updateIndex].colour.w);
+		// Update particle properties
+        particleData[updateIndex].travelAngle -= particleData[updateIndex].travelSpeed * deltaTime;
+
+        matrix transform = transpose(instanceData[updateIndex].instanceTransform);
+
+        transform[3][0] = particleData[updateIndex].travelRadius * cos(particleData[updateIndex].travelAngle) + particleData[updateIndex].startPosition.x;
+        transform[3][1] = particleData[updateIndex].travelRadius * sin(particleData[updateIndex].travelAngle) + particleData[updateIndex].startPosition.y;
+        transform[3][2] = particleData[updateIndex].travelRadius * sin(particleData[updateIndex].travelAngle) + particleData[updateIndex].startPosition.z;
+        transform[0] = cameraRight;
+        transform[1] = cameraForward;
+        transform[2] = cameraUp;
+
+        instanceData[updateIndex].instanceTransform = transpose(transform);
+
+        if (particleData[updateIndex].travelAngle > 2 * PI)
+        {
+            particleData[updateIndex].travelAngle -= 2 * PI;
+        }
+
+        instanceData[updateIndex].colour.w = clamp(cos(elapsedTime + particleData[updateIndex].fadeSpeed) * 0.5 + 0.5, 0.0, particleData[updateIndex].colour.w);
+    }
 }

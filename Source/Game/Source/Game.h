@@ -113,7 +113,8 @@ namespace Kaka
 			DirectX::XMFLOAT3 blackpoint; // Blackpoint adjustment
 			float contrast; // Contrast adjustment
 			float saturation; // Saturation adjustment
-			float padding[3];
+			float blur; // Blur adjustment
+			float padding[2];
 		};
 
 		PostProcessingBuffer ppBuffer = {};
@@ -203,27 +204,33 @@ namespace Kaka
 
 		//ID3D11ShaderResourceView* hammersleySRV = nullptr;
 
-		static constexpr unsigned int HAMMERSLEY_DIR_COUNT = 512u;
-		static constexpr unsigned int HAMMERSLEY_SPOT_COUNT = 128u;
-		static constexpr unsigned int HAMMERSLEY_FINAL_COUNT = 64u;
+		static constexpr unsigned int HAMMERSLEY_DIR_COUNT = 4u;
+		static constexpr unsigned int HAMMERSLEY_SPOT_COUNT = 2u;
+		static constexpr unsigned int HAMMERSLEY_FINAL_COUNT = 0u;
 
-		struct HammerDataDirectional
+		struct TAABuffer
 		{
-			float x[HAMMERSLEY_DIR_COUNT] = {};
-			float y[HAMMERSLEY_DIR_COUNT] = {};
-		} hammerDataDirectional;
+			unsigned int mode = 0u;
+			float padding[3];
+		} taaBuffer;
 
-		struct HammerDataSpot
-		{
-			float x[HAMMERSLEY_SPOT_COUNT] = {};
-			float y[HAMMERSLEY_SPOT_COUNT] = {};
-		} hammerDataSpot;
+		//struct HammerDataDirectional
+		//{
+		//	float x[HAMMERSLEY_DIR_COUNT] = {};
+		//	float y[HAMMERSLEY_DIR_COUNT] = {};
+		//} hammerDataDirectional;
 
-		struct HammerDataFinal
-		{
-			float x[HAMMERSLEY_FINAL_COUNT] = {};
-			float y[HAMMERSLEY_FINAL_COUNT] = {};
-		} hammerDataFinal;
+		//struct HammerDataSpot
+		//{
+		//	float x[HAMMERSLEY_SPOT_COUNT] = {};
+		//	float y[HAMMERSLEY_SPOT_COUNT] = {};
+		//} hammerDataSpot;
+
+		//struct HammerDataFinal
+		//{
+		//	float x[HAMMERSLEY_FINAL_COUNT] = {};
+		//	float y[HAMMERSLEY_FINAL_COUNT] = {};
+		//} hammerDataFinal;
 
 		//struct HammersleyData
 		//{
@@ -236,8 +243,8 @@ namespace Kaka
 		//	float padding = {};
 		//} hData;
 
-		PixelConstantBuffer<HammerDataDirectional> hammersleyDirectionalBuffer{wnd.Gfx(), 5u};
-		PixelConstantBuffer<HammerDataSpot> hammersleySpotBuffer{wnd.Gfx(), 6u};
-		PixelConstantBuffer<HammerDataFinal> hammersleyFinalBuffer{wnd.Gfx(), 7u};
+		//PixelConstantBuffer<HammerDataDirectional> hammersleyDirectionalBuffer{wnd.Gfx(), 5u};
+		//PixelConstantBuffer<HammerDataSpot> hammersleySpotBuffer{wnd.Gfx(), 6u};
+		//PixelConstantBuffer<HammerDataFinal> hammersleyFinalBuffer{wnd.Gfx(), 7u};
 	};
 }

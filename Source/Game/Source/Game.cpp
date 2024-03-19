@@ -73,6 +73,7 @@ namespace Kaka
 		ppBuffer.exposure = 0.0f;
 		ppBuffer.contrast = 1.0f;
 		ppBuffer.saturation = 1.0f;
+		ppBuffer.blur = 0.0f;
 
 		skybox.Init(wnd.Gfx(), "Assets\\Textures\\Skybox\\Miramar\\", "Assets\\Textures\\Skybox\\Kurt\\");
 
@@ -89,7 +90,10 @@ namespace Kaka
 		flashlightTexture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\Flashlight_cookie.png", 5u);
 		// 524288 * 4 = 2 097 152
 		// 524288 * 2 = 1 048 576
-		dustParticles.Init(wnd.Gfx(), 0.0125f, 1048576u, true, "Assets\\Textures\\particle.png");
+		// 2097152 * 2 = 4 194 304
+		// 4194304 * 2 = 8 388 608
+		dustParticles.Init(wnd.Gfx(), 0.0125f, 2097152, true, "Assets\\Textures\\particle.png");
+		//dustParticles.Init(wnd.Gfx(), 0.0125f, 1048576u, true, "Assets\\Textures\\particle.png");
 		//smokeParticles.Init(wnd.Gfx(), 25.0f, 1000u, true, "Assets\\Textures\\SpriteCloud.png");
 
 		// Flashlight setup
@@ -205,30 +209,30 @@ namespace Kaka
 		//	hData.pointsFinal[i] = (Hammersley(i, hData.finalCount));
 		//}
 
-		for (int i = 0; i < HAMMERSLEY_DIR_COUNT; ++i)
-		{
-			const DirectX::XMFLOAT2 point = Hammersley(i, HAMMERSLEY_DIR_COUNT);
-			hammerDataDirectional.x[i] = point.x;
-			hammerDataDirectional.y[i] = point.y;
-		}
+		//for (int i = 0; i < HAMMERSLEY_DIR_COUNT; ++i)
+		//{
+		//	const DirectX::XMFLOAT2 point = Hammersley(i, HAMMERSLEY_DIR_COUNT);
+		//	hammerDataDirectional.x[i] = point.x;
+		//	hammerDataDirectional.y[i] = point.y;
+		//}
 
-		for (int i = 0; i < HAMMERSLEY_SPOT_COUNT; ++i)
-		{
-			const DirectX::XMFLOAT2 point = Hammersley(i, HAMMERSLEY_SPOT_COUNT);
-			hammerDataSpot.x[i] = point.x;
-			hammerDataSpot.y[i] = point.y;
-		}
+		//for (int i = 0; i < HAMMERSLEY_SPOT_COUNT; ++i)
+		//{
+		//	const DirectX::XMFLOAT2 point = Hammersley(i, HAMMERSLEY_SPOT_COUNT);
+		//	hammerDataSpot.x[i] = point.x;
+		//	hammerDataSpot.y[i] = point.y;
+		//}
 
-		for (int i = 0; i < HAMMERSLEY_FINAL_COUNT; ++i)
-		{
-			const DirectX::XMFLOAT2 point = Hammersley(i, HAMMERSLEY_FINAL_COUNT);
-			hammerDataFinal.x[i] = point.x;
-			hammerDataFinal.y[i] = point.y;
-		}
+		//for (int i = 0; i < HAMMERSLEY_FINAL_COUNT; ++i)
+		//{
+		//	const DirectX::XMFLOAT2 point = Hammersley(i, HAMMERSLEY_FINAL_COUNT);
+		//	hammerDataFinal.x[i] = point.x;
+		//	hammerDataFinal.y[i] = point.y;
+		//}
 
-		hammersleyDirectionalBuffer.Update(wnd.Gfx(), hammerDataDirectional);
-		hammersleySpotBuffer.Update(wnd.Gfx(), hammerDataSpot);
-		hammersleyFinalBuffer.Update(wnd.Gfx(), hammerDataFinal);
+		//hammersleyDirectionalBuffer.Update(wnd.Gfx(), hammerDataDirectional);
+		//hammersleySpotBuffer.Update(wnd.Gfx(), hammerDataSpot);
+		//hammersleyFinalBuffer.Update(wnd.Gfx(), hammerDataFinal);
 
 		while (true)
 		{
@@ -485,25 +489,25 @@ namespace Kaka
 				rsmBufferDirectional.lightCameraTransform = wnd.Gfx().directionalLightRSMBuffer.GetCamera().GetInverseView() * wnd.Gfx().directionalLightRSMBuffer.GetCamera().GetProjection();
 				PixelConstantBuffer<RSMBuffer> rsmPixelBuffer{wnd.Gfx(), PS_CBUFFER_SLOT_RSM_DIRECTIONAL};
 
-				for (int i = 0; i < combinedPasses; ++i)
-				{
-					if (i == 0)
-					{
-						wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMDownscaleDirectional, nullptr);
-					}
-					else
-					{
-						wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMFullscaleDirectional, nullptr);
-						wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTRUE_SLOT_INDIRECT_LIGHT_DIRECTIONAL, 1u, wnd.Gfx().rsmDownscaleDirectional.pResource.GetAddressOf());
-					}
+				//for (int i = 0; i < combinedPasses; ++i)
+				//{
+				//	if (i == 0)
+				//	{
+				//		wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMDownscaleDirectional, nullptr);
+				//	}
+				//	else
+				//	{
+				wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMFullscaleDirectional, nullptr);
+				//wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTRUE_SLOT_INDIRECT_LIGHT_DIRECTIONAL, 1u, wnd.Gfx().rsmDownscaleDirectional.pResource.GetAddressOf());
+				//}
 
-					rsmBufferDirectional.currentPass = i;
-					rsmBufferDirectional.isDirectionalLight = TRUE;
-					rsmPixelBuffer.Update(wnd.Gfx(), rsmBufferDirectional);
-					rsmPixelBuffer.Bind(wnd.Gfx());
+				rsmBufferDirectional.currentPass = 0;
+				rsmBufferDirectional.isDirectionalLight = TRUE;
+				rsmPixelBuffer.Update(wnd.Gfx(), rsmBufferDirectional);
+				rsmPixelBuffer.Bind(wnd.Gfx());
 
-					indirectLighting.Draw(wnd.Gfx());
-				}
+				indirectLighting.Draw(wnd.Gfx());
+				//}
 
 				wnd.Gfx().directionalLightRSMBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
 
@@ -511,25 +515,25 @@ namespace Kaka
 				wnd.Gfx().spotLightRSMBuffer[0].SetAllAsResources(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
 				rsmBufferSpot.lightCameraTransform = wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetInverseView() * wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetProjection();
 
-				for (int i = 0; i < combinedPasses; ++i)
-				{
-					if (i == 0)
-					{
-						wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMDownscaleSpot, nullptr);
-					}
-					else
-					{
-						wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMFullscaleSpot, nullptr);
-						wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, wnd.Gfx().rsmDownscaleSpot.pResource.GetAddressOf());
-					}
+				//for (int i = 0; i < combinedPasses; ++i)
+				//{
+				//	if (i == 0)
+				//	{
+				//		wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMDownscaleSpot, nullptr);
+				//	}
+				//	else
+				//	{
+				wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMFullscaleSpot, nullptr);
+				wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, wnd.Gfx().rsmDownscaleSpot.pResource.GetAddressOf());
+				//}
 
-					rsmBufferSpot.currentPass = i;
-					rsmBufferSpot.isDirectionalLight = FALSE;
-					rsmPixelBuffer.Update(wnd.Gfx(), rsmBufferSpot);
-					rsmPixelBuffer.Bind(wnd.Gfx());
+				rsmBufferSpot.currentPass = 0;
+				rsmBufferSpot.isDirectionalLight = FALSE;
+				rsmPixelBuffer.Update(wnd.Gfx(), rsmBufferSpot);
+				rsmPixelBuffer.Bind(wnd.Gfx());
 
-					indirectLighting.Draw(wnd.Gfx());
-				}
+				indirectLighting.Draw(wnd.Gfx());
+				//}
 
 				wnd.Gfx().spotLightRSMBuffer[0].ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
 			}
@@ -559,16 +563,16 @@ namespace Kaka
 		{
 			wnd.Gfx().SetBlendState(eBlendStates::Additive);
 
-			if (combinedPasses > 1)
-			{
-				wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTRUE_SLOT_INDIRECT_LIGHT_DIRECTIONAL, 1u, wnd.Gfx().rsmFullscaleDirectional.pResource.GetAddressOf());
-				wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, wnd.Gfx().rsmFullscaleSpot.pResource.GetAddressOf());
-			}
-			else
-			{
-				wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTRUE_SLOT_INDIRECT_LIGHT_DIRECTIONAL, 1u, wnd.Gfx().rsmDownscaleDirectional.pResource.GetAddressOf());
-				wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, wnd.Gfx().rsmDownscaleSpot.pResource.GetAddressOf());
-			}
+			//if (combinedPasses > 1)
+			//{
+			wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTRUE_SLOT_INDIRECT_LIGHT_DIRECTIONAL, 1u, wnd.Gfx().rsmFullscaleDirectional.pResource.GetAddressOf());
+			wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, wnd.Gfx().rsmFullscaleSpot.pResource.GetAddressOf());
+			//}
+			//else
+			//{
+			//	wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTRUE_SLOT_INDIRECT_LIGHT_DIRECTIONAL, 1u, wnd.Gfx().rsmDownscaleDirectional.pResource.GetAddressOf());
+			//	wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, wnd.Gfx().rsmDownscaleSpot.pResource.GetAddressOf());
+			//}
 
 			indirectLighting.SetPixelShaderCombined(true);
 
@@ -620,7 +624,35 @@ namespace Kaka
 		ppb.Bind(wnd.Gfx());
 
 		postProcessing.Draw(wnd.Gfx());
+
+		ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
+		wnd.Gfx().pContext->PSSetShaderResources(1u, 1, nullSRVs);
 		// Post processing pass -- END
+
+		wnd.Gfx().SetRenderTarget(eRenderTargetType::Default, nullptr);
+
+		// TAA pass -- BEGIN
+		wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, wnd.Gfx().fullscreen.pResource.GetAddressOf());
+		wnd.Gfx().pContext->PSSetShaderResources(1u, 1u, wnd.Gfx().temporalAliasing.pResource.GetAddressOf());
+
+		PixelConstantBuffer<TAABuffer> tab{wnd.Gfx(), 1u};
+		tab.Update(wnd.Gfx(), taaBuffer);
+		tab.Bind(wnd.Gfx());
+
+		postProcessing.SetTemporalAliasingPS();
+		postProcessing.Draw(wnd.Gfx());
+
+		// TAA pass -- END
+
+		// TAA Setup for next frame -- BEGIN
+		wnd.Gfx().SetRenderTarget(eRenderTargetType::TAA, nullptr);
+
+		wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, wnd.Gfx().fullscreen.pResource.GetAddressOf());
+		postProcessing.SetFullscreenPS();
+		postProcessing.Draw(wnd.Gfx());
+		// TAA Setup for next frame -- END
+
+		wnd.Gfx().SetRenderTarget(eRenderTargetType::Default, nullptr);
 
 		// ImGui windows
 		if (showImGui)
@@ -634,12 +666,14 @@ namespace Kaka
 				ImGui::DragFloat("Exposure", &ppBuffer.exposure, 0.01f, -10.0f, 10.0f, "%.2f");
 				ImGui::DragFloat("Contrast", &ppBuffer.contrast, 0.01f, 0.0f, 10.0f, "%.2f");
 				ImGui::DragFloat("Saturation", &ppBuffer.saturation, 0.01f, 0.0f, 10.0f, "%.2f");
+				ImGui::DragFloat("Blur", &ppBuffer.blur, 0.01f, 0.0f, 64.0f, "%.2f");
 				ImGui::Text("Bloom");
 				ImGui::Checkbox("Use bloom", &wnd.Gfx().useBloom);
 				ImGui::SetNextItemWidth(100);
 				ImGui::SliderFloat("Bloom blending", &wnd.Gfx().bb.bloomBlending, 0.0f, 1.0f);
 				ImGui::SetNextItemWidth(100);
 				ImGui::SliderFloat("Bloom threshold", &wnd.Gfx().bb.bloomThreshold, 0.0f, 1.0f);
+				ImGui::DragInt("TAA Mode", (int*)&taaBuffer.mode, 1, 0, 2);
 			}
 			ImGui::End();
 
@@ -854,33 +888,33 @@ namespace Kaka
 
 			switch (e->GetKeyCode())
 			{
-			case VK_ESCAPE:
-				if (wnd.CursorEnabled())
-				{
-					wnd.DisableCursor();
-					wnd.mouse.EnableRaw();
-				}
-				else
-				{
-					wnd.EnableCursor();
-					wnd.mouse.DisableRaw();
-				}
-				break;
-			case VK_F1:
-				showImGui = !showImGui;
-				break;
-			case VK_F2:
-				showStatsWindow = !showStatsWindow;
-				break;
-			case VK_F3:
-				drawLightDebug = !drawLightDebug;
-				break;
-			case 'F':
-				flashlightOn = !flashlightOn;
-				break;
-			case 'R':
-				drawRSM = !drawRSM;
-				break;
+				case VK_ESCAPE:
+					if (wnd.CursorEnabled())
+					{
+						wnd.DisableCursor();
+						wnd.mouse.EnableRaw();
+					}
+					else
+					{
+						wnd.EnableCursor();
+						wnd.mouse.DisableRaw();
+					}
+					break;
+				case VK_F1:
+					showImGui = !showImGui;
+					break;
+				case VK_F2:
+					showStatsWindow = !showStatsWindow;
+					break;
+				case VK_F3:
+					drawLightDebug = !drawLightDebug;
+					break;
+				case 'F':
+					flashlightOn = !flashlightOn;
+					break;
+				case 'R':
+					drawRSM = !drawRSM;
+					break;
 			}
 		}
 
