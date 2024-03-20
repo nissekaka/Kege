@@ -87,7 +87,7 @@ namespace Kaka
 		models.back().Init();
 		models.back().SetScale(0.1f);
 
-		flashlightTexture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\Flashlight_cookie.png", 5u);
+		//flashlightTexture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\Flashlight_cookie.png", 5u);
 		// 524288 * 4 = 2 097 152
 		// 524288 * 2 = 1 048 576
 		// 2097152 * 2 = 4 194 304
@@ -96,49 +96,49 @@ namespace Kaka
 		//dustParticles.Init(wnd.Gfx(), 0.0125f, 1048576u, true, "Assets\\Textures\\particle.png");
 		//smokeParticles.Init(wnd.Gfx(), 25.0f, 1000u, true, "Assets\\Textures\\SpriteCloud.png");
 
-		// Flashlight setup
-		{
-			flashlightInner = &deferredLights.AddSpotLight();
-			flashlightInner->intensity = 5000.0f;
-			flashlightIntensity = flashlightInner->intensity;
-			flashlightInner->range = 1000.0f;
-			flashlightInner->innerAngle = 0.13f; // Radians
-			flashlightInner->outerAngle = 0.32f; // Radians
-			flashlightInner->colour = {1.0f, 0.9f, 0.6f};
-			flashlightInner->useTexture = TRUE;
-			flashlightInner->useVolumetricLight = TRUE;
-			flashlightInner->numberOfVolumetricSteps = 15u;
-			flashlightInner->volumetricScattering = 0.12f;
-			flashlightInner->volumetricIntensity = 3.0f;
-			flashlightInner->volumetricAngle = DegToRad(5.0f);
-			flashlightInner->volumetricRange = 30.0f;
-			flashlightInner->volumetricFade = 25.0f;
-			flashlightInner->volumetricAlpha = 0.5f;
+		//// Flashlight setup
+		//{
+		//	flashlightInner = &deferredLights.AddSpotLight();
+		//	flashlightInner->intensity = 5000.0f;
+		//	flashlightIntensity = flashlightInner->intensity;
+		//	flashlightInner->range = 1000.0f;
+		//	flashlightInner->innerAngle = 0.13f; // Radians
+		//	flashlightInner->outerAngle = 0.32f; // Radians
+		//	flashlightInner->colour = {1.0f, 0.9f, 0.6f};
+		//	flashlightInner->useTexture = TRUE;
+		//	flashlightInner->useVolumetricLight = TRUE;
+		//	flashlightInner->numberOfVolumetricSteps = 15u;
+		//	flashlightInner->volumetricScattering = 0.12f;
+		//	flashlightInner->volumetricIntensity = 3.0f;
+		//	flashlightInner->volumetricAngle = DegToRad(5.0f);
+		//	flashlightInner->volumetricRange = 30.0f;
+		//	flashlightInner->volumetricFade = 25.0f;
+		//	flashlightInner->volumetricAlpha = 0.5f;
 
-			wnd.Gfx().spotLightRSMBuffer[0].GetCamera().SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 120.0f, 0.5f, 5000.0f);
+		//	wnd.Gfx().spotLightRSMBuffer[0].GetCamera().SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 120.0f, 0.5f, 5000.0f);
 
-			flashlightOuter = &deferredLights.AddSpotLight();
-			flashlightOuter->intensity = flashlightInner->intensity * 0.5f;
-			flashlightOuter->range = flashlightInner->range;
-			flashlightOuter->innerAngle = flashlightInner->innerAngle; // Radians
-			flashlightOuter->outerAngle = std::clamp(flashlightInner->outerAngle * 10.0f, flashlightOuter->outerAngle, 3.14f); // Radians
-			flashlightOuter->colour = flashlightInner->colour;
-			flashlightOuter->useTexture = FALSE;
-			flashlightOuter->useVolumetricLight = TRUE;
-			flashlightOuter->numberOfVolumetricSteps = 15u;
-			flashlightOuter->volumetricScattering = 0.12f;
-			flashlightOuter->volumetricIntensity = 0.5f;
-			flashlightOuter->volumetricAngle = DegToRad(15.0f);
-			flashlightOuter->volumetricRange = 30.0f;
-			flashlightOuter->volumetricFade = 25.0f;
-			flashlightOuter->volumetricAlpha = 0.2f;
-		}
+		//	flashlightOuter = &deferredLights.AddSpotLight();
+		//	flashlightOuter->intensity = flashlightInner->intensity * 0.5f;
+		//	flashlightOuter->range = flashlightInner->range;
+		//	flashlightOuter->innerAngle = flashlightInner->innerAngle; // Radians
+		//	flashlightOuter->outerAngle = std::clamp(flashlightInner->outerAngle * 10.0f, flashlightOuter->outerAngle, 3.14f); // Radians
+		//	flashlightOuter->colour = flashlightInner->colour;
+		//	flashlightOuter->useTexture = FALSE;
+		//	flashlightOuter->useVolumetricLight = TRUE;
+		//	flashlightOuter->numberOfVolumetricSteps = 15u;
+		//	flashlightOuter->volumetricScattering = 0.12f;
+		//	flashlightOuter->volumetricIntensity = 0.5f;
+		//	flashlightOuter->volumetricAngle = DegToRad(15.0f);
+		//	flashlightOuter->volumetricRange = 30.0f;
+		//	flashlightOuter->volumetricFade = 25.0f;
+		//	flashlightOuter->volumetricAlpha = 0.2f;
+		//}
 
 		rsmBufferDirectional.type = 0u;
 		rsmBufferDirectional.sampleCount = HAMMERSLEY_DIR_COUNT;
 		rsmBufferDirectional.sampleCountLastPass = HAMMERSLEY_FINAL_COUNT;
-		rsmBufferDirectional.rMax = 0.11f;
-		rsmBufferDirectional.rsmIntensity = 15000.0f;
+		rsmBufferDirectional.rMax = 0.1f;
+		rsmBufferDirectional.rsmIntensity = 7500.0f;
 		rsmBufferDirectional.uvScale = wnd.Gfx().rsmDownscaleFactor;
 		rsmBufferDirectional.isDirectionalLight = TRUE;
 		rsmBufferDirectional.weightMax = 3.7f;
@@ -210,70 +210,70 @@ namespace Kaka
 
 		HandleInput(aDeltaTime);
 
-		// Flashlight
-		{
-			if (flashlightOn)
-			{
-				if (flashlightInner->intensity < flashlightIntensity)
-				{
-					flashlightInner->intensity = Interp(flashlightInner->intensity, flashlightIntensity, aDeltaTime * flashlightIntensityInterpSpeed);
-				}
-			}
-			else
-			{
-				if (flashlightInner->intensity > 0.0f)
-				{
-					flashlightInner->intensity = Interp(flashlightInner->intensity, 0.0f, aDeltaTime * flashlightIntensityInterpSpeed);
-				}
-			}
+		//// Flashlight
+		//{
+		//	if (flashlightOn)
+		//	{
+		//		if (flashlightInner->intensity < flashlightIntensity)
+		//		{
+		//			flashlightInner->intensity = Interp(flashlightInner->intensity, flashlightIntensity, aDeltaTime * flashlightIntensityInterpSpeed);
+		//		}
+		//	}
+		//	else
+		//	{
+		//		if (flashlightInner->intensity > 0.0f)
+		//		{
+		//			flashlightInner->intensity = Interp(flashlightInner->intensity, 0.0f, aDeltaTime * flashlightIntensityInterpSpeed);
+		//		}
+		//	}
 
-			// Move flashlight a bit from the camera so that we see the shadows
+		//	// Move flashlight a bit from the camera so that we see the shadows
 
-			// Forward vector
-			constexpr float forwardOffsetFactor = 2.5f;
+		//	// Forward vector
+		//	constexpr float forwardOffsetFactor = 2.5f;
 
-			DirectX::XMFLOAT3 targetPosition = camera.GetPosition();
-			DirectX::XMFLOAT3 targetDirection;
-			DirectX::XMStoreFloat3(&targetDirection, camera.GetForwardVector());
+		//	DirectX::XMFLOAT3 targetPosition = camera.GetPosition();
+		//	DirectX::XMFLOAT3 targetDirection;
+		//	DirectX::XMStoreFloat3(&targetDirection, camera.GetForwardVector());
 
-			flashlightInner->direction = targetDirection;
-			flashlightInner->direction = {targetDirection.x * -1.0f, targetDirection.y * -1.0f, targetDirection.z * -1.0f};
+		//	flashlightInner->direction = targetDirection;
+		//	flashlightInner->direction = {targetDirection.x * -1.0f, targetDirection.y * -1.0f, targetDirection.z * -1.0f};
 
-			targetPosition.x += targetDirection.x * forwardOffsetFactor;
-			targetPosition.y += targetDirection.y * forwardOffsetFactor;
-			targetPosition.z += targetDirection.z * forwardOffsetFactor;
+		//	targetPosition.x += targetDirection.x * forwardOffsetFactor;
+		//	targetPosition.y += targetDirection.y * forwardOffsetFactor;
+		//	targetPosition.z += targetDirection.z * forwardOffsetFactor;
 
-			// Right vector
-			constexpr float rightOffsetFactor = 2.5f;
+		//	// Right vector
+		//	constexpr float rightOffsetFactor = 2.5f;
 
-			DirectX::XMFLOAT3 right;
-			DirectX::XMStoreFloat3(&right, camera.GetRightVector());
-			targetPosition.x += right.x * rightOffsetFactor;
-			targetPosition.y += right.y * rightOffsetFactor;
-			targetPosition.z += right.z * rightOffsetFactor;
+		//	DirectX::XMFLOAT3 right;
+		//	DirectX::XMStoreFloat3(&right, camera.GetRightVector());
+		//	targetPosition.x += right.x * rightOffsetFactor;
+		//	targetPosition.y += right.y * rightOffsetFactor;
+		//	targetPosition.z += right.z * rightOffsetFactor;
 
-			// Up vector
-			constexpr float upOffsetFactor = 2.5f;
-			DirectX::XMFLOAT3 up;
-			DirectX::XMStoreFloat3(&up, camera.GetUpVector());
-			targetPosition.x -= up.x * upOffsetFactor;
-			targetPosition.y -= up.y * upOffsetFactor;
-			targetPosition.z -= up.z * upOffsetFactor;
+		//	// Up vector
+		//	constexpr float upOffsetFactor = 2.5f;
+		//	DirectX::XMFLOAT3 up;
+		//	DirectX::XMStoreFloat3(&up, camera.GetUpVector());
+		//	targetPosition.x -= up.x * upOffsetFactor;
+		//	targetPosition.y -= up.y * upOffsetFactor;
+		//	targetPosition.z -= up.z * upOffsetFactor;
 
-			flashlightInner->position.x = Interp(flashlightInner->position.x, targetPosition.x, aDeltaTime * flashlightPositionInterpSpeed);
-			flashlightInner->position.y = Interp(flashlightInner->position.y, targetPosition.y, aDeltaTime * flashlightPositionInterpSpeed);
-			flashlightInner->position.z = Interp(flashlightInner->position.z, targetPosition.z, aDeltaTime * flashlightPositionInterpSpeed);
+		//	flashlightInner->position.x = Interp(flashlightInner->position.x, targetPosition.x, aDeltaTime * flashlightPositionInterpSpeed);
+		//	flashlightInner->position.y = Interp(flashlightInner->position.y, targetPosition.y, aDeltaTime * flashlightPositionInterpSpeed);
+		//	flashlightInner->position.z = Interp(flashlightInner->position.z, targetPosition.z, aDeltaTime * flashlightPositionInterpSpeed);
 
-			wnd.Gfx().spotLightRSMBuffer[0].GetCamera().SetPosition(flashlightInner->position);
+		//	wnd.Gfx().spotLightRSMBuffer[0].GetCamera().SetPosition(flashlightInner->position);
 
-			flashlightOuter->position = flashlightInner->position;
-			flashlightOuter->direction = flashlightInner->direction;
-			flashlightOuter->intensity = flashlightInner->intensity * flashlightBleedIntensityFactor;
-			flashlightOuter->range = flashlightInner->range;
-			flashlightOuter->innerAngle = flashlightInner->innerAngle; // Radians
-			flashlightOuter->outerAngle = std::clamp(flashlightInner->outerAngle * flashlightBleedAngleMultiplier, flashlightInner->outerAngle, 3.14f); // Radians
-			flashlightOuter->colour = flashlightInner->colour;
-		}
+		//	flashlightOuter->position = flashlightInner->position;
+		//	flashlightOuter->direction = flashlightInner->direction;
+		//	flashlightOuter->intensity = flashlightInner->intensity * flashlightBleedIntensityFactor;
+		//	flashlightOuter->range = flashlightInner->range;
+		//	flashlightOuter->innerAngle = flashlightInner->innerAngle; // Radians
+		//	flashlightOuter->outerAngle = std::clamp(flashlightInner->outerAngle * flashlightBleedAngleMultiplier, flashlightInner->outerAngle, 3.14f); // Radians
+		//	flashlightOuter->colour = flashlightInner->colour;
+		//}
 
 		wnd.Gfx().CameraJitter();
 
@@ -295,7 +295,7 @@ namespace Kaka
 		skyboxAngle.y += skyboxSpeed * aDeltaTime;
 		skybox.Rotate(skyboxAngle);
 
-		dustParticles.Update(wnd.Gfx(), aDeltaTime);
+		//dustParticles.Update(wnd.Gfx(), aDeltaTime);
 		//smokeParticles.Update(wnd.Gfx(), aDeltaTime);
 
 		wnd.Gfx().SetDepthStencilState(eDepthStencilStates::Normal);
@@ -306,7 +306,7 @@ namespace Kaka
 		{
 			wnd.Gfx().StartShadows(wnd.Gfx().directionalLightRSMBuffer.GetCamera(), deferredLights.GetDirectionalLightData().lightDirection, wnd.Gfx().directionalLightRSMBuffer, PS_TEXTURE_SLOT_SHADOW_MAP_DIRECTIONAL);
 			deferredLights.SetShadowCamera(wnd.Gfx().directionalLightRSMBuffer.GetCamera().GetInverseView() * wnd.Gfx().directionalLightRSMBuffer.GetCamera().GetProjection());
-			deferredLights.SetSpotLightShadowCamera(wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetInverseView() * wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetProjection(), 0);
+			//deferredLights.SetSpotLightShadowCamera(wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetInverseView() * wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetProjection(), 0);
 
 			wnd.Gfx().directionalLightRSMBuffer.ClearTextures(wnd.Gfx().pContext.Get());
 			wnd.Gfx().directionalLightRSMBuffer.SetAsActiveTarget(wnd.Gfx().pContext.Get());
@@ -323,58 +323,57 @@ namespace Kaka
 
 			// Render everything that casts shadows
 			{
-				//terrain.Draw(wnd.Gfx());
 				for (Model& model : models)
 				{
-					model.Draw(wnd.Gfx(), aDeltaTime);
+					model.Draw(wnd.Gfx(), aDeltaTime, false);
 				}
 			}
 		}
 		// ---------- SHADOW MAP PASS -- DIRECTIONAL LIGHT ---------- END
 
-		// ---------- SHADOW MAP PASS -- SPOT LIGHT ---------- BEGIN
-		{
-			DirectX::XMFLOAT3 direction = deferredLights.GetSpotLightData(0).direction;
-			direction = {direction.x, direction.y * -1.0f, direction.z * -1.0f};
+		//// ---------- SHADOW MAP PASS -- SPOT LIGHT ---------- BEGIN
+		//{
+		//	DirectX::XMFLOAT3 direction = deferredLights.GetSpotLightData(0).direction;
+		//	direction = {direction.x, direction.y * -1.0f, direction.z * -1.0f};
 
-			Camera& shadowCamera = wnd.Gfx().spotLightRSMBuffer[0].GetCamera();
-			const DirectX::XMMATRIX spotlightInverseViewProj = shadowCamera.GetInverseView() * shadowCamera.GetProjection();
+		//	Camera& shadowCamera = wnd.Gfx().spotLightRSMBuffer[0].GetCamera();
+		//	const DirectX::XMMATRIX spotlightInverseViewProj = shadowCamera.GetInverseView() * shadowCamera.GetProjection();
 
-			wnd.Gfx().StartShadows(shadowCamera, direction, wnd.Gfx().spotLightRSMBuffer[0], PS_TEXTURE_SLOT_SHADOW_MAP_SPOT);
-			deferredLights.SetSpotLightShadowCamera(spotlightInverseViewProj, 0);
-			deferredLights.SetSpotLightShadowCamera(spotlightInverseViewProj, 1);
+		//	wnd.Gfx().StartShadows(shadowCamera, direction, wnd.Gfx().spotLightRSMBuffer[0], PS_TEXTURE_SLOT_SHADOW_MAP_SPOT);
+		//	deferredLights.SetSpotLightShadowCamera(spotlightInverseViewProj, 0);
+		//	deferredLights.SetSpotLightShadowCamera(spotlightInverseViewProj, 1);
 
-			wnd.Gfx().spotLightRSMBuffer[0].ClearTextures(wnd.Gfx().pContext.Get());
-			wnd.Gfx().spotLightRSMBuffer[0].SetAsActiveTarget(wnd.Gfx().pContext.Get());
+		//	wnd.Gfx().spotLightRSMBuffer[0].ClearTextures(wnd.Gfx().pContext.Get());
+		//	wnd.Gfx().spotLightRSMBuffer[0].SetAsActiveTarget(wnd.Gfx().pContext.Get());
 
-			rsmLightData.colourAndIntensity[0] = deferredLights.GetSpotLightData(0).colour.x;
-			rsmLightData.colourAndIntensity[1] = deferredLights.GetSpotLightData(0).colour.y;
-			rsmLightData.colourAndIntensity[2] = deferredLights.GetSpotLightData(0).colour.z;
-			rsmLightData.colourAndIntensity[3] = deferredLights.GetSpotLightData(0).intensity;
-			rsmLightData.directionAndInnerAngle[0] = deferredLights.GetSpotLightData(0).direction.x;
-			rsmLightData.directionAndInnerAngle[1] = deferredLights.GetSpotLightData(0).direction.y;
-			rsmLightData.directionAndInnerAngle[2] = deferredLights.GetSpotLightData(0).direction.z;
-			rsmLightData.directionAndInnerAngle[3] = deferredLights.GetSpotLightData(0).innerAngle;
-			rsmLightData.lightPositionAndOuterAngle[0] = deferredLights.GetSpotLightData(0).position.x;
-			rsmLightData.lightPositionAndOuterAngle[1] = deferredLights.GetSpotLightData(0).position.y;
-			rsmLightData.lightPositionAndOuterAngle[2] = deferredLights.GetSpotLightData(0).position.z;
-			rsmLightData.lightPositionAndOuterAngle[3] = deferredLights.GetSpotLightData(0).outerAngle;
-			rsmLightData.range = deferredLights.GetSpotLightData(0).range;
-			rsmLightData.isDirectionalLight = FALSE;
+		//	rsmLightData.colourAndIntensity[0] = deferredLights.GetSpotLightData(0).colour.x;
+		//	rsmLightData.colourAndIntensity[1] = deferredLights.GetSpotLightData(0).colour.y;
+		//	rsmLightData.colourAndIntensity[2] = deferredLights.GetSpotLightData(0).colour.z;
+		//	rsmLightData.colourAndIntensity[3] = deferredLights.GetSpotLightData(0).intensity;
+		//	rsmLightData.directionAndInnerAngle[0] = deferredLights.GetSpotLightData(0).direction.x;
+		//	rsmLightData.directionAndInnerAngle[1] = deferredLights.GetSpotLightData(0).direction.y;
+		//	rsmLightData.directionAndInnerAngle[2] = deferredLights.GetSpotLightData(0).direction.z;
+		//	rsmLightData.directionAndInnerAngle[3] = deferredLights.GetSpotLightData(0).innerAngle;
+		//	rsmLightData.lightPositionAndOuterAngle[0] = deferredLights.GetSpotLightData(0).position.x;
+		//	rsmLightData.lightPositionAndOuterAngle[1] = deferredLights.GetSpotLightData(0).position.y;
+		//	rsmLightData.lightPositionAndOuterAngle[2] = deferredLights.GetSpotLightData(0).position.z;
+		//	rsmLightData.lightPositionAndOuterAngle[3] = deferredLights.GetSpotLightData(0).outerAngle;
+		//	rsmLightData.range = deferredLights.GetSpotLightData(0).range;
+		//	rsmLightData.isDirectionalLight = FALSE;
 
-			rsmLightDataBuffer.Update(wnd.Gfx(), rsmLightData);
-			rsmLightDataBuffer.Bind(wnd.Gfx());
+		//	rsmLightDataBuffer.Update(wnd.Gfx(), rsmLightData);
+		//	rsmLightDataBuffer.Bind(wnd.Gfx());
 
-			// Render everything that casts shadows
-			{
-				for (Model& model : models)
-				{
-					model.Draw(wnd.Gfx(), aDeltaTime);
-				}
-			}
+		//	// Render everything that casts shadows
+		//	{
+		//		for (Model& model : models)
+		//		{
+		//			model.Draw(wnd.Gfx(), aDeltaTime);
+		//		}
+		//	}
 
-			wnd.Gfx().ResetShadows(camera);
-		}
+		wnd.Gfx().ResetShadows(camera);
+		//}
 		// ---------- SHADOW MAP PASS -- SPOT LIGHT ---------- END
 
 
@@ -385,7 +384,7 @@ namespace Kaka
 
 			for (Model& model : models)
 			{
-				model.Draw(wnd.Gfx(), aDeltaTime);
+				model.Draw(wnd.Gfx(), aDeltaTime, true);
 			}
 
 			wnd.Gfx().SetRenderTarget(eRenderTargetType::None, nullptr);
@@ -431,31 +430,31 @@ namespace Kaka
 
 				wnd.Gfx().directionalLightRSMBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
 
-				// Spot light
-				wnd.Gfx().spotLightRSMBuffer[0].SetAllAsResources(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
-				rsmBufferSpot.lightCameraTransform = wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetInverseView() * wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetProjection();
+				//	// Spot light
+				//	wnd.Gfx().spotLightRSMBuffer[0].SetAllAsResources(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
+				//	rsmBufferSpot.lightCameraTransform = wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetInverseView() * wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetProjection();
 
-				//for (int i = 0; i < combinedPasses; ++i)
-				//{
-				//	if (i == 0)
-				//	{
-				//		wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMDownscaleSpot, nullptr);
-				//	}
-				//	else
-				//	{
-				wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMFullscaleSpot, nullptr);
-				wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, wnd.Gfx().rsmDownscaleSpot.pResource.GetAddressOf());
-				//}
+				//	//for (int i = 0; i < combinedPasses; ++i)
+				//	//{
+				//	//	if (i == 0)
+				//	//	{
+				//	//		wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMDownscaleSpot, nullptr);
+				//	//	}
+				//	//	else
+				//	//	{
+				//	wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMFullscaleSpot, nullptr);
+				//	wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, wnd.Gfx().rsmDownscaleSpot.pResource.GetAddressOf());
+				//	//}
 
-				rsmBufferSpot.currentPass = 0;
-				rsmBufferSpot.isDirectionalLight = FALSE;
+				//	rsmBufferSpot.currentPass = 0;
+				//	rsmBufferSpot.isDirectionalLight = FALSE;
 				rsmPixelBuffer.Update(wnd.Gfx(), rsmBufferSpot);
 				rsmPixelBuffer.Bind(wnd.Gfx());
 
-				indirectLighting.Draw(wnd.Gfx());
-				//}
+				//	indirectLighting.Draw(wnd.Gfx());
+				//	//}
 
-				wnd.Gfx().spotLightRSMBuffer[0].ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
+				//	wnd.Gfx().spotLightRSMBuffer[0].ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
 			}
 		}
 		// Indirect lighting pass -- END
@@ -468,13 +467,13 @@ namespace Kaka
 			shadowPixelBuffer.Update(wnd.Gfx(), shadowBuffer);
 			shadowPixelBuffer.Bind(wnd.Gfx());
 
-			flashlightTexture->Bind(wnd.Gfx());
+			//flashlightTexture->Bind(wnd.Gfx());
 
 			wnd.Gfx().BindShadows(wnd.Gfx().directionalLightRSMBuffer, PS_TEXTURE_SLOT_SHADOW_MAP_DIRECTIONAL);
-			wnd.Gfx().BindShadows(wnd.Gfx().spotLightRSMBuffer[0], PS_TEXTURE_SLOT_SHADOW_MAP_SPOT);
+			//wnd.Gfx().BindShadows(wnd.Gfx().spotLightRSMBuffer[0], PS_TEXTURE_SLOT_SHADOW_MAP_SPOT);
 			deferredLights.Draw(wnd.Gfx());
 			wnd.Gfx().UnbindShadows(PS_TEXTURE_SLOT_SHADOW_MAP_DIRECTIONAL);
-			wnd.Gfx().UnbindShadows(PS_TEXTURE_SLOT_SHADOW_MAP_SPOT);
+			//wnd.Gfx().UnbindShadows(PS_TEXTURE_SLOT_SHADOW_MAP_SPOT);
 		}
 
 		// Indirect combined pass -- BEGIN
@@ -486,7 +485,7 @@ namespace Kaka
 			//if (combinedPasses > 1)
 			//{
 			wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTRUE_SLOT_INDIRECT_LIGHT_DIRECTIONAL, 1u, wnd.Gfx().rsmFullscaleDirectional.pResource.GetAddressOf());
-			wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, wnd.Gfx().rsmFullscaleSpot.pResource.GetAddressOf());
+			//wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, wnd.Gfx().rsmFullscaleSpot.pResource.GetAddressOf());
 			//}
 			//else
 			//{
@@ -517,13 +516,13 @@ namespace Kaka
 
 		// Sprite pass -- BEGIN
 		{
-			wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_GBUFFER_SLOT);
-			wnd.Gfx().SetBlendState(eBlendStates::Additive);
+			//wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_GBUFFER_SLOT);
+			//wnd.Gfx().SetBlendState(eBlendStates::Additive);
 
-			deferredLights.BindFlashlightBuffer(wnd.Gfx());
-			dustParticles.Draw(wnd.Gfx());
+			//deferredLights.BindFlashlightBuffer(wnd.Gfx());
+			//dustParticles.Draw(wnd.Gfx());
 
-			wnd.Gfx().SetBlendState(eBlendStates::Disabled);
+			//wnd.Gfx().SetBlendState(eBlendStates::Disabled);
 		}
 		// Sprite pass -- END
 
@@ -533,7 +532,7 @@ namespace Kaka
 
 			ID3D11ShaderResourceView* const nullSRV[1] = {nullptr};
 			wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTRUE_SLOT_INDIRECT_LIGHT_DIRECTIONAL, 1u, nullSRV);
-			wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, nullSRV);
+			//wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, nullSRV);
 		}
 
 
@@ -606,66 +605,64 @@ namespace Kaka
 				ImGui::SliderFloat("Bloom blending", &wnd.Gfx().bb.bloomBlending, 0.0f, 1.0f);
 				ImGui::SetNextItemWidth(100);
 				ImGui::SliderFloat("Bloom threshold", &wnd.Gfx().bb.bloomThreshold, 0.0f, 1.0f);
-				ImGui::DragInt("TAA Mode", (int*)&taaBuffer.mode, 1, 0, 2);
-				ImGui::DragFloat("Denoise strength", &taaBuffer.denoise, 0.01f, 0.0f, 10.0f, "%.2f");
 			}
 			ImGui::End();
 
-			if (ImGui::Begin("Flashlight"))
-			{
-				ImGui::Columns(2, nullptr, false);
-				ImGui::SetColumnWidth(0, 250.0f);
-				ImGui::Text("Spot light");
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::ColorPicker3("Colour##SpotColour", &flashlightInner->colour.x);
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragFloat("Intensity##SpotIntensity", &flashlightIntensity, 10.0f, 0.0f, 10000.0f, "%.2f");
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragFloat("Range", &flashlightInner->range, 10.0f, 0.0f, 10000.0f, "%.2f");
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragFloat("Inner angle", &flashlightInner->innerAngle, 0.01f, 0.0f, flashlightInner->outerAngle, "%.2f");
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragFloat("Outer angle", &flashlightInner->outerAngle, 0.01f, flashlightInner->innerAngle, 3.14f, "%.2f");
-				ImGui::Text("Bleed");
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragFloat("Bleed intensity mul", &flashlightBleedIntensityFactor, 0.01f, 0.0f, 1.0f, "%.2f");
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragFloat("Bleed angle mul", &flashlightBleedAngleMultiplier, 0.1f, 0.0f, 10.0f, "%.2f");
-				ImGui::NextColumn();
-				ImGui::Text("Volumetric - Inner");
-				ImGui::Checkbox("Use volumetric##UseVol1", (bool*)&flashlightInner->useVolumetricLight);
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragInt("Steps##VolStep1", (int*)&flashlightInner->numberOfVolumetricSteps, 1, 1, 15);
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragFloat("Scattering##VolScat1", &flashlightInner->volumetricScattering, 0.01f, 0.0f, 1.0f, "%.2f");
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragFloat("Intensity##VolInt1", &flashlightInner->volumetricIntensity, 0.01f, 0.0f, 10.0f, "%.2f");
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::SliderAngle("Angle##VolAng1", &flashlightInner->volumetricAngle, 0, 90, "%.2f");
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragFloat("Range##VolRan1", &flashlightInner->volumetricRange, 0.1f, 0.0f, 100.0f, "%.2f");
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragFloat("Fade##VolFad1", &flashlightInner->volumetricFade, 0.1f, 0.0f, 100.0f, "%.2f");
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragFloat("Alpha##VolAlp1", &flashlightInner->volumetricAlpha, 0.01f, 0.0f, 1.0f, "%.2f");
-				ImGui::Text("Volumetric - Outer");
-				ImGui::Checkbox("Use volumetric##UseVol2", (bool*)&flashlightOuter->useVolumetricLight);
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragInt("Steps##VolStep2", (int*)&flashlightOuter->numberOfVolumetricSteps, 1, 1, 15);
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragFloat("Scattering##VolScat2", &flashlightOuter->volumetricScattering, 0.01f, 0.0f, 1.0f, "%.2f");
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragFloat("Intensity##VolInt2", &flashlightOuter->volumetricIntensity, 0.01f, 0.0f, 10.0f, "%.2f");
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::SliderAngle("Angle##VolAng2", &flashlightOuter->volumetricAngle, 0, 90, "%.2f");
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragFloat("Range##VolRan2", &flashlightOuter->volumetricRange, 0.1f, 0.0f, 100.0f, "%.2f");
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragFloat("Fade##VolFad2", &flashlightOuter->volumetricFade, 0.1f, 0.0f, 100.0f, "%.2f");
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragFloat("Alpha##VolAlp2", &flashlightOuter->volumetricAlpha, 0.01f, 0.0f, 1.0f, "%.2f");
-			}
-			ImGui::End();
+			//if (ImGui::Begin("Flashlight"))
+			//{
+			//	ImGui::Columns(2, nullptr, false);
+			//	ImGui::SetColumnWidth(0, 250.0f);
+			//	ImGui::Text("Spot light");
+			//	ImGui::SetNextItemWidth(150.0f);
+			//	ImGui::ColorPicker3("Colour##SpotColour", &flashlightInner->colour.x);
+			//	ImGui::SetNextItemWidth(150.0f);
+			//	ImGui::DragFloat("Intensity##SpotIntensity", &flashlightIntensity, 10.0f, 0.0f, 10000.0f, "%.2f");
+			//	ImGui::SetNextItemWidth(150.0f);
+			//	ImGui::DragFloat("Range", &flashlightInner->range, 10.0f, 0.0f, 10000.0f, "%.2f");
+			//	ImGui::SetNextItemWidth(150.0f);
+			//	ImGui::DragFloat("Inner angle", &flashlightInner->innerAngle, 0.01f, 0.0f, flashlightInner->outerAngle, "%.2f");
+			//	ImGui::SetNextItemWidth(150.0f);
+			//	ImGui::DragFloat("Outer angle", &flashlightInner->outerAngle, 0.01f, flashlightInner->innerAngle, 3.14f, "%.2f");
+			//	ImGui::Text("Bleed");
+			//	ImGui::SetNextItemWidth(150.0f);
+			//	ImGui::DragFloat("Bleed intensity mul", &flashlightBleedIntensityFactor, 0.01f, 0.0f, 1.0f, "%.2f");
+			//	ImGui::SetNextItemWidth(150.0f);
+			//	ImGui::DragFloat("Bleed angle mul", &flashlightBleedAngleMultiplier, 0.1f, 0.0f, 10.0f, "%.2f");
+			//	ImGui::NextColumn();
+			//	ImGui::Text("Volumetric - Inner");
+			//	ImGui::Checkbox("Use volumetric##UseVol1", (bool*)&flashlightInner->useVolumetricLight);
+			//	ImGui::SetNextItemWidth(150.0f);
+			//	ImGui::DragInt("Steps##VolStep1", (int*)&flashlightInner->numberOfVolumetricSteps, 1, 1, 15);
+			//	ImGui::SetNextItemWidth(150.0f);
+			//	ImGui::DragFloat("Scattering##VolScat1", &flashlightInner->volumetricScattering, 0.01f, 0.0f, 1.0f, "%.2f");
+			//	ImGui::SetNextItemWidth(150.0f);
+			//	ImGui::DragFloat("Intensity##VolInt1", &flashlightInner->volumetricIntensity, 0.01f, 0.0f, 10.0f, "%.2f");
+			//	ImGui::SetNextItemWidth(150.0f);
+			//	ImGui::SliderAngle("Angle##VolAng1", &flashlightInner->volumetricAngle, 0, 90, "%.2f");
+			//	ImGui::SetNextItemWidth(150.0f);
+			//	ImGui::DragFloat("Range##VolRan1", &flashlightInner->volumetricRange, 0.1f, 0.0f, 100.0f, "%.2f");
+			//	ImGui::SetNextItemWidth(150.0f);
+			//	ImGui::DragFloat("Fade##VolFad1", &flashlightInner->volumetricFade, 0.1f, 0.0f, 100.0f, "%.2f");
+			//	ImGui::SetNextItemWidth(150.0f);
+			//	ImGui::DragFloat("Alpha##VolAlp1", &flashlightInner->volumetricAlpha, 0.01f, 0.0f, 1.0f, "%.2f");
+			//	ImGui::Text("Volumetric - Outer");
+			//	ImGui::Checkbox("Use volumetric##UseVol2", (bool*)&flashlightOuter->useVolumetricLight);
+			//	ImGui::SetNextItemWidth(150.0f);
+			//	ImGui::DragInt("Steps##VolStep2", (int*)&flashlightOuter->numberOfVolumetricSteps, 1, 1, 15);
+			//	ImGui::SetNextItemWidth(150.0f);
+			//	ImGui::DragFloat("Scattering##VolScat2", &flashlightOuter->volumetricScattering, 0.01f, 0.0f, 1.0f, "%.2f");
+			//	ImGui::SetNextItemWidth(150.0f);
+			//	ImGui::DragFloat("Intensity##VolInt2", &flashlightOuter->volumetricIntensity, 0.01f, 0.0f, 10.0f, "%.2f");
+			//	ImGui::SetNextItemWidth(150.0f);
+			//	ImGui::SliderAngle("Angle##VolAng2", &flashlightOuter->volumetricAngle, 0, 90, "%.2f");
+			//	ImGui::SetNextItemWidth(150.0f);
+			//	ImGui::DragFloat("Range##VolRan2", &flashlightOuter->volumetricRange, 0.1f, 0.0f, 100.0f, "%.2f");
+			//	ImGui::SetNextItemWidth(150.0f);
+			//	ImGui::DragFloat("Fade##VolFad2", &flashlightOuter->volumetricFade, 0.1f, 0.0f, 100.0f, "%.2f");
+			//	ImGui::SetNextItemWidth(150.0f);
+			//	ImGui::DragFloat("Alpha##VolAlp2", &flashlightOuter->volumetricAlpha, 0.01f, 0.0f, 1.0f, "%.2f");
+			//}
+			//ImGui::End();
 
 			if (ImGui::Begin("Shadows"))
 			{
@@ -681,7 +678,6 @@ namespace Kaka
 
 			if (ImGui::Begin("RSM Directional"))
 			{
-				ImGui::Columns(2, nullptr, false);
 				//ImGui::Checkbox("Use RSM##DirUse", (bool*)&rsmBufferDirectional.useDirectionalRSM);
 				//ImGui::Checkbox("Only RSM##DirOnl", (bool*)&rsmBufferDirectional.onlyRSM);
 				ImGui::Checkbox("Use Poisson##DirPoi", (bool*)&rsmBufferDirectional.usePoisson);
@@ -694,14 +690,14 @@ namespace Kaka
 				ImGui::SetNextItemWidth(150.0f);
 				ImGui::ColorPicker3("Ambiance colour##DirAmbCol", &rsmBufferSpot.ambianceColour.x);
 				ImGui::DragFloat("Ambiance intensity##DirAmbInt", &rsmBufferSpot.ambianceColour.w, 0.01f, 0.0f, 1.0f, "%.2f");
-				ImGui::DragFloat("Weight max##DirWeiMax", &rsmBufferDirectional.weightMax, 0.001f, 0.0f, 5.0f, "%.4f");
+				//ImGui::DragFloat("Weight max##DirWeiMax", &rsmBufferDirectional.weightMax, 0.001f, 0.0f, 5.0f, "%.4f");
 
-				ImGui::NextColumn();
+				//ImGui::NextColumn();
 
-				ImGui::Checkbox("Use Poisson##SpoPoi", (bool*)&rsmBufferSpot.usePoisson);
-				ImGui::DragInt("Sample count##SpoSam", (int*)&rsmBufferSpot.sampleCount, 1, 1, 2000);
-				ImGui::DragFloat("R Max##SpoMax", &rsmBufferSpot.rMax, 0.001f, 0.0f, 5.0f, "%.3f");
-				ImGui::DragFloat("RSM Intensity##SpoInt", &rsmBufferSpot.rsmIntensity, 10.0f, 0.0f, 100000.0f, "%.2f");
+				//ImGui::Checkbox("Use Poisson##SpoPoi", (bool*)&rsmBufferSpot.usePoisson);
+				//ImGui::DragInt("Sample count##SpoSam", (int*)&rsmBufferSpot.sampleCount, 1, 1, 2000);
+				//ImGui::DragFloat("R Max##SpoMax", &rsmBufferSpot.rMax, 0.001f, 0.0f, 5.0f, "%.3f");
+				//ImGui::DragFloat("RSM Intensity##SpoInt", &rsmBufferSpot.rsmIntensity, 10.0f, 0.0f, 100000.0f, "%.2f");
 			}
 			ImGui::End();
 			//for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)
@@ -748,9 +744,9 @@ namespace Kaka
 				ImGui::Columns(2, nullptr, false);
 				ImGui::Text("Directional light");
 				ImGui::Image(wnd.Gfx().rsmFullscaleDirectional.pResource.Get(), ImVec2(512, 288));
-				ImGui::NextColumn();
-				ImGui::Text("Spot light");
-				ImGui::Image(wnd.Gfx().rsmFullscaleSpot.pResource.Get(), ImVec2(512, 288));
+				//ImGui::NextColumn();
+				//ImGui::Text("Spot light");
+				//ImGui::Image(wnd.Gfx().rsmFullscaleSpot.pResource.Get(), ImVec2(512, 288));
 			}
 			ImGui::End();
 
@@ -770,21 +766,21 @@ namespace Kaka
 			}
 			ImGui::End();
 
-			// Draw all resources in RSMBuffer
-			if (ImGui::Begin("RSMBuffer Spotlight"))
-			{
-				ImGui::Columns(2, nullptr, false);
-				ImGui::Text("World Position");
-				ImGui::Image(wnd.Gfx().spotLightRSMBuffer[0].GetShaderResourceViews()[0], ImVec2(512, 288));
-				ImGui::Text("Normal");
-				ImGui::Image(wnd.Gfx().spotLightRSMBuffer[0].GetShaderResourceViews()[1], ImVec2(512, 288));
-				ImGui::NextColumn();
-				ImGui::Text("Flux");
-				ImGui::Image(wnd.Gfx().spotLightRSMBuffer[0].GetShaderResourceViews()[2], ImVec2(512, 288));
-				ImGui::Text("Depth");
-				ImGui::Image(*wnd.Gfx().spotLightRSMBuffer[0].GetDepthShaderResourceView(), ImVec2(512, 288));
-			}
-			ImGui::End();
+			//// Draw all resources in RSMBuffer
+			//if (ImGui::Begin("RSMBuffer Spotlight"))
+			//{
+			//	ImGui::Columns(2, nullptr, false);
+			//	ImGui::Text("World Position");
+			//	ImGui::Image(wnd.Gfx().spotLightRSMBuffer[0].GetShaderResourceViews()[0], ImVec2(512, 288));
+			//	ImGui::Text("Normal");
+			//	ImGui::Image(wnd.Gfx().spotLightRSMBuffer[0].GetShaderResourceViews()[1], ImVec2(512, 288));
+			//	ImGui::NextColumn();
+			//	ImGui::Text("Flux");
+			//	ImGui::Image(wnd.Gfx().spotLightRSMBuffer[0].GetShaderResourceViews()[2], ImVec2(512, 288));
+			//	ImGui::Text("Depth");
+			//	ImGui::Image(*wnd.Gfx().spotLightRSMBuffer[0].GetDepthShaderResourceView(), ImVec2(512, 288));
+			//}
+			//ImGui::End();
 
 			deferredLights.ShowControlWindow();
 		}
@@ -832,7 +828,7 @@ namespace Kaka
 				drawLightDebug = !drawLightDebug;
 				break;
 			case 'F':
-				flashlightOn = !flashlightOn;
+				//flashlightOn = !flashlightOn;
 				break;
 			case 'R':
 				drawRSM = !drawRSM;

@@ -24,7 +24,7 @@ namespace Kaka
 		void Init();
 		void LoadModel(const Graphics& aGfx, const std::string& aFilePath, const eShaderType aShaderType);
 		bool LoadAnimation(const std::string& aFilePath);
-		void Draw(Graphics& aGfx, const float aDeltaTime);
+		void Draw(Graphics& aGfx, const float aDeltaTime, bool aFrustumCulling);
 		void SetPosition(DirectX::XMFLOAT3 aPosition);
 		void SetRotation(DirectX::XMFLOAT3 aRotation);
 		void SetScale(float aScale);
@@ -53,7 +53,7 @@ namespace Kaka
 
 	private:
 		void UpdatePtr(float aDeltaTime);
-		void DrawStatic(Graphics& aGfx);
+		void DrawStatic(Graphics& aGfx, bool aFrustumCulling);
 		void DrawAnimated(Graphics& aGfx);
 
 	private:

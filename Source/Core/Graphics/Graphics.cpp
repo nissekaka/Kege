@@ -128,7 +128,7 @@ namespace Kaka
 			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-			samplerDesc.MaxAnisotropy = 8;
+			samplerDesc.MaxAnisotropy = 4;
 			samplerDesc.MipLODBias = 0.0f;
 			samplerDesc.MinLOD = 0.0f;
 			samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
@@ -461,10 +461,10 @@ namespace Kaka
 		constexpr float colour[] = {0.0f, 0.0f, 0.0f, 0.0f};
 		//pContext->ClearRenderTargetView(pDefaultTarget.Get(), colour);
 		pContext->ClearRenderTargetView(postProcessing.pTarget.Get(), colour);
-		pContext->ClearRenderTargetView(rsmDownscaleDirectional.pTarget.Get(), colour);
-		pContext->ClearRenderTargetView(rsmFullscaleDirectional.pTarget.Get(), colour);
-		pContext->ClearRenderTargetView(rsmDownscaleSpot.pTarget.Get(), colour);
-		pContext->ClearRenderTargetView(rsmFullscaleSpot.pTarget.Get(), colour);
+		//pContext->ClearRenderTargetView(rsmDownscaleDirectional.pTarget.Get(), colour);
+		//pContext->ClearRenderTargetView(rsmFullscaleDirectional.pTarget.Get(), colour);
+		//pContext->ClearRenderTargetView(rsmDownscaleSpot.pTarget.Get(), colour);
+		//pContext->ClearRenderTargetView(rsmFullscaleSpot.pTarget.Get(), colour);
 		pContext->ClearDepthStencilView(pDepth.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0u);
 	}
 

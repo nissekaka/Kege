@@ -137,13 +137,13 @@ namespace Kaka
 		return ModelLoader::LoadAnimation(animatedModelData, aFilePath);
 	}
 
-	void Model::Draw(Graphics& aGfx, const float aDeltaTime)
+	void Model::Draw(Graphics& aGfx, const float aDeltaTime, bool aFrustumCulling)
 	{
 		switch (modelType)
 		{
 		case eModelType::Static:
 			{
-				DrawStatic(aGfx);
+				DrawStatic(aGfx, aFrustumCulling);
 			}
 			break;
 		case eModelType::Skeletal:
@@ -156,7 +156,7 @@ namespace Kaka
 		}
 	}
 
-	void Model::DrawStatic(Graphics& aGfx)
+	void Model::DrawStatic(Graphics& aGfx, bool aFrustumCulling)
 	{
 		if (!isLoaded)
 		{
@@ -184,9 +184,12 @@ namespace Kaka
 
 		for (Mesh& mesh : modelData.meshList->meshes)
 		{
-			if (!aGfx.IsBoundingBoxInFrustum(GetTranslatedAABB(mesh).minBound, GetTranslatedAABB(mesh).maxBound))
+			if (aFrustumCulling)
 			{
-				continue;
+				if (!aGfx.IsBoundingBoxInFrustum(GetTranslatedAABB(mesh).minBound, GetTranslatedAABB(mesh).maxBound))
+				{
+					continue;
+				}
 			}
 
 			if (mesh.texture != nullptr)
