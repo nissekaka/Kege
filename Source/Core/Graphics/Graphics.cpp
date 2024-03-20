@@ -381,9 +381,9 @@ namespace Kaka
 			fullDesc.MiscFlags = 0u;
 			result = pDevice->CreateTexture2D(&fullDesc, nullptr, &fullTexture);
 			assert(SUCCEEDED(result));
-			result = pDevice->CreateShaderResourceView(fullTexture, nullptr, &fullscreen.pResource);
+			result = pDevice->CreateShaderResourceView(fullTexture, nullptr, &historyN1.pResource);
 			assert(SUCCEEDED(result));
-			result = pDevice->CreateRenderTargetView(fullTexture, nullptr, &fullscreen.pTarget);
+			result = pDevice->CreateRenderTargetView(fullTexture, nullptr, &historyN1.pTarget);
 			assert(SUCCEEDED(result));
 
 			fullTexture->Release();
@@ -406,9 +406,9 @@ namespace Kaka
 			taaDesc.MiscFlags = 0u;
 			result = pDevice->CreateTexture2D(&taaDesc, nullptr, &taaTexture);
 			assert(SUCCEEDED(result));
-			result = pDevice->CreateShaderResourceView(taaTexture, nullptr, &temporalAliasing.pResource);
+			result = pDevice->CreateShaderResourceView(taaTexture, nullptr, &historyN.pResource);
 			assert(SUCCEEDED(result));
-			result = pDevice->CreateRenderTargetView(taaTexture, nullptr, &temporalAliasing.pTarget);
+			result = pDevice->CreateRenderTargetView(taaTexture, nullptr, &historyN.pTarget);
 			assert(SUCCEEDED(result));
 
 			taaTexture->Release();
@@ -448,6 +448,8 @@ namespace Kaka
 
 	void Graphics::BeginFrame()
 	{
+		++frameCount;
+
 		// ImGui begin frame
 		if (imGuiEnabled)
 		{
@@ -560,14 +562,14 @@ namespace Kaka
 				pContext->OMSetRenderTargets(1u, rsmFullscaleSpot.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::Fullscreen:
+		case eRenderTargetType::HistoryN1:
 			{
-				pContext->OMSetRenderTargets(1u, fullscreen.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
+				pContext->OMSetRenderTargets(1u, historyN1.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::TAA:
+		case eRenderTargetType::HistoryN:
 			{
-				pContext->OMSetRenderTargets(1u, temporalAliasing.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
+				pContext->OMSetRenderTargets(1u, historyN.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
 		//case eRenderTargetType::ShadowMap:
@@ -624,14 +626,14 @@ namespace Kaka
 				pContext->OMSetRenderTargets(1u, rsmFullscaleSpot.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::Fullscreen:
+		case eRenderTargetType::HistoryN1:
 			{
-				pContext->OMSetRenderTargets(1u, fullscreen.pTarget.GetAddressOf(), aDepth);
+				pContext->OMSetRenderTargets(1u, historyN1.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::TAA:
+		case eRenderTargetType::HistoryN:
 			{
-				pContext->OMSetRenderTargets(1u, temporalAliasing.pTarget.GetAddressOf(), aDepth);
+				pContext->OMSetRenderTargets(1u, historyN.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
 		//case eRenderTargetType::ShadowMap:
@@ -667,12 +669,23 @@ namespace Kaka
 		//pContext->OMSetBlendState(nullptr, nullptr, 0x0f);
 	}
 
-	void Graphics::HandleBloomScaling(PostProcessing& aPostProcessor)
+	void Graphics::CameraJitter()
+	{
+		DirectX::XMFLOAT2 jitterSample = halton23[frameCount % 16];
+
+		// Divide by resolution and move to -1, 1
+		jitterSample.x = ((jitterSample.x - 0.5f) / (float)width) * 2.0f;
+		jitterSample.y = ((jitterSample.y - 0.5f) / (float)height) * 2.0f;
+
+		camera->JitterProjection(jitterSample.x, jitterSample.y);
+	}
+
+	void Graphics::HandleBloomScaling(PostProcessing& aPostProcessor, ID3D11ShaderResourceView* aResource)
 	{
 		if (useBloom)
 		{
 			pContext->OMSetRenderTargets(1u, bloomDownscale[0].pTarget.GetAddressOf(), nullptr);
-			pContext->PSSetShaderResources(0u, 1u, postProcessing.pResource.GetAddressOf());
+			pContext->PSSetShaderResources(0u, 1u, &aResource);
 
 			aPostProcessor.SetDownsamplePS();
 
@@ -715,14 +728,14 @@ namespace Kaka
 
 			aPostProcessor.SetPostProcessPS();
 
-			pContext->OMSetRenderTargets(1u, fullscreen.pTarget.GetAddressOf(), nullptr);
-			pContext->PSSetShaderResources(0u, 1u, postProcessing.pResource.GetAddressOf());
+			pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), nullptr);
+			pContext->PSSetShaderResources(0u, 1u, &aResource);
 			pContext->PSSetShaderResources(1u, 1u, bloomDownscale[0].pResource.GetAddressOf());
 		}
 		else
 		{
-			pContext->OMSetRenderTargets(1u, fullscreen.pTarget.GetAddressOf(), nullptr);
-			pContext->PSSetShaderResources(0u, 1u, postProcessing.pResource.GetAddressOf());
+			pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), nullptr);
+			pContext->PSSetShaderResources(0u, 1u, &aResource);
 			ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
 			pContext->PSSetShaderResources(1u, 1, nullSRVs);
 		}

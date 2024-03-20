@@ -34,8 +34,8 @@ namespace Kaka
 		RSMDownscaleSpot,
 		RSMFullscaleDirectional,
 		RSMFullscaleSpot,
-		Fullscreen,
-		TAA
+		HistoryN1,
+		HistoryN
 	};
 
 	enum class eBlendStates
@@ -110,8 +110,9 @@ namespace Kaka
 		void SetVFXBlend() const;
 		void SetAdditiveBlend() const;
 		void ResetBlend() const;
+		void CameraJitter();
 
-		void HandleBloomScaling(PostProcessing& aPostProcessor);
+		void HandleBloomScaling(PostProcessing& aPostProcessor, ID3D11ShaderResourceView* aResource);
 
 		void SetBlendState(eBlendStates aBlendState);
 		void SetDepthStencilState(eDepthStencilStates aDepthStencilState);
@@ -178,8 +179,8 @@ namespace Kaka
 		RenderTarget rsmFullscaleDirectional;
 		RenderTarget rsmFullscaleSpot;
 
-		RenderTarget temporalAliasing;
-		RenderTarget fullscreen;
+		RenderTarget historyN;
+		RenderTarget historyN1;
 
 		std::vector<RenderTarget> bloomDownscale = {};
 
@@ -224,6 +225,28 @@ namespace Kaka
 		//RSMBuffer rsmBuffer;
 		RSMBuffer directionalLightRSMBuffer;
 		std::vector<RSMBuffer> spotLightRSMBuffer;
+
+		// I need a Halton 2,3 sequence for TAA with 16 values
+		DirectX::XMFLOAT2 halton23[16] = {
+			{0.5f, 0.333333f},
+			{0.25f, 0.666667f},
+			{0.75f, 0.111111f},
+			{0.125f, 0.444444f},
+			{0.625f, 0.777778f},
+			{0.375f, 0.222222f},
+			{0.875f, 0.555556f},
+			{0.0625f, 0.888889f},
+			{0.5625f, 0.037037f},
+			{0.3125f, 0.370370f},
+			{0.8125f, 0.703704f},
+			{0.1875f, 0.148148f},
+			{0.6875f, 0.481481f},
+			{0.4375f, 0.814815f},
+			{0.9375f, 0.259259f},
+			{0.03125f, 0.592593f}
+		};
+
+		unsigned long long frameCount = 0;
 
 	private:
 	};

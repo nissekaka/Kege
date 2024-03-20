@@ -215,6 +215,8 @@ namespace Kaka
 			float padding[2];
 		} taaBuffer;
 
+		bool flipFlop = false;
+
 		//struct HammerDataDirectional
 		//{
 		//	float x[HAMMERSLEY_DIR_COUNT] = {};

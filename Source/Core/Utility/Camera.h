@@ -41,18 +41,21 @@ namespace Kaka
 		DirectX::XMMATRIX GetView() const;
 		DirectX::XMMATRIX GetInverseView() const;
 		DirectX::XMMATRIX GetProjection() const;
+		DirectX::XMMATRIX GetJitteredProjection() const;
 		DirectX::XMFLOAT3 GetPosition() const;
 		DirectX::XMVECTOR GetForwardVector() const;
 		DirectX::XMVECTOR GetRightVector() const;
 		DirectX::XMVECTOR GetUpVector() const;
 		void SetPerspective(float aWidth, float aHeight, float aVFov, float aNearZ, float aFarZ);
 		void SetOrthographic(float aWidth, float aHeight, float aNearZ, float aFarZ);
+		void JitterProjection(float aJitterX, float aJitterY);
 
 	private:
 		PerspectiveData perspectiveData;
 		OrthographicData orthographicData;
 		eCameraType cameraType;
 		DirectX::XMMATRIX projection{};
+		DirectX::XMMATRIX jitteredProjection{};
 
 		DirectX::XMFLOAT3 position;
 		float pitch;
