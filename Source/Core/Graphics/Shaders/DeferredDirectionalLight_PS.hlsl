@@ -1,5 +1,6 @@
+#include "deferred_common.hlsli"
 #include "PBRFunctions.hlsli"
-#include "RSM.hlsli"
+#include "Shadows.hlsli"
 #include "Volumetric.hlsli"
 
 cbuffer DirectionalLight : register(b1)
@@ -12,6 +13,28 @@ cbuffer DirectionalLight : register(b1)
     uint numberOfVolumetricSteps;
     float volumetricScattering;
     float volumetricIntensity;
+};
+
+// TODO Move shadowColour and ambianceColour to Directional Light
+cbuffer RSMData : register(b3)
+{
+    bool usePoissonRSM;
+    bool isDirectional;
+    uint mode;
+    uint sampleCount;
+    uint sampleCountLastPass;
+    uint currentPass;
+    uint type;
+    float rMax;
+    float rsmIntensity;
+    float uvScale;
+    float weightMax;
+    float divideN;
+    float divideP;
+    float3 padding;
+    float4 shadowColour;
+    float4 ambianceColour;
+    float4x4 lightCameraTransform;
 };
 
 float4 main(DeferredVertexToPixel aInput) : SV_TARGET

@@ -9,7 +9,6 @@
 
 //Texture2D<float> tDepthMap;
 
-SamplerState shadowSplr : register(s1);
 //SamplerComparisonState shadowSplrCmp : register(s2);
 
 

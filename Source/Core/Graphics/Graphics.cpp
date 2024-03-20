@@ -128,7 +128,7 @@ namespace Kaka
 			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-			samplerDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
+			samplerDesc.MaxAnisotropy = 8;
 			samplerDesc.MipLODBias = 0.0f;
 			samplerDesc.MinLOD = 0.0f;
 			samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
@@ -136,7 +136,7 @@ namespace Kaka
 			pDevice->CreateSamplerState(&samplerDesc, &pDefaultSampler);
 		}
 
-		// Shadow sampler
+		// Linear sampler
 		{
 			D3D11_SAMPLER_DESC samplerDesc = CD3D11_SAMPLER_DESC{CD3D11_DEFAULT{}};
 			samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -144,18 +144,18 @@ namespace Kaka
 			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 
-			pDevice->CreateSamplerState(&samplerDesc, &pShadowSampler);
+			pDevice->CreateSamplerState(&samplerDesc, &pLinearSampler);
 		}
 
-		// Linear sampler
+		// Point sampler
 		{
 			D3D11_SAMPLER_DESC samplerDesc = CD3D11_SAMPLER_DESC{CD3D11_DEFAULT{}};
-			samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+			samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
 			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
 			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
 			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 
-			pDevice->CreateSamplerState(&samplerDesc, &pLinearClampedSampler);
+			pDevice->CreateSamplerState(&samplerDesc, &pPointClampedSampler);
 		}
 
 		HRESULT result;
@@ -437,8 +437,8 @@ namespace Kaka
 		}
 
 		pContext->PSSetSamplers(0u, 1u, pDefaultSampler.GetAddressOf());
-		pContext->PSSetSamplers(1u, 1u, pShadowSampler.GetAddressOf());
-		pContext->PSSetSamplers(2u, 1u, pLinearClampedSampler.GetAddressOf());
+		pContext->PSSetSamplers(1u, 1u, pLinearSampler.GetAddressOf());
+		pContext->PSSetSamplers(2u, 1u, pPointClampedSampler.GetAddressOf());
 	}
 
 	Graphics::~Graphics()

@@ -1,3 +1,4 @@
+#pragma once
 // GBuffer
 Texture2D gWorldPositionTex : register(t0);
 Texture2D gColourTex : register(t1);
@@ -19,9 +20,6 @@ Texture2D giSpotTex : register(t10);
 // Skybox
 TextureCube daySkyTex : register(t12);
 TextureCube nightSkyTex : register(t13);
-
-SamplerState defaultSampler : register(s0);
-SamplerState linearSampler : register(s2);
 
 cbuffer CommonBuffer : register(b4)
 {

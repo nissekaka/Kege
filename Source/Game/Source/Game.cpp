@@ -697,23 +697,11 @@ namespace Kaka
 				ImGui::DragFloat("Weight max##DirWeiMax", &rsmBufferDirectional.weightMax, 0.001f, 0.0f, 5.0f, "%.4f");
 
 				ImGui::NextColumn();
-				//ImGui::Checkbox("Use RSM##SpoUse", (bool*)&rsmBufferSpot.useSpotRSM);
-				//ImGui::Checkbox("Only RSM##SpoOnl", (bool*)&rsmBufferSpot.onlyRSM);
+
 				ImGui::Checkbox("Use Poisson##SpoPoi", (bool*)&rsmBufferSpot.usePoisson);
 				ImGui::DragInt("Sample count##SpoSam", (int*)&rsmBufferSpot.sampleCount, 1, 1, 2000);
 				ImGui::DragFloat("R Max##SpoMax", &rsmBufferSpot.rMax, 0.001f, 0.0f, 5.0f, "%.3f");
 				ImGui::DragFloat("RSM Intensity##SpoInt", &rsmBufferSpot.rsmIntensity, 10.0f, 0.0f, 100000.0f, "%.2f");
-
-				ImGui::DragInt("Combined passes", &combinedPasses, 1, 1, 4);
-				ImGui::DragFloat("Weight max##SpoWeiMax", &rsmBufferSpot.weightMax, 0.001f, 0.0f, 5.0f, "%.4f");
-				ImGui::DragFloat("Divide N", &rsmBufferSpot.divideN, 0.1f, 0.0f, 5.0f, "%.1f");
-				ImGui::DragFloat("Divide P", &rsmBufferSpot.divideP, 0.1f, 0.0f, 5.0f, "%.1f");
-				ImGui::DragInt("Final sample count", (int*)&rsmBufferSpot.sampleCountLastPass, 1, 0, 600);
-				ImGui::SliderInt("Mode", (int*)&rsmBufferSpot.mode, 0, (int)eRSMMode::Count - 1, ModeEnumToString[rsmBufferDirectional.mode].c_str());
-				rsmBufferDirectional.mode = rsmBufferSpot.mode;
-				rsmBufferDirectional.sampleCountLastPass = rsmBufferSpot.sampleCountLastPass;
-				rsmBufferDirectional.divideN = rsmBufferSpot.divideN;
-				rsmBufferDirectional.divideP = rsmBufferSpot.divideP;
 			}
 			ImGui::End();
 			//for (int i = 0; i < static_cast<int>(pointLights.size()); ++i)

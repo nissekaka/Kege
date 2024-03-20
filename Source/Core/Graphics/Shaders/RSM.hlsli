@@ -1,5 +1,6 @@
 #include "deferred_common.hlsli"
-#include "Shadows.hlsli"
+#include "Poisson.hlsli"
+#include "common.hlsli"
 
 cbuffer HammersleyDataDirectional : register(b5)
 {
@@ -92,9 +93,9 @@ float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Text
         for (int i = 0; i < 151; i++)	// Sum contributions of sampling locations
         {
             const float2 coord = aUv + aRMax * POISSON_DISK_151[i];
-            const float3 xp = aWorldPosTex.Sample(linearSampler, coord).xyz; // Position (x_p) and normal (n_p) are in world coordinates too
-            const float3 flux = aFluxTex.Sample(linearSampler, coord).rgb; // Collect components from corresponding RSM textures
-            const float3 np = normalize(2.0f * aNormalTex.Sample(linearSampler, coord).xyz - 1.0f);
+            const float3 xp = aWorldPosTex.Sample(pointSampler, coord).xyz; // Position (x_p) and normal (n_p) are in world coordinates too
+            const float3 flux = aFluxTex.Sample(pointSampler, coord).rgb; // Collect components from corresponding RSM textures
+            const float3 np = normalize(2.0f * aNormalTex.Sample(pointSampler, coord).xyz - 1.0f);
 
             float3 Ep = flux * ((max(0, dot(np, aX - xp)) * max(0, dot(aN, xp - aX)))
 									/ pow(length(aX - xp), 4));
@@ -106,8 +107,7 @@ float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Text
     }
     else
     {
-        float2 pixel = aPixel;
-        float2 o = hash23(float3(pixel.x, pixel.y, currentTime * 1000.0f));
+        const float2 o = hash23(float3(aPixel.x, aPixel.y, currentTime * 1000.0f));
         //float2 o2 = IGN(pixel) + hash22(float2(currentTime * 1000.0f, 0.f));
 
 		[loop]
@@ -115,37 +115,18 @@ float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Text
         {
             //float2 offset = mul(Hammersley(i, sampleCount), rot);
             float2 offset = Hammersley(i, aSampleCount);
- 
 
             offset.xy += o;
             offset.xy = fmod(offset.xy, 1.0f);
-            //float2 offset;
 
-            //if (aType == 0)
-            //{
-            //    offset.x = hSamplesDirectional[i >> 2][i & 3];
-            //    offset.y = hSamplesDirectional[(i >> 2) + (aSampleCount >> 2)][i & 3];
-            //}
-            //else if (aType == 1)
-            //{
-            //    offset.x = hSamplesSpot[i >> 2][i & 3];;
-            //    offset.y = hSamplesSpot[(i >> 2) + (aSampleCount >> 2)][i & 3];
-            //}
-            //else
-            //{
-            //    offset.x = hSamplesFinal[i >> 2][i & 3];;;
-            //    offset.y = hSamplesFinal[(i >> 2) + (aSampleCount >> 2)][i & 3];
-            //}
-
-            //offset = clamp(offset, 0.001f, 0.999f); // Prevents the offset from creating black artifacts
             const float r = offset.x * aRMax;
             const float theta = offset.y * TWO_PI;
             const float2 coord = aUv + float2(r * cos(theta), r * sin(theta));
             const float weight = offset.x * offset.x;
 
-            const float3 xp = aWorldPosTex.Sample(linearSampler, coord).xyz; // Position (x_p) and normal (n_p) are in world coordinates too
-            const float3 flux = aFluxTex.Sample(linearSampler, coord).rgb; // Collect components from corresponding RSM textures
-            const float3 np = normalize(2.0f * aNormalTex.Sample(linearSampler, coord).xyz - 1.0f);
+            const float3 xp = aWorldPosTex.Sample(pointSampler, coord).xyz; // Position (x_p) and normal (n_p) are in world coordinates too
+            const float3 flux = aFluxTex.Sample(pointSampler, coord).rgb; // Collect components from corresponding RSM textures
+            const float3 np = normalize(2.0f * aNormalTex.Sample(pointSampler, coord).xyz - 1.0f);
 
             float3 Ep = flux * ((max(0, dot(np, aX - xp)) * max(0, dot(aN, xp - aX)))
 									/ pow(length(aX - xp), 4));

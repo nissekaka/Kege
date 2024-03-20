@@ -1,3 +1,4 @@
+#include "common.hlsli"
 #include "deferred_common.hlsli"
 #include "Light.hlsli"
 #include "PBRFunctions.hlsli"

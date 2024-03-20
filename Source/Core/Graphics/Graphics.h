@@ -200,19 +200,13 @@ namespace Kaka
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pDepthShaderResourceView;
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pDepth;
 
-		//RenderTarget worldPosition;
-
-		//RenderTarget shadowMap;
-		//Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pShadowDepth;
-
 		Microsoft::WRL::ComPtr<ID3D11BlendState> pBlendStates[(int)eBlendStates::Count];
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilState> pDepthStencilStates[(int)eDepthStencilStates::Count];
 		Microsoft::WRL::ComPtr<ID3D11RasterizerState> pRasterizerStates[(int)eRasterizerStates::Count];
 
 		Microsoft::WRL::ComPtr<ID3D11SamplerState> pDefaultSampler;
-		Microsoft::WRL::ComPtr<ID3D11SamplerState> pShadowSampler;
-		Microsoft::WRL::ComPtr<ID3D11SamplerState> pLinearClampedSampler;
-		//Microsoft::WRL::ComPtr<ID3D11SamplerState> pShadowCompSampler;
+		Microsoft::WRL::ComPtr<ID3D11SamplerState> pLinearSampler;
+		Microsoft::WRL::ComPtr<ID3D11SamplerState> pPointClampedSampler;
 		Microsoft::WRL::ComPtr<ID3D11SamplerState> pVFXSampler;
 
 		UINT width;
@@ -222,11 +216,9 @@ namespace Kaka
 		VertexShader* vertexShaderOverride = nullptr;
 
 		GBuffer gBuffer;
-		//RSMBuffer rsmBuffer;
 		RSMBuffer directionalLightRSMBuffer;
 		std::vector<RSMBuffer> spotLightRSMBuffer;
 
-		// I need a Halton 2,3 sequence for TAA with 16 values
 		DirectX::XMFLOAT2 halton23[16] = {
 			{0.5f, 0.333333f},
 			{0.25f, 0.666667f},

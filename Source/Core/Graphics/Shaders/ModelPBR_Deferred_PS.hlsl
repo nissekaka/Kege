@@ -1,3 +1,4 @@
+#include "common.hlsli"
 #include "deferred_common.hlsli"
 
 struct PixelInput

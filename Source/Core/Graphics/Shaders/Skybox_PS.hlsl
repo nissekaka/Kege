@@ -1,5 +1,4 @@
-//#include "common.hlsli"
-
+#include "common.hlsli"
 #include "deferred_common.hlsli"
 
 cbuffer DirectionalLight : register(b1)

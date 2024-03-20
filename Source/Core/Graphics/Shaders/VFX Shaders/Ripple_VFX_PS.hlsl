@@ -1,5 +1,6 @@
 #include "VFX_Commons.hlsli"
 #include "../deferred_common.hlsli"
+#include "../common.hlsli"
 
 Texture2D worldPosTex : register(t12);
 

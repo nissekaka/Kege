@@ -1,5 +1,7 @@
 #include "PBRFunctions.hlsli"
-#include "RSM.hlsli"
+//#include "RSM.hlsli"
+#include "deferred_common.hlsli"
+#include "Shadows.hlsli"
 #include "Volumetric.hlsli"
 
 cbuffer SpotlightData : register(b2)
@@ -21,6 +23,28 @@ cbuffer SpotlightData : register(b2)
     float volumetricAngle;
     float volumetricRange;
     float volumetricFade;
+};
+
+// TODO Move shadowColour to common light or something
+cbuffer RSMData : register(b3)
+{
+    bool usePoissonRSM;
+    bool isDirectional;
+    uint mode;
+    uint sampleCount;
+    uint sampleCountLastPass;
+    uint currentPass;
+    uint type;
+    float rMax;
+    float rsmIntensity;
+    float uvScale;
+    float weightMax;
+    float divideN;
+    float divideP;
+    float3 padding;
+    float4 shadowColour;
+    float4 ambianceColour;
+    float4x4 lightCameraTransform;
 };
 
 bool IsInSpotlightCone(float3 aWorldPosition, float aAngle)
