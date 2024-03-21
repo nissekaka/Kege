@@ -100,6 +100,7 @@ namespace Kaka
 		void DrawIndexedInstanced(UINT aCount, UINT aInstanceCount);
 		//void SetProjection(DirectX::FXMMATRIX& aProjection);
 		DirectX::XMMATRIX GetProjection() const;
+		DirectX::XMMATRIX GetJitteredProjection() const;
 		void SetCamera(Camera& aCamera);
 		DirectX::XMMATRIX GetCameraInverseView() const;
 		UINT GetDrawcallCount() const;
@@ -110,7 +111,7 @@ namespace Kaka
 		void SetVFXBlend() const;
 		void SetAdditiveBlend() const;
 		void ResetBlend() const;
-		void CameraJitter();
+		void ApplyProjectionJitter();
 
 		void HandleBloomScaling(PostProcessing& aPostProcessor, ID3D11ShaderResourceView* aResource);
 
@@ -182,6 +183,8 @@ namespace Kaka
 		RenderTarget historyN;
 		RenderTarget historyN1;
 
+		DirectX::XMMATRIX historyViewProjection;
+
 		std::vector<RenderTarget> bloomDownscale = {};
 
 		struct DownSampleBuffer
@@ -193,7 +196,7 @@ namespace Kaka
 		} bb;
 
 		int bloomDivideFactor = 2;
-		bool useBloom = true;
+		bool usePostProcessing = true;
 		int bloomSteps = 5;
 
 		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pDefaultTarget;
@@ -237,6 +240,10 @@ namespace Kaka
 			{0.9375f, 0.259259f},
 			{0.03125f, 0.592593f}
 		};
+
+		DirectX::XMFLOAT2 previousJitter = {0.0f, 0.0f};
+		DirectX::XMFLOAT2 currentJitter = {0.0f, 0.0f};
+		float jitterScale = 0.2f;
 
 		unsigned long long frameCount = 0;
 

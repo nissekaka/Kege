@@ -42,6 +42,7 @@ namespace Kaka
 	{
 		camera.SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 80, 0.5f, 5000.0f);
 		wnd.Gfx().directionalLightRSMBuffer.GetCamera().SetOrthographic(WINDOW_WIDTH / 3.0f, WINDOW_HEIGHT / 3.0f, -500.0f, 500.0f);
+		wnd.Gfx().historyViewProjection = camera.GetInverseView() * camera.GetProjection();
 
 		for (int i = 0; i < NUM_POINT_LIGHTS; ++i)
 		{
@@ -275,7 +276,7 @@ namespace Kaka
 		//	flashlightOuter->colour = flashlightInner->colour;
 		//}
 
-		wnd.Gfx().CameraJitter();
+		wnd.Gfx().ApplyProjectionJitter();
 
 		commonBuffer.worldToClipMatrix = camera.GetInverseView() * camera.GetProjection();
 		commonBuffer.view = camera.GetView();
@@ -544,6 +545,8 @@ namespace Kaka
 
 			wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, wnd.Gfx().postProcessing.pResource.GetAddressOf());
 			wnd.Gfx().pContext->PSSetShaderResources(1u, 1u, wnd.Gfx().historyN.pResource.GetAddressOf());
+			// Need world position for reprojection
+			wnd.Gfx().pContext->PSSetShaderResources(2u, 1u, wnd.Gfx().gBuffer.GetShaderResourceViews());
 		}
 		else
 		{
@@ -551,15 +554,21 @@ namespace Kaka
 
 			wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, wnd.Gfx().postProcessing.pResource.GetAddressOf());
 			wnd.Gfx().pContext->PSSetShaderResources(1u, 1u, wnd.Gfx().historyN1.pResource.GetAddressOf());
+			// Need world position for reprojection
+			wnd.Gfx().pContext->PSSetShaderResources(2u, 1u, wnd.Gfx().gBuffer.GetShaderResourceViews());
 		}
 
 		PixelConstantBuffer<TAABuffer> tab{wnd.Gfx(), 1u};
+		taaBuffer.historyViewProjection = wnd.Gfx().historyViewProjection;
+		taaBuffer.clientResolution = wnd.Gfx().GetCurrentResolution();
 		tab.Update(wnd.Gfx(), taaBuffer);
 		tab.Bind(wnd.Gfx());
 
+		// Set history view projection matrix for next frame
+		wnd.Gfx().historyViewProjection = camera.GetInverseView() * camera.GetProjection();
+
 		postProcessing.SetTemporalAliasingPS();
 		postProcessing.Draw(wnd.Gfx());
-
 		//// TAA pass -- END
 
 		// Post processing pass -- BEGIN
@@ -582,9 +591,12 @@ namespace Kaka
 		postProcessing.Draw(wnd.Gfx());
 
 		ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
+		wnd.Gfx().pContext->PSSetShaderResources(0u, 1, nullSRVs);
 		wnd.Gfx().pContext->PSSetShaderResources(1u, 1, nullSRVs);
+		wnd.Gfx().pContext->PSSetShaderResources(2u, 1, nullSRVs);
 
 		// Post processing pass -- END
+
 
 		// ImGui windows
 		if (showImGui)
@@ -593,6 +605,7 @@ namespace Kaka
 
 			if (ImGui::Begin("Post Processing"))
 			{
+				ImGui::Checkbox("Use PP", &wnd.Gfx().usePostProcessing);
 				ImGui::ColorPicker3("Tint", &ppBuffer.tint.x);
 				ImGui::DragFloat3("Blackpoint", &ppBuffer.blackpoint.x, 0.01f, 0.0f, 1.0f, "%.2f");
 				ImGui::DragFloat("Exposure", &ppBuffer.exposure, 0.01f, -10.0f, 10.0f, "%.2f");
@@ -600,11 +613,12 @@ namespace Kaka
 				ImGui::DragFloat("Saturation", &ppBuffer.saturation, 0.01f, 0.0f, 10.0f, "%.2f");
 				ImGui::DragFloat("Blur", &ppBuffer.blur, 0.01f, 0.0f, 64.0f, "%.2f");
 				ImGui::Text("Bloom");
-				ImGui::Checkbox("Use bloom", &wnd.Gfx().useBloom);
 				ImGui::SetNextItemWidth(100);
 				ImGui::SliderFloat("Bloom blending", &wnd.Gfx().bb.bloomBlending, 0.0f, 1.0f);
 				ImGui::SetNextItemWidth(100);
 				ImGui::SliderFloat("Bloom threshold", &wnd.Gfx().bb.bloomThreshold, 0.0f, 1.0f);
+				ImGui::Text("Temporal Anti-Aliasing");
+				ImGui::DragFloat("Jitter scale", &wnd.Gfx().jitterScale, 0.01f, 0.0f, 1.0f, "%.2f");
 			}
 			ImGui::End();
 
@@ -806,33 +820,36 @@ namespace Kaka
 
 			switch (e->GetKeyCode())
 			{
-			case VK_ESCAPE:
-				if (wnd.CursorEnabled())
-				{
-					wnd.DisableCursor();
-					wnd.mouse.EnableRaw();
-				}
-				else
-				{
-					wnd.EnableCursor();
-					wnd.mouse.DisableRaw();
-				}
-				break;
-			case VK_F1:
-				showImGui = !showImGui;
-				break;
-			case VK_F2:
-				showStatsWindow = !showStatsWindow;
-				break;
-			case VK_F3:
-				drawLightDebug = !drawLightDebug;
-				break;
-			case 'F':
-				//flashlightOn = !flashlightOn;
-				break;
-			case 'R':
-				drawRSM = !drawRSM;
-				break;
+				case VK_ESCAPE:
+					if (wnd.CursorEnabled())
+					{
+						wnd.DisableCursor();
+						wnd.mouse.EnableRaw();
+					}
+					else
+					{
+						wnd.EnableCursor();
+						wnd.mouse.DisableRaw();
+					}
+					break;
+				case VK_F1:
+					showImGui = !showImGui;
+					break;
+				case VK_F2:
+					showStatsWindow = !showStatsWindow;
+					break;
+				case VK_F3:
+					drawLightDebug = !drawLightDebug;
+					break;
+				case 'T':
+					taaBuffer.useTAA = !taaBuffer.useTAA;
+					break;
+				case 'F':
+					//flashlightOn = !flashlightOn;
+					break;
+				case 'R':
+					drawRSM = !drawRSM;
+					break;
 			}
 		}
 

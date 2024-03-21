@@ -99,7 +99,7 @@ namespace Kaka
 
 	DirectX::XMMATRIX Camera::GetProjection() const
 	{
-		return jitteredProjection;
+		return projection;
 	}
 
 	DirectX::XMMATRIX Camera::GetJitteredProjection() const
@@ -145,7 +145,7 @@ namespace Kaka
 		};
 	}
 
-	void Camera::SetPerspective(float aWidth, float aHeight, float aVFov, float aNearZ, float aFarZ)
+	void Camera::SetPerspective(const float aWidth, const float aHeight, const float aVFov, const float aNearZ, const float aFarZ)
 	{
 		cameraType = eCameraType::Perspective;
 
@@ -165,7 +165,7 @@ namespace Kaka
 		jitteredProjection = projection;
 	}
 
-	void Camera::SetOrthographic(float aWidth, float aHeight, float aNearZ, float aFarZ)
+	void Camera::SetOrthographic(const float aWidth, const float aHeight, const float aNearZ, const float aFarZ)
 	{
 		cameraType = eCameraType::Orthographic;
 
@@ -178,9 +178,9 @@ namespace Kaka
 		jitteredProjection = projection;
 	}
 
-	void Camera::JitterProjection(float aJitterX, float aJitterY)
+	void Camera::ApplyProjectionJitter(const float aJitterX, const float aJitterY)
 	{
-		DirectX::XMMATRIX offset = DirectX::XMMatrixTranslation(aJitterX, aJitterY, 0.0f);
+		const DirectX::XMMATRIX offset = DirectX::XMMatrixTranslation(aJitterX, aJitterY, 0.0f);
 
 		jitteredProjection = projection * offset;
 	}

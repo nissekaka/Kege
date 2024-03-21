@@ -48,7 +48,7 @@ namespace Kaka
 		DirectX::XMVECTOR GetUpVector() const;
 		void SetPerspective(float aWidth, float aHeight, float aVFov, float aNearZ, float aFarZ);
 		void SetOrthographic(float aWidth, float aHeight, float aNearZ, float aFarZ);
-		void JitterProjection(float aJitterX, float aJitterY);
+		void ApplyProjectionJitter(float aJitterX, float aJitterY);
 
 	private:
 		PerspectiveData perspectiveData;
@@ -56,6 +56,7 @@ namespace Kaka
 		eCameraType cameraType;
 		DirectX::XMMATRIX projection{};
 		DirectX::XMMATRIX jitteredProjection{};
+		DirectX::XMMATRIX unjitteredProjection{};
 
 		DirectX::XMFLOAT3 position;
 		float pitch;

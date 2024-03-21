@@ -502,6 +502,11 @@ namespace Kaka
 		return camera->GetProjection();
 	}
 
+	DirectX::XMMATRIX Graphics::GetJitteredProjection() const
+	{
+		return camera->GetJitteredProjection();
+	}
+
 	void Graphics::SetCamera(Camera& aCamera)
 	{
 		camera = &aCamera;
@@ -523,60 +528,60 @@ namespace Kaka
 
 		switch (aRenderTargetType)
 		{
-		case eRenderTargetType::None:
+			case eRenderTargetType::None:
 			{
 				pContext->OMSetRenderTargets(0u, nullptr, aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::Default:
+			case eRenderTargetType::Default:
 			{
 				pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::WaterReflect:
+			case eRenderTargetType::WaterReflect:
 			{
 				pContext->OMSetRenderTargets(1u, renderWaterReflect.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::PostProcessing:
+			case eRenderTargetType::PostProcessing:
 			{
 				pContext->OMSetRenderTargets(1u, postProcessing.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::RSMDownscaleDirectional:
+			case eRenderTargetType::RSMDownscaleDirectional:
 			{
 				pContext->OMSetRenderTargets(1u, rsmDownscaleDirectional.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
-		case eRenderTargetType::RSMDownscaleSpot:
+			case eRenderTargetType::RSMDownscaleSpot:
 			{
 				pContext->OMSetRenderTargets(1u, rsmDownscaleSpot.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::RSMFullscaleDirectional:
+			case eRenderTargetType::RSMFullscaleDirectional:
 			{
 				pContext->OMSetRenderTargets(1u, rsmFullscaleDirectional.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::RSMFullscaleSpot:
+			case eRenderTargetType::RSMFullscaleSpot:
 			{
 				pContext->OMSetRenderTargets(1u, rsmFullscaleSpot.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::HistoryN1:
+			case eRenderTargetType::HistoryN1:
 			{
 				pContext->OMSetRenderTargets(1u, historyN1.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::HistoryN:
+			case eRenderTargetType::HistoryN:
 			{
 				pContext->OMSetRenderTargets(1u, historyN.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		//case eRenderTargetType::ShadowMap:
-		//{
-		//	pContext->OMSetRenderTargets(0u, nullptr, aUseDepth ? rsmBuffer.GetDepthStencilView() : NULL);
-		//}
-		//break;
+			//case eRenderTargetType::ShadowMap:
+			//{
+			//	pContext->OMSetRenderTargets(0u, nullptr, aUseDepth ? rsmBuffer.GetDepthStencilView() : NULL);
+			//}
+			//break;
 		}
 	}
 
@@ -586,61 +591,61 @@ namespace Kaka
 
 		switch (aRenderTargetType)
 		{
-		case eRenderTargetType::None:
+			case eRenderTargetType::None:
 			{
 				pContext->OMSetRenderTargets(0u, nullptr, aDepth);
 			}
 			break;
-		case eRenderTargetType::Default:
+			case eRenderTargetType::Default:
 			{
 				pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::WaterReflect:
+			case eRenderTargetType::WaterReflect:
 			{
 				pContext->OMSetRenderTargets(1u, renderWaterReflect.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::PostProcessing:
+			case eRenderTargetType::PostProcessing:
 			{
 				pContext->OMSetRenderTargets(1u, postProcessing.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::RSMDownscaleDirectional:
+			case eRenderTargetType::RSMDownscaleDirectional:
 			{
 				pContext->OMSetRenderTargets(1u, rsmDownscaleDirectional.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::RSMDownscaleSpot:
+			case eRenderTargetType::RSMDownscaleSpot:
 			{
 				pContext->OMSetRenderTargets(1u, rsmDownscaleSpot.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::RSMFullscaleDirectional:
+			case eRenderTargetType::RSMFullscaleDirectional:
 			{
 				pContext->OMSetRenderTargets(1u, rsmFullscaleDirectional.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::RSMFullscaleSpot:
+			case eRenderTargetType::RSMFullscaleSpot:
 			{
 				pContext->OMSetRenderTargets(1u, rsmFullscaleSpot.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::HistoryN1:
+			case eRenderTargetType::HistoryN1:
 			{
 				pContext->OMSetRenderTargets(1u, historyN1.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::HistoryN:
+			case eRenderTargetType::HistoryN:
 			{
 				pContext->OMSetRenderTargets(1u, historyN.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		//case eRenderTargetType::ShadowMap:
-		//{
-		//	pContext->OMSetRenderTargets(0u, nullptr, rsmBuffer.GetDepthStencilView());
-		//}
-		//break;
+			//case eRenderTargetType::ShadowMap:
+			//{
+			//	pContext->OMSetRenderTargets(0u, nullptr, rsmBuffer.GetDepthStencilView());
+			//}
+			//break;
 		}
 	}
 
@@ -669,20 +674,25 @@ namespace Kaka
 		//pContext->OMSetBlendState(nullptr, nullptr, 0x0f);
 	}
 
-	void Graphics::CameraJitter()
+	void Graphics::ApplyProjectionJitter()
 	{
-		DirectX::XMFLOAT2 jitterSample = halton23[frameCount % 16];
+		previousJitter = currentJitter;
+
+		currentJitter = halton23[frameCount % 16];
 
 		// Divide by resolution and move to -1, 1
-		jitterSample.x = ((jitterSample.x - 0.5f) / (float)width) * 2.0f;
-		jitterSample.y = ((jitterSample.y - 0.5f) / (float)height) * 2.0f;
+		currentJitter.x = ((currentJitter.x - 0.5f) / (float)width) * 2.0f;
+		currentJitter.y = ((currentJitter.y - 0.5f) / (float)height) * 2.0f;
 
-		camera->JitterProjection(jitterSample.x, jitterSample.y);
+		currentJitter.x *= jitterScale;
+		currentJitter.y *= jitterScale;
+
+		camera->ApplyProjectionJitter(currentJitter.x, currentJitter.y);
 	}
 
 	void Graphics::HandleBloomScaling(PostProcessing& aPostProcessor, ID3D11ShaderResourceView* aResource)
 	{
-		if (useBloom)
+		if (usePostProcessing)
 		{
 			pContext->OMSetRenderTargets(1u, bloomDownscale[0].pTarget.GetAddressOf(), nullptr);
 			pContext->PSSetShaderResources(0u, 1u, &aResource);
@@ -734,6 +744,8 @@ namespace Kaka
 		}
 		else
 		{
+			aPostProcessor.SetFullscreenPS();
+
 			pContext->OMSetRenderTargets(1u, pDefaultTarget.GetAddressOf(), nullptr);
 			pContext->PSSetShaderResources(0u, 1u, &aResource);
 			ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
@@ -745,22 +757,22 @@ namespace Kaka
 	{
 		switch (aBlendState)
 		{
-		case eBlendStates::Disabled:
+			case eBlendStates::Disabled:
 			{
 				pContext->OMSetBlendState(pBlendStates[(int)eBlendStates::Disabled].Get(), nullptr, 0x0f);
 			}
 			break;
-		case eBlendStates::Alpha:
+			case eBlendStates::Alpha:
 			{
 				pContext->OMSetBlendState(pBlendStates[(int)eBlendStates::Alpha].Get(), nullptr, 0x0f);
 			}
 			break;
-		case eBlendStates::VFX:
+			case eBlendStates::VFX:
 			{
 				pContext->OMSetBlendState(pBlendStates[(int)eBlendStates::VFX].Get(), nullptr, 0x0f);
 			}
 			break;
-		case eBlendStates::Additive:
+			case eBlendStates::Additive:
 			{
 				pContext->OMSetBlendState(pBlendStates[(int)eBlendStates::Additive].Get(), nullptr, 0x0f);
 			}
@@ -772,27 +784,27 @@ namespace Kaka
 	{
 		switch (aDepthStencilState)
 		{
-		case eDepthStencilStates::Normal:
+			case eDepthStencilStates::Normal:
 			{
 				pContext->OMSetDepthStencilState(pDepthStencilStates[(int)eDepthStencilStates::Normal].Get(), 0u);
 			}
 			break;
-		case eDepthStencilStates::ReadOnlyGreater:
+			case eDepthStencilStates::ReadOnlyGreater:
 			{
 				pContext->OMSetDepthStencilState(pDepthStencilStates[(int)eDepthStencilStates::ReadOnlyGreater].Get(), 0u);
 			}
 			break;
-		case eDepthStencilStates::ReadOnlyLessEqual:
+			case eDepthStencilStates::ReadOnlyLessEqual:
 			{
 				pContext->OMSetDepthStencilState(pDepthStencilStates[(int)eDepthStencilStates::ReadOnlyLessEqual].Get(), 0u);
 			}
 			break;
-		case eDepthStencilStates::ReadOnlyEmpty:
+			case eDepthStencilStates::ReadOnlyEmpty:
 			{
 				pContext->OMSetDepthStencilState(pDepthStencilStates[(int)eDepthStencilStates::ReadOnlyEmpty].Get(), 0u);
 			}
 			break;
-		default: ;
+			default: ;
 		}
 	}
 
@@ -800,22 +812,22 @@ namespace Kaka
 	{
 		switch (aRasterizerState)
 		{
-		case eRasterizerStates::BackfaceCulling:
+			case eRasterizerStates::BackfaceCulling:
 			{
 				pContext->RSSetState(pRasterizerStates[(int)eRasterizerStates::BackfaceCulling].Get());
 			}
 			break;
-		case eRasterizerStates::FrontfaceCulling:
+			case eRasterizerStates::FrontfaceCulling:
 			{
 				pContext->RSSetState(pRasterizerStates[(int)eRasterizerStates::FrontfaceCulling].Get());
 			}
 			break;
-		case eRasterizerStates::NoCulling:
+			case eRasterizerStates::NoCulling:
 			{
 				pContext->RSSetState(pRasterizerStates[(int)eRasterizerStates::NoCulling].Get());
 			}
 			break;
-		default: ;
+			default: ;
 		}
 	}
 

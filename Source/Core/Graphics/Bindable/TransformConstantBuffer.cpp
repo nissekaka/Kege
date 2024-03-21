@@ -28,7 +28,7 @@ namespace Kaka
 	{
 		const DirectX::XMMATRIX objectToWorld = parent.GetTransform();
 		DirectX::XMMATRIX objectToClip = objectToWorld * aGfx.GetCameraInverseView();
-		objectToClip = objectToClip * aGfx.GetProjection();
+		objectToClip = objectToClip * aGfx.GetJitteredProjection();
 
 		return {objectToWorld, objectToClip};
 	}

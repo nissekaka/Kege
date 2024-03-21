@@ -210,9 +210,10 @@ namespace Kaka
 
 		struct TAABuffer
 		{
-			unsigned int mode = 0u;
-			float denoise = 3.0f;
-			float padding[2];
+			DirectX::XMMATRIX historyViewProjection;
+			DirectX::XMFLOAT2 clientResolution;
+			BOOL useTAA = true;
+			float padding;
 		} taaBuffer;
 
 		bool flipFlop = false;
