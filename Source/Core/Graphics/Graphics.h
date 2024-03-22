@@ -8,6 +8,7 @@
 #include "GBuffer.h"
 #include "RSMBuffer.h"
 #include "ShaderFactory.h"
+#include <External/Include/FileWatch/FileWatch.hpp>
 
 #define KAKA_BG_COLOUR {0.1f, 0.2f, 0.3f, 1.0f}
 
@@ -148,6 +149,7 @@ namespace Kaka
 		bool IsImGuiEnabled() const;
 		UINT GetWidth() const;
 		UINT GetHeight() const;
+		void ProcessFileChangeEngine(const std::wstring& aPath, filewatch::Event aEvent);
 
 	private:
 		bool imGuiEnabled = true;
@@ -165,6 +167,8 @@ namespace Kaka
 		bool IsBoundingBoxInFrustum(const DirectX::XMFLOAT3& aMin, const DirectX::XMFLOAT3& aMax) const;
 
 	private:
+		filewatch::FileWatch<std::wstring> shaderFileWatcher;
+
 		Camera* camera = nullptr;
 		Microsoft::WRL::ComPtr<ID3D11Device> pDevice;
 		Microsoft::WRL::ComPtr<IDXGISwapChain> pSwap;

@@ -18,7 +18,13 @@ namespace Kaka
 	Graphics::Graphics(HWND aHWnd, UINT aWidth, UINT aHeight)
 		:
 		width(aWidth),
-		height(aHeight)
+		height(aHeight),
+		shaderFileWatcher(
+			L"..\\Source\\Core\\Graphics\\Shaders",
+			[this](const std::wstring& path, const filewatch::Event change_type)
+			{
+				ProcessFileChangeEngine(path, change_type);
+			})
 	{
 		{
 			DXGI_SWAP_CHAIN_DESC scd = {};
@@ -1122,6 +1128,22 @@ namespace Kaka
 	UINT Graphics::GetHeight() const
 	{
 		return height;
+	}
+
+	void Graphics::ProcessFileChangeEngine(const std::wstring& aPath, filewatch::Event aEvent)
+	{
+		switch (aEvent)
+		{
+			case filewatch::Event::modified:
+				if (aPath.ends_with(L".hlsl"))
+				{
+					const std::wstring sub = aPath.substr(aPath.find_last_of(L"\\") + 1);
+
+					ShaderFactory::RecompileShader(sub, pDevice.Get());
+				}
+
+				break;
+		}
 	}
 
 	Graphics::FrustumPlanes Graphics::ExtractFrustumPlanes() const

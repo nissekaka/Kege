@@ -6,6 +6,8 @@ namespace Kaka
 {
 	class PixelShader : public Bindable
 	{
+		friend class ShaderFactory;
+
 	public:
 		PixelShader() = default;
 		PixelShader(const Graphics& aGfx, const std::wstring& aPath);

@@ -7,6 +7,8 @@ namespace Kaka
 {
 	class VertexShader : public Bindable
 	{
+		friend class ShaderFactory;
+
 	public:
 		VertexShader() = default;
 		VertexShader(const Graphics& aGfx, const std::wstring& aPath);

@@ -1,7 +1,3 @@
-#pragma once
-// GBuffer
-
-
 cbuffer CommonBuffer : register(b4)
 {
     float4x4 worldToClipMatrix;
