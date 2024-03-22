@@ -5,9 +5,9 @@ namespace Kaka
 {
 	void IndirectLighting::Init(const Graphics& aGfx)
 	{
-		indirectLightingVS = ShaderFactory::GetVertexShader(aGfx, L"Shaders/Fullscreen_VS.cso");
-		indirectLightingPS = ShaderFactory::GetPixelShader(aGfx, L"Shaders/IndirectLighting_PS.cso");
-		indirectLightingCombinedPS = ShaderFactory::GetPixelShader(aGfx, L"Shaders/IndirectLightingCombined_PS.cso");
+		indirectLightingVS = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\Fullscreen_VS.cso");
+		indirectLightingPS = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\IndirectLighting_PS.cso");
+		indirectLightingCombinedPS = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\IndirectLightingCombined_PS.cso");
 		indirectLightingDefaultPS = indirectLightingPS;
 
 		struct PVertex
