@@ -1,5 +1,6 @@
 #include "common.hlsli"
 #include "deferred_common.hlsli"
+#include "GBuffer.hlsli"
 
 struct PixelInput
 {
@@ -35,7 +36,7 @@ GBufferOutput main(PixelInput aInput) : SV_TARGET
 
     //albedo.a = min(worldAlpha, cameraAlpha);
     //float3 normal = aInput.normal;
-    float3 normal = float3(gNormalTex.Sample(defaultSampler, aInput.texCoord).rg, 1.0f);
+    float3 normal = float3(gNormalTex.Sample(linearSampler, aInput.texCoord).rg, 1.0f);
     //float3 normal = normalTex.Sample(defaultSampler, scaledUV).wyz;
     //float ambientOcclusion = normal.z;
     normal = 2.0f * normal - 1.0f;

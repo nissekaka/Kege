@@ -542,21 +542,26 @@ namespace Kaka
 		if (flipFlop)
 		{
 			wnd.Gfx().SetRenderTarget(eRenderTargetType::HistoryN1, nullptr);
-
-			wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, wnd.Gfx().postProcessing.pResource.GetAddressOf());
 			wnd.Gfx().pContext->PSSetShaderResources(1u, 1u, wnd.Gfx().historyN.pResource.GetAddressOf());
-			// Need world position for reprojection
-			wnd.Gfx().pContext->PSSetShaderResources(2u, 1u, wnd.Gfx().gBuffer.GetShaderResourceViews());
 		}
 		else
 		{
 			wnd.Gfx().SetRenderTarget(eRenderTargetType::HistoryN, nullptr);
-
-			wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, wnd.Gfx().postProcessing.pResource.GetAddressOf());
 			wnd.Gfx().pContext->PSSetShaderResources(1u, 1u, wnd.Gfx().historyN1.pResource.GetAddressOf());
-			// Need world position for reprojection
-			wnd.Gfx().pContext->PSSetShaderResources(2u, 1u, wnd.Gfx().gBuffer.GetShaderResourceViews());
 		}
+
+		wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, wnd.Gfx().postProcessing.pResource.GetAddressOf());
+		// Need world position for reprojection
+		wnd.Gfx().pContext->PSSetShaderResources(2u, 1u, wnd.Gfx().gBuffer.GetShaderResourceViews());
+		wnd.Gfx().pContext->PSSetShaderResources(3u, 1u, wnd.Gfx().gBuffer.GetDepthShaderResourceView());
+
+		ImGui::Begin("Noise Filtering");
+		ImGui::DragFloat("KERNEL_RADIUS", &taaBuffer.KERNEL_RADIUS, 0.01f, 0.0f, 100.0f, "%.2f");
+		ImGui::DragFloat("K SIGMA_DEPTH", &taaBuffer.SIGMA_DEPTH, 0.001f, 0.0f, 10.0f, "%.2f");
+		ImGui::DragFloat("SIGMA_NORMAL", &taaBuffer.SIGMA_NORMAL, 0.001f, 0.0f, 10.0f, "%.2f");
+		ImGui::DragFloat("SIGMA_COLOR", &taaBuffer.SIGMA_COLOR, 0.001f, 0.0f, 10.0f, "%.2f");
+		ImGui::DragFloat("blend", &taaBuffer.blend, 0.01f, 0.0f, 1.0f, "%.2f");
+		ImGui::End();
 
 		PixelConstantBuffer<TAABuffer> tab{wnd.Gfx(), 1u};
 		taaBuffer.historyViewProjection = wnd.Gfx().historyViewProjection;
@@ -820,36 +825,36 @@ namespace Kaka
 
 			switch (e->GetKeyCode())
 			{
-				case VK_ESCAPE:
-					if (wnd.CursorEnabled())
-					{
-						wnd.DisableCursor();
-						wnd.mouse.EnableRaw();
-					}
-					else
-					{
-						wnd.EnableCursor();
-						wnd.mouse.DisableRaw();
-					}
-					break;
-				case VK_F1:
-					showImGui = !showImGui;
-					break;
-				case VK_F2:
-					showStatsWindow = !showStatsWindow;
-					break;
-				case VK_F3:
-					drawLightDebug = !drawLightDebug;
-					break;
-				case 'T':
-					taaBuffer.useTAA = !taaBuffer.useTAA;
-					break;
-				case 'F':
-					//flashlightOn = !flashlightOn;
-					break;
-				case 'R':
-					drawRSM = !drawRSM;
-					break;
+			case VK_ESCAPE:
+				if (wnd.CursorEnabled())
+				{
+					wnd.DisableCursor();
+					wnd.mouse.EnableRaw();
+				}
+				else
+				{
+					wnd.EnableCursor();
+					wnd.mouse.DisableRaw();
+				}
+				break;
+			case VK_F1:
+				showImGui = !showImGui;
+				break;
+			case VK_F2:
+				showStatsWindow = !showStatsWindow;
+				break;
+			case VK_F3:
+				drawLightDebug = !drawLightDebug;
+				break;
+			case 'T':
+				taaBuffer.useTAA = !taaBuffer.useTAA;
+				break;
+			case 'F':
+				//flashlightOn = !flashlightOn;
+				break;
+			case 'R':
+				drawRSM = !drawRSM;
+				break;
 			}
 		}
 

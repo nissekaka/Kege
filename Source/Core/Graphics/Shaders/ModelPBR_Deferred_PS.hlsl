@@ -1,5 +1,6 @@
 #include "common.hlsli"
 #include "deferred_common.hlsli"
+#include "GBuffer.hlsli"
 
 struct PixelInput
 {
@@ -21,7 +22,7 @@ GBufferOutput main(PixelInput aInput)
         discard;
     }
 
-    float3 normal = float3(gNormalTex.Sample(defaultSampler, aInput.texCoord).rg, 1.0f);
+    float3 normal = float3(gNormalTex.Sample(linearSampler, aInput.texCoord).rg, 1.0f);
     //float3 normal = normalTex.Sample(defaultSampler, scaledUV).wyz;
     //float ambientOcclusion = normal.z;
     normal = 2.0f * normal - 1.0f;
@@ -36,7 +37,7 @@ GBufferOutput main(PixelInput aInput)
 
     const float3 pixelNormal = normalize(mul(TBN, normal));
 
-    float4 material = gMaterialTex.Sample(defaultSampler, aInput.texCoord);
+    float4 material = gMaterialTex.Sample(linearSampler, aInput.texCoord);
     float ambientOcclusion = material.r;
 
     GBufferOutput output;

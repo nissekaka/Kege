@@ -1,4 +1,3 @@
-#include "deferred_common.hlsli"
 #include "Shadows.hlsli"
 
 struct PixelInput
@@ -12,6 +11,8 @@ struct PixelInput
     float3 bitan : BITANGENT;
     float4 colour : INSTANCE_COLOUR;
 };
+
+Texture2D gColourTex : register(t1);
 
 cbuffer FlashlightData : register(b2)
 {

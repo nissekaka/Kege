@@ -5,6 +5,9 @@
 
 static const uint MAX_LIGHTS = 50u; // Needs to be the same in PointLight
 
+TextureCube daySkyTex : register(t12);
+TextureCube nightSkyTex : register(t13);
+
 cbuffer Model : register(b0)
 {
     bool normalMapEnabled;
@@ -63,8 +66,8 @@ float4 main(PixelInput aInput) : SV_TARGET
     const float2 texCoord = aInput.texCoord + float2(waveOffset, waveOffset);
 
     float3 colour = colourTex.Sample(defaultSampler, texCoord).rgb;
-    float3 normal = normalTex.Sample(defaultSampler, texCoord).xyz;
-    const float3 material = materialTex.Sample(defaultSampler, texCoord).rgb;
+    float3 normal = normalTex.Sample(linearSampler, texCoord).xyz;
+    const float3 material = materialTex.Sample(linearSampler, texCoord).rgb;
 
     float3 ambientLight = { 0.0f, 0.0f, 0.0f };
     float3 directionalLight = { 0.0f, 0.0f, 0.0f };

@@ -1,5 +1,6 @@
 #include "common.hlsli"
 #include "deferred_common.hlsli"
+#include "GBuffer.hlsli"
 #include "PBRFunctions.hlsli"
 
 cbuffer PointlightData : register(b2)
@@ -15,11 +16,11 @@ cbuffer PointlightData : register(b2)
 float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 {
     const float2 uv = aInput.position.xy / clientResolution.xy;
-    const float3 worldPosition = gWorldPositionTex.Sample(defaultSampler, uv).rgb;
+    const float3 worldPosition = gWorldPositionTex.Sample(linearSampler, uv).rgb;
 
     const float3 albedo = gColourTex.Sample(defaultSampler, uv).rgb;
-    const float3 normal = normalize(2.0f * gNormalTex.Sample(defaultSampler, uv).xyz - 1.0f);
-    const float4 material = gMaterialTex.Sample(defaultSampler, uv);
+    const float3 normal = normalize(2.0f * gNormalTex.Sample(linearSampler, uv).xyz - 1.0f);
+    const float4 material = gMaterialTex.Sample(linearSampler, uv);
 
     if (material.a == 0.0f)
     {

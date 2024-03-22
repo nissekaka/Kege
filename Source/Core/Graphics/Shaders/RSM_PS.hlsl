@@ -1,5 +1,6 @@
 #include "common.hlsli"
 #include "deferred_common.hlsli"
+#include "GBuffer.hlsli"
 
 struct PixelInput
 {
@@ -29,7 +30,7 @@ RSMBufferOutput main(PixelInput aInput)
         discard;
     }
 
-    float3 normal = float3(gNormalTex.Sample(defaultSampler, aInput.texCoord).rg, 1.0f);
+    float3 normal = float3(gNormalTex.Sample(linearSampler, aInput.texCoord).rg, 1.0f);
 
     normal = 2.0f * normal - 1.0f;
     normal.z = sqrt(1 - saturate(normal.x * normal.x + normal.y * normal.y));

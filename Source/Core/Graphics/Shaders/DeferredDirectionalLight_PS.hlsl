@@ -1,7 +1,11 @@
 #include "deferred_common.hlsli"
+#include "GBuffer.hlsli"
 #include "PBRFunctions.hlsli"
 #include "Shadows.hlsli"
 #include "Volumetric.hlsli"
+
+TextureCube daySkyTex : register(t12);
+TextureCube nightSkyTex : register(t13);
 
 cbuffer DirectionalLight : register(b1)
 {
@@ -40,12 +44,12 @@ cbuffer RSMData : register(b3)
 float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 {
     const float2 uv = aInput.position.xy / clientResolution.xy;
-    const float3 worldPosition = gWorldPositionTex.Sample(defaultSampler, uv).rgb;
+    const float3 worldPosition = gWorldPositionTex.Sample(linearSampler, uv).rgb;
     const float3 albedo = gColourTex.Sample(defaultSampler, uv).rgb;
-    const float4 ambientOcclusionAndCustom = gAmbientOcclusionTex.Sample(defaultSampler, uv).rgba;
+    const float4 ambientOcclusionAndCustom = gAmbientOcclusionTex.Sample(linearSampler, uv).rgba;
     
-    const float3 normal = normalize(2.0f * gNormalTex.Sample(defaultSampler, uv).xyz - 1.0f);
-    const float4 material = gMaterialTex.Sample(defaultSampler, uv);
+    const float3 normal = normalize(2.0f * gNormalTex.Sample(linearSampler, uv).xyz - 1.0f);
+    const float4 material = gMaterialTex.Sample(linearSampler, uv);
 
     const float roughness = material.g;
     const float metalness = material.b;
@@ -69,7 +73,7 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 
     const float3 volumetric = Volumetric(worldPosition, cameraPosition.xyz, numberOfVolumetricSteps,
                                          uv, clientResolution.xy, directionalLightCameraTransform,
-                                         directionalLightShadowMap, defaultSampler, dirLightDir,
+                                         directionalLightShadowMap, linearSampler, dirLightDir,
                                          directionalLightColour, volumetricScattering) * volumetricIntensity;
 
     float3 finalColour = directionalLight * shadowFactor;
@@ -83,7 +87,7 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
     const float dotProduct = dot(lightDir, float3(0.0f, 1.0f, 0.0f));
     const float blendFactor = (dotProduct + 1.0) / 2.0f;
 
-    const float3 ambiance = EvaluateAmbianceDynamicSky(defaultSampler, daySkyTex, nightSkyTex, blendFactor,
+    const float3 ambiance = EvaluateAmbianceDynamicSky(linearSampler, daySkyTex, nightSkyTex, blendFactor,
     normal, ambientOcclusionAndCustom.gba, toEye, roughness, ambientOcclusionAndCustom.r, colour, specular);
 
     const float3 constantAmbiance = colour * ambianceColour.rgb * ambianceColour.w;

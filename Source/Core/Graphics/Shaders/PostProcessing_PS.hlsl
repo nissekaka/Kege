@@ -23,14 +23,14 @@ cbuffer Parameters : register(b1)
 
 float4 main(const PixelInput aInput) : SV_TARGET
 {
-    float4 colour = fullscreenTexture.Sample(defaultSampler, aInput.texCoord).rgba;
+    float4 colour = fullscreenTexture.Sample(linearSampler, aInput.texCoord).rgba;
 
 	if (colour.a < 0.1f)
     {
         discard;
     }
 
-    float4 bloom = bloomSampleTexture.Sample(defaultSampler, aInput.texCoord).rgba;
+    float4 bloom = bloomSampleTexture.Sample(linearSampler, aInput.texCoord).rgba;
 
     // Blur
     const float twoPi = 6.28318530718; // Pi*2
@@ -45,8 +45,8 @@ float4 main(const PixelInput aInput) : SV_TARGET
     {
         for (float i = 1.0 / quality; i <= 1.0; i += 1.0 / quality)
         {
-            colour += fullscreenTexture.Sample(defaultSampler, aInput.texCoord + float2(cos(d), sin(d)) * radius * i);
-            bloom += bloomSampleTexture.Sample(defaultSampler, aInput.texCoord + float2(cos(d), sin(d)) * radius * i);
+            colour += fullscreenTexture.Sample(linearSampler, aInput.texCoord + float2(cos(d), sin(d)) * radius * i);
+            bloom += bloomSampleTexture.Sample(linearSampler, aInput.texCoord + float2(cos(d), sin(d)) * radius * i);
         }
     }
     

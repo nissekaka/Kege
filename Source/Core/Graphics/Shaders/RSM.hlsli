@@ -2,6 +2,10 @@
 #include "Poisson.hlsli"
 #include "common.hlsli"
 
+Texture2D rsmWorldPositionTex : register(t6);
+Texture2D rsmNormalTex : register(t7);
+Texture2D rsmFluxTex : register(t8);
+
 cbuffer HammersleyDataDirectional : register(b5)
 {
     float4 hSamplesDirectional[256];
@@ -119,7 +123,7 @@ float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Text
             offset.xy += o;
             offset.xy = fmod(offset.xy, 1.0f);
 
-            // soft radius rather than hard cutoff
+            // Soft radius rather than hard cutoff
             offset.x = (offset.x * offset.x * offset.x * offset.x + 1.0f) * offset.x;
 
             const float r = offset.x * aRMax;

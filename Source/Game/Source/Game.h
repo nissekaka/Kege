@@ -202,8 +202,6 @@ namespace Kaka
 		VertexConstantBuffer<CommonBuffer> vcb{wnd.Gfx(), VS_CBUFFER_SLOT_COMMON};
 		PixelConstantBuffer<RSMLightData> rsmLightDataBuffer{wnd.Gfx(), PS_CBUFFER_SLOT_RSM_LIGHT};
 
-		//ID3D11ShaderResourceView* hammersleySRV = nullptr;
-
 		static constexpr unsigned int HAMMERSLEY_DIR_COUNT = 4u;
 		static constexpr unsigned int HAMMERSLEY_SPOT_COUNT = 2u;
 		static constexpr unsigned int HAMMERSLEY_FINAL_COUNT = 0u;
@@ -213,42 +211,13 @@ namespace Kaka
 			DirectX::XMMATRIX historyViewProjection;
 			DirectX::XMFLOAT2 clientResolution;
 			BOOL useTAA = true;
-			float padding;
+			float KERNEL_RADIUS = 5.0f;
+			float SIGMA_DEPTH = 0.1f;
+			float SIGMA_NORMAL = 0.1f;
+			float SIGMA_COLOR = 0.1f;
+			float blend = 1.0f;
 		} taaBuffer;
 
 		bool flipFlop = false;
-
-		//struct HammerDataDirectional
-		//{
-		//	float x[HAMMERSLEY_DIR_COUNT] = {};
-		//	float y[HAMMERSLEY_DIR_COUNT] = {};
-		//} hammerDataDirectional;
-
-		//struct HammerDataSpot
-		//{
-		//	float x[HAMMERSLEY_SPOT_COUNT] = {};
-		//	float y[HAMMERSLEY_SPOT_COUNT] = {};
-		//} hammerDataSpot;
-
-		//struct HammerDataFinal
-		//{
-		//	float x[HAMMERSLEY_FINAL_COUNT] = {};
-		//	float y[HAMMERSLEY_FINAL_COUNT] = {};
-		//} hammerDataFinal;
-
-		//struct HammersleyData
-		//{
-		//	DirectX::XMFLOAT2 pointsDir[2000] = {}; // Bytes = 16000
-		//	DirectX::XMFLOAT2 pointsSpot[256] = {}; // Bytes = 18048
-		//	DirectX::XMFLOAT2 pointsFinal[64] = {}; // Bytes = 18560
-		//	unsigned int dirCount = {}; // 18564
-		//	unsigned int spotCount = {}; // 18568
-		//	unsigned int finalCount = {}; // 18572
-		//	float padding = {};
-		//} hData;
-
-		//PixelConstantBuffer<HammerDataDirectional> hammersleyDirectionalBuffer{wnd.Gfx(), 5u};
-		//PixelConstantBuffer<HammerDataSpot> hammersleySpotBuffer{wnd.Gfx(), 6u};
-		//PixelConstantBuffer<HammerDataFinal> hammersleyFinalBuffer{wnd.Gfx(), 7u};
 	};
 }

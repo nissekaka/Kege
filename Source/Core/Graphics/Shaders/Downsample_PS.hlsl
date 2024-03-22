@@ -25,10 +25,10 @@ float4 main(PixelInput aInput) : SV_TARGET
     const float2 pixelOffset = float2(ddx(aInput.texCoord.x), ddy(aInput.texCoord.y));
 	// Could have done one sample in the middle
 	// But that results in some artifacts. This pattern gives a much smoother result
-    const float3 p00 = fullscreenTexture.Sample(defaultSampler, aInput.texCoord + pixelOffset * float2(-0.5f, -0.5f)).rgb;
-    const float3 p01 = fullscreenTexture.Sample(defaultSampler, aInput.texCoord + pixelOffset * float2(-0.5f, 0.5f)).rgb;
-    const float3 p10 = fullscreenTexture.Sample(defaultSampler, aInput.texCoord + pixelOffset * float2(0.5f, -0.5f)).rgb;
-    const float3 p11 = fullscreenTexture.Sample(defaultSampler, aInput.texCoord + pixelOffset * float2(0.5f, 0.5f)).rgb;
+    const float3 p00 = fullscreenTexture.Sample(linearSampler, aInput.texCoord + pixelOffset * float2(-0.5f, -0.5f)).rgb;
+    const float3 p01 = fullscreenTexture.Sample(linearSampler, aInput.texCoord + pixelOffset * float2(-0.5f, 0.5f)).rgb;
+    const float3 p10 = fullscreenTexture.Sample(linearSampler, aInput.texCoord + pixelOffset * float2(0.5f, -0.5f)).rgb;
+    const float3 p11 = fullscreenTexture.Sample(linearSampler, aInput.texCoord + pixelOffset * float2(0.5f, 0.5f)).rgb;
 
     returnValue.rgb = bloomThreshold * (p00 + p01 + p10 + p11);
     returnValue.a = 1.0f;

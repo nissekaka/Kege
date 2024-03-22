@@ -1,8 +1,11 @@
 #include "PBRFunctions.hlsli"
 //#include "RSM.hlsli"
 #include "deferred_common.hlsli"
+#include "GBuffer.hlsli"
 #include "Shadows.hlsli"
 #include "Volumetric.hlsli"
+
+Texture2D flashlightTex : register(t5);
 
 cbuffer SpotlightData : register(b2)
 {
@@ -60,10 +63,10 @@ bool IsInSpotlightCone(float3 aWorldPosition, float aAngle)
 float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 {
     const float2 uv = aInput.position.xy / clientResolution.xy;
-    const float3 worldPosition = gWorldPositionTex.Sample(defaultSampler, uv).rgb;
+    const float3 worldPosition = gWorldPositionTex.Sample(linearSampler, uv).rgb;
     const float3 albedo = gColourTex.Sample(defaultSampler, uv).rgb;
-    const float3 normal = normalize(2.0f * gNormalTex.Sample(defaultSampler, uv).xyz - 1.0f);
-    const float4 material = gMaterialTex.Sample(defaultSampler, uv);
+    const float3 normal = normalize(2.0f * gNormalTex.Sample(linearSampler, uv).xyz - 1.0f);
+    const float4 material = gMaterialTex.Sample(linearSampler, uv);
 
     const float metalness = material.b;
     const float roughness = material.g;
@@ -87,7 +90,7 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
         projectedPosition.x *= clientResolution.x / clientResolution.y; // Because texture has aspect ratio 1:1
         const float2 lightUV = 0.5f + float2(0.5f, -0.5f) * (projectedPosition.xy) / lightOuterAngle;
 
-        lightFromTexture = flashlightTex.Sample(defaultSampler, lightUV).rgb;
+        lightFromTexture = flashlightTex.Sample(linearSampler, lightUV).rgb;
     }
 
     float3 volumetric = float3(0.0f, 0.0f, 0.0f);

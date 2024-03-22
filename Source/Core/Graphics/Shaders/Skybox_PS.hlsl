@@ -1,5 +1,7 @@
 #include "common.hlsli"
-#include "deferred_common.hlsli"
+
+TextureCube daySkyTex : register(t12);
+TextureCube nightSkyTex : register(t13);
 
 cbuffer DirectionalLight : register(b1)
 {
@@ -18,8 +20,8 @@ struct PixelInput
 
 float4 main(const PixelInput aInput) : SV_TARGET
 {
-    const float3 day = daySkyTex.Sample(defaultSampler, aInput.worldPosition).rgb;
-    const float3 night = nightSkyTex.Sample(defaultSampler, aInput.worldPosition).rgb;
+    const float3 day = daySkyTex.Sample(linearSampler, aInput.worldPosition).rgb;
+    const float3 night = nightSkyTex.Sample(linearSampler, aInput.worldPosition).rgb;
     const float3 lightDir = normalize(directionalLightDirection);
     const float dotProduct = dot(lightDir, float3(0.0f, 1.0f, 0.0f));
     const float blendFactor = (dotProduct + 1.0) / 2.0f;

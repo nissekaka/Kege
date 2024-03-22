@@ -9,7 +9,7 @@ VFXOutput main(VFXVertexToPixelInput aInput)
     VFXOutput output;
 
     const float2 uv = aInput.position.xy / clientResolution.xy;
-    const float3 worldPosition = worldPosTex.Sample(defaultSampler, uv).rgb;
+    const float3 worldPosition = worldPosTex.Sample(linearSampler, uv).rgb;
 
     float dist = length(worldPosition - aInput.worldPos);
 
