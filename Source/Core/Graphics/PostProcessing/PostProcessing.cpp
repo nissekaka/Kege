@@ -12,13 +12,13 @@ namespace Kaka
 
 	void PostProcessing::Init(const Graphics& aGfx)
 	{
-		postProcessVS = ShaderFactory::GetVertexShader(aGfx, L"Shaders/Fullscreen_VS.cso");
-		postProcessPS = ShaderFactory::GetPixelShader(aGfx, L"Shaders/PostProcessing_PS.cso");
+		postProcessVS = ShaderFactory::GetVertexShader(aGfx, L"Shaders\\Fullscreen_VS.cso");
+		postProcessPS = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\PostProcessing_PS.cso");
 
-		downsamplePS = ShaderFactory::GetPixelShader(aGfx, L"Shaders/Downsample_PS.cso");
-		upsamplePS = ShaderFactory::GetPixelShader(aGfx, L"Shaders/Upsample_PS.cso");
-		fullscreenPS = ShaderFactory::GetPixelShader(aGfx, L"Shaders/Fullscreen_PS.cso");
-		temporalAliasingPS = ShaderFactory::GetPixelShader(aGfx, L"Shaders/TAA_PS.cso");
+		downsamplePS = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Downsample_PS.cso");
+		upsamplePS = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Upsample_PS.cso");
+		fullscreenPS = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\Fullscreen_PS.cso");
+		temporalAliasingPS = ShaderFactory::GetPixelShader(aGfx, L"Shaders\\TAA_PS.cso");
 
 		currentPS = postProcessPS;
 

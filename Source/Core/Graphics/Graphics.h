@@ -34,6 +34,7 @@ namespace Kaka
 		RSMDownscaleDirectional,
 		RSMDownscaleSpot,
 		RSMFullscaleDirectional,
+		RSMFullscaleDirectionalPrevious,
 		RSMFullscaleSpot,
 		HistoryN1,
 		HistoryN
@@ -182,6 +183,8 @@ namespace Kaka
 		float rsmDownscaleFactor = 1.0f;
 
 		RenderTarget rsmFullscaleDirectional;
+		RenderTarget rsmFullscaleDirectionalN;
+		RenderTarget rsmFullscaleDirectionalN1;
 		RenderTarget rsmFullscaleSpot;
 
 		RenderTarget historyN;
@@ -247,7 +250,7 @@ namespace Kaka
 
 		DirectX::XMFLOAT2 previousJitter = {0.0f, 0.0f};
 		DirectX::XMFLOAT2 currentJitter = {0.0f, 0.0f};
-		float jitterScale = 0.2f;
+		float jitterScale = 0.5f;
 
 		unsigned long long frameCount = 0;
 

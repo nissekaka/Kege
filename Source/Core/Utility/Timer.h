@@ -1,7 +1,7 @@
 #pragma once
 #include <mutex>
-#include "Core/Windows/KakaWin.h"
 
+static constexpr int MAX_FPS_SAMPLES = 1024;
 
 namespace Kaka
 {
@@ -23,6 +23,8 @@ namespace Kaka
 		float deltaTime;
 		float totalTime = 0.0f;
 		float fps = 0.0f;
+		float latestFps[MAX_FPS_SAMPLES] = {0.0f};
+		int latestFpsIndex = 0;
 		std::mutex mutex;
 	};
 }

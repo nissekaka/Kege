@@ -1,6 +1,5 @@
 #include "common.hlsli"
 #include "deferred_common.hlsli"
-#include "GBuffer.hlsli"
 
 struct PixelInput
 {
@@ -13,20 +12,29 @@ struct PixelInput
     float3 bitan : BITANGENT;
 };
 
+Texture2D colourTex : register(t1);
+Texture2D normalTex : register(t2);
+Texture2D materialTex : register(t3);
+
 GBufferOutput main(PixelInput aInput)
 {
-    float4 albedo = gColourTex.Sample(defaultSampler, aInput.texCoord).rgba;
+    float4 albedo = colourTex.Sample(defaultSampler, aInput.texCoord).rgba;
 
     if (albedo.a < 0.5f)
     {
         discard;
     }
 
-    float3 normal = float3(gNormalTex.Sample(linearSampler, aInput.texCoord).rg, 1.0f);
+    float3 normal = float3(normalTex.Sample(linearSampler, aInput.texCoord).rg, 1.0f);
     //float3 normal = normalTex.Sample(defaultSampler, scaledUV).wyz;
     //float ambientOcclusion = normal.z;
     normal = 2.0f * normal - 1.0f;
-    normal.z = sqrt(1 - saturate(normal.x * normal.x + normal.y * normal.y));
+
+    // normal.z calculation is
+    // not needed for Sponza
+    // but is needed models with
+    // only x and y normal data
+    normal.z = sqrt(1 - saturate(normal.x * normal.x + normal.y * normal.y)); 
     normal = normalize(normal);
     normal.y = -normal.y;
 
@@ -37,7 +45,7 @@ GBufferOutput main(PixelInput aInput)
 
     const float3 pixelNormal = normalize(mul(TBN, normal));
 
-    float4 material = gMaterialTex.Sample(linearSampler, aInput.texCoord);
+    float4 material = materialTex.Sample(linearSampler, aInput.texCoord);
     float ambientOcclusion = material.r;
 
     GBufferOutput output;
@@ -47,8 +55,7 @@ GBufferOutput main(PixelInput aInput)
     output.material = float4(material.rgb, 1.0f);
     output.ambientOcclusionAndCustom = float4(ambientOcclusion, aInput.worldNormal); // gba are unused, put whatever data you want here!
     output.ambientOcclusionAndCustom.g = 0.0f;
-
-    //output.rsm = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    
     return output;
 }
 

@@ -10,7 +10,7 @@ namespace Kaka
 
 	Texture::Texture(const UINT aSlot)
 		:
-		slot(aSlot) {}
+		slot(aSlot) { }
 
 	void Texture::LoadTextureFromModel(const Graphics& aGfx, const std::string& aFilePath)
 	{
@@ -130,7 +130,6 @@ namespace Kaka
 					"\nTexture: " + texturePath +
 					"\n+++++++++++++++++++++++++++++++++++++++++++++++++";
 				OutputDebugStringA(text.c_str());
-				hasNormalMap = TRUE;
 			}
 			if (FAILED(hr))
 			{
@@ -163,8 +162,6 @@ namespace Kaka
 						"\nTexture: " + texturePath +
 						"\n+++++++++++++++++++++++++++++++++++++++++++++++++";
 					OutputDebugStringA(text.c_str());
-
-					hasNormalMap = TRUE;
 				}
 				if (FAILED(hr))
 				{
@@ -210,7 +207,6 @@ namespace Kaka
 					"\nTexture: " + texturePath +
 					"\n+++++++++++++++++++++++++++++++++++++++++++++++++";
 				OutputDebugStringA(text.c_str());
-				hasMaterial = TRUE;
 			}
 			if (FAILED(hr))
 			{
@@ -244,8 +240,6 @@ namespace Kaka
 						"\nTexture: " + texturePath +
 						"\n+++++++++++++++++++++++++++++++++++++++++++++++++";
 					OutputDebugStringA(text.c_str());
-
-					hasMaterial = TRUE;
 				}
 				if (FAILED(hr))
 				{
@@ -319,37 +313,75 @@ namespace Kaka
 
 		for (int i = 0; i < 3; ++i)
 		{
-			std::string aFilePath;
+			std::string filePath;
+			std::string defaultFilePath[3] = {
+				"Assets\\Textures\\Default\\Default_c.dds",
+				"Assets\\Textures\\Default\\Default_n.dds",
+				"Assets\\Textures\\Default\\Default_m.dds"
+			};
 			switch (i)
 			{
 			case 0:
-				aFilePath = aFilePath1;
+				filePath = aFilePath1;
 				break;
 			case 1:
-				aFilePath = aFilePath2;
+				filePath = aFilePath2;
 				break;
 			case 2:
-				aFilePath = aFilePath3;
+				filePath = aFilePath3;
 				break;
 			}
 
 			// Try to load the DDS texture file
-			HRESULT hr = DirectX::LoadFromDDSFile(std::wstring(aFilePath.begin(), aFilePath.end()).c_str(),
+			HRESULT hr = DirectX::LoadFromDDSFile(std::wstring(filePath.begin(), filePath.end()).c_str(),
 			                                      DirectX::DDS_FLAGS_NONE, &metadata, image);
 
 			if (FAILED(hr))
 			{
 				// If DDS texture not found, try to load PNG texture with the same name
-				hr = DirectX::LoadFromWICFile(std::wstring(aFilePath.begin(), aFilePath.end()).c_str(),
+				hr = DirectX::LoadFromWICFile(std::wstring(filePath.begin(), filePath.end()).c_str(),
 				                              DirectX::WIC_FLAGS_NONE, &metadata, image);
+			}
+
+			if (FAILED(hr))
+			{
+				filePath = defaultFilePath[i];
+				// If no texture found, try to load default texture
+				hr = DirectX::LoadFromDDSFile(std::wstring(filePath.begin(), filePath.end()).c_str(),
+				                              DirectX::DDS_FLAGS_NONE, &metadata, image);
+
+				if (SUCCEEDED(hr))
+				{
+					const std::string text =
+						"\n-------------------------------------------------"
+						"\nLoaded default texture!"
+						"\nTexture: " + filePath +
+						"\n-------------------------------------------------";
+					OutputDebugStringA(text.c_str());
+				}
 			}
 
 			if (SUCCEEDED(hr))
 			{
+				if (image.IsAlphaAllOpaque())
+				{
+					hasAlpha = TRUE;
+				}
+
 				// Generate mipmaps for the loaded texture
 				DirectX::ScratchImage mipmappedImage;
 				hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), metadata,
 				                              DirectX::TEX_FILTER_DEFAULT, 0, mipmappedImage);
+
+				if (SUCCEEDED(hr))
+				{
+					const std::string text =
+						"\n+++++++++++++++++++++++++++++++++++++++++++++++++"
+						"\nMipmapped texture!"
+						"\nTexture: " + filePath +
+						"\n+++++++++++++++++++++++++++++++++++++++++++++++++";
+					OutputDebugStringA(text.c_str());
+				}
 
 				if (SUCCEEDED(hr))
 				{
@@ -360,14 +392,31 @@ namespace Kaka
 					                              pTextures.back().GetAddressOf());
 				}
 
-				if (SUCCEEDED(hr))
+				if (FAILED(hr))
 				{
 					const std::string text =
-						"\n+++++++++++++++++++++++++++++++++++++++++++++++++"
-						"\nLoaded texture!"
-						"\nTexture: " + aFilePath +
-						"\n+++++++++++++++++++++++++++++++++++++++++++++++++";
+						"\n-------------------------------------------------"
+						"\nFailed to mipmap texture!"
+						"\nTexture: " + filePath +
+						"\n-------------------------------------------------";
+
 					OutputDebugStringA(text.c_str());
+
+					pTextures.emplace_back();
+					// Create the shader resource view from the mipmapped texture
+					hr = CreateShaderResourceView(GetDevice(aGfx), image.GetImages(),
+					                              image.GetImageCount(), image.GetMetadata(),
+					                              pTextures.back().GetAddressOf());
+
+					if (SUCCEEDED(hr))
+					{
+						const std::string text =
+							"\n+++++++++++++++++++++++++++++++++++++++++++++++++"
+							"\nLoaded non-mipmapped texture!"
+							"\nTexture: " + filePath +
+							"\n+++++++++++++++++++++++++++++++++++++++++++++++++";
+						OutputDebugStringA(text.c_str());
+					}
 				}
 			}
 
@@ -394,7 +443,7 @@ namespace Kaka
 				const std::string text =
 					"\n-------------------------------------------------"
 					"\nFailed to load texture!"
-					"\nTexture: " + aFilePath +
+					"\nTexture: " + filePath +
 					"\n-------------------------------------------------";
 				OutputDebugStringA(text.c_str());
 			}
@@ -405,15 +454,5 @@ namespace Kaka
 	{
 		GetContext(aGfx)->PSSetShaderResources(slot, static_cast<UINT>(pTextures.size()),
 		                                       pTextures.data()->GetAddressOf());
-	}
-
-	BOOL Texture::HasNormalMap() const
-	{
-		return hasNormalMap;
-	}
-
-	BOOL Texture::HasMaterial() const
-	{
-		return hasMaterial;
 	}
 }

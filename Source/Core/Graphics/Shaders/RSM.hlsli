@@ -23,22 +23,10 @@ cbuffer HammersleyDataFinal : register(b7)
 
 cbuffer RSMData : register(b3)
 {
-    bool usePoissonRSM;
     bool isDirectional;
-    uint mode;
     uint sampleCount;
-    uint sampleCountLastPass;
-    uint currentPass;
-    uint type;
     float rMax;
     float rsmIntensity;
-    float uvScale;
-    float weightMax;
-    float divideN;
-    float divideP;
-    float3 padding;
-    float4 shadowColour;
-    float4 ambianceColour;
     float4x4 lightCameraTransform;
 };
 
@@ -82,7 +70,7 @@ float2 hash23(float3 p3)
 }
 
 
-float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Texture2D aWorldPosTex, Texture2D aFluxTex, Texture2D aNormalTex, const bool aUsePoisson, const float aRMax, const uint aSampleCount, const float aIntensity, const uint aType, const float2 aPixel)
+float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, const float aRMax, const uint aSampleCount, const float aIntensity, const float2 aPixel)
 {
     // The irradiance at a surface point x with normal n due to pixel light p is
     //
@@ -91,28 +79,10 @@ float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Text
 	//                                ||aX-xp||^4
 
     float3 rsmOutput = { 0.0f, 0.0f, 0.0f };
-
-    if (aUsePoisson)
-    {
-        for (int i = 0; i < 151; i++)	// Sum contributions of sampling locations
-        {
-            const float2 coord = aUv + aRMax * POISSON_DISK_151[i];
-            const float3 xp = aWorldPosTex.Sample(pointSampler, coord).xyz; // Position (x_p) and normal (n_p) are in world coordinates too
-            const float3 flux = aFluxTex.Sample(pointSampler, coord).rgb; // Collect components from corresponding RSM textures
-            const float3 np = normalize(2.0f * aNormalTex.Sample(pointSampler, coord).xyz - 1.0f);
-
-            float3 Ep = flux * ((max(0, dot(np, aX - xp)) * max(0, dot(aN, xp - aX)))
-									/ pow(length(aX - xp), 4));
-
-            Ep *= POISSON_DISK_151[i].x * POISSON_DISK_151[i].x; // Weighting contribution and normalizing
-
-            rsmOutput += Ep; // Accumulate
-        }
-    }
-    else
-    {
         const float2 o = hash23(float3(aPixel.x, aPixel.y, currentTime * 1000.0f));
         //float2 o2 = IGN(pixel) + hash22(float2(currentTime * 1000.0f, 0.f));
+
+        //const float2x2 rot = { {cos(o.x), sin(o.x)}, {cos(o.y), sin(o.y)} }; // Random rotation matrix for jittering
 
 		[loop]
         for (uint i = 0; i < aSampleCount; i++)	// Sum contributions of sampling locations
@@ -122,7 +92,7 @@ float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Text
 
             offset.xy += o;
             offset.xy = fmod(offset.xy, 1.0f);
-
+            
             // Soft radius rather than hard cutoff
             offset.x = (offset.x * offset.x * offset.x * offset.x + 1.0f) * offset.x;
 
@@ -131,9 +101,9 @@ float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Text
             const float2 coord = aUv + float2(r * cos(theta), r * sin(theta));
             const float weight = offset.x * offset.x;
 
-            const float3 xp = aWorldPosTex.Sample(pointSampler, coord).xyz; // Position (x_p) and normal (n_p) are in world coordinates too
-            const float3 flux = aFluxTex.Sample(pointSampler, coord).rgb; // Collect components from corresponding RSM textures
-            const float3 np = normalize(2.0f * aNormalTex.Sample(pointSampler, coord).xyz - 1.0f);
+            const float3 xp = rsmWorldPositionTex.Sample(pointSampler, coord).xyz; // Position (x_p) and normal (n_p) are in world coordinates too
+            const float3 flux = rsmFluxTex.Sample(pointSampler, coord).rgb; // Collect components from corresponding RSM textures
+			const float3 np = normalize(2.0f * rsmNormalTex.Sample(linearSampler, coord).xyz - 1.0f);
 
             float3 Ep = flux * ((max(0, dot(np, aX - xp)) * max(0, dot(aN, xp - aX)))
 									/ pow(length(aX - xp), 4));
@@ -142,7 +112,6 @@ float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, Text
 
             rsmOutput += Ep; // Accumulate
         }
-    }
 
     return rsmOutput / aSampleCount * aIntensity; // Modulate result with some intensity value
 }

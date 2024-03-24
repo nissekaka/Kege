@@ -33,7 +33,6 @@ namespace Kaka
 		DirectX::XMMATRIX GetTransform() const override;
 		float GetScale() const;
 		bool IsLoaded() const;
-		void SetNearbyLights(bool aNearbyPointLights[], bool aNearbySpotLights[]);
 		void BindPixelShader(const Graphics& aGfx);
 		ModelDataPtr& GetModelData() { return modelData; }
 		AnimatedModelDataPtr& GetAnimatedModelData() { return animatedModelData; }
@@ -57,16 +56,11 @@ namespace Kaka
 		void DrawAnimated(Graphics& aGfx);
 
 	private:
-		//Sampler sampler = {};
-		//VertexBuffer vertexBuffer = {};
-		//IndexBuffer indexBuffer = {};
 		PixelShader* pixelShader = nullptr;
 		VertexShader* vertexShader = nullptr;
 		std::vector<D3D11_INPUT_ELEMENT_DESC> ied;
 		InputLayout inputLayout;
 		Topology topology = {};
-		//Rasterizer rasterizer = {};
-		//DepthStencil depthStencil = {};
 
 	private:
 		eShaderType shaderType = {};
@@ -92,14 +86,10 @@ namespace Kaka
 		AnimatedModelDataPtr animatedModelData;
 		ModelDataPtr modelData;
 		eModelType modelType = eModelType::None;
-		//std::vector<std::unique_ptr<Bindable>> bindablePtrs;
 		bool isLoaded = false;
 
 		bool drawSkeleton = false;
 		bool drawBoneNames = false;
-
-		BOOL nearbyPointLights[50u];
-		BOOL nearbySpotLights[50u];
 
 		std::vector<DirectX::XMMATRIX> combinedTransforms;
 		std::vector<DirectX::XMMATRIX> finalTransforms;

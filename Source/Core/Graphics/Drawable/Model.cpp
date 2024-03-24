@@ -192,15 +192,27 @@ namespace Kaka
 				}
 			}
 
+			bool hasAlpha = false;
 			if (mesh.texture != nullptr)
 			{
 				mesh.texture->Bind(aGfx);
+
+				if (mesh.texture->HasAlpha())
+				{
+					hasAlpha = true;
+					aGfx.SetRasterizerState(eRasterizerStates::NoCulling);
+				}
 			}
 
 			mesh.vertexBuffer.Bind(aGfx);
 			mesh.indexBuffer.Bind(aGfx);
 
 			aGfx.DrawIndexed(mesh.indexBuffer.GetCount());
+
+			if (hasAlpha)
+			{
+				aGfx.SetRasterizerState(eRasterizerStates::BackfaceCulling);
+			}
 		}
 
 		// Unbind shader resources
@@ -455,15 +467,6 @@ namespace Kaka
 	bool Model::IsLoaded() const
 	{
 		return isLoaded;
-	}
-
-	void Model::SetNearbyLights(bool aNearbyPointLights[50], bool aNearbySpotLights[50])
-	{
-		for (int i = 0; i < MAX_LIGHTS; ++i)
-		{
-			nearbyPointLights[i] = aNearbyPointLights[i];
-			nearbySpotLights[i] = aNearbySpotLights[i];
-		}
 	}
 
 	void Model::BindPixelShader(const Graphics& aGfx)

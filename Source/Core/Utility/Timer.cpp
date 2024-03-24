@@ -53,6 +53,8 @@ namespace Kaka
 
 			totalTime += dt;
 			fps = 1.0f / dt;
+			latestFps[latestFpsIndex] = fps;
+			latestFpsIndex = (latestFpsIndex + 1) % MAX_FPS_SAMPLES;
 		}
 
 		deltaTime = dt;
@@ -76,7 +78,13 @@ namespace Kaka
 	float Timer::GetFPS()
 	{
 		std::lock_guard<std::mutex> lock(mutex);
+		float averageFps = 0.0f;
 
-		return fps;
+		for (const float latestFp : latestFps)
+		{
+			averageFps += latestFp;
+		}
+
+		return averageFps / MAX_FPS_SAMPLES;
 	}
 }

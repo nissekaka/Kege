@@ -1,4 +1,5 @@
 #include "common.hlsli"
+#include "deferred_common.hlsli"
 
 struct PixelInput
 {
@@ -9,13 +10,11 @@ struct PixelInput
 cbuffer Parameters : register(b1)
 {
     matrix historyViewProjection;
-    float2 clientResolution;
+    float2 clientResolution2;
     bool useTAA;
-    float KERNEL_RADIUS = 4;
-    float SIGMA_DEPTH = 0.1;
-    float SIGMA_NORMAL = 0.1;
-    float SIGMA_COLOR = 0.1;
-    float blend = 1.0;
+    float padding;
+    float2 jitterOffset;
+    float2 previousJitterOffset;
 };
 
 Texture2D currentTexture : register(t0);
@@ -29,45 +28,22 @@ float2 CameraReproject(float3 aPosition)
     float4 screenPosition = mul(historyViewProjection, float4(aPosition, 1.0f));
     const float2 screenUV = screenPosition.xy / screenPosition.w;
     float2 reprojectedUV = (screenUV * float2(0.5f, -0.5f) + 0.5f);
-    return reprojectedUV;
-}
-
-// YUV-RGB conversion routine from Hyper3D
-float3 encodePalYuv(float3 rgb)
-{
-    rgb = pow(rgb, float3(2.0, 2.0, 2.0)); // gamma correction
-    return float3(
-        dot(rgb, float3(0.299, 0.587, 0.114)),
-        dot(rgb, float3(-0.14713, -0.28886, 0.436)),
-        dot(rgb, float3(0.615, -0.51499, -0.10001))
-    );
-}
-
-float3 decodePalYuv(float3 yuv)
-{
-    float3 rgb = float3(
-        dot(yuv, float3(1., 0., 1.13983)),
-        dot(yuv, float3(1., -0.39465, -0.58060)),
-        dot(yuv, float3(1., 2.03211, 0.))
-    );
-    return pow(rgb, float3(0.5, 0.5, 0.5)); // gamma correction
+    return reprojectedUV;//    -jitterOffset + previousJitterOffset;
 }
 
 float4 main(const PixelInput aInput) : SV_TARGET
 {
-    const float2 uv = aInput.position.xy / clientResolution.xy;
-
+    //const float2 uv = aInput.position.xy / clientResolution.xy;
 
     if (!useTAA)
     {
-        //return smartDeNoise(currentTexture, aInput.texCoord);
-	    return currentTexture.Sample(linearSampler, aInput.texCoord);
+        return currentTexture.Sample(pointSampler, aInput.texCoord);
     }
     
 	// Use history view-projection matrix to project onto previous camera's screen space
-    const float3 worldPosition = worldPositionTexture.Sample(linearSampler, uv).rgb;
+    const float3 worldPosition = worldPositionTexture.Sample(linearSampler, aInput.texCoord).rgb;
 
-    float2 reprojectedUV = uv;
+    float2 reprojectedUV = aInput.texCoord;
 
     // If the world position is valid, reproject the UV
     if (length(worldPosition) > 0.0f)
@@ -86,7 +62,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
     {
         for (int y = -1; y <= 1; ++y)
         {
-            const float3 colour = currentTexture.Sample(linearSampler, uv + float2(x, y) / clientResolution); // Sample neighbor
+            const float3 colour = currentTexture.Sample(pointSampler, aInput.texCoord + float2(x, y) / clientResolution); // Sample neighbor
             minColor = min(minColor, colour); // Take min and max
             maxColor = max(maxColor, colour);
         }
@@ -97,47 +73,31 @@ float4 main(const PixelInput aInput) : SV_TARGET
 
     float3 output = currentColour * 0.1f + previousColourClamped * 0.9f;
 
-    if (blend > 0.0f)
-    {
-        float3 antialiased = previousColourClamped.rgb;
+    float3 antialiased = previousColourClamped.rgb;
 
-        float2 off = float2(1.0f / clientResolution.x, 1.0f / clientResolution.y);
-        float3 in0 = output; //    currentTexture.Sample(linearSampler, uv).rgb;
+    float2 off = float2(1.0f / clientResolution.x, 1.0f / clientResolution.y);
+    float3 in0 = output; //    currentTexture.Sample(linearSampler, uv).rgb;
 
-        antialiased = lerp(antialiased * antialiased, in0 * in0, 0.5f);
-        antialiased = sqrt(antialiased);
+    antialiased = lerp(antialiased * antialiased, in0 * in0, 0.5f);
+    antialiased = sqrt(antialiased);
 
-        float3 in1 = currentTexture.Sample(linearSampler, uv + float2(+off.x, 0.0)).xyz;
-        float3 in2 = currentTexture.Sample(linearSampler, uv + float2(-off.x, 0.0)).xyz;
-        float3 in3 = currentTexture.Sample(linearSampler, uv + float2(0.0, +off.y)).xyz;
-        float3 in4 = currentTexture.Sample(linearSampler, uv + float2(0.0, -off.y)).xyz;
-        float3 in5 = currentTexture.Sample(linearSampler, uv + float2(+off.x, +off.y)).xyz;
-        float3 in6 = currentTexture.Sample(linearSampler, uv + float2(-off.x, +off.y)).xyz;
-        float3 in7 = currentTexture.Sample(linearSampler, uv + float2(+off.x, -off.y)).xyz;
-        float3 in8 = currentTexture.Sample(linearSampler, uv + float2(-off.x, -off.y)).xyz;
+    float3 in1 = currentTexture.Sample(pointSampler, aInput.texCoord + float2(+off.x, 0.0)).xyz;
+    float3 in2 = currentTexture.Sample(pointSampler, aInput.texCoord + float2(-off.x, 0.0)).xyz;
+    float3 in3 = currentTexture.Sample(pointSampler, aInput.texCoord + float2(0.0, +off.y)).xyz;
+    float3 in4 = currentTexture.Sample(pointSampler, aInput.texCoord + float2(0.0, -off.y)).xyz;
+    float3 in5 = currentTexture.Sample(pointSampler, aInput.texCoord + float2(+off.x, +off.y)).xyz;
+    float3 in6 = currentTexture.Sample(pointSampler, aInput.texCoord + float2(-off.x, +off.y)).xyz;
+    float3 in7 = currentTexture.Sample(pointSampler, aInput.texCoord + float2(+off.x, -off.y)).xyz;
+    float3 in8 = currentTexture.Sample(pointSampler, aInput.texCoord + float2(-off.x, -off.y)).xyz;
 
-        antialiased = encodePalYuv(antialiased);
-        in0 = encodePalYuv(in0);
-        in1 = encodePalYuv(in1);
-        in2 = encodePalYuv(in2);
-        in3 = encodePalYuv(in3);
-        in4 = encodePalYuv(in4);
-        in5 = encodePalYuv(in5);
-        in6 = encodePalYuv(in6);
-        in7 = encodePalYuv(in7);
-        in8 = encodePalYuv(in8);
+    float3 minColour = min(min(min(in0, in1), min(in2, in3)), in4);
+    float3 maxColour = max(max(max(in0, in1), max(in2, in3)), in4);
+    minColour = lerp(minColour, min(min(min(in5, in6), min(in7, in8)), minColour), 0.5);
+    maxColour = lerp(maxColour, max(max(max(in5, in6), max(in7, in8)), maxColour), 0.5);
 
-        float3 minColour = min(min(min(in0, in1), min(in2, in3)), in4);
-        float3 maxColour = max(max(max(in0, in1), max(in2, in3)), in4);
-        minColour = lerp(minColour, min(min(min(in5, in6), min(in7, in8)), minColour), 0.5);
-        maxColour = lerp(maxColour, max(max(max(in5, in6), max(in7, in8)), maxColour), 0.5);
+    antialiased = clamp(antialiased, minColour, maxColour);
 
-        antialiased = clamp(antialiased, minColour, maxColour);
-
-        antialiased = decodePalYuv(antialiased);
-
-        return float4(antialiased, 1.0f);
-    }
+    return float4(antialiased, 1.0f);
 
     return float4(output, 1.0f);
 }

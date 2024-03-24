@@ -1,6 +1,6 @@
 #include "common.hlsli"
 #include "deferred_common.hlsli"
-#include "GBuffer.hlsli"
+//#include "GBuffer.hlsli"
 
 struct PixelInput
 {
@@ -22,19 +22,34 @@ cbuffer RSMLightData : register(b0)
     bool isDirectionalLight;
 }
 
+Texture2D colourTex : register(t1);
+Texture2D normalTex : register(t2);
+
 RSMBufferOutput main(PixelInput aInput)
 {
-    float4 albedo = gColourTex.Sample(defaultSampler, aInput.texCoord).rgba;
+    //const float2 uv = aInput.position.xy / clientResolution.xy;
+    float4 albedo = colourTex.Sample(defaultSampler, aInput.texCoord).rgba;
     if (albedo.a < 0.1f)
     {
         discard;
     }
 
-    float3 normal = float3(gNormalTex.Sample(linearSampler, aInput.texCoord).rg, 1.0f);
+    //const float3 normal = normalize(2.0f * gNormalTex.Sample(linearSampler, aInput.texCoord).xyz - 1.0f);
+    //float3 normal = normalize(2.0f * gNormalTex.Sample(linearSampler, aInput.texCoord).xyz - 1.0f);
+    //float3 worldNormal = normalize(2.0f * normalTex.Sample(linearSampler, aInput.texCoord).xyz - 1.0f);
 
+    float3 normal = float3(normalTex.Sample(linearSampler, aInput.texCoord).rg, 1.0f);
+    //float3 normal = normalTex.Sample(defaultSampler, scaledUV).wyz;
+    //float ambientOcclusion = normal.z;
     normal = 2.0f * normal - 1.0f;
+
+    // normal.z calculation is
+    // not needed for Sponza
+    // but is needed models with
+    // only x and y normal data
     normal.z = sqrt(1 - saturate(normal.x * normal.x + normal.y * normal.y));
     normal = normalize(normal);
+    normal.y = -normal.y;
 
     float3x3 TBN = float3x3(normalize(aInput.tangent.xyz),
                             normalize(-aInput.bitan.xyz),
@@ -42,6 +57,23 @@ RSMBufferOutput main(PixelInput aInput)
     TBN = transpose(TBN);
 
     const float3 pixelNormal = normalize(mul(TBN, normal));
+
+    //float ambientOcclusion = normal.z;
+    //normal = 2.0f * normal - 1.0f;
+	// normal.z calculation is
+    // not needed for Sponza
+    // but is needed models with
+    // only x and y normal data
+    //normal.z = sqrt(1 - saturate(normal.x * normal.x + normal.y * normal.y));
+    //normal = normalize(normal);
+    //normal.y = -normal.y;
+
+    //float3x3 TBN = float3x3(normalize(aInput.tangent.xyz),
+    //                        normalize(-aInput.bitan.xyz),
+    //                        normalize(aInput.normal.xyz));
+    //TBN = transpose(TBN);
+    //
+    //const float3 pixelNormal = normalize(mul(TBN, normal));
 
     RSMBufferOutput output;
 
@@ -76,7 +108,7 @@ RSMBufferOutput main(PixelInput aInput)
         output.flux = float4(albedo.rgb * lightColourAndIntensity.rgb, 1.0f) * finalAttenuation * lightColourAndIntensity.w;
     }
 
-    output.normal = float4(pixelNormal, 1.0f);
+    output.normal = float4(0.5f + 0.5f * pixelNormal, 1.0f);;
 
     return output;
 }

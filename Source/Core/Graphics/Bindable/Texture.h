@@ -17,17 +17,14 @@ namespace Kaka
 		void LoadTextureFromPath(const Graphics& aGfx, const std::string& aFilePath);
 		void LoadMaterialFromPaths(const Graphics& aGfx, const std::string& aFilePath1, const std::string& aFilePath2, const std::string& aFilePath3);
 		void Bind(const Graphics& aGfx) override;
-		BOOL HasNormalMap() const;
-		BOOL HasMaterial() const;
 		void SetSlot(const UINT aSlot) { slot = aSlot; }
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetTextureAtIndex(size_t aIndex) { return pTextures[aIndex]; }
 		void SetTextureAtIndex(const Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& aTexture, size_t aIndex) { pTextures[aIndex] = aTexture; }
-
+		bool HasAlpha() const { return hasAlpha; }
 	private:
 		std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> pTextures;
 		UINT slot;
-		BOOL hasNormalMap = FALSE;
-		BOOL hasMaterial = FALSE;
+		BOOL hasAlpha = FALSE;
 	};
 
 	struct Material

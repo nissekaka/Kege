@@ -17,10 +17,12 @@ namespace Kaka
 		directionalLightData.lightDirection = {2.16f, -3.14f, -1.6f};
 		directionalLightData.lightColour = {1.0f, 0.8f, 0.6f};
 		directionalLightData.lightIntensity = 1.0f;
-		directionalLightData.ambientLight = 0.15f;
+		directionalLightData.ambientLight = 0.0f;
 		directionalLightData.numberOfVolumetricSteps = 15;
 		directionalLightData.volumetricScattering = 0.12f;
 		directionalLightData.volumetricIntensity = 1.0f;
+		directionalLightData.shadowColour = {1.0f, 0.949f, 0.839f, 0.01f};
+		directionalLightData.ambianceColour = {0.839f, 0.914f, 1.0f, 0.05f};
 
 		CreateQuad(aGfx);
 
@@ -161,6 +163,12 @@ namespace Kaka
 			ImGui::DragInt("Steps##VolumetricSteps", &directionalLightData.numberOfVolumetricSteps, 1.0f, 0, 15);
 			ImGui::DragFloat("Scattering##VolumetricScattering", &directionalLightData.volumetricScattering, 0.01f, 0.0f, 10.0f, "%.2f");
 			ImGui::DragFloat("Intensity##VolumetricIntensity", &directionalLightData.volumetricIntensity, 0.01f, 0.0f, 10.0f, "%.2f");
+			ImGui::SetNextItemWidth(150.0f);
+			ImGui::ColorPicker3("Shadow colour##DirShaCol", &directionalLightData.shadowColour.x);
+			ImGui::DragFloat("Shadow intensity##DirShaInt", &directionalLightData.shadowColour.w, 0.01f, 0.0f, 1.0f, "%.2f");
+			ImGui::SetNextItemWidth(150.0f);
+			ImGui::ColorPicker3("Ambiance colour##DirAmbCol", &directionalLightData.ambianceColour.x);
+			ImGui::DragFloat("Ambiance intensity##DirAmbInt", &directionalLightData.ambianceColour.w, 0.01f, 0.0f, 1.0f, "%.2f");
 		}
 		ImGui::End();
 	}

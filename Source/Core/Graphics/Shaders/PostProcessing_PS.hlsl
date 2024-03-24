@@ -19,11 +19,13 @@ cbuffer Parameters : register(b1)
     float contrast;
     float saturation;
     float blur;
+    float sharpness;
 };
 
 float4 main(const PixelInput aInput) : SV_TARGET
 {
-    float4 colour = fullscreenTexture.Sample(linearSampler, aInput.texCoord).rgba;
+	//float4 colour = fullscreenTexture.Sample(linearSampler, aInput.texCoord).rgba;
+    float4 colour = fullscreenTexture.Sample(linearSampler, aInput.texCoord);
 
 	if (colour.a < 0.1f)
     {
@@ -53,6 +55,16 @@ float4 main(const PixelInput aInput) : SV_TARGET
     // Output to screen
     colour /= quality * directions - 15.0f;
     bloom /= quality * directions - 15.0f;
+
+    // Sharpening
+    float3 sharpenedSum = colour.rgb * (1.0f + 4.0f * sharpness);
+
+    sharpenedSum -= fullscreenTexture.Sample(linearSampler, aInput.texCoord + float2(0.0f, 1.0f) / clientResolution).rgb * sharpness;
+    sharpenedSum -= fullscreenTexture.Sample(linearSampler, aInput.texCoord - float2(0.0f, 1.0f) / clientResolution).rgb * sharpness;
+    sharpenedSum -= fullscreenTexture.Sample(linearSampler, aInput.texCoord + float2(1.0f, 0.0f) / clientResolution).rgb * sharpness;
+    sharpenedSum -= fullscreenTexture.Sample(linearSampler, aInput.texCoord - float2(1.0f, 0.0f) / clientResolution).rgb * sharpness;
+
+    colour = float4(sharpenedSum, 1.0f);
 
     float3 newColour = colour + bloom;
 

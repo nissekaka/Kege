@@ -67,9 +67,9 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 0.000000
 illum 2
-map_Kd textures/spnza_bricks_a_BaseColor.jpg
-map_Pmr textures/spnza_bricks_a_MetallicRoughness.jpg
-norm textures/spnza_bricks_a_Normal.jpg
+map_Kd textures/brickwall_01_BaseColor.png
+map_Pmr textures/brickwall_01_Roughnessbrickwall_01_Metalness.png
+norm textures/brickwall_01_Normal.png
 
 newmtl ceiling
 Ns 7.843137

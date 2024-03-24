@@ -80,9 +80,11 @@ namespace Kaka
 
 	private:
 		std::vector<Model> models;
-		Texture* whiteTexture = nullptr;
-		Texture* blueTexture = nullptr;
-		Texture* redTexture = nullptr;
+		Model* movingModel = nullptr;
+
+		float modelMoveSpeed = 10.0f;
+		float modelRotateAngle = 3.14159f;
+		float modelRotateRadius = 1.0f;
 
 		Skybox skybox{};
 		float skyboxSpeed = 0.005f;
@@ -114,7 +116,8 @@ namespace Kaka
 			float contrast; // Contrast adjustment
 			float saturation; // Saturation adjustment
 			float blur; // Blur adjustment
-			float padding[2];
+			float sharpness; // Sharpness adjustment
+			float padding;
 		};
 
 		PostProcessingBuffer ppBuffer = {};
@@ -139,43 +142,14 @@ namespace Kaka
 
 		ShadowBuffer shadowBuffer = {};
 
-		enum class eRSMMode
-		{
-			NoAlbedo,
-			WithAlbedo,
-			Debug,
-			Count
-		};
-
-		std::string ModeEnumToString[3]
-		{
-			"No albedo",
-			"With albedo",
-			"Debug"
-		};
-
 		struct RSMBuffer
 		{
-			BOOL usePoisson = false;
 			BOOL isDirectionalLight = true;
-			UINT mode = 0u;
-			UINT sampleCount = 100u;
-			UINT sampleCountLastPass = 100u;
-			UINT currentPass = 0;
-			UINT type = 0;
+			UINT sampleCount = 12u;
 			float rMax = 0.08f; // Maximum sampling radius.
 			float rsmIntensity = 10.0f;
-			float uvScale = 1;
-			float weightMax = 0.1f;
-			float divideN = 1.0f;
-			float divideP = 20.0f;
-			float padding[3] = {};
-			DirectX::XMFLOAT4 shadowColour = {0.8f, 0.9f, 1.0f, 0.01f};
-			DirectX::XMFLOAT4 ambianceColour = {0.8f, 0.9f, 1.0f, 0.3f};
 			DirectX::XMMATRIX lightCameraTransform;
 		};
-
-		static constexpr int RSM_MAX_SAMPLE_COUNT = 5000;
 
 		RSMBuffer rsmBufferDirectional = {};
 		RSMBuffer rsmBufferSpot = {};
@@ -196,8 +170,6 @@ namespace Kaka
 			float padding[3];
 		} rsmCombinedBuffer;
 
-		int combinedPasses = 4;
-
 		PixelConstantBuffer<CommonBuffer> pcb{wnd.Gfx(), PS_CBUFFER_SLOT_COMMON};
 		VertexConstantBuffer<CommonBuffer> vcb{wnd.Gfx(), VS_CBUFFER_SLOT_COMMON};
 		PixelConstantBuffer<RSMLightData> rsmLightDataBuffer{wnd.Gfx(), PS_CBUFFER_SLOT_RSM_LIGHT};
@@ -211,11 +183,9 @@ namespace Kaka
 			DirectX::XMMATRIX historyViewProjection;
 			DirectX::XMFLOAT2 clientResolution;
 			BOOL useTAA = true;
-			float KERNEL_RADIUS = 5.0f;
-			float SIGMA_DEPTH = 0.1f;
-			float SIGMA_NORMAL = 0.1f;
-			float SIGMA_COLOR = 0.1f;
-			float blend = 1.0f;
+			float padding;
+			DirectX::XMFLOAT2 jitter;
+			DirectX::XMFLOAT2 previousJitter;
 		} taaBuffer;
 
 		bool flipFlop = false;

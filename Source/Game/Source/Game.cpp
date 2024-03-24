@@ -18,22 +18,6 @@ constexpr int TERRAIN_SIZE = 0;
 constexpr int MODELS_TO_LOAD_THREADED = 10;
 constexpr float SHADOW_RESOLUTION_DIVIDER = 4.0f;
 
-// Reverses the bits of the input
-unsigned int BitfieldReverse(const unsigned int aBits)
-{
-	unsigned int b = (unsigned int(aBits) << 16u) | (unsigned int(aBits) >> 16u);
-	b = (b & 0x55555555u) << 1u | (b & 0xAAAAAAAAu) >> 1u;
-	b = (b & 0x33333333u) << 2u | (b & 0xCCCCCCCCu) >> 2u;
-	b = (b & 0x0F0F0F0Fu) << 4u | (b & 0xF0F0F0F0u) >> 4u;
-	b = (b & 0x00FF00FFu) << 8u | (b & 0xFF00FF00u) >> 8u;
-	return b;
-}
-
-DirectX::XMFLOAT2 Hammersley(const unsigned int aI, const unsigned int aN)
-{
-	return DirectX::XMFLOAT2(float(aI) / float(aN), float(BitfieldReverse(aI)) * 2.3283064365386963e-10);
-}
-
 namespace Kaka
 {
 	Game::Game()
@@ -41,7 +25,7 @@ namespace Kaka
 		wnd(WINDOW_WIDTH, WINDOW_HEIGHT, L"Kaka")
 	{
 		camera.SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 80, 0.5f, 5000.0f);
-		wnd.Gfx().directionalLightRSMBuffer.GetCamera().SetOrthographic(WINDOW_WIDTH / 3.0f, WINDOW_HEIGHT / 3.0f, -500.0f, 500.0f);
+		wnd.Gfx().directionalLightRSMBuffer.GetCamera().SetOrthographic(WINDOW_WIDTH / 2.5f, WINDOW_HEIGHT / 2.5f, -500.0f, 500.0f);
 		wnd.Gfx().historyViewProjection = camera.GetInverseView() * camera.GetProjection();
 
 		for (int i = 0; i < NUM_POINT_LIGHTS; ++i)
@@ -75,6 +59,7 @@ namespace Kaka
 		ppBuffer.contrast = 1.0f;
 		ppBuffer.saturation = 1.0f;
 		ppBuffer.blur = 0.0f;
+		ppBuffer.sharpness = 0.7f;
 
 		skybox.Init(wnd.Gfx(), "Assets\\Textures\\Skybox\\Miramar\\", "Assets\\Textures\\Skybox\\Kurt\\");
 
@@ -83,17 +68,26 @@ namespace Kaka
 		camera.SetRotationDegrees(29.0f, 138.0f);
 
 		models.emplace_back();
+		//models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\sibenik\\sibenik.obj", Model::eShaderType::PBR);
 		models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\sponza_pbr\\Sponza.obj", Model::eShaderType::PBR);
-		//models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\NewSponza\\New_Sponza_001.gltf", Model::eShaderType::PBR);
+		//models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\newSponza\\export\\newSponza.gltf", Model::eShaderType::PBR);
 		models.back().Init();
 		models.back().SetScale(0.1f);
+		//models.back().SetScale(10.0f);
+
+		//models.emplace_back();
+		//models.back().LoadModel(wnd.Gfx(), "Assets\\Models\\hiroyuki\\hiroyuki.fbx", Model::eShaderType::PBR);
+		//models.back().Init();
+		//models.back().SetScale(10.0f);
+		//
+		//movingModel = &models.back();
 
 		//flashlightTexture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\Flashlight_cookie.png", 5u);
 		// 524288 * 4 = 2 097 152
 		// 524288 * 2 = 1 048 576
 		// 2097152 * 2 = 4 194 304
 		// 4194304 * 2 = 8 388 608
-		dustParticles.Init(wnd.Gfx(), 0.0125f, 2097152, true, "Assets\\Textures\\particle.png");
+		//dustParticles.Init(wnd.Gfx(), 0.0125f, 2097152, true, "Assets\\Textures\\particle.png");
 		//dustParticles.Init(wnd.Gfx(), 0.0125f, 1048576u, true, "Assets\\Textures\\particle.png");
 		//smokeParticles.Init(wnd.Gfx(), 25.0f, 1000u, true, "Assets\\Textures\\SpriteCloud.png");
 
@@ -135,23 +129,15 @@ namespace Kaka
 		//	flashlightOuter->volumetricAlpha = 0.2f;
 		//}
 
-		rsmBufferDirectional.type = 0u;
 		rsmBufferDirectional.sampleCount = HAMMERSLEY_DIR_COUNT;
-		rsmBufferDirectional.sampleCountLastPass = HAMMERSLEY_FINAL_COUNT;
-		rsmBufferDirectional.rMax = 0.1f;
-		rsmBufferDirectional.rsmIntensity = 7500.0f;
-		rsmBufferDirectional.uvScale = wnd.Gfx().rsmDownscaleFactor;
+		rsmBufferDirectional.rMax = 0.04f;
+		rsmBufferDirectional.rsmIntensity = 2000.0f;
 		rsmBufferDirectional.isDirectionalLight = TRUE;
-		rsmBufferDirectional.weightMax = 3.7f;
 
-		rsmBufferSpot.type = 1u;
 		rsmBufferSpot.sampleCount = HAMMERSLEY_SPOT_COUNT;
-		rsmBufferSpot.sampleCountLastPass = HAMMERSLEY_FINAL_COUNT;
 		rsmBufferSpot.rMax = 0.165f;
 		rsmBufferSpot.rsmIntensity = 100.0f;
-		rsmBufferSpot.uvScale = wnd.Gfx().rsmDownscaleFactor;
 		rsmBufferSpot.isDirectionalLight = FALSE;
-		rsmBufferSpot.weightMax = 3.8f;
 
 		while (true)
 		{
@@ -210,6 +196,26 @@ namespace Kaka
 		wnd.Gfx().SetCamera(camera);
 
 		HandleInput(aDeltaTime);
+
+		//modelRotateAngle -= modelMoveSpeed * aDeltaTime;
+		//
+		//movingModel->SetPosition(
+		//	{
+		//		modelRotateRadius * cos(modelRotateAngle),
+		//		movingModel->GetPosition().y,
+		//		modelRotateRadius * sin(modelRotateAngle)
+		//	});
+		//
+		//std::string position = "\nPosition: " + std::to_string(movingModel->GetPosition().x) + ", " + std::to_string(movingModel->GetPosition().y) + ", " + std::to_string(movingModel->GetPosition().z);
+		//OutputDebugStringA(position.c_str());
+		//
+		//std::string angle = "\nAngle: " + std::to_string(modelRotateAngle);
+		//OutputDebugStringA(angle.c_str());
+
+		//if (modelRotateAngle > 2 * PI)
+		//{
+		//	modelRotateAngle -= 2 * PI;
+		//}
 
 		//// Flashlight
 		//{
@@ -280,7 +286,7 @@ namespace Kaka
 
 		commonBuffer.worldToClipMatrix = camera.GetInverseView() * camera.GetProjection();
 		commonBuffer.view = camera.GetView();
-		commonBuffer.projection = camera.GetProjection();
+		commonBuffer.projection = DirectX::XMMatrixInverse(nullptr, camera.GetProjection());
 		commonBuffer.viewInverse = camera.GetInverseView();
 		commonBuffer.clipToWorldMatrix = DirectX::XMMatrixInverse(nullptr, commonBuffer.worldToClipMatrix);
 		commonBuffer.cameraPosition = {camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z, 0.0f};
@@ -417,11 +423,17 @@ namespace Kaka
 				//	}
 				//	else
 				//	{
-				wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMFullscaleDirectional, nullptr);
+				if (flipFlop)
+				{
+					wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMFullscaleDirectional, nullptr);
+				}
+				else
+				{
+					wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMFullscaleDirectionalPrevious, nullptr);
+				}
 				//wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTRUE_SLOT_INDIRECT_LIGHT_DIRECTIONAL, 1u, wnd.Gfx().rsmDownscaleDirectional.pResource.GetAddressOf());
 				//}
 
-				rsmBufferDirectional.currentPass = 0;
 				rsmBufferDirectional.isDirectionalLight = TRUE;
 				rsmPixelBuffer.Update(wnd.Gfx(), rsmBufferDirectional);
 				rsmPixelBuffer.Bind(wnd.Gfx());
@@ -481,11 +493,34 @@ namespace Kaka
 
 		if (drawRSM)
 		{
-			wnd.Gfx().SetBlendState(eBlendStates::Additive);
-
 			//if (combinedPasses > 1)
 			//{
-			wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTRUE_SLOT_INDIRECT_LIGHT_DIRECTIONAL, 1u, wnd.Gfx().rsmFullscaleDirectional.pResource.GetAddressOf());
+
+			// Set render target to combined
+
+			if (flipFlop)
+			{
+				wnd.Gfx().pContext->OMSetRenderTargets(1u, wnd.Gfx().rsmFullscaleDirectionalN1.pTarget.GetAddressOf(), nullptr);
+				wnd.Gfx().pContext->PSSetShaderResources(1u, 1u, wnd.Gfx().rsmFullscaleDirectionalN.pResource.GetAddressOf());
+			}
+			else
+			{
+				wnd.Gfx().pContext->OMSetRenderTargets(1u, wnd.Gfx().rsmFullscaleDirectionalN.pTarget.GetAddressOf(), nullptr);
+				wnd.Gfx().pContext->PSSetShaderResources(1u, 1u, wnd.Gfx().rsmFullscaleDirectionalN1.pResource.GetAddressOf());
+			}
+
+			// Draw the combined pass
+			wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, wnd.Gfx().rsmFullscaleDirectional.pResource.GetAddressOf());
+			wnd.Gfx().pContext->PSSetShaderResources(2u, 1u, wnd.Gfx().gBuffer.GetShaderResourceViews());
+
+			PixelConstantBuffer<TAABuffer> tab{wnd.Gfx(), 10u};
+			taaBuffer.historyViewProjection = wnd.Gfx().historyViewProjection;
+			taaBuffer.clientResolution = wnd.Gfx().GetCurrentResolution();
+			taaBuffer.jitter = wnd.Gfx().currentJitter;
+			taaBuffer.previousJitter = wnd.Gfx().previousJitter;
+
+			tab.Update(wnd.Gfx(), taaBuffer);
+			tab.Bind(wnd.Gfx());
 			//wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, wnd.Gfx().rsmFullscaleSpot.pResource.GetAddressOf());
 			//}
 			//else
@@ -493,14 +528,46 @@ namespace Kaka
 			//	wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTRUE_SLOT_INDIRECT_LIGHT_DIRECTIONAL, 1u, wnd.Gfx().rsmDownscaleDirectional.pResource.GetAddressOf());
 			//	wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, wnd.Gfx().rsmDownscaleSpot.pResource.GetAddressOf());
 			//}
-
+			//wnd.Gfx().SetBlendState(eBlendStates::Additive);
 			indirectLighting.SetPixelShaderCombined(true);
 
 			indirectLighting.Draw(wnd.Gfx());
 
 			indirectLighting.SetPixelShaderCombined(false);
+			//wnd.Gfx().SetBlendState(eBlendStates::Disabled);
+
+			wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, nullptr);
+
+			if (flipFlop)
+			{
+				wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, wnd.Gfx().rsmFullscaleDirectionalN1.pResource.GetAddressOf());
+			}
+			else
+			{
+				wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, wnd.Gfx().rsmFullscaleDirectionalN.pResource.GetAddressOf());
+			}
+
+			wnd.Gfx().SetBlendState(eBlendStates::Additive);
+
+			postProcessing.SetFullscreenPS();
+			postProcessing.Draw(wnd.Gfx());
+
 			wnd.Gfx().SetBlendState(eBlendStates::Disabled);
 		}
+
+
+		//wnd.Gfx().pContext->OMSetRenderTargets(1u, wnd.Gfx().rsmFullscaleDirectional.pTarget.GetAddressOf(), nullptr);
+
+		//if (flipFlop)
+		//{
+		//	wnd.Gfx().pContext->PSSetShaderResources(1u, 1u, wnd.Gfx().rsmFullscaleDirectionalN.pResource.GetAddressOf());
+		//}
+		//else
+		//{
+		//	wnd.Gfx().pContext->OMSetRenderTargets(1u, wnd.Gfx().rsmFullscaleDirectionalN.pTarget.GetAddressOf(), nullptr);
+		//	wnd.Gfx().pContext->PSSetShaderResources(1u, 1u, wnd.Gfx().rsmFullscaleDirectionalN1.pResource.GetAddressOf());
+		//}
+		//wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, wnd.Gfx().postProcessing.pResource.GetAddressOf());
 
 		// Indirect combined pass -- END
 
@@ -532,7 +599,8 @@ namespace Kaka
 			wnd.Gfx().gBuffer.ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_GBUFFER_SLOT);
 
 			ID3D11ShaderResourceView* const nullSRV[1] = {nullptr};
-			wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTRUE_SLOT_INDIRECT_LIGHT_DIRECTIONAL, 1u, nullSRV);
+			wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, nullSRV);
+			wnd.Gfx().pContext->PSSetShaderResources(1u, 1u, nullSRV);
 			//wnd.Gfx().pContext->PSSetShaderResources(PS_TEXTURE_SLOT_INDIRECT_LIGHT_SPOT, 1u, nullSRV);
 		}
 
@@ -553,19 +621,13 @@ namespace Kaka
 		wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, wnd.Gfx().postProcessing.pResource.GetAddressOf());
 		// Need world position for reprojection
 		wnd.Gfx().pContext->PSSetShaderResources(2u, 1u, wnd.Gfx().gBuffer.GetShaderResourceViews());
-		wnd.Gfx().pContext->PSSetShaderResources(3u, 1u, wnd.Gfx().gBuffer.GetDepthShaderResourceView());
-
-		ImGui::Begin("Noise Filtering");
-		ImGui::DragFloat("KERNEL_RADIUS", &taaBuffer.KERNEL_RADIUS, 0.01f, 0.0f, 100.0f, "%.2f");
-		ImGui::DragFloat("K SIGMA_DEPTH", &taaBuffer.SIGMA_DEPTH, 0.001f, 0.0f, 10.0f, "%.2f");
-		ImGui::DragFloat("SIGMA_NORMAL", &taaBuffer.SIGMA_NORMAL, 0.001f, 0.0f, 10.0f, "%.2f");
-		ImGui::DragFloat("SIGMA_COLOR", &taaBuffer.SIGMA_COLOR, 0.001f, 0.0f, 10.0f, "%.2f");
-		ImGui::DragFloat("blend", &taaBuffer.blend, 0.01f, 0.0f, 1.0f, "%.2f");
-		ImGui::End();
 
 		PixelConstantBuffer<TAABuffer> tab{wnd.Gfx(), 1u};
 		taaBuffer.historyViewProjection = wnd.Gfx().historyViewProjection;
 		taaBuffer.clientResolution = wnd.Gfx().GetCurrentResolution();
+		taaBuffer.jitter = wnd.Gfx().currentJitter;
+		taaBuffer.previousJitter = wnd.Gfx().previousJitter;
+
 		tab.Update(wnd.Gfx(), taaBuffer);
 		tab.Bind(wnd.Gfx());
 
@@ -617,6 +679,7 @@ namespace Kaka
 				ImGui::DragFloat("Contrast", &ppBuffer.contrast, 0.01f, 0.0f, 10.0f, "%.2f");
 				ImGui::DragFloat("Saturation", &ppBuffer.saturation, 0.01f, 0.0f, 10.0f, "%.2f");
 				ImGui::DragFloat("Blur", &ppBuffer.blur, 0.01f, 0.0f, 64.0f, "%.2f");
+				ImGui::DragFloat("Sharpness", &ppBuffer.sharpness, 0.01f, 0.0f, 10.0f, "%.2f");
 				ImGui::Text("Bloom");
 				ImGui::SetNextItemWidth(100);
 				ImGui::SliderFloat("Bloom blending", &wnd.Gfx().bb.bloomBlending, 0.0f, 1.0f);
@@ -699,16 +762,9 @@ namespace Kaka
 			{
 				//ImGui::Checkbox("Use RSM##DirUse", (bool*)&rsmBufferDirectional.useDirectionalRSM);
 				//ImGui::Checkbox("Only RSM##DirOnl", (bool*)&rsmBufferDirectional.onlyRSM);
-				ImGui::Checkbox("Use Poisson##DirPoi", (bool*)&rsmBufferDirectional.usePoisson);
 				ImGui::DragInt("Sample count##DirSam", (int*)&rsmBufferDirectional.sampleCount, 1, 1, 2000);
 				ImGui::DragFloat("R Max##DirectMax", &rsmBufferDirectional.rMax, 0.001f, 0.0f, 5.0f, "%.3f");
 				ImGui::DragFloat("RSM Intensity##DirInt", &rsmBufferDirectional.rsmIntensity, 10.0f, 0.0f, 100000.0f, "%.2f");
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::ColorPicker3("Shadow colour##DirShaCol", &rsmBufferSpot.shadowColour.x);
-				ImGui::DragFloat("Shadow intensity##DirShaInt", &rsmBufferSpot.shadowColour.w, 0.01f, 0.0f, 1.0f, "%.2f");
-				ImGui::SetNextItemWidth(150.0f);
-				ImGui::ColorPicker3("Ambiance colour##DirAmbCol", &rsmBufferSpot.ambianceColour.x);
-				ImGui::DragFloat("Ambiance intensity##DirAmbInt", &rsmBufferSpot.ambianceColour.w, 0.01f, 0.0f, 1.0f, "%.2f");
 				//ImGui::DragFloat("Weight max##DirWeiMax", &rsmBufferDirectional.weightMax, 0.001f, 0.0f, 5.0f, "%.4f");
 
 				//ImGui::NextColumn();
@@ -922,10 +978,10 @@ namespace Kaka
 	{
 		if (ImGui::Begin("Stats"))
 		{
-			ImGui::Text("%.3f ms", 1000.0f / ImGui::GetIO().Framerate);
-			ImGui::Text("%.0f FPS", ImGui::GetIO().Framerate);
 			const std::string drawcalls = "Drawcalls:" + std::to_string(wnd.Gfx().GetDrawcallCount());
 			ImGui::Text(drawcalls.c_str());
+			ImGui::Text("%.0f FPS", timer.GetFPS());
+			ImGui::Text("Total: %.3f ms", 1000.0f / timer.GetFPS());
 		}
 		ImGui::End();
 	}
