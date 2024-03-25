@@ -1,7 +1,7 @@
 #pragma once
 #include <mutex>
 
-static constexpr int MAX_FPS_SAMPLES = 1024;
+static constexpr int MAX_FPS_SAMPLES = 128;
 
 namespace Kaka
 {

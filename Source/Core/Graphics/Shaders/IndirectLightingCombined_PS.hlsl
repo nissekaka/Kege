@@ -5,7 +5,7 @@ Texture2D previousDirectional : register(t1);
 Texture2D worldPositionTexture : register(t2);
 //Texture2D giSpotTex : register(t10);
 
-cbuffer Parameters : register(b10)
+cbuffer TAABuffer : register(b10)
 {
     matrix historyViewProjection;
     float2 clientResolution2;
@@ -27,13 +27,13 @@ float2 CameraReproject(float3 aPosition)
     float4 screenPosition = mul(historyViewProjection, float4(aPosition, 1.0f));
     const float2 screenUV = screenPosition.xy / screenPosition.w;
     float2 reprojectedUV = (screenUV * float2(0.5f, -0.5f) + 0.5f);
-    return reprojectedUV -jitterOffset + previousJitterOffset;
+    return reprojectedUV;
 }
 
 // YUV-RGB conversion routine from Hyper3D
 float3 encodePalYuv(float3 rgb)
 {
-    rgb = pow(rgb, float3(2.0, 2.0, 2.0)); // gamma correction
+    rgb = pow(rgb, float3(2.0, 2.0, 2.0)); // Gamma correction
     return float3(
         dot(rgb, float3(0.299, 0.587, 0.114)),
         dot(rgb, float3(-0.14713, -0.28886, 0.436)),
@@ -48,14 +48,14 @@ float3 decodePalYuv(float3 yuv)
         dot(yuv, float3(1., -0.39465, -0.58060)),
         dot(yuv, float3(1., 2.03211, 0.))
     );
-    return pow(rgb, float3(0.5, 0.5, 0.5)); // gamma correction
+    return pow(rgb, float3(0.5, 0.5, 0.5)); // Gamma correction
 }
 
 float4 main(const PixelInput aInput) : SV_TARGET
 {
-	// Use history view-projection matrix to project onto previous camera's screen space
     const float3 worldPosition = worldPositionTexture.Sample(linearSampler, aInput.texCoord).rgb;
 
+	// Use history view-projection matrix to project onto previous camera's screen space
     float2 reprojectedUV = aInput.texCoord;
 
     // If the world position is valid, reproject the UV

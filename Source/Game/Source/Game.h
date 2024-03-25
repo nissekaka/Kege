@@ -174,7 +174,7 @@ namespace Kaka
 		VertexConstantBuffer<CommonBuffer> vcb{wnd.Gfx(), VS_CBUFFER_SLOT_COMMON};
 		PixelConstantBuffer<RSMLightData> rsmLightDataBuffer{wnd.Gfx(), PS_CBUFFER_SLOT_RSM_LIGHT};
 
-		static constexpr unsigned int HAMMERSLEY_DIR_COUNT = 4u;
+		static constexpr unsigned int HAMMERSLEY_DIR_COUNT = 12u;
 		static constexpr unsigned int HAMMERSLEY_SPOT_COUNT = 2u;
 		static constexpr unsigned int HAMMERSLEY_FINAL_COUNT = 0u;
 

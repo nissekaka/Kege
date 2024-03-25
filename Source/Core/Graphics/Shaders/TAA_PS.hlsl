@@ -7,7 +7,7 @@ struct PixelInput
     float2 texCoord : TEXCOORD;
 };
 
-cbuffer Parameters : register(b1)
+cbuffer TAABuffer : register(b1)
 {
     matrix historyViewProjection;
     float2 clientResolution2;
@@ -28,13 +28,11 @@ float2 CameraReproject(float3 aPosition)
     float4 screenPosition = mul(historyViewProjection, float4(aPosition, 1.0f));
     const float2 screenUV = screenPosition.xy / screenPosition.w;
     float2 reprojectedUV = (screenUV * float2(0.5f, -0.5f) + 0.5f);
-    return reprojectedUV;//    -jitterOffset + previousJitterOffset;
+    return reprojectedUV;
 }
 
 float4 main(const PixelInput aInput) : SV_TARGET
 {
-    //const float2 uv = aInput.position.xy / clientResolution.xy;
-
     if (!useTAA)
     {
         return currentTexture.Sample(pointSampler, aInput.texCoord);
@@ -71,7 +69,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
 	// Clamp previous color to min/max bounding box
     const float3 previousColourClamped = clamp(previousColour, minColor, maxColor);
 
-    float3 output = currentColour * 0.1f + previousColourClamped * 0.9f;
+    float3 output = currentColour * 0.05f + previousColourClamped * 0.95f;
 
     float3 antialiased = previousColourClamped.rgb;
 

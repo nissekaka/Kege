@@ -59,7 +59,7 @@ namespace Kaka
 		ppBuffer.contrast = 1.0f;
 		ppBuffer.saturation = 1.0f;
 		ppBuffer.blur = 0.0f;
-		ppBuffer.sharpness = 0.7f;
+		ppBuffer.sharpness = 1.0f;
 
 		skybox.Init(wnd.Gfx(), "Assets\\Textures\\Skybox\\Miramar\\", "Assets\\Textures\\Skybox\\Kurt\\");
 
@@ -131,7 +131,7 @@ namespace Kaka
 
 		rsmBufferDirectional.sampleCount = HAMMERSLEY_DIR_COUNT;
 		rsmBufferDirectional.rMax = 0.04f;
-		rsmBufferDirectional.rsmIntensity = 2000.0f;
+		rsmBufferDirectional.rsmIntensity = 5000.0f;
 		rsmBufferDirectional.isDirectionalLight = TRUE;
 
 		rsmBufferSpot.sampleCount = HAMMERSLEY_SPOT_COUNT;
@@ -437,6 +437,15 @@ namespace Kaka
 				rsmBufferDirectional.isDirectionalLight = TRUE;
 				rsmPixelBuffer.Update(wnd.Gfx(), rsmBufferDirectional);
 				rsmPixelBuffer.Bind(wnd.Gfx());
+
+				PixelConstantBuffer<TAABuffer> tab{wnd.Gfx(), 1u};
+				taaBuffer.historyViewProjection = wnd.Gfx().historyViewProjection;
+				taaBuffer.clientResolution = wnd.Gfx().GetCurrentResolution();
+				taaBuffer.jitter = wnd.Gfx().currentJitter;
+				taaBuffer.previousJitter = wnd.Gfx().previousJitter;
+
+				tab.Update(wnd.Gfx(), taaBuffer);
+				tab.Bind(wnd.Gfx());
 
 				indirectLighting.Draw(wnd.Gfx());
 				//}
@@ -978,10 +987,10 @@ namespace Kaka
 	{
 		if (ImGui::Begin("Stats"))
 		{
+			ImGui::Text("%.3f ms", 1000.0f / timer.GetFPS());
+			ImGui::Text("%.0f FPS", timer.GetFPS());
 			const std::string drawcalls = "Drawcalls:" + std::to_string(wnd.Gfx().GetDrawcallCount());
 			ImGui::Text(drawcalls.c_str());
-			ImGui::Text("%.0f FPS", timer.GetFPS());
-			ImGui::Text("Total: %.3f ms", 1000.0f / timer.GetFPS());
 		}
 		ImGui::End();
 	}

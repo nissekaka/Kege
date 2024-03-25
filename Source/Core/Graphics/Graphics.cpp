@@ -746,15 +746,36 @@ namespace Kaka
 		//pContext->OMSetBlendState(nullptr, nullptr, 0x0f);
 	}
 
+	float Halton(uint32_t i, uint32_t b)
+	{
+		float f = 1.0f;
+		float r = 0.0f;
+
+		while (i > 0)
+		{
+			f /= static_cast<float>(b);
+			r = r + f * static_cast<float>(i % b);
+			i = static_cast<uint32_t>(floorf(static_cast<float>(i) / static_cast<float>(b)));
+		}
+
+		return r;
+	}
+
 	void Graphics::ApplyProjectionJitter()
 	{
 		previousJitter = currentJitter;
 
-		currentJitter = halton23[frameCount % 16];
+		//currentJitter = halton23[frameCount % 16];
+		currentJitter = DirectX::XMFLOAT2(
+			2.0f * Halton(frameCount % 8 + 1, 2) - 1.0f,
+			2.0f * Halton(frameCount % 8 + 1, 3) - 1.0f);
 
 		// Divide by resolution and move to -1, 1
-		currentJitter.x = ((currentJitter.x - 0.5f) / (float)width) * 2.0f;
-		currentJitter.y = ((currentJitter.y - 0.5f) / (float)height) * 2.0f;
+		currentJitter.x = currentJitter.x / (float)width;
+		currentJitter.y = currentJitter.y / (float)height;
+
+		//currentJitter.x = ((currentJitter.x - 0.5f) / (float)width) * 2.0f;
+		//currentJitter.y = ((currentJitter.y - 0.5f) / (float)height) * 2.0f;
 
 		currentJitter.x *= jitterScale;
 		currentJitter.y *= jitterScale;

@@ -8,10 +8,20 @@ struct PixelInput
     float2 texCoord : TEXCOORD;
 };
 
+cbuffer TAABuffer : register(b1)
+{
+    matrix historyViewProjection;
+    float2 clientResolution2;
+    bool useTAA;
+    float padding2;
+    float2 jitterOffset;
+    float2 previousJitterOffset;
+};
+
 float4 main(const PixelInput aInput) : SV_TARGET
 {
 
-    const float2 uv = aInput.texCoord;
+    const float2 uv = aInput.texCoord + jitterOffset;
 
     const float3 albedo = gColourTex.Sample(defaultSampler, uv).rgb;
     const float3 worldPosition = gWorldPositionTex.Sample(linearSampler, uv).rgb;
