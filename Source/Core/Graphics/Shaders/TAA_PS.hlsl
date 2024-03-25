@@ -9,25 +9,23 @@ struct PixelInput
 
 cbuffer TAABuffer : register(b1)
 {
-    matrix historyViewProjection;
-    float2 clientResolution2;
-    bool useTAA;
-    float padding;
     float2 jitterOffset;
     float2 previousJitterOffset;
+    bool useTAA;
 };
 
 Texture2D currentTexture : register(t0);
 Texture2D previousTexture : register(t1);
-Texture2D worldPositionTexture : register(t2);
-Texture2D depthTexture : register(t3);
+//Texture2D worldPositionTexture : register(t2);
+//Texture2D depthTexture : register(t3);
+Texture2D velocityTexture : register(t2);
 
 float2 CameraReproject(float3 aPosition)
 {
     // Transform screen space position to UV and sample the previous texture
     float4 screenPosition = mul(historyViewProjection, float4(aPosition, 1.0f));
     const float2 screenUV = screenPosition.xy / screenPosition.w;
-    float2 reprojectedUV = (screenUV * float2(0.5f, -0.5f) + 0.5f);
+    float2 reprojectedUV = screenUV * float2(0.5f, -0.5f) + 0.5f;
     return reprojectedUV;
 }
 
@@ -37,17 +35,20 @@ float4 main(const PixelInput aInput) : SV_TARGET
     {
         return currentTexture.Sample(pointSampler, aInput.texCoord);
     }
-    
-	// Use history view-projection matrix to project onto previous camera's screen space
-    const float3 worldPosition = worldPositionTexture.Sample(linearSampler, aInput.texCoord).rgb;
 
-    float2 reprojectedUV = aInput.texCoord;
+	//// Use history view-projection matrix to project onto previous camera's screen space
+ //   const float3 worldPosition = worldPositionTexture.Sample(linearSampler, aInput.texCoord).rgb;
 
-    // If the world position is valid, reproject the UV
-    if (length(worldPosition) > 0.0f)
-    {
-        reprojectedUV = CameraReproject(worldPosition);
-    }
+ //   float2 reprojectedUV = aInput.texCoord;
+
+ //   // If the world position is valid, reproject the UV
+ //   if (length(worldPosition) > 0.0f)
+ //   {
+ //       reprojectedUV = CameraReproject(worldPosition);
+ //   }
+
+    const float2 motionVector = velocityTexture.Sample(linearSampler, aInput.position.xy).xy;
+    const float2 reprojectedUV = (aInput.position.xy - motionVector) / resolution;
 
     const float3 currentColour = currentTexture.Sample(linearSampler, aInput.texCoord).rgb;
     const float3 previousColour = previousTexture.Sample(linearSampler, reprojectedUV).rgb;
@@ -60,7 +61,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
     {
         for (int y = -1; y <= 1; ++y)
         {
-            const float3 colour = currentTexture.Sample(pointSampler, aInput.texCoord + float2(x, y) / clientResolution); // Sample neighbor
+            const float3 colour = currentTexture.Sample(pointSampler, aInput.texCoord + float2(x, y) / resolution); // Sample neighbor
             minColor = min(minColor, colour); // Take min and max
             maxColor = max(maxColor, colour);
         }
@@ -73,7 +74,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
 
     float3 antialiased = previousColourClamped.rgb;
 
-    float2 off = float2(1.0f / clientResolution.x, 1.0f / clientResolution.y);
+    float2 off = float2(1.0f / resolution.x, 1.0f / resolution.y);
     float3 in0 = output; //    currentTexture.Sample(linearSampler, uv).rgb;
 
     antialiased = lerp(antialiased * antialiased, in0 * in0, 0.5f);

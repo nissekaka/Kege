@@ -5,11 +5,19 @@ struct PixelInput
 {
     float3 worldPos : POSITION;
     float4 position : SV_POSITION;
+    float4 previousPosition : PREVIOUS_POSITION;
     float2 texCoord : TEXCOORD;
     float3 normal : NORMAL;
     float3 worldNormal : WORLDNORMAL;
     float3 tangent : TANGENT;
     float3 bitan : BITANGENT;
+};
+
+cbuffer TAABuffer : register(b1)
+{
+    float2 jitterOffset;
+    float2 previousJitterOffset;
+    bool useTAA;
 };
 
 Texture2D colourTex : register(t1);
@@ -55,7 +63,15 @@ GBufferOutput main(PixelInput aInput)
     output.material = float4(material.rgb, 1.0f);
     output.ambientOcclusionAndCustom = float4(ambientOcclusion, aInput.worldNormal); // gba are unused, put whatever data you want here!
     output.ambientOcclusionAndCustom.g = 0.0f;
-    
+
+    const float2 previousPosNDC = aInput.previousPosition.xy / aInput.previousPosition.w;
+    const float2 currentPosNDC = aInput.position.xy / aInput.position.w;
+
+    const float2 velocity = previousPosNDC - currentPosNDC;
+    output.velocity = velocity * float2(0.5, -0.5); // Put in UV space
+    output.velocity -= jitterOffset;
+    output.velocity -= previousJitterOffset;
+
     return output;
 }
 

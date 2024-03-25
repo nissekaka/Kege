@@ -169,7 +169,14 @@ namespace Kaka
 		TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
 		transformConstantBuffer.Bind(aGfx);
 
-		vertexShader->Bind(aGfx);
+		if (aGfx.HasVertexShaderOverride())
+		{
+			aGfx.GetVertexShaderOverride()->Bind(aGfx);
+		}
+		else
+		{
+			vertexShader->Bind(aGfx);
+		}
 		if (aGfx.HasPixelShaderOverride())
 		{
 			aGfx.GetPixelShaderOverride()->Bind(aGfx);

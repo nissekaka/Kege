@@ -24,7 +24,7 @@ cbuffer DirectionalLight : register(b1)
 
 float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 {
-    const float2 uv = aInput.position.xy / clientResolution.xy;
+    const float2 uv = aInput.position.xy / resolution.xy;
     const float3 worldPosition = gWorldPositionTex.Sample(linearSampler, uv).rgb;
     const float3 albedo = gColourTex.Sample(defaultSampler, uv).rgb;
     const float4 ambientOcclusionAndCustom = gAmbientOcclusionTex.Sample(linearSampler, uv).rgba;
@@ -53,7 +53,7 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
     roughness, directionalLightColour, -dirLightDir, toEye) * directionalLightIntensity;
 
     const float3 volumetric = Volumetric(worldPosition, cameraPosition.xyz, numberOfVolumetricSteps,
-                                         uv, clientResolution.xy, directionalLightCameraTransform,
+                                         uv, resolution.xy, directionalLightCameraTransform,
                                          directionalLightShadowMap, linearSampler, dirLightDir,
                                          directionalLightColour, volumetricScattering) * volumetricIntensity;
 

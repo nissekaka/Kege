@@ -6,6 +6,7 @@ struct PixelInput
 {
     float3 worldPos : POSITION;
     float4 position : SV_POSITION;
+    float4 previousPosition : PREVIOUS_POSITION;
     float2 texCoord : TEXCOORD;
     float3 normal : NORMAL;
     float3 worldNormal : WORLDNORMAL;

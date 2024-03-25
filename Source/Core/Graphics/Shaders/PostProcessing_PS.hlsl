@@ -40,7 +40,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
     const float directions = 16.0; // BLUR DIRECTIONS (Default 16.0 - More is better but slower)
     const float quality = 3.0; // BLUR QUALITY (Default 4.0 - More is better but slower)
 
-    const float2 radius = blur / clientResolution.xy;
+    const float2 radius = blur / resolution.xy;
     
     // Blur calculations
     for (float d = 0.0; d < twoPi; d += twoPi / directions)
@@ -59,10 +59,10 @@ float4 main(const PixelInput aInput) : SV_TARGET
     // Sharpening
     float3 sharpenedSum = colour.rgb * (1.0f + 4.0f * sharpness);
 
-    sharpenedSum -= fullscreenTexture.Sample(linearSampler, aInput.texCoord + float2(0.0f, 1.0f) / clientResolution).rgb * sharpness;
-    sharpenedSum -= fullscreenTexture.Sample(linearSampler, aInput.texCoord - float2(0.0f, 1.0f) / clientResolution).rgb * sharpness;
-    sharpenedSum -= fullscreenTexture.Sample(linearSampler, aInput.texCoord + float2(1.0f, 0.0f) / clientResolution).rgb * sharpness;
-    sharpenedSum -= fullscreenTexture.Sample(linearSampler, aInput.texCoord - float2(1.0f, 0.0f) / clientResolution).rgb * sharpness;
+    sharpenedSum -= fullscreenTexture.Sample(linearSampler, aInput.texCoord + float2(0.0f, 1.0f) / resolution).rgb * sharpness;
+    sharpenedSum -= fullscreenTexture.Sample(linearSampler, aInput.texCoord - float2(0.0f, 1.0f) / resolution).rgb * sharpness;
+    sharpenedSum -= fullscreenTexture.Sample(linearSampler, aInput.texCoord + float2(1.0f, 0.0f) / resolution).rgb * sharpness;
+    sharpenedSum -= fullscreenTexture.Sample(linearSampler, aInput.texCoord - float2(1.0f, 0.0f) / resolution).rgb * sharpness;
 
     colour = float4(sharpenedSum, 1.0f);
 

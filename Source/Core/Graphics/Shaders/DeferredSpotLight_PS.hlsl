@@ -62,7 +62,7 @@ bool IsInSpotlightCone(float3 aWorldPosition, float aAngle)
 
 float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 {
-    const float2 uv = aInput.position.xy / clientResolution.xy;
+    const float2 uv = aInput.position.xy / resolution.xy;
     const float3 worldPosition = gWorldPositionTex.Sample(linearSampler, uv).rgb;
     const float3 albedo = gColourTex.Sample(defaultSampler, uv).rgb;
     const float3 normal = normalize(2.0f * gNormalTex.Sample(linearSampler, uv).xyz - 1.0f);
@@ -87,7 +87,7 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
     if (useTexture)
     {
         float2 projectedPosition = lightProjectedPosition.xy;
-        projectedPosition.x *= clientResolution.x / clientResolution.y; // Because texture has aspect ratio 1:1
+        projectedPosition.x *= resolution.x / resolution.y; // Because texture has aspect ratio 1:1
         const float2 lightUV = 0.5f + float2(0.5f, -0.5f) * (projectedPosition.xy) / lightOuterAngle;
 
         lightFromTexture = flashlightTex.Sample(linearSampler, lightUV).rgb;
@@ -103,7 +103,7 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
         const float3 step = V * stepSize;
  
         float3 position = cameraPosition.xyz;
-        position += step * DITHER_PATTERN[int(uv.x * clientResolution.x) % 4][int(uv.y * clientResolution.y) % 4];
+        position += step * DITHER_PATTERN[int(uv.x * resolution.x) % 4][int(uv.y * resolution.y) % 4];
         
 		[unroll(15)]
         for (int i = 0; i < numberOfVolumetricSteps; i++)

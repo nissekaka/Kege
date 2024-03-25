@@ -1,6 +1,3 @@
-
-#include "deferred_common.hlsli"
-
 cbuffer Transform : register(b0)
 {
     matrix objectToWorld;
@@ -31,14 +28,12 @@ struct PixelInput
 PixelInput main(const VertexInput aInput)
 {
     PixelInput output;
-    const matrix currentObjectToClip = mul(viewProjection, objectToWorld);
-    const matrix previousObjectToClip = mul(historyViewProjection, objectToWorld);
 
     const float3x3 objectToWorldRotation = objectToWorld;
     const float4 position = { aInput.position, 1.0f };
     output.worldPos = mul(objectToWorld, position).xyz;
-    output.position = mul(currentObjectToClip, position);
-    output.previousPosition = mul(previousObjectToClip, position);
+    output.position = mul(objectToClip, position);
+    output.previousPosition = output.position;
     output.texCoord = aInput.texCoord;
     output.normal = mul(objectToWorldRotation, aInput.normal);
     output.worldNormal = aInput.normal;

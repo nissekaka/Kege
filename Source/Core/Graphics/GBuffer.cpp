@@ -14,6 +14,7 @@ namespace Kaka
 			DXGI_FORMAT_R10G10B10A2_UNORM, // Normal,
 			DXGI_FORMAT_R8G8B8A8_UNORM, // Material
 			DXGI_FORMAT_R8G8B8A8_UNORM, // AmbientOcclusionAndCustom
+			DXGI_FORMAT_R16G16_FLOAT // Velocity
 		};
 
 		GBuffer returnGBuffer;

@@ -170,7 +170,7 @@ float4 main(PixelInput aInput) : SV_TARGET
     // Dividing by dist to make waves smaller at distance
     // Scaling by Amplitude parameter
     const float2 offset = A * (maxValue + heightDerivative) / dist;
-    const float3 reflection = reflectTex.Sample(defaultSampler, aInput.position.xy / clientResolution + offset).rgb;
+    const float3 reflection = reflectTex.Sample(defaultSampler, aInput.position.xy / resolution + offset).rgb;
 
     const float3 result = lerp(reflection, finalColour /*shadowFactor*/, 0.35f);
 

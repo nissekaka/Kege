@@ -7,8 +7,6 @@ Texture2D worldPositionTexture : register(t2);
 
 cbuffer TAABuffer : register(b10)
 {
-    matrix historyViewProjection;
-    float2 clientResolution2;
     bool useTAA;
     float padding2;
     float2 jitterOffset;
@@ -67,7 +65,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
     const float3 currentColour = currentDirectional.Sample(linearSampler, aInput.texCoord).rgb;
     const float3 previousColour = previousDirectional.Sample(linearSampler, reprojectedUV).rgb;
 
-    //return float4(currentColour, 1.0f);
+    return float4(currentColour, 1.0f);
 
     // Arbitrary out of range numbers
     float3 minColor = 9999.0, maxColor = -9999.0;
@@ -77,7 +75,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
     {
         for (int y = -1; y <= 1; ++y)
         {
-            const float3 colour = currentDirectional.Sample(linearSampler, aInput.texCoord + float2(x, y) / clientResolution); // Sample neighbor
+            const float3 colour = currentDirectional.Sample(linearSampler, aInput.texCoord + float2(x, y) / resolution); // Sample neighbor
             minColor = min(minColor, colour); // Take min and max
             maxColor = max(maxColor, colour);
         }
@@ -92,7 +90,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
 
     float3 antialiased = previousColourClamped.rgb;
 
-    float2 off = float2(1.0f / clientResolution.x, 1.0f / clientResolution.y);
+    float2 off = float2(1.0f / resolution.x, 1.0f / resolution.y);
     float3 in0 = output; //    currentTexture.Sample(linearSampler, uv).rgb;
 
     antialiased = lerp(antialiased * antialiased, in0 * in0, 0.5f);

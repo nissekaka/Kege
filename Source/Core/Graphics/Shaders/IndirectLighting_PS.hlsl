@@ -10,8 +10,6 @@ struct PixelInput
 
 cbuffer TAABuffer : register(b1)
 {
-    matrix historyViewProjection;
-    float2 clientResolution2;
     bool useTAA;
     float padding2;
     float2 jitterOffset;

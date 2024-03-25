@@ -92,10 +92,10 @@ namespace Kaka
 
 		struct CommonBuffer
 		{
-			DirectX::XMMATRIX worldToClipMatrix;
-			DirectX::XMMATRIX view;
+			DirectX::XMMATRIX viewProjection;
+			DirectX::XMMATRIX historyViewProjection;
+			DirectX::XMMATRIX inverseViewProjection;
 			DirectX::XMMATRIX projection;
-			DirectX::XMMATRIX clipToWorldMatrix;
 			DirectX::XMMATRIX viewInverse;
 			DirectX::XMFLOAT4 cameraPosition;
 			DirectX::XMFLOAT2 resolution;
@@ -180,12 +180,10 @@ namespace Kaka
 
 		struct TAABuffer
 		{
-			DirectX::XMMATRIX historyViewProjection;
-			DirectX::XMFLOAT2 clientResolution;
-			BOOL useTAA = true;
-			float padding;
 			DirectX::XMFLOAT2 jitter;
 			DirectX::XMFLOAT2 previousJitter;
+			BOOL useTAA = true;
+			float padding[3];
 		} taaBuffer;
 
 		bool flipFlop = false;

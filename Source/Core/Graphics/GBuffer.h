@@ -17,6 +17,7 @@ namespace Kaka
 			Normal,
 			Material,
 			AmbientOcclusionAndCustom,
+			Velocity,
 			Count
 		};
 
@@ -24,18 +25,20 @@ namespace Kaka
 		{
 			switch (aTexture)
 			{
-				case GBufferTexture::WorldPosition:
-					return 2u;
-				case GBufferTexture::Albedo:
-					return 3u;
-				case GBufferTexture::Normal:
-					return 4u;
-				case GBufferTexture::Material:
-					return 5u;
-				case GBufferTexture::AmbientOcclusionAndCustom:
-					return 6u;
-				default:
-					return 0;
+			case GBufferTexture::WorldPosition:
+				return 2u;
+			case GBufferTexture::Albedo:
+				return 3u;
+			case GBufferTexture::Normal:
+				return 4u;
+			case GBufferTexture::Material:
+				return 5u;
+			case GBufferTexture::AmbientOcclusionAndCustom:
+				return 6u;
+			case GBufferTexture::Velocity:
+				return 7u;
+			default:
+				return 0;
 			}
 		}
 
@@ -48,6 +51,11 @@ namespace Kaka
 		void SetAsResourceOnSlot(ID3D11DeviceContext* aContext, GBufferTexture aTexture, unsigned int aSlot);
 		void SetAllAsResources(ID3D11DeviceContext* aContext, unsigned int aSlot);
 		void ClearAllAsResourcesSlots(ID3D11DeviceContext* aContext, unsigned int aSlot);
+
+		inline ID3D11ShaderResourceView* const* GetShaderResourceView(GBufferTexture aType) const
+		{
+			return shaderResourceViews[(int)aType].GetAddressOf();
+		}
 
 		inline ID3D11ShaderResourceView* const* GetShaderResourceViews() const
 		{

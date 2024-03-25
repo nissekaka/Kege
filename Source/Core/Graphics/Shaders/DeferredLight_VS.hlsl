@@ -1,5 +1,4 @@
 #include "deferred_common.hlsli"
-#include "common.hlsli"
 
 cbuffer DeferredVertexConstantBuffer : register(b1)
 {
@@ -25,7 +24,7 @@ DeferredVertexToPixel main(DeferredVertexInput aInput)
         );
 
         output.position = mul(objectToWorld, position);
-        output.position = mul(worldToClipMatrix, output.position);
+        output.position = mul(viewProjection, output.position);
     }
 
     return output;

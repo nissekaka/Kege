@@ -284,11 +284,11 @@ namespace Kaka
 
 		wnd.Gfx().ApplyProjectionJitter();
 
-		commonBuffer.worldToClipMatrix = camera.GetInverseView() * camera.GetProjection();
-		commonBuffer.view = camera.GetView();
+		commonBuffer.historyViewProjection = commonBuffer.viewProjection;
+		commonBuffer.viewProjection = camera.GetInverseView() * camera.GetJitteredProjection();
+		commonBuffer.inverseViewProjection = DirectX::XMMatrixInverse(nullptr, commonBuffer.viewProjection);
 		commonBuffer.projection = DirectX::XMMatrixInverse(nullptr, camera.GetProjection());
 		commonBuffer.viewInverse = camera.GetInverseView();
-		commonBuffer.clipToWorldMatrix = DirectX::XMMatrixInverse(nullptr, commonBuffer.worldToClipMatrix);
 		commonBuffer.cameraPosition = {camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z, 0.0f};
 		commonBuffer.resolution = wnd.Gfx().GetCurrentResolution();
 		commonBuffer.currentTime = timer.GetTotalTime();
@@ -389,6 +389,13 @@ namespace Kaka
 			wnd.Gfx().gBuffer.ClearTextures(wnd.Gfx().pContext.Get());
 			wnd.Gfx().gBuffer.SetAsActiveTarget(wnd.Gfx().pContext.Get(), wnd.Gfx().gBuffer.GetDepthStencilView());
 
+			PixelConstantBuffer<TAABuffer> tab{wnd.Gfx(), 1u};
+			taaBuffer.jitter = wnd.Gfx().currentJitter;
+			taaBuffer.previousJitter = wnd.Gfx().previousJitter;
+
+			tab.Update(wnd.Gfx(), taaBuffer);
+			tab.Bind(wnd.Gfx());
+
 			for (Model& model : models)
 			{
 				model.Draw(wnd.Gfx(), aDeltaTime, true);
@@ -439,8 +446,6 @@ namespace Kaka
 				rsmPixelBuffer.Bind(wnd.Gfx());
 
 				PixelConstantBuffer<TAABuffer> tab{wnd.Gfx(), 1u};
-				taaBuffer.historyViewProjection = wnd.Gfx().historyViewProjection;
-				taaBuffer.clientResolution = wnd.Gfx().GetCurrentResolution();
 				taaBuffer.jitter = wnd.Gfx().currentJitter;
 				taaBuffer.previousJitter = wnd.Gfx().previousJitter;
 
@@ -523,8 +528,6 @@ namespace Kaka
 			wnd.Gfx().pContext->PSSetShaderResources(2u, 1u, wnd.Gfx().gBuffer.GetShaderResourceViews());
 
 			PixelConstantBuffer<TAABuffer> tab{wnd.Gfx(), 10u};
-			taaBuffer.historyViewProjection = wnd.Gfx().historyViewProjection;
-			taaBuffer.clientResolution = wnd.Gfx().GetCurrentResolution();
 			taaBuffer.jitter = wnd.Gfx().currentJitter;
 			taaBuffer.previousJitter = wnd.Gfx().previousJitter;
 
@@ -629,11 +632,11 @@ namespace Kaka
 
 		wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, wnd.Gfx().postProcessing.pResource.GetAddressOf());
 		// Need world position for reprojection
-		wnd.Gfx().pContext->PSSetShaderResources(2u, 1u, wnd.Gfx().gBuffer.GetShaderResourceViews());
+		//wnd.Gfx().pContext->PSSetShaderResources(2u, 1u, wnd.Gfx().gBuffer.GetShaderResourceView(GBuffer::GBufferTexture::WorldPosition));
+		wnd.Gfx().pContext->PSSetShaderResources(2u, 1u, wnd.Gfx().gBuffer.GetShaderResourceView(GBuffer::GBufferTexture::Velocity));
+		wnd.Gfx().pContext->PSSetShaderResources(3u, 1u, wnd.Gfx().gBuffer.GetDepthShaderResourceView());
 
 		PixelConstantBuffer<TAABuffer> tab{wnd.Gfx(), 1u};
-		taaBuffer.historyViewProjection = wnd.Gfx().historyViewProjection;
-		taaBuffer.clientResolution = wnd.Gfx().GetCurrentResolution();
 		taaBuffer.jitter = wnd.Gfx().currentJitter;
 		taaBuffer.previousJitter = wnd.Gfx().previousJitter;
 
@@ -815,10 +818,10 @@ namespace Kaka
 				ImGui::Image(wnd.Gfx().gBuffer.GetShaderResourceViews()[3], ImVec2(512, 288));
 				ImGui::Text("Ambient Occlusion");
 				ImGui::Image(wnd.Gfx().gBuffer.GetShaderResourceViews()[4], ImVec2(512, 288));
-				//ImGui::Text("RSM");
-				//ImGui::Image(wnd.Gfx().gBuffer.GetShaderResourceViews()[5], ImVec2(512, 288));
 				ImGui::Text("Depth");
 				ImGui::Image(*wnd.Gfx().gBuffer.GetDepthShaderResourceView(), ImVec2(512, 288));
+				ImGui::Text("Velocity");
+				ImGui::Image(wnd.Gfx().gBuffer.GetShaderResourceViews()[5], ImVec2(512, 288));
 			}
 			ImGui::End();
 

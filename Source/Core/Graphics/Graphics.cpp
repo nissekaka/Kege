@@ -1166,6 +1166,7 @@ namespace Kaka
 		SetCamera(aCamera);
 		aCamera.SetDirection(aLightDirection);
 
+		SetVertexShaderOverride(L"Shaders\\RSM_VS.cso");
 		SetPixelShaderOverride(L"Shaders\\RSM_PS.cso");
 
 		ID3D11ShaderResourceView* nullSRVs[1] = {nullptr};
@@ -1175,6 +1176,7 @@ namespace Kaka
 	void Graphics::ResetShadows(Camera& aCamera)
 	{
 		ClearPixelShaderOverride();
+		ClearVertexShaderOverride();
 		SetCamera(aCamera);
 	}
 
