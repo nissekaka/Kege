@@ -16,9 +16,9 @@ cbuffer TAABuffer : register(b1)
 
 Texture2D currentTexture : register(t0);
 Texture2D previousTexture : register(t1);
-//Texture2D worldPositionTexture : register(t2);
+Texture2D worldPositionTexture : register(t2);
 //Texture2D depthTexture : register(t3);
-Texture2D velocityTexture : register(t2);
+//Texture2D velocityTexture : register(t2);
 
 float2 CameraReproject(float3 aPosition)
 {
@@ -36,22 +36,24 @@ float4 main(const PixelInput aInput) : SV_TARGET
         return currentTexture.Sample(pointSampler, aInput.texCoord);
     }
 
-	//// Use history view-projection matrix to project onto previous camera's screen space
- //   const float3 worldPosition = worldPositionTexture.Sample(linearSampler, aInput.texCoord).rgb;
+	// Use history view-projection matrix to project onto previous camera's screen space
+    const float3 worldPosition = worldPositionTexture.Sample(linearSampler, aInput.texCoord).rgb;
 
- //   float2 reprojectedUV = aInput.texCoord;
+    float2 reprojectedUV = aInput.texCoord;
 
- //   // If the world position is valid, reproject the UV
- //   if (length(worldPosition) > 0.0f)
- //   {
- //       reprojectedUV = CameraReproject(worldPosition);
- //   }
+    // If the world position is valid, reproject the UV
+    if (length(worldPosition) > 0.0f)
+    {
+        reprojectedUV = CameraReproject(worldPosition);
+    }
 
-    const float2 motionVector = velocityTexture.Sample(linearSampler, aInput.position.xy).xy;
-    const float2 reprojectedUV = (aInput.position.xy - motionVector) / resolution;
+    //const float2 motionVector = velocityTexture.Sample(linearSampler, aInput.texCoord).xy;
+    //const float2 reprojectedUV = (aInput.texCoord - motionVector); // / resolution;
 
     const float3 currentColour = currentTexture.Sample(linearSampler, aInput.texCoord).rgb;
     const float3 previousColour = previousTexture.Sample(linearSampler, reprojectedUV).rgb;
+
+    //return float4(previousColour, 1.0f);
 
     // Arbitrary out of range numbers
     float3 minColor = 9999.0, maxColor = -9999.0;

@@ -250,7 +250,7 @@ namespace Kaka
 
 		DirectX::XMFLOAT2 previousJitter = {0.0f, 0.0f};
 		DirectX::XMFLOAT2 currentJitter = {0.0f, 0.0f};
-		float jitterScale = 0.5f;
+		float jitterScale = 0.1f;
 
 		unsigned long long frameCount = 0;
 

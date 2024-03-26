@@ -87,7 +87,7 @@ namespace Kaka
 		// 524288 * 2 = 1 048 576
 		// 2097152 * 2 = 4 194 304
 		// 4194304 * 2 = 8 388 608
-		//dustParticles.Init(wnd.Gfx(), 0.0125f, 2097152, true, "Assets\\Textures\\particle.png");
+		dustParticles.Init(wnd.Gfx(), 0.0125f, 2097152, true, "Assets\\Textures\\particle.png");
 		//dustParticles.Init(wnd.Gfx(), 0.0125f, 1048576u, true, "Assets\\Textures\\particle.png");
 		//smokeParticles.Init(wnd.Gfx(), 25.0f, 1000u, true, "Assets\\Textures\\SpriteCloud.png");
 
@@ -302,7 +302,7 @@ namespace Kaka
 		skyboxAngle.y += skyboxSpeed * aDeltaTime;
 		skybox.Rotate(skyboxAngle);
 
-		//dustParticles.Update(wnd.Gfx(), aDeltaTime);
+		dustParticles.Update(wnd.Gfx(), aDeltaTime);
 		//smokeParticles.Update(wnd.Gfx(), aDeltaTime);
 
 		wnd.Gfx().SetDepthStencilState(eDepthStencilStates::Normal);
@@ -597,12 +597,12 @@ namespace Kaka
 		// Sprite pass -- BEGIN
 		{
 			//wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_GBUFFER_SLOT);
-			//wnd.Gfx().SetBlendState(eBlendStates::Additive);
+			wnd.Gfx().SetBlendState(eBlendStates::Additive);
 
 			//deferredLights.BindFlashlightBuffer(wnd.Gfx());
-			//dustParticles.Draw(wnd.Gfx());
+			dustParticles.Draw(wnd.Gfx());
 
-			//wnd.Gfx().SetBlendState(eBlendStates::Disabled);
+			wnd.Gfx().SetBlendState(eBlendStates::Disabled);
 		}
 		// Sprite pass -- END
 
@@ -632,8 +632,8 @@ namespace Kaka
 
 		wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, wnd.Gfx().postProcessing.pResource.GetAddressOf());
 		// Need world position for reprojection
-		//wnd.Gfx().pContext->PSSetShaderResources(2u, 1u, wnd.Gfx().gBuffer.GetShaderResourceView(GBuffer::GBufferTexture::WorldPosition));
-		wnd.Gfx().pContext->PSSetShaderResources(2u, 1u, wnd.Gfx().gBuffer.GetShaderResourceView(GBuffer::GBufferTexture::Velocity));
+		wnd.Gfx().pContext->PSSetShaderResources(2u, 1u, wnd.Gfx().gBuffer.GetShaderResourceView(GBuffer::GBufferTexture::WorldPosition));
+		//wnd.Gfx().pContext->PSSetShaderResources(2u, 1u, wnd.Gfx().gBuffer.GetShaderResourceView(GBuffer::GBufferTexture::Velocity));
 		wnd.Gfx().pContext->PSSetShaderResources(3u, 1u, wnd.Gfx().gBuffer.GetDepthShaderResourceView());
 
 		PixelConstantBuffer<TAABuffer> tab{wnd.Gfx(), 1u};

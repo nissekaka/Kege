@@ -65,7 +65,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
     const float3 currentColour = currentDirectional.Sample(linearSampler, aInput.texCoord).rgb;
     const float3 previousColour = previousDirectional.Sample(linearSampler, reprojectedUV).rgb;
 
-    return float4(currentColour, 1.0f);
+    //return float4(currentColour, 1.0f);
 
     // Arbitrary out of range numbers
     float3 minColor = 9999.0, maxColor = -9999.0;
@@ -84,7 +84,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
 	// Clamp previous color to min/max bounding box
     const float3 previousColourClamped = clamp(previousColour, minColor, maxColor);
 
-    float3 output = currentColour * 0.1f + previousColourClamped * 0.9f;
+    float3 output = currentColour * 0.05f + previousColourClamped * 0.95f;
 
 	return float4(output, 1.0f);
 

@@ -37,8 +37,8 @@ PixelInput main(const VertexInput aInput)
     const float3x3 objectToWorldRotation = objectToWorld;
     const float4 position = { aInput.position, 1.0f };
     output.worldPos = mul(objectToWorld, position).xyz;
-    output.position = mul(currentObjectToClip, position);
-    output.previousPosition = mul(previousObjectToClip, position);
+    output.position = mul(viewProjection, float4(output.worldPos, 1.0f));
+    output.previousPosition = mul(historyViewProjection, float4(output.worldPos, 1.0f));
     output.texCoord = aInput.texCoord;
     output.normal = mul(objectToWorldRotation, aInput.normal);
     output.worldNormal = aInput.normal;
