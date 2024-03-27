@@ -5,7 +5,7 @@ Texture2D previousDirectional : register(t1);
 Texture2D worldPositionTexture : register(t2);
 Texture2D currentSpot : register(t3);
 
-cbuffer TAABuffer : register(b10)
+cbuffer TAABuffer : register(b1)
 {
     bool useTAA;
     float padding2;
@@ -65,8 +65,6 @@ float4 main(const PixelInput aInput) : SV_TARGET
     const float3 currentColour = currentDirectional.Sample(linearSampler, aInput.texCoord).rgb;
     const float3 previousColour = previousDirectional.Sample(linearSampler, reprojectedUV).rgb;
 
-    //return float4(currentColour, 1.0f);
-
     // Arbitrary out of range numbers
     float3 minColor = 9999.0, maxColor = -9999.0;
  
@@ -86,7 +84,19 @@ float4 main(const PixelInput aInput) : SV_TARGET
 
     float3 output = currentColour * 0.05f + previousColourClamped * 0.95f;
 
-    output += currentSpot.Sample(linearSampler, aInput.texCoord).rgb;
+    //float sharpness = 0.1f;
+
+    //// Sharpening
+    //float3 sharpenedSum = output.rgb * (1.0f + 4.0f * sharpness);
+
+    //sharpenedSum -= previousDirectional.Sample(linearSampler, aInput.texCoord + float2(0.0f, 1.0f) / resolution).rgb * sharpness;
+    //sharpenedSum -= previousDirectional.Sample(linearSampler, aInput.texCoord - float2(0.0f, 1.0f) / resolution).rgb * sharpness;
+    //sharpenedSum -= previousDirectional.Sample(linearSampler, aInput.texCoord + float2(1.0f, 0.0f) / resolution).rgb * sharpness;
+    //sharpenedSum -= previousDirectional.Sample(linearSampler, aInput.texCoord - float2(1.0f, 0.0f) / resolution).rgb * sharpness;
+
+    //output = float4(sharpenedSum, 1.0f);
+
+    //output += currentSpot.Sample(linearSampler, aInput.texCoord).rgb;
 
 	return float4(output, 1.0f);
 

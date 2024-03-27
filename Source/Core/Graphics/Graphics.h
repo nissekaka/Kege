@@ -31,10 +31,7 @@ namespace Kaka
 		Default,
 		WaterReflect,
 		PostProcessing,
-		RSMDownscaleDirectional,
-		RSMDownscaleSpot,
-		RSMFullscaleDirectional,
-		RSMFullscaleDirectionalPrevious,
+		IndirectLight,
 		RSMFullscaleSpot,
 		HistoryN1,
 		HistoryN
@@ -108,10 +105,6 @@ namespace Kaka
 		void SetRenderTarget(eRenderTargetType aRenderTargetType, const bool aUseDepth = true) const;
 		void SetRenderTarget(eRenderTargetType aRenderTargetType, ID3D11DepthStencilView* aDepth) const;
 		void SetRenderTargetShadow(const RSMBuffer& aBuffer) const;
-		void SetAlphaBlend() const;
-		void SetVFXBlend() const;
-		void SetAdditiveBlend() const;
-		void ResetBlend() const;
 		void ApplyProjectionJitter();
 
 		void HandleBloomScaling(PostProcessing& aPostProcessor, ID3D11ShaderResourceView* aResource);
@@ -177,14 +170,10 @@ namespace Kaka
 		RenderTarget renderWaterReflect;
 		RenderTarget postProcessing;
 
-		RenderTarget rsmDownscaleDirectional;
-		RenderTarget rsmDownscaleSpot;
-		float rsmDownscaleFactor = 1.0f;
-
-		RenderTarget rsmFullscaleDirectional;
-		RenderTarget rsmFullscaleDirectionalN;
-		RenderTarget rsmFullscaleDirectionalN1;
-		RenderTarget rsmFullscaleSpot;
+		RenderTarget indirectLight;
+		RenderTarget indirectLightN;
+		RenderTarget indirectLightN1;
+		//RenderTarget rsmFullscaleSpot;
 
 		RenderTarget historyN;
 		RenderTarget historyN1;

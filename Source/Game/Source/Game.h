@@ -29,12 +29,10 @@ namespace Kaka
 		int Go();
 
 	private:
-		void LoadModelThreaded(const std::string& aModelPath, Model& aModel);
 		void Update(const float aDeltaTime);
 		void HandleInput(const float aDeltaTime);
 		void ShowImGui();
 		void ShowStatsWindow();
-		float GetDistanceBetweenObjects(DirectX::XMFLOAT3 aPosA, DirectX::XMFLOAT3 aPosB) const;
 
 	private:
 		ImGuiManager imGui;
@@ -81,11 +79,6 @@ namespace Kaka
 
 	private:
 		std::vector<Model> models;
-		Model* movingModel = nullptr;
-
-		float modelMoveSpeed = 10.0f;
-		float modelRotateAngle = 3.14159f;
-		float modelRotateRadius = 1.0f;
 
 		Skybox skybox{};
 		float skyboxSpeed = 0.005f;
@@ -123,12 +116,6 @@ namespace Kaka
 
 		PostProcessingBuffer ppBuffer = {};
 
-		std::thread updateThread;
-		std::thread loadModelsThread;
-		std::vector<std::thread> modelLoadingThreads;
-		std::vector<bool> threadHasStarted = {};
-		std::mutex modelLoadingMutex;
-		float loadRadius = 100.0f;
 		float cameraMoveSpeed = 10.0f;
 
 		struct ShadowBuffer
@@ -171,14 +158,6 @@ namespace Kaka
 			float padding[3];
 		} rsmCombinedBuffer;
 
-		PixelConstantBuffer<CommonBuffer> pcb{wnd.Gfx(), PS_CBUFFER_SLOT_COMMON};
-		VertexConstantBuffer<CommonBuffer> vcb{wnd.Gfx(), VS_CBUFFER_SLOT_COMMON};
-		PixelConstantBuffer<RSMLightData> rsmLightDataBuffer{wnd.Gfx(), PS_CBUFFER_SLOT_RSM_LIGHT};
-
-		static constexpr unsigned int HAMMERSLEY_DIR_COUNT = 12u;
-		static constexpr unsigned int HAMMERSLEY_SPOT_COUNT = 8u;
-		static constexpr unsigned int HAMMERSLEY_FINAL_COUNT = 0u;
-
 		struct TAABuffer
 		{
 			DirectX::XMFLOAT2 jitter;
@@ -186,6 +165,18 @@ namespace Kaka
 			BOOL useTAA = true;
 			float padding[3];
 		} taaBuffer;
+
+		VertexConstantBuffer<CommonBuffer> vcb{wnd.Gfx(), VS_CBUFFER_SLOT_COMMON};
+		PixelConstantBuffer<CommonBuffer> pcb{wnd.Gfx(), PS_CBUFFER_SLOT_COMMON};
+		PixelConstantBuffer<RSMLightData> rsmLightDataBuffer{wnd.Gfx(), PS_CBUFFER_SLOT_RSM_LIGHT};
+		PixelConstantBuffer<TAABuffer> tab{wnd.Gfx(), 1u};
+		PixelConstantBuffer<RSMBuffer> rsmPixelBuffer{wnd.Gfx(), PS_CBUFFER_SLOT_RSM_DIRECTIONAL};
+		PixelConstantBuffer<ShadowBuffer> shadowPixelBuffer{wnd.Gfx(), PS_CBUFFER_SLOT_SHADOW};
+		PixelConstantBuffer<PostProcessingBuffer> ppb{wnd.Gfx(), 1u};
+
+		static constexpr unsigned int SAMPLE_COUNT_DIRECTIONAL = 8u;
+		static constexpr unsigned int SAMPLE_COUNT_SPOT = 4u;
+
 
 		bool flipFlop = false;
 	};

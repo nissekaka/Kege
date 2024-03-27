@@ -1,5 +1,4 @@
 #include "common.hlsli"
-//#include "deferred_common.hlsli"
 
 cbuffer Bloom : register(b1)
 {
@@ -25,6 +24,12 @@ float4 main(PixelInput aInput) : SV_TARGET
     const float2 pixelOffset = float2(ddx(aInput.texCoord.x), ddy(aInput.texCoord.y));
 	// Could have done one sample in the middle
 	// But that results in some artifacts. This pattern gives a much smoother result
+    if (aInput.texCoord.x < 0.001f || aInput.texCoord.x > 0.999f || aInput.texCoord.y < 0.001f || aInput.texCoord.y > 0.999f)
+    {
+        returnValue.rgb = 0.0f;
+        returnValue.a = 0.0f;
+        return returnValue;
+    }
     const float3 p00 = fullscreenTexture.Sample(linearSampler, aInput.texCoord + pixelOffset * float2(-0.5f, -0.5f)).rgb;
     const float3 p01 = fullscreenTexture.Sample(linearSampler, aInput.texCoord + pixelOffset * float2(-0.5f, 0.5f)).rgb;
     const float3 p10 = fullscreenTexture.Sample(linearSampler, aInput.texCoord + pixelOffset * float2(0.5f, -0.5f)).rgb;

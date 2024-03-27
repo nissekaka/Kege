@@ -15,16 +15,12 @@ namespace Kaka
 		void Draw(Graphics& aGfx);
 		void SetPosition(DirectX::XMFLOAT3 aPosition, unsigned int aIndex);
 		void SetScale(float aScale, unsigned int aIndex);
-		//float GetRotation(unsigned int aIndex) const { return rotations[aIndex]; }
-		//void SetRotation(float aRotation, unsigned int aIndex);
 		DirectX::XMMATRIX GetTransform() const override;
 		DirectX::XMFLOAT3 GetPosition(unsigned int aIndex) const;
 
 	public:
 		void ShowControlWindow(const char* aWindowName = nullptr);
 		bool IsInSpotlightCone(DirectX::XMFLOAT3 aWorldPosition, const SpotlightData& aSpotlightData);
-		void UpdateTransforms(float aDeltaTime, DirectX::XMVECTOR aCameraForward, DirectX::XMVECTOR aCameraRight, DirectX::XMVECTOR aCameraUp, int aUpdateStart, int aUpdateEnd);
-		void UpdateTransform(float aDeltaTime, unsigned instanceCount, DirectX::XMVECTOR cameraForward, DirectX::XMVECTOR cameraRight, DirectX::XMVECTOR cameraUp);
 		void Update(const Graphics& aGfx, const float aDeltaTime, const DirectX::XMFLOAT3 aCameraPosition);
 
 	private:
@@ -53,7 +49,6 @@ namespace Kaka
 	private:
 		std::vector<SpriteVertex> vertices = {};
 		std::vector<unsigned short> indices = {};
-		//VertexBuffer vertexBuffer;
 		IndexBuffer indexBuffer;
 
 		ID3D11Buffer* vertexBuffer = nullptr;

@@ -254,67 +254,7 @@ namespace Kaka
 			}
 		}
 
-		// Reflective Shadow Map downscale -- Directional
-		{
-			UINT rsmWidth = (float)width * rsmDownscaleFactor;
-			UINT rsmHeight = (float)height * rsmDownscaleFactor;
-			//UINT rsmWidth = width;
-			//UINT rsmHeight = height;
-
-			ID3D11Texture2D* rsmTexture;
-			D3D11_TEXTURE2D_DESC rsmDesc = {0};
-			rsmDesc.Width = rsmWidth;
-			rsmDesc.Height = rsmHeight;
-			rsmDesc.MipLevels = 1u;
-			rsmDesc.ArraySize = 1u;
-			rsmDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-			rsmDesc.SampleDesc.Count = 1u;
-			rsmDesc.SampleDesc.Quality = 0u;
-			rsmDesc.Usage = D3D11_USAGE_DEFAULT;
-			rsmDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-			rsmDesc.CPUAccessFlags = 0u;
-			rsmDesc.MiscFlags = 0u;
-			result = pDevice->CreateTexture2D(&rsmDesc, nullptr, &rsmTexture);
-			assert(SUCCEEDED(result));
-			result = pDevice->CreateShaderResourceView(rsmTexture, nullptr, &rsmDownscaleDirectional.pResource);
-			assert(SUCCEEDED(result));
-			result = pDevice->CreateRenderTargetView(rsmTexture, nullptr, &rsmDownscaleDirectional.pTarget);
-			assert(SUCCEEDED(result));
-
-			rsmTexture->Release();
-		}
-
-		// Reflective Shadow Map downscale -- Spot
-		{
-			UINT rsmWidth = (float)width * rsmDownscaleFactor;
-			UINT rsmHeight = (float)height * rsmDownscaleFactor;
-			//UINT rsmWidth = width;
-			//UINT rsmHeight = height;
-
-			ID3D11Texture2D* rsmTexture;
-			D3D11_TEXTURE2D_DESC rsmDesc = {0};
-			rsmDesc.Width = rsmWidth;
-			rsmDesc.Height = rsmHeight;
-			rsmDesc.MipLevels = 1u;
-			rsmDesc.ArraySize = 1u;
-			rsmDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-			rsmDesc.SampleDesc.Count = 1u;
-			rsmDesc.SampleDesc.Quality = 0u;
-			rsmDesc.Usage = D3D11_USAGE_DEFAULT;
-			rsmDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-			rsmDesc.CPUAccessFlags = 0u;
-			rsmDesc.MiscFlags = 0u;
-			result = pDevice->CreateTexture2D(&rsmDesc, nullptr, &rsmTexture);
-			assert(SUCCEEDED(result));
-			result = pDevice->CreateShaderResourceView(rsmTexture, nullptr, &rsmDownscaleSpot.pResource);
-			assert(SUCCEEDED(result));
-			result = pDevice->CreateRenderTargetView(rsmTexture, nullptr, &rsmDownscaleSpot.pTarget);
-			assert(SUCCEEDED(result));
-
-			rsmTexture->Release();
-		}
-
-		// Reflective Shadow Fullscale Directional
+		// Indirect light
 		{
 			UINT rsmWidth = width;
 			UINT rsmHeight = height;
@@ -334,15 +274,15 @@ namespace Kaka
 			rsmDesc.MiscFlags = 0u;
 			result = pDevice->CreateTexture2D(&rsmDesc, nullptr, &rsmTexture);
 			assert(SUCCEEDED(result));
-			result = pDevice->CreateShaderResourceView(rsmTexture, nullptr, &rsmFullscaleDirectional.pResource);
+			result = pDevice->CreateShaderResourceView(rsmTexture, nullptr, &indirectLight.pResource);
 			assert(SUCCEEDED(result));
-			result = pDevice->CreateRenderTargetView(rsmTexture, nullptr, &rsmFullscaleDirectional.pTarget);
+			result = pDevice->CreateRenderTargetView(rsmTexture, nullptr, &indirectLight.pTarget);
 			assert(SUCCEEDED(result));
 
 			rsmTexture->Release();
 		}
 
-		// Reflective Shadow Fullscale Directional N
+		// Indirect light N
 		{
 			UINT rsmWidth = width;
 			UINT rsmHeight = height;
@@ -362,15 +302,15 @@ namespace Kaka
 			rsmDesc.MiscFlags = 0u;
 			result = pDevice->CreateTexture2D(&rsmDesc, nullptr, &rsmTexture);
 			assert(SUCCEEDED(result));
-			result = pDevice->CreateShaderResourceView(rsmTexture, nullptr, &rsmFullscaleDirectionalN.pResource);
+			result = pDevice->CreateShaderResourceView(rsmTexture, nullptr, &indirectLightN.pResource);
 			assert(SUCCEEDED(result));
-			result = pDevice->CreateRenderTargetView(rsmTexture, nullptr, &rsmFullscaleDirectionalN.pTarget);
+			result = pDevice->CreateRenderTargetView(rsmTexture, nullptr, &indirectLightN.pTarget);
 			assert(SUCCEEDED(result));
 
 			rsmTexture->Release();
 		}
 
-		// Reflective Shadow Fullscale Directional N - 1
+		// Indirect light N - 1
 		{
 			UINT rsmWidth = width;
 			UINT rsmHeight = height;
@@ -390,37 +330,9 @@ namespace Kaka
 			rsmDesc.MiscFlags = 0u;
 			result = pDevice->CreateTexture2D(&rsmDesc, nullptr, &rsmTexture);
 			assert(SUCCEEDED(result));
-			result = pDevice->CreateShaderResourceView(rsmTexture, nullptr, &rsmFullscaleDirectionalN1.pResource);
+			result = pDevice->CreateShaderResourceView(rsmTexture, nullptr, &indirectLightN1.pResource);
 			assert(SUCCEEDED(result));
-			result = pDevice->CreateRenderTargetView(rsmTexture, nullptr, &rsmFullscaleDirectionalN1.pTarget);
-			assert(SUCCEEDED(result));
-
-			rsmTexture->Release();
-		}
-
-		// Reflective Shadow Fullscale Spot
-		{
-			UINT rsmWidth = width;
-			UINT rsmHeight = height;
-
-			ID3D11Texture2D* rsmTexture;
-			D3D11_TEXTURE2D_DESC rsmDesc = {0};
-			rsmDesc.Width = rsmWidth;
-			rsmDesc.Height = rsmHeight;
-			rsmDesc.MipLevels = 1u;
-			rsmDesc.ArraySize = 1u;
-			rsmDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-			rsmDesc.SampleDesc.Count = 1u;
-			rsmDesc.SampleDesc.Quality = 0u;
-			rsmDesc.Usage = D3D11_USAGE_DEFAULT;
-			rsmDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-			rsmDesc.CPUAccessFlags = 0u;
-			rsmDesc.MiscFlags = 0u;
-			result = pDevice->CreateTexture2D(&rsmDesc, nullptr, &rsmTexture);
-			assert(SUCCEEDED(result));
-			result = pDevice->CreateShaderResourceView(rsmTexture, nullptr, &rsmFullscaleSpot.pResource);
-			assert(SUCCEEDED(result));
-			result = pDevice->CreateRenderTargetView(rsmTexture, nullptr, &rsmFullscaleSpot.pTarget);
+			result = pDevice->CreateRenderTargetView(rsmTexture, nullptr, &indirectLightN1.pTarget);
 			assert(SUCCEEDED(result));
 
 			rsmTexture->Release();
@@ -610,28 +522,9 @@ namespace Kaka
 				pContext->OMSetRenderTargets(1u, postProcessing.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
-		case eRenderTargetType::RSMDownscaleDirectional:
+		case eRenderTargetType::IndirectLight:
 			{
-				pContext->OMSetRenderTargets(1u, rsmDownscaleDirectional.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
-			}
-		case eRenderTargetType::RSMDownscaleSpot:
-			{
-				pContext->OMSetRenderTargets(1u, rsmDownscaleSpot.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
-			}
-			break;
-		case eRenderTargetType::RSMFullscaleDirectional:
-			{
-				pContext->OMSetRenderTargets(1u, rsmFullscaleDirectional.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
-			}
-			break;
-		case eRenderTargetType::RSMFullscaleDirectionalPrevious:
-			{
-				pContext->OMSetRenderTargets(1u, rsmFullscaleDirectionalN.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
-			}
-			break;
-		case eRenderTargetType::RSMFullscaleSpot:
-			{
-				pContext->OMSetRenderTargets(1u, rsmFullscaleSpot.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
+				pContext->OMSetRenderTargets(1u, indirectLight.pTarget.GetAddressOf(), aUseDepth ? pDepth.Get() : NULL);
 			}
 			break;
 		case eRenderTargetType::HistoryN1:
@@ -678,29 +571,9 @@ namespace Kaka
 				pContext->OMSetRenderTargets(1u, postProcessing.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
-		case eRenderTargetType::RSMDownscaleDirectional:
+		case eRenderTargetType::IndirectLight:
 			{
-				pContext->OMSetRenderTargets(1u, rsmDownscaleDirectional.pTarget.GetAddressOf(), aDepth);
-			}
-			break;
-		case eRenderTargetType::RSMDownscaleSpot:
-			{
-				pContext->OMSetRenderTargets(1u, rsmDownscaleSpot.pTarget.GetAddressOf(), aDepth);
-			}
-			break;
-		case eRenderTargetType::RSMFullscaleDirectional:
-			{
-				pContext->OMSetRenderTargets(1u, rsmFullscaleDirectional.pTarget.GetAddressOf(), aDepth);
-			}
-			break;
-		case eRenderTargetType::RSMFullscaleDirectionalPrevious:
-			{
-				pContext->OMSetRenderTargets(1u, rsmFullscaleDirectionalN.pTarget.GetAddressOf(), aDepth);
-			}
-			break;
-		case eRenderTargetType::RSMFullscaleSpot:
-			{
-				pContext->OMSetRenderTargets(1u, rsmFullscaleSpot.pTarget.GetAddressOf(), aDepth);
+				pContext->OMSetRenderTargets(1u, indirectLight.pTarget.GetAddressOf(), aDepth);
 			}
 			break;
 		case eRenderTargetType::HistoryN1:
@@ -726,26 +599,6 @@ namespace Kaka
 		pContext->OMSetRenderTargets(0u, nullptr, aBuffer.GetDepthStencilView());
 	}
 
-	void Graphics::SetAlphaBlend() const
-	{
-		//pContext->OMSetBlendState(pBlend.Get(), nullptr, 0x0f);
-	}
-
-	void Graphics::SetVFXBlend() const
-	{
-		//pContext->OMSetBlendState(pBlendVfx.Get(), nullptr, 0x0f);
-	}
-
-	void Graphics::SetAdditiveBlend() const
-	{
-		//pContext->OMSetBlendState(pBlendAdd.Get(), nullptr, 0x0f);
-	}
-
-	void Graphics::ResetBlend() const
-	{
-		//pContext->OMSetBlendState(nullptr, nullptr, 0x0f);
-	}
-
 	float Halton(uint32_t i, uint32_t b)
 	{
 		float f = 1.0f;
@@ -767,15 +620,15 @@ namespace Kaka
 
 		//currentJitter = halton23[frameCount % 16];
 		currentJitter = DirectX::XMFLOAT2(
-			2.0f * Halton(frameCount % 8 + 1, 2) - 1.0f,
-			2.0f * Halton(frameCount % 8 + 1, 3) - 1.0f);
+			Halton(frameCount % 8 + 1, 2),
+			Halton(frameCount % 8 + 1, 3));
 
 		// Divide by resolution and move to -1, 1
-		currentJitter.x = currentJitter.x / (float)width;
-		currentJitter.y = currentJitter.y / (float)height;
+		//currentJitter.x = currentJitter.x / (float)width;
+		//currentJitter.y = currentJitter.y / (float)height;
 
-		//currentJitter.x = ((currentJitter.x - 0.5f) / (float)width) * 2.0f;
-		//currentJitter.y = ((currentJitter.y - 0.5f) / (float)height) * 2.0f;
+		currentJitter.x = ((currentJitter.x - 0.5f) / (float)width) * 2.0f;
+		currentJitter.y = ((currentJitter.y - 0.5f) / (float)height) * 2.0f;
 
 		currentJitter.x *= jitterScale;
 		currentJitter.y *= jitterScale;

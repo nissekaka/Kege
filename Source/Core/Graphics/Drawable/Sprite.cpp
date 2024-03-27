@@ -292,8 +292,6 @@ namespace Kaka
 		offsets[0] = 0;
 		offsets[1] = 0;
 
-		//aGfx.pContext->CopyResource(instanceBuffer, instanceCompBuffer);
-
 		aGfx.pContext->VSSetShaderResources(11u, 1u, &srcTransformSRV);
 
 		bufferPointers[0] = vertexBuffer;
@@ -308,18 +306,6 @@ namespace Kaka
 
 		TransformConstantBuffer transformConstantBuffer(aGfx, *this, 0u);
 		transformConstantBuffer.Bind(aGfx);
-
-		//aGfx.pContext->UpdateSubresource(instanceBuffer, 0, nullptr, srcBufferTransform, 0, 0);
-
-
-		//D3D11_MAPPED_SUBRESOURCE mappedResource = {};
-		//aGfx.pContext->Map(instanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-		//memcpy(
-		//	mappedResource.pData,
-		//	instanceData.data(),
-		//	sizeof(InstanceData) * instanceCount
-		//);
-		//aGfx.pContext->Unmap(instanceBuffer, 0);
 
 		vertexShader->Bind(aGfx);
 		if (aGfx.HasPixelShaderOverride())
@@ -355,10 +341,6 @@ namespace Kaka
 		SetPosition(position, aIndex);
 	}
 
-	//void Sprite::SetRotation(float aRotation, const unsigned int aIndex)
-	//{
-	//	rotations[aIndex] = aRotation;
-	//}
 
 	DirectX::XMMATRIX Sprite::GetTransform() const
 	{
@@ -404,30 +386,6 @@ namespace Kaka
 		return (angle > cos(aSpotlightData.innerAngle + (aSpotlightData.outerAngle - aSpotlightData.innerAngle) / 2.0f)) && (distToLight < aSpotlightData.range);
 	}
 
-	void Sprite::UpdateTransforms(const float aDeltaTime, const DirectX::XMVECTOR aCameraForward, const DirectX::XMVECTOR aCameraRight, const DirectX::XMVECTOR aCameraUp, int aUpdateStart, int aUpdateEnd)
-	{
-		//for (; aUpdateStart < aUpdateEnd; ++aUpdateStart)
-		//{
-		//	particleData[aUpdateStart].travelAngle -= particleData[aUpdateStart].travelSpeed * aDeltaTime;
-
-		//	instanceData[aUpdateStart].instanceTransform.r[3].m128_f32[0] = particleData[aUpdateStart].travelRadius * std::cos(particleData[aUpdateStart].travelAngle) + particleData[aUpdateStart].startPosition.x;
-		//	instanceData[aUpdateStart].instanceTransform.r[3].m128_f32[1] = particleData[aUpdateStart].travelRadius * std::sin(particleData[aUpdateStart].travelAngle) + particleData[aUpdateStart].startPosition.y;
-		//	instanceData[aUpdateStart].instanceTransform.r[3].m128_f32[2] = particleData[aUpdateStart].travelRadius * std::sin(particleData[aUpdateStart].travelAngle) + particleData[aUpdateStart].startPosition.z;
-
-		//	if (particleData[aUpdateStart].travelAngle > 2 * PI)
-		//	{
-		//		particleData[aUpdateStart].travelAngle -= 2 * PI;
-		//	}
-
-		//	instanceData[aUpdateStart].colour.w = std::clamp(cos(elapsedTime + particleData[aUpdateStart].fadeSpeed) * 0.5f + 0.5f, 0.0f, particleData[aUpdateStart].colour.w);
-
-		//	// Set the rotation to face the camera
-		//	instanceData[aUpdateStart].instanceTransform.r[0] = aCameraRight;
-		//	instanceData[aUpdateStart].instanceTransform.r[1] = aCameraForward;
-		//	instanceData[aUpdateStart].instanceTransform.r[2] = aCameraUp;
-		//}
-	}
-
 	void Sprite::Update(const Graphics& aGfx, const float aDeltaTime, const DirectX::XMFLOAT3 aCameraPosition)
 	{
 		const unsigned int instanceCount = instanceData.size();
@@ -461,7 +419,6 @@ namespace Kaka
 		computeShader->Bind(aGfx);
 
 		// Transform buffer - Slot 0
-		//aGfx.pContext->CSSetShaderResources(0u, 1u, &srcTransformSRV);
 		aGfx.pContext->CSSetUnorderedAccessViews(0u, 1u, &instanceUAV,NULL);
 		// Particle buffer - Slot 1
 		aGfx.pContext->CSSetShaderResources(1u, 1u, &srcParticleSRV);

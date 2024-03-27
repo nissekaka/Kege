@@ -11,12 +11,6 @@
 
 constexpr int WINDOW_WIDTH = 1920;
 constexpr int WINDOW_HEIGHT = 1080;
-constexpr int NUM_POINT_LIGHTS = 0;
-constexpr int NUM_SPOT_LIGHTS = 0;
-constexpr int TERRAIN_SIZE = 0;
-
-constexpr int MODELS_TO_LOAD_THREADED = 10;
-constexpr float SHADOW_RESOLUTION_DIVIDER = 4.0f;
 
 namespace Kaka
 {
@@ -25,25 +19,8 @@ namespace Kaka
 		wnd(WINDOW_WIDTH, WINDOW_HEIGHT, L"Kaka")
 	{
 		camera.SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 80, 0.5f, 5000.0f);
-		wnd.Gfx().directionalLightRSMBuffer.GetCamera().SetOrthographic(WINDOW_WIDTH / 2.5f, WINDOW_HEIGHT / 2.5f, -500.0f, 500.0f);
+		wnd.Gfx().directionalLightRSMBuffer.GetCamera().SetOrthographic(WINDOW_WIDTH / 3.0f, WINDOW_HEIGHT / 3.0f, -500.0f, 500.0f);
 		wnd.Gfx().historyViewProjection = camera.GetInverseView() * camera.GetProjection();
-
-		for (int i = 0; i < NUM_POINT_LIGHTS; ++i)
-		{
-			pointlights.emplace_back(Pointlight{wnd.Gfx(), 2u});
-		}
-
-		for (int i = 0; i < NUM_SPOT_LIGHTS; ++i)
-		{
-			spotlights.emplace_back(Spotlight{wnd.Gfx(), 3u});
-		}
-
-		//threadedModels.resize(MODELS_TO_LOAD_THREADED);
-		//modelLoadingThreads.resize(threadedModels.size());
-		for (int i = 0; i < modelLoadingThreads.size(); ++i)
-		{
-			threadHasStarted.push_back(false);
-		}
 
 		deferredLights.Init(wnd.Gfx());
 	}
@@ -93,9 +70,9 @@ namespace Kaka
 			flashlightInner->volumetricAngle = DegToRad(5.0f);
 			flashlightInner->volumetricRange = 30.0f;
 			flashlightInner->volumetricFade = 25.0f;
-			flashlightInner->volumetricAlpha = 0.5f;
+			flashlightInner->volumetricAlpha = 1.0f;
 
-			wnd.Gfx().spotLightRSMBuffer[0].GetCamera().SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 120.0f, 0.5f, 5000.0f);
+			wnd.Gfx().spotLightRSMBuffer[0].GetCamera().SetPerspective(WINDOW_WIDTH, WINDOW_HEIGHT, 60.0f, 0.5f, 5000.0f);
 
 			flashlightOuter = &deferredLights.AddSpotLight();
 			flashlightOuter->intensity = flashlightInner->intensity * 0.5f;
@@ -111,17 +88,17 @@ namespace Kaka
 			flashlightOuter->volumetricAngle = DegToRad(15.0f);
 			flashlightOuter->volumetricRange = 30.0f;
 			flashlightOuter->volumetricFade = 25.0f;
-			flashlightOuter->volumetricAlpha = 0.2f;
+			flashlightOuter->volumetricAlpha = 0.6f;
 		}
 
-		rsmBufferDirectional.sampleCount = HAMMERSLEY_DIR_COUNT;
+		rsmBufferDirectional.sampleCount = SAMPLE_COUNT_DIRECTIONAL;
 		rsmBufferDirectional.rMax = 0.04f;
 		rsmBufferDirectional.rsmIntensity = 5000.0f;
 		rsmBufferDirectional.isDirectionalLight = TRUE;
 
-		rsmBufferSpot.sampleCount = HAMMERSLEY_SPOT_COUNT;
+		rsmBufferSpot.sampleCount = SAMPLE_COUNT_SPOT;
 		rsmBufferSpot.rMax = 0.165f;
-		rsmBufferSpot.rsmIntensity = 100.0f;
+		rsmBufferSpot.rsmIntensity = 40.0f;
 		rsmBufferSpot.isDirectionalLight = FALSE;
 
 		while (true)
@@ -137,44 +114,9 @@ namespace Kaka
 		}
 	}
 
-	void Game::LoadModelThreaded(const std::string& aModelPath, Model& aModel)
-	{
-		modelLoadingMutex.lock();
-		aModel.LoadModel(wnd.Gfx(), aModelPath, Model::eShaderType::AnimPBR);
-		aModel.Init();
-		modelLoadingMutex.unlock();
-	}
-
 	void Game::Update(const float aDeltaTime)
 	{
 		UNREFERENCED_PARAMETER(aDeltaTime);
-
-		//for (int i = 0; i < threadedModels.size(); ++i)
-		//{
-		//	const float distance = GetDistanceBetweenObjects(camera.GetPosition(), threadedModels[i].GetPosition());
-
-		//	if (distance < loadRadius)
-		//	{
-		//		// We only want to start the thread if it hasn't already been started
-		//		if (!threadHasStarted[i])
-		//		{
-		//			threadHasStarted[i] = true;
-		//			std::string path[3] = {
-		//				"Assets\\Models\\player\\sk_player.fbx",
-		//				"Assets\\Models\\crawler\\CH_NPC_Crawler_01_22G3S_SK.fbx",
-		//				"Assets\\Models\\wizard\\SM_wizard.fbx",
-		//			};
-		//			modelLoadingThreads[i] = std::thread(&Game::LoadModelThreaded, this, path[i % 3], std::ref(threadedModels[i]));
-
-		//			// We don't have to wait for this thread, it will just do its thing
-		//			// So we detach	it
-		//			modelLoadingThreads[i].detach();
-		//		}
-		//	}
-		//}
-
-		//camera.SetPosition({camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z - cameraMoveSpeed * aDeltaTime});
-
 
 		// Begin frame
 		wnd.Gfx().BeginFrame();
@@ -182,27 +124,7 @@ namespace Kaka
 
 		HandleInput(aDeltaTime);
 
-		//modelRotateAngle -= modelMoveSpeed * aDeltaTime;
-		//
-		//movingModel->SetPosition(
-		//	{
-		//		modelRotateRadius * cos(modelRotateAngle),
-		//		movingModel->GetPosition().y,
-		//		modelRotateRadius * sin(modelRotateAngle)
-		//	});
-		//
-		//std::string position = "\nPosition: " + std::to_string(movingModel->GetPosition().x) + ", " + std::to_string(movingModel->GetPosition().y) + ", " + std::to_string(movingModel->GetPosition().z);
-		//OutputDebugStringA(position.c_str());
-		//
-		//std::string angle = "\nAngle: " + std::to_string(modelRotateAngle);
-		//OutputDebugStringA(angle.c_str());
-
-		//if (modelRotateAngle > 2 * PI)
-		//{
-		//	modelRotateAngle -= 2 * PI;
-		//}
-
-		// Flashlight
+		/// Flashlight setup -- BEGIN
 		{
 			if (flashlightOn)
 			{
@@ -220,12 +142,11 @@ namespace Kaka
 			}
 
 			// Move flashlight a bit from the camera so that we see the shadows
-
 			// Forward vector
 			constexpr float forwardOffsetFactor = 2.5f;
 
 			DirectX::XMFLOAT3 targetPosition = camera.GetPosition();
-			DirectX::XMFLOAT3 targetDirection;
+			DirectX::XMFLOAT3 targetDirection = {};
 			DirectX::XMStoreFloat3(&targetDirection, camera.GetForwardVector());
 
 			flashlightInner->direction = targetDirection;
@@ -238,7 +159,7 @@ namespace Kaka
 			// Right vector
 			constexpr float rightOffsetFactor = 2.5f;
 
-			DirectX::XMFLOAT3 right;
+			DirectX::XMFLOAT3 right = {};
 			DirectX::XMStoreFloat3(&right, camera.GetRightVector());
 			targetPosition.x += right.x * rightOffsetFactor;
 			targetPosition.y += right.y * rightOffsetFactor;
@@ -246,7 +167,7 @@ namespace Kaka
 
 			// Up vector
 			constexpr float upOffsetFactor = 2.5f;
-			DirectX::XMFLOAT3 up;
+			DirectX::XMFLOAT3 up = {};
 			DirectX::XMStoreFloat3(&up, camera.GetUpVector());
 			targetPosition.x -= up.x * upOffsetFactor;
 			targetPosition.y -= up.y * upOffsetFactor;
@@ -266,6 +187,7 @@ namespace Kaka
 			flashlightOuter->outerAngle = std::clamp(flashlightInner->outerAngle * flashlightBleedAngleMultiplier, flashlightInner->outerAngle, 3.14f); // Radians
 			flashlightOuter->colour = flashlightInner->colour;
 		}
+		/// Flashlight setup -- END
 
 		wnd.Gfx().ApplyProjectionJitter();
 
@@ -293,7 +215,7 @@ namespace Kaka
 		// Need backface culling for Reflective Shadow Maps
 		wnd.Gfx().SetRasterizerState(eRasterizerStates::BackfaceCulling);
 
-		// ---------- SHADOW MAP PASS -- DIRECTIONAL LIGHT ---------- BEGIN
+		/// ---------- SHADOW MAP PASS -- DIRECTIONAL LIGHT ---------- BEGIN
 		{
 			wnd.Gfx().StartShadows(wnd.Gfx().directionalLightRSMBuffer.GetCamera(), deferredLights.GetDirectionalLightData().lightDirection, wnd.Gfx().directionalLightRSMBuffer, PS_TEXTURE_SLOT_SHADOW_MAP_DIRECTIONAL);
 			deferredLights.SetShadowCamera(wnd.Gfx().directionalLightRSMBuffer.GetCamera().GetInverseView() * wnd.Gfx().directionalLightRSMBuffer.GetCamera().GetProjection());
@@ -320,9 +242,9 @@ namespace Kaka
 				}
 			}
 		}
-		// ---------- SHADOW MAP PASS -- DIRECTIONAL LIGHT ---------- END
+		/// ---------- SHADOW MAP PASS -- DIRECTIONAL LIGHT ---------- END
 
-		// ---------- SHADOW MAP PASS -- SPOT LIGHT ---------- BEGIN
+		/// ---------- SHADOW MAP PASS -- SPOT LIGHT ---------- BEGIN
 		{
 			DirectX::XMFLOAT3 direction = deferredLights.GetSpotLightData(0).direction;
 			direction = {direction.x, direction.y * -1.0f, direction.z * -1.0f};
@@ -365,14 +287,13 @@ namespace Kaka
 
 			wnd.Gfx().ResetShadows(camera);
 		}
-		// ---------- SHADOW MAP PASS -- SPOT LIGHT ---------- END
+		/// ---------- SHADOW MAP PASS -- SPOT LIGHT ---------- END
 
-		// GBuffer pass -- BEGIN
+		/// GBuffer pass -- BEGIN
 		{
 			wnd.Gfx().gBuffer.ClearTextures(wnd.Gfx().pContext.Get());
 			wnd.Gfx().gBuffer.SetAsActiveTarget(wnd.Gfx().pContext.Get(), wnd.Gfx().gBuffer.GetDepthStencilView());
 
-			PixelConstantBuffer<TAABuffer> tab{wnd.Gfx(), 1u};
 			taaBuffer.jitter = wnd.Gfx().currentJitter;
 			taaBuffer.previousJitter = wnd.Gfx().previousJitter;
 
@@ -387,31 +308,29 @@ namespace Kaka
 			wnd.Gfx().SetRenderTarget(eRenderTargetType::None, nullptr);
 			wnd.Gfx().gBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_GBUFFER_SLOT);
 		}
-		// GBuffer pass -- END
+		/// GBuffer pass -- END
 
-		// Indirect lighting pass -- BEGIN
+		/// Indirect lighting pass -- BEGIN
 		{
 			if (drawRSM)
 			{
 				// Directional light
 				wnd.Gfx().directionalLightRSMBuffer.SetAllAsResources(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
-				rsmBufferDirectional.lightCameraTransform = wnd.Gfx().directionalLightRSMBuffer.GetCamera().GetInverseView() * wnd.Gfx().directionalLightRSMBuffer.GetCamera().GetProjection();
-				PixelConstantBuffer<RSMBuffer> rsmPixelBuffer{wnd.Gfx(), PS_CBUFFER_SLOT_RSM_DIRECTIONAL};
+				rsmBufferDirectional.lightCameraTransform = wnd.Gfx().directionalLightRSMBuffer.GetCamera().GetInverseView() * wnd.Gfx().directionalLightRSMBuffer.GetCamera().GetJitteredProjection();
 
 				if (flipFlop)
 				{
-					wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMFullscaleDirectional, nullptr);
+					wnd.Gfx().SetRenderTarget(eRenderTargetType::IndirectLight, nullptr);
 				}
 				else
 				{
-					wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMFullscaleDirectionalPrevious, nullptr);
+					wnd.Gfx().pContext->OMSetRenderTargets(1u, wnd.Gfx().indirectLightN.pTarget.GetAddressOf(), nullptr);
 				}
 
 				rsmBufferDirectional.isDirectionalLight = TRUE;
 				rsmPixelBuffer.Update(wnd.Gfx(), rsmBufferDirectional);
 				rsmPixelBuffer.Bind(wnd.Gfx());
 
-				PixelConstantBuffer<TAABuffer> tab{wnd.Gfx(), 1u};
 				taaBuffer.jitter = wnd.Gfx().currentJitter;
 				taaBuffer.previousJitter = wnd.Gfx().previousJitter;
 
@@ -424,26 +343,27 @@ namespace Kaka
 
 				// Spot light
 				wnd.Gfx().spotLightRSMBuffer[0].SetAllAsResources(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
-				rsmBufferSpot.lightCameraTransform = wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetInverseView() * wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetProjection();
-
-				wnd.Gfx().SetRenderTarget(eRenderTargetType::RSMFullscaleSpot, nullptr);
+				rsmBufferSpot.lightCameraTransform = wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetInverseView() * wnd.Gfx().spotLightRSMBuffer[0].GetCamera().GetJitteredProjection();
 
 				rsmBufferSpot.isDirectionalLight = FALSE;
 				rsmPixelBuffer.Update(wnd.Gfx(), rsmBufferSpot);
 				rsmPixelBuffer.Bind(wnd.Gfx());
 
+				wnd.Gfx().SetBlendState(eBlendStates::Additive);
+
 				indirectLighting.Draw(wnd.Gfx());
+
+				wnd.Gfx().SetBlendState(eBlendStates::Disabled);
 
 				wnd.Gfx().spotLightRSMBuffer[0].ClearAllAsResourcesSlots(wnd.Gfx().pContext.Get(), PS_RSM_SLOT_DIRECTIONAL);
 			}
 		}
-		// Indirect lighting pass -- END
+		/// Indirect lighting pass -- END
 
-		// Lighting pass
+		/// Lighting pass -- BEGIN
 		{
 			wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, nullptr);
 
-			PixelConstantBuffer<ShadowBuffer> shadowPixelBuffer{wnd.Gfx(), PS_CBUFFER_SLOT_SHADOW};
 			shadowPixelBuffer.Update(wnd.Gfx(), shadowBuffer);
 			shadowPixelBuffer.Bind(wnd.Gfx());
 
@@ -455,8 +375,20 @@ namespace Kaka
 			wnd.Gfx().UnbindShadows(PS_TEXTURE_SLOT_SHADOW_MAP_DIRECTIONAL);
 			wnd.Gfx().UnbindShadows(PS_TEXTURE_SLOT_SHADOW_MAP_SPOT);
 		}
+		/// Lighting pass -- END
 
-		// Indirect combined pass -- BEGIN
+		/// Skybox pass -- BEGIN
+		{
+			wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, wnd.Gfx().gBuffer.GetDepthStencilView());
+
+			wnd.Gfx().SetDepthStencilState(eDepthStencilStates::ReadOnlyLessEqual);
+			wnd.Gfx().SetRasterizerState(eRasterizerStates::NoCulling);
+
+			skybox.Draw(wnd.Gfx());
+		}
+		/// Skybox pass -- END
+
+		/// Indirect combined pass -- BEGIN
 
 		if (drawRSM)
 		{
@@ -464,21 +396,19 @@ namespace Kaka
 
 			if (flipFlop)
 			{
-				wnd.Gfx().pContext->OMSetRenderTargets(1u, wnd.Gfx().rsmFullscaleDirectionalN1.pTarget.GetAddressOf(), nullptr);
-				wnd.Gfx().pContext->PSSetShaderResources(1u, 1u, wnd.Gfx().rsmFullscaleDirectionalN.pResource.GetAddressOf());
+				wnd.Gfx().pContext->OMSetRenderTargets(1u, wnd.Gfx().indirectLightN1.pTarget.GetAddressOf(), nullptr);
+				wnd.Gfx().pContext->PSSetShaderResources(1u, 1u, wnd.Gfx().indirectLightN.pResource.GetAddressOf());
 			}
 			else
 			{
-				wnd.Gfx().pContext->OMSetRenderTargets(1u, wnd.Gfx().rsmFullscaleDirectionalN.pTarget.GetAddressOf(), nullptr);
-				wnd.Gfx().pContext->PSSetShaderResources(1u, 1u, wnd.Gfx().rsmFullscaleDirectionalN1.pResource.GetAddressOf());
+				wnd.Gfx().pContext->OMSetRenderTargets(1u, wnd.Gfx().indirectLightN.pTarget.GetAddressOf(), nullptr);
+				wnd.Gfx().pContext->PSSetShaderResources(1u, 1u, wnd.Gfx().indirectLightN1.pResource.GetAddressOf());
 			}
 
 			// Draw the combined pass
-			wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, wnd.Gfx().rsmFullscaleDirectional.pResource.GetAddressOf());
+			wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, wnd.Gfx().indirectLight.pResource.GetAddressOf());
 			wnd.Gfx().pContext->PSSetShaderResources(2u, 1u, wnd.Gfx().gBuffer.GetShaderResourceView(GBuffer::GBufferTexture::WorldPosition));
-			wnd.Gfx().pContext->PSSetShaderResources(3u, 1u, wnd.Gfx().rsmFullscaleSpot.pResource.GetAddressOf());
 
-			PixelConstantBuffer<TAABuffer> tab{wnd.Gfx(), 10u};
 			taaBuffer.jitter = wnd.Gfx().currentJitter;
 			taaBuffer.previousJitter = wnd.Gfx().previousJitter;
 
@@ -493,17 +423,16 @@ namespace Kaka
 			wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, nullSRV);
 			wnd.Gfx().pContext->PSSetShaderResources(1u, 1u, nullSRV);
 			wnd.Gfx().pContext->PSSetShaderResources(2u, 1u, nullSRV);
-			wnd.Gfx().pContext->PSSetShaderResources(3u, 1u, nullSRV);
 
 			wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, nullptr);
 
 			if (flipFlop)
 			{
-				wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, wnd.Gfx().rsmFullscaleDirectionalN1.pResource.GetAddressOf());
+				wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, wnd.Gfx().indirectLightN1.pResource.GetAddressOf());
 			}
 			else
 			{
-				wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, wnd.Gfx().rsmFullscaleDirectionalN.pResource.GetAddressOf());
+				wnd.Gfx().pContext->PSSetShaderResources(0u, 1u, wnd.Gfx().indirectLightN.pResource.GetAddressOf());
 			}
 
 			wnd.Gfx().SetBlendState(eBlendStates::Additive);
@@ -513,20 +442,9 @@ namespace Kaka
 
 			wnd.Gfx().SetBlendState(eBlendStates::Disabled);
 		}
-		// Indirect combined pass -- END
+		/// Indirect combined pass -- END
 
-		// Skybox pass -- BEGIN
-		{
-			wnd.Gfx().SetRenderTarget(eRenderTargetType::PostProcessing, wnd.Gfx().gBuffer.GetDepthStencilView());
-
-			wnd.Gfx().SetDepthStencilState(eDepthStencilStates::ReadOnlyLessEqual);
-			wnd.Gfx().SetRasterizerState(eRasterizerStates::NoCulling);
-
-			skybox.Draw(wnd.Gfx());
-		}
-		// Skybox pass -- END
-
-		// TAA pass -- BEGIN
+		/// TAA pass -- BEGIN
 
 		if (flipFlop)
 		{
@@ -545,7 +463,6 @@ namespace Kaka
 		//wnd.Gfx().pContext->PSSetShaderResources(2u, 1u, wnd.Gfx().gBuffer.GetShaderResourceView(GBuffer::GBufferTexture::Velocity));
 		wnd.Gfx().pContext->PSSetShaderResources(3u, 1u, wnd.Gfx().gBuffer.GetDepthShaderResourceView());
 
-		PixelConstantBuffer<TAABuffer> tab{wnd.Gfx(), 1u};
 		taaBuffer.jitter = wnd.Gfx().currentJitter;
 		taaBuffer.previousJitter = wnd.Gfx().previousJitter;
 
@@ -557,9 +474,9 @@ namespace Kaka
 
 		postProcessing.SetTemporalAliasingPS();
 		postProcessing.Draw(wnd.Gfx());
-		// TAA pass -- END
+		/// TAA pass -- END
 
-		// Post processing pass -- BEGIN
+		/// Post processing pass -- BEGIN
 
 		if (flipFlop)
 		{
@@ -572,7 +489,6 @@ namespace Kaka
 
 		flipFlop = !flipFlop;
 
-		PixelConstantBuffer<PostProcessingBuffer> ppb{wnd.Gfx(), 1u};
 		ppb.Update(wnd.Gfx(), ppBuffer);
 		ppb.Bind(wnd.Gfx());
 
@@ -584,9 +500,9 @@ namespace Kaka
 		wnd.Gfx().pContext->PSSetShaderResources(2u, 1, nullSRVs);
 		wnd.Gfx().pContext->PSSetShaderResources(3u, 1, nullSRVs);
 
-		// Post processing pass -- END
+		/// Post processing pass -- END
 
-		// Sprite pass -- BEGIN
+		/// Sprite pass -- BEGIN
 		{
 			wnd.Gfx().SetBlendState(eBlendStates::Additive);
 
@@ -595,7 +511,7 @@ namespace Kaka
 
 			wnd.Gfx().SetBlendState(eBlendStates::Disabled);
 		}
-		// Sprite pass -- END
+		/// Sprite pass -- END
 
 		ShowImGui();
 
@@ -758,7 +674,7 @@ namespace Kaka
 				ImGui::Text("Volumetric - Inner");
 				ImGui::Checkbox("Use volumetric##UseVol1", (bool*)&flashlightInner->useVolumetricLight);
 				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragInt("Steps##VolStep1", (int*)&flashlightInner->numberOfVolumetricSteps, 1, 1, 15);
+				ImGui::DragInt("Steps##VolStep1", (int*)&flashlightInner->numberOfVolumetricSteps, 1, 1, 30);
 				ImGui::SetNextItemWidth(150.0f);
 				ImGui::DragFloat("Scattering##VolScat1", &flashlightInner->volumetricScattering, 0.01f, 0.0f, 1.0f, "%.2f");
 				ImGui::SetNextItemWidth(150.0f);
@@ -774,7 +690,7 @@ namespace Kaka
 				ImGui::Text("Volumetric - Outer");
 				ImGui::Checkbox("Use volumetric##UseVol2", (bool*)&flashlightOuter->useVolumetricLight);
 				ImGui::SetNextItemWidth(150.0f);
-				ImGui::DragInt("Steps##VolStep2", (int*)&flashlightOuter->numberOfVolumetricSteps, 1, 1, 15);
+				ImGui::DragInt("Steps##VolStep2", (int*)&flashlightOuter->numberOfVolumetricSteps, 1, 1, 30);
 				ImGui::SetNextItemWidth(150.0f);
 				ImGui::DragFloat("Scattering##VolScat2", &flashlightOuter->volumetricScattering, 0.01f, 0.0f, 1.0f, "%.2f");
 				ImGui::SetNextItemWidth(150.0f);
@@ -838,14 +754,9 @@ namespace Kaka
 			ImGui::End();
 
 			// RSM indirect lighting
-			if (ImGui::Begin("RSM"))
+			if (ImGui::Begin("Indirect light"))
 			{
-				ImGui::Columns(2, nullptr, false);
-				ImGui::Text("Directional light");
-				ImGui::Image(wnd.Gfx().rsmFullscaleDirectional.pResource.Get(), ImVec2(512, 288));
-				ImGui::NextColumn();
-				ImGui::Text("Spot light");
-				ImGui::Image(wnd.Gfx().rsmFullscaleSpot.pResource.Get(), ImVec2(512, 288));
+				ImGui::Image(wnd.Gfx().indirectLight.pResource.Get(), ImVec2(1024, 576));
 			}
 			ImGui::End();
 
@@ -900,15 +811,5 @@ namespace Kaka
 			ImGui::Text(drawcalls.c_str());
 		}
 		ImGui::End();
-	}
-
-	float Game::GetDistanceBetweenObjects(const DirectX::XMFLOAT3 aPosA, const DirectX::XMFLOAT3 aPosB) const
-	{
-		const float dx = aPosB.x - aPosA.x;
-		const float dy = aPosB.y - aPosA.y;
-		const float dz = aPosB.z - aPosA.z;
-
-		const float distance = std::sqrt(dx * dx + dy * dy + dz * dz);
-		return distance;
 	}
 }

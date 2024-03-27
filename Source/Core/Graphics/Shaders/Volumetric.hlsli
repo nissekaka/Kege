@@ -24,7 +24,7 @@ float3 Volumetric(float3 aWorldPosition, float3 aCameraPosition, uint aSteps, fl
     float3 position = aCameraPosition;
     position += step * DITHER_PATTERN[int(aUv.x * aResolution.x) % 4][int(aUv.y * aResolution.y) % 4];
 
-    [unroll(15)]
+    [unroll(30)]
     for (int i = 0; i < aSteps; i++)
     {
         const float4 lightSpacePositionTemp = mul(aTransform, float4(position, 1.0f));
