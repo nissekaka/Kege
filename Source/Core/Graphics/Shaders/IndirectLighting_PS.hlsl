@@ -18,8 +18,7 @@ cbuffer TAABuffer : register(b1)
 
 float4 main(const PixelInput aInput) : SV_TARGET
 {
-
-    const float2 uv = aInput.texCoord + jitterOffset;
+    const float2 uv = aInput.texCoord;
 
     const float3 albedo = gColourTex.Sample(defaultSampler, uv).rgb;
     const float3 worldPosition = gWorldPositionTex.Sample(linearSampler, uv).rgb;
@@ -32,8 +31,6 @@ float4 main(const PixelInput aInput) : SV_TARGET
 
     float3 rsm = IndirectLighting(sampleUV, worldNormal, worldPosition,
     rMax, sampleCount, rsmIntensity, aInput.position.xy) * albedo;
-
-    const float3 np = normalize(2.0f * rsmNormalTex.Sample(linearSampler, sampleUV).xyz - 1.0f);
 
     return float4(rsm, 1.0f);
 }

@@ -11,7 +11,7 @@ namespace Kaka
 	class Sprite : public Drawable
 	{
 	public:
-		void Init(const Graphics& aGfx, const float aSize, const unsigned aNumberOfSprites, bool aIsVfx, const std::string& aFile);
+		void Init(const Graphics& aGfx, const float aSize, const unsigned aNumberOfSprites, bool aIsVfx, const std::string& aFile, const DirectX::XMFLOAT3 aCameraPosition);
 		void Draw(Graphics& aGfx);
 		void SetPosition(DirectX::XMFLOAT3 aPosition, unsigned int aIndex);
 		void SetScale(float aScale, unsigned int aIndex);
@@ -25,7 +25,7 @@ namespace Kaka
 		bool IsInSpotlightCone(DirectX::XMFLOAT3 aWorldPosition, const SpotlightData& aSpotlightData);
 		void UpdateTransforms(float aDeltaTime, DirectX::XMVECTOR aCameraForward, DirectX::XMVECTOR aCameraRight, DirectX::XMVECTOR aCameraUp, int aUpdateStart, int aUpdateEnd);
 		void UpdateTransform(float aDeltaTime, unsigned instanceCount, DirectX::XMVECTOR cameraForward, DirectX::XMVECTOR cameraRight, DirectX::XMVECTOR cameraUp);
-		void Update(const Graphics& aGfx, const float aDeltaTime);
+		void Update(const Graphics& aGfx, const float aDeltaTime, const DirectX::XMFLOAT3 aCameraPosition);
 
 	private:
 		//Sampler sampler = {};
@@ -45,13 +45,7 @@ namespace Kaka
 			{"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
 			{"BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
 			// Data from the instance buffer
-			// Instance ID
-			{"INSTANCE_ID", 0, DXGI_FORMAT_R32_UINT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1},
-			//{"INSTANCE_TRANSFORM", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1},
-			//{"INSTANCE_TRANSFORM", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1},
-			//{"INSTANCE_TRANSFORM", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1},
-			//{"INSTANCE_TRANSFORM", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1},
-			//{"INSTANCE_COLOUR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1}
+			{"INSTANCE_ID", 0, DXGI_FORMAT_R32_UINT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1}
 		};
 
 		InputLayout inputLayout;
@@ -67,7 +61,6 @@ namespace Kaka
 
 		ID3D11Buffer* instanceCompBuffer = nullptr;
 		ID3D11Buffer* srcParticleCompBuffer = nullptr;
-		//ID3D11Buffer* destBufferTransform = nullptr;
 		ID3D11Buffer* destParticleCompBuffer = nullptr;
 		ID3D11ShaderResourceView* srcTransformSRV = nullptr;
 		ID3D11ShaderResourceView* srcParticleSRV = nullptr;
@@ -86,25 +79,25 @@ namespace Kaka
 		struct ParticleData
 		{
 			DirectX::XMFLOAT3 startPosition;
-			float travelAngle;
-			DirectX::XMFLOAT4 colour;
 			float travelRadius;
-			float travelSpeed;
+			DirectX::XMFLOAT3 travelAngle;
 			float fadeSpeed;
+			DirectX::XMFLOAT4 colour;
+			DirectX::XMFLOAT3 travelSpeed;
 			float padding;
 		};
 
 		std::vector<InstanceData> instanceData = {};
-		//std::vector<ParticleData> particleData = {};
 
 		struct ParticleConstants
 		{
 			DirectX::XMVECTOR cameraForward = {};
 			DirectX::XMVECTOR cameraRight = {};
 			DirectX::XMVECTOR cameraUp = {};
+			DirectX::XMFLOAT3 cameraPosition = {};
 			float deltaTime = {};
 			float elapsedTime = {};
-			float padding[2] = {};
+			float maxRange = {};
 		} particleConstants;
 
 		float elapsedTime = 0.0f;

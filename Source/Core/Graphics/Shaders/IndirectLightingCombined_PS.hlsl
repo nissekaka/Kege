@@ -3,7 +3,7 @@
 Texture2D currentDirectional : register(t0);
 Texture2D previousDirectional : register(t1);
 Texture2D worldPositionTexture : register(t2);
-//Texture2D giSpotTex : register(t10);
+Texture2D currentSpot : register(t3);
 
 cbuffer TAABuffer : register(b10)
 {
@@ -85,6 +85,8 @@ float4 main(const PixelInput aInput) : SV_TARGET
     const float3 previousColourClamped = clamp(previousColour, minColor, maxColor);
 
     float3 output = currentColour * 0.05f + previousColourClamped * 0.95f;
+
+    output += currentSpot.Sample(linearSampler, aInput.texCoord).rgb;
 
 	return float4(output, 1.0f);
 

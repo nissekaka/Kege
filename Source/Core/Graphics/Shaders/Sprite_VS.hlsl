@@ -14,8 +14,6 @@ struct VertexInput
     float3 tan : TANGENT;
     float3 bitan : BITANGENT;
     uint instanceID : SV_InstanceID;
-	//matrix instanceTransform : INSTANCE_TRANSFORM;
-    //float4 colour : INSTANCE_COLOUR;
 };
 
 struct InstanceData
@@ -43,7 +41,7 @@ PixelInput main(const VertexInput aInput)
     PixelInput output;
     
     const matrix instObjectToWorld = instanceDataBuffer[aInput.instanceID].instanceTransform;
-    const matrix instObjectToClip = mul(objectToClip, instObjectToWorld);
+    const matrix instObjectToClip = mul(viewProjection, instObjectToWorld);
 
     const float3x3 objectToWorldRotation = objectToWorld;
     const float4 position = aInput.position;

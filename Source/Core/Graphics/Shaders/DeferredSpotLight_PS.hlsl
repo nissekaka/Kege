@@ -7,6 +7,21 @@
 
 Texture2D flashlightTex : register(t5);
 
+cbuffer DirectionalLight : register(b1)
+{
+    float3 directionalLightDirection;
+    float directionalLightIntensity;
+    float3 directionalLightColour;
+    float ambientLightIntensity;
+    float4x4 directionalLightCameraTransform;
+    uint numberOfVolumetricStepsDir;
+    float volumetricScatteringDir;
+    float volumetricIntensityDir;
+    float padding;
+    float4 shadowColour;
+    float4 ambianceColour;
+};
+
 cbuffer SpotlightData : register(b2)
 {
     float3 lightPosition;
@@ -31,22 +46,10 @@ cbuffer SpotlightData : register(b2)
 // TODO Move shadowColour to common light or something
 cbuffer RSMData : register(b3)
 {
-    bool usePoissonRSM;
     bool isDirectional;
-    uint mode;
     uint sampleCount;
-    uint sampleCountLastPass;
-    uint currentPass;
-    uint type;
     float rMax;
     float rsmIntensity;
-    float uvScale;
-    float weightMax;
-    float divideN;
-    float divideP;
-    float3 padding;
-    float4 shadowColour;
-    float4 ambianceColour;
     float4x4 lightCameraTransform;
 };
 
@@ -64,7 +67,7 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
 {
     const float2 uv = aInput.position.xy / resolution.xy;
     const float3 worldPosition = gWorldPositionTex.Sample(linearSampler, uv).rgb;
-    const float3 albedo = gColourTex.Sample(defaultSampler, uv).rgb;
+    const float3 albedo = gColourTex.Sample(linearSampler, uv).rgb;
     const float3 normal = normalize(2.0f * gNormalTex.Sample(linearSampler, uv).xyz - 1.0f);
     const float4 material = gMaterialTex.Sample(linearSampler, uv);
 

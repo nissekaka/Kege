@@ -32,6 +32,7 @@ namespace Kaka
 		void LoadModelThreaded(const std::string& aModelPath, Model& aModel);
 		void Update(const float aDeltaTime);
 		void HandleInput(const float aDeltaTime);
+		void ShowImGui();
 		void ShowStatsWindow();
 		float GetDistanceBetweenObjects(DirectX::XMFLOAT3 aPosA, DirectX::XMFLOAT3 aPosB) const;
 
@@ -175,7 +176,7 @@ namespace Kaka
 		PixelConstantBuffer<RSMLightData> rsmLightDataBuffer{wnd.Gfx(), PS_CBUFFER_SLOT_RSM_LIGHT};
 
 		static constexpr unsigned int HAMMERSLEY_DIR_COUNT = 12u;
-		static constexpr unsigned int HAMMERSLEY_SPOT_COUNT = 2u;
+		static constexpr unsigned int HAMMERSLEY_SPOT_COUNT = 8u;
 		static constexpr unsigned int HAMMERSLEY_FINAL_COUNT = 0u;
 
 		struct TAABuffer

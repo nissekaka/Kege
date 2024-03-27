@@ -63,7 +63,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
     {
         for (int y = -1; y <= 1; ++y)
         {
-            const float3 colour = currentTexture.Sample(pointSampler, aInput.texCoord + float2(x, y) / resolution); // Sample neighbor
+            const float3 colour = currentTexture.Sample(linearSampler, aInput.texCoord + float2(x, y) / resolution); // Sample neighbor
             minColor = min(minColor, colour); // Take min and max
             maxColor = max(maxColor, colour);
         }
@@ -72,7 +72,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
 	// Clamp previous color to min/max bounding box
     const float3 previousColourClamped = clamp(previousColour, minColor, maxColor);
 
-    float3 output = currentColour * 0.05f + previousColourClamped * 0.95f;
+    float3 output = currentColour * 0.1f + previousColourClamped * 0.9f;
 
     float3 antialiased = previousColourClamped.rgb;
 

@@ -12,7 +12,9 @@
 
 namespace Kaka
 {
-	void Sprite::Init(const Graphics& aGfx, const float aSize, const unsigned int aNumberOfSprites, bool aIsVfx, const std::string& aFile)
+	static constexpr float MAX_RANGE_TO_CAMERA = 15.0f;
+
+	void Sprite::Init(const Graphics& aGfx, const float aSize, const unsigned int aNumberOfSprites, bool aIsVfx, const std::string& aFile, const DirectX::XMFLOAT3 aCameraPosition)
 	{
 		constexpr float uvFactor = 1.0f;
 
@@ -103,25 +105,31 @@ namespace Kaka
 		{
 			instanceIds[i] = i;
 			// Set random position between -20, 0, -20 and 20, 0, 20
-			std::uniform_real_distribution<float> xDist(-150.0f, 130.0f);
-			std::uniform_real_distribution<float> yDist(0.0f, 80.0f);
-			std::uniform_real_distribution<float> zDist(-70.0f, 70.0f);
-			std::uniform_real_distribution<float> distSize(0.5f, 1.25f);
+			std::uniform_real_distribution<float> xDist(-MAX_RANGE_TO_CAMERA, MAX_RANGE_TO_CAMERA);
+			std::uniform_real_distribution<float> yDist(-MAX_RANGE_TO_CAMERA, MAX_RANGE_TO_CAMERA);
+			std::uniform_real_distribution<float> zDist(-MAX_RANGE_TO_CAMERA, MAX_RANGE_TO_CAMERA);
+			std::uniform_real_distribution<float> sizeDist(0.5f, 1.25f);
 			std::uniform_real_distribution<float> alphaDist(0.05f, 0.4f);
 			std::uniform_real_distribution<float> fadeDist(5.0f, 10.0f);
-			float scale = distSize(gen);
+			float scale = sizeDist(gen);
 			instanceData[i].instanceTransform = DirectX::XMMatrixScaling(scale, scale, scale);
 			particleData[i].colour = {1.0f, 1.0f, 1.0f, alphaDist(gen)};
 			instanceData[i].colour = particleData[i].colour;
 
-			SetPosition({xDist(gen), yDist(gen), zDist(gen)}, i);
+			DirectX::XMFLOAT3 position = {aCameraPosition.x + xDist(gen), aCameraPosition.y + yDist(gen), aCameraPosition.z + zDist(gen)};
+
+			SetPosition(position, i);
 			particleData[i].startPosition = GetPosition(i);
 
 			std::uniform_real_distribution<float> radiusDist(0.5f, 10.0f);
 			std::uniform_real_distribution<float> speedDist(0.01f, 0.1f);
 			particleData[i].travelRadius = radiusDist(gen);
-			particleData[i].travelSpeed = speedDist(gen);
-			particleData[i].travelAngle = PI;
+			particleData[i].travelSpeed.x = speedDist(gen);
+			particleData[i].travelSpeed.y = speedDist(gen);
+			particleData[i].travelSpeed.z = speedDist(gen);
+			particleData[i].travelAngle.x = 0;
+			particleData[i].travelAngle.y = PI / 2.0f;
+			particleData[i].travelAngle.z = PI;
 			particleData[i].fadeSpeed = fadeDist(gen);
 		}
 
@@ -420,7 +428,7 @@ namespace Kaka
 		//}
 	}
 
-	void Sprite::Update(const Graphics& aGfx, const float aDeltaTime)
+	void Sprite::Update(const Graphics& aGfx, const float aDeltaTime, const DirectX::XMFLOAT3 aCameraPosition)
 	{
 		const unsigned int instanceCount = instanceData.size();
 
@@ -440,6 +448,8 @@ namespace Kaka
 		particleConstants.cameraForward = cameraForward;
 		particleConstants.cameraRight = cameraRight;
 		particleConstants.cameraUp = cameraUp;
+		particleConstants.maxRange = MAX_RANGE_TO_CAMERA;
+		particleConstants.cameraPosition = aCameraPosition;
 
 		ComputeConstantBuffer<ParticleConstants> particleConstantBuffer{aGfx, 0u};
 		particleConstantBuffer.Update(aGfx, particleConstants);
@@ -457,7 +467,9 @@ namespace Kaka
 		aGfx.pContext->CSSetShaderResources(1u, 1u, &srcParticleSRV);
 		aGfx.pContext->CSSetUnorderedAccessViews(1u, 1u, &particleUAV, NULL);
 
-		aGfx.pContext->Dispatch(1024u, 1u, 1u);
+		const unsigned int threadGroupCount = instanceCount / 64;
+
+		aGfx.pContext->Dispatch(threadGroupCount, 1u, 1u);
 
 		aGfx.pContext->CSSetShader(NULL, NULL, 0u);
 		aGfx.pContext->CSSetUnorderedAccessViews(0u, 1u, ppUAViewNULL, NULL);

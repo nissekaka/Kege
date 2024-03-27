@@ -100,7 +100,6 @@ namespace Kaka
 		void EndFrame();
 		void DrawIndexed(UINT aCount);
 		void DrawIndexedInstanced(UINT aCount, UINT aInstanceCount);
-		//void SetProjection(DirectX::FXMMATRIX& aProjection);
 		DirectX::XMMATRIX GetProjection() const;
 		DirectX::XMMATRIX GetJitteredProjection() const;
 		void SetCamera(Camera& aCamera);
@@ -250,7 +249,7 @@ namespace Kaka
 
 		DirectX::XMFLOAT2 previousJitter = {0.0f, 0.0f};
 		DirectX::XMFLOAT2 currentJitter = {0.0f, 0.0f};
-		float jitterScale = 0.1f;
+		float jitterScale = 0.4f;
 
 		unsigned long long frameCount = 0;
 
