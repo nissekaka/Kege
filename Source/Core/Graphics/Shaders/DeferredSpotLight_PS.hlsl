@@ -91,7 +91,7 @@ float4 main(DeferredVertexToPixel aInput) : SV_TARGET
     {
         float2 projectedPosition = lightProjectedPosition.xy;
         projectedPosition.x *= resolution.x / resolution.y; // Because texture has aspect ratio 1:1
-        const float2 lightUV = 0.5f + float2(0.5f, -0.5f) * (projectedPosition.xy) / 1.047f;
+        const float2 lightUV = 0.5f + float2(0.5f, -0.5f) * (projectedPosition.xy) / lightOuterAngle / 1.4835f; // 1.4835f is the spotlight camera fov (85) in radians
 
         lightFromTexture = flashlightTex.Sample(linearSampler, lightUV).rgb;
     }
