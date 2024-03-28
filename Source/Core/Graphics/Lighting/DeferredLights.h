@@ -23,6 +23,7 @@ namespace Kaka
 		~DeferredLights() = default;
 
 		void Init(Graphics& aGfx);
+		void Update(const float aDeltaTime);
 		void Draw(Graphics& aGfx);
 		void ShowControlWindow();
 		void SetShadowCamera(const DirectX::XMMATRIX& aCamera);
@@ -71,5 +72,13 @@ namespace Kaka
 		std::vector<D3D11_INPUT_ELEMENT_DESC> ied;
 		InputLayout inputLayout;
 		Topology topology = {};
+
+		// Directional light simulation
+		bool shouldSimulate = false;
+		float sunAngle = 0.0f;
+		float rotationSpeed = 0.8f;
+		DirectX::XMFLOAT3 lowColour = {0.4f, 0.4f, 0.6f};
+		DirectX::XMFLOAT3 highColour = {1.0f, 0.8f, 0.6f};
+		float colorLerpThreshold = -0.5f;
 	};
 }

@@ -44,6 +44,37 @@ namespace Kaka
 		spotlightData.reserve(SPOT_LIGHT_RESERVE);
 	}
 
+	void DeferredLights::Update(const float aDeltaTime)
+	{
+		if (!shouldSimulate)
+		{
+			return;
+		}
+
+		// Update the angle based on time and speed
+		sunAngle += rotationSpeed * aDeltaTime;
+
+		DirectX::XMFLOAT3 direction;
+		direction.x = directionalLightData.lightDirection.x;
+		direction.y = std::sin(sunAngle) * PI;
+		direction.z = std::cos(sunAngle); // Assuming the light is pointing straight down
+
+		directionalLightData.lightDirection = direction;
+
+		// Calculate the colour based on the vertical position of the light
+		float colorLerp = -direction.y - colorLerpThreshold;
+		colorLerp = std::clamp(colorLerp, 0.0f, 1.0f);
+
+		// Interpolate between lowColour and highColour based on the colorLerp value
+		DirectX::XMFLOAT3 currentColour;
+		currentColour.x = lowColour.x + colorLerp * (highColour.x - lowColour.x);
+		currentColour.y = lowColour.y + colorLerp * (highColour.y - lowColour.y);
+		currentColour.z = lowColour.z + colorLerp * (highColour.z - lowColour.z);
+
+		// Set the new colour
+		directionalLightData.lightColour = currentColour;
+	}
+
 	void DeferredLights::Draw(Graphics& aGfx)
 	{
 		lightVS->Bind(aGfx);
@@ -169,6 +200,10 @@ namespace Kaka
 			ImGui::SetNextItemWidth(150.0f);
 			ImGui::ColorPicker3("Ambiance colour##DirAmbCol", &directionalLightData.ambianceColour.x);
 			ImGui::DragFloat("Ambiance intensity##DirAmbInt", &directionalLightData.ambianceColour.w, 0.01f, 0.0f, 1.0f, "%.2f");
+			ImGui::Text("Simulation");
+			ImGui::Checkbox("Enable Simulation", &shouldSimulate);
+			ImGui::Text("Rotation Speed");
+			ImGui::DragFloat("##RotationSpeed", &rotationSpeed, 0.01f, 0.0f, 10.0f, "%.2f");
 		}
 		ImGui::End();
 	}
