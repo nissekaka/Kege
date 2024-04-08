@@ -38,9 +38,9 @@ void main(uint3 DTid : SV_DispatchThreadID)
     //[unroll(2)]
     //for (int i = 0; i < 2; ++i)
     //{
-    const uint updateIndex = DTid.x; //    +1048576 * i;
+    const uint updateIndex = DTid.x;
 
-		// Update particle properties
+	// Update particle properties
     particleData[updateIndex].travelAngle.x -= particleData[updateIndex].travelSpeed.x * deltaTime;
     particleData[updateIndex].travelAngle.y -= particleData[updateIndex].travelSpeed.y * deltaTime;
     particleData[updateIndex].travelAngle.z -= particleData[updateIndex].travelSpeed.z * deltaTime;
@@ -85,5 +85,4 @@ void main(uint3 DTid : SV_DispatchThreadID)
     }
 
     instanceData[updateIndex].colour.w = clamp(cos(elapsedTime + particleData[updateIndex].fadeSpeed) * 0.5 + 0.5, 0.0, particleData[updateIndex].colour.w);
-    //}
 }

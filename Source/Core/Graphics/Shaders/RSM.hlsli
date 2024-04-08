@@ -6,21 +6,6 @@ Texture2D rsmWorldPositionTex : register(t6);
 Texture2D rsmNormalTex : register(t7);
 Texture2D rsmFluxTex : register(t8);
 
-cbuffer HammersleyDataDirectional : register(b5)
-{
-    float4 hSamplesDirectional[256];
-};
-
-cbuffer HammersleyDataSpot : register(b6)
-{
-    float4 hSamplesSpot[64];
-};
-
-cbuffer HammersleyDataFinal : register(b7)
-{
-    float4 hSamplesFinal[32];
-};
-
 cbuffer RSMData : register(b3)
 {
     bool isDirectional;
@@ -49,23 +34,10 @@ float2 Hammersley(const uint aI, const uint aN)
     return float2(float(aI) / float(aN), float(BitfieldReverse(aI)) * 2.3283064365386963e-10);
 }
 
-float IGN(float2 pixel)
-{
-    return fmod(52.9829189f * fmod(0.06711056f * float(pixel.x) + 0.00583715f * float(pixel.y), 1.0f), 1.0f);
-}
-
-float2 hash22(float2 p)
-{
-    float3 p3 = frac(float3(p.xyx) * float3(.1031, .1030, .0973));
-    p3 += dot(p3, p3.yzx + 33.33);
-    return frac((p3.xx + p3.yz) * p3.zy);
-
-}
-
 float2 hash23(float3 p3)
 {
-    p3 = frac(p3 * float3(.1031, .1030, .0973));
-    p3 += dot(p3, p3.yzx + 33.33);
+    p3 = frac(p3 * float3(0.1031f, 0.1030f, 0.0973f));
+    p3 += dot(p3, p3.yzx + 33.33f);
     return frac((p3.xx + p3.yz) * p3.zy);
 }
 
@@ -78,40 +50,36 @@ float3 IndirectLighting(const float2 aUv, const float3 aN, const float3 aX, cons
     // Ep(aX, aN) = phi(p) -----------------------------------             
 	//                                ||aX-xp||^4
 
-    float3 rsmOutput = { 0.0f, 0.0f, 0.0f };
-        const float2 o = hash23(float3(aPixel.x, aPixel.y, currentTime * 1000.0f));
-        //float2 o2 = IGN(pixel) + hash22(float2(currentTime * 1000.0f, 0.f));
+    float3 output = { 0.0f, 0.0f, 0.0f };
+    const float2 noise = hash23(float3(aPixel.x, aPixel.y, currentTime * 1000.0f));
 
-        //const float2x2 rot = { {cos(o.x), sin(o.x)}, {cos(o.y), sin(o.y)} }; // Random rotation matrix for jittering
+	[loop]
+    for (uint i = 0; i < aSampleCount; i++)	// Sum contributions of sampling locations
+    {
+        float2 offset = Hammersley(i, aSampleCount);
 
-		[loop]
-        for (uint i = 0; i < aSampleCount; i++)	// Sum contributions of sampling locations
-        {
-            //float2 offset = mul(Hammersley(i, sampleCount), rot);
-            float2 offset = Hammersley(i, aSampleCount);
-
-            offset.xy += o;
-            offset.xy = fmod(offset.xy, 1.0f);
+        offset.xy += noise;
+        offset.xy = fmod(offset.xy, 1.0f);
             
-            // Soft radius rather than hard cutoff
-            offset.x = (offset.x * offset.x * offset.x * offset.x + 1.0f) * offset.x;
+    	// Soft radius rather than hard cutoff
+        offset.x = (offset.x * offset.x * offset.x * offset.x + 1.0f) * offset.x;
 
-            const float r = offset.x * aRMax;
-            const float theta = offset.y * TWO_PI;
-            const float2 coord = aUv + float2(r * cos(theta), r * sin(theta));
-            const float weight = offset.x * offset.x;
+        float r = offset.x * aRMax;
+        float theta = offset.y * TWO_PI;
+        float2 coord = aUv + float2(r * cos(theta), r * sin(theta));
+        float weight = offset.x * offset.x;
 
-            const float3 xp = rsmWorldPositionTex.Sample(pointSampler, coord).xyz; // Position (x_p) and normal (n_p) are in world coordinates too
-            const float3 flux = rsmFluxTex.Sample(pointSampler, coord).rgb; // Collect components from corresponding RSM textures
-			const float3 np = normalize(2.0f * rsmNormalTex.Sample(linearSampler, coord).xyz - 1.0f);
+        float3 xp = rsmWorldPositionTex.Sample(linearSampler, coord).xyz; // Position (x_p) and normal (n_p) are in world coordinates too
+        float3 flux = rsmFluxTex.Sample(linearSampler, coord).rgb; // Collect components from corresponding RSM textures
+        float3 np = normalize(2.0f * rsmNormalTex.Sample(linearSampler, coord).xyz - 1.0f);
 
-            float3 Ep = flux * ((max(0, dot(np, aX - xp)) * max(0, dot(aN, xp - aX)))
+        float3 Ep = flux * ((max(0, dot(np, aX - xp)) * max(0, dot(aN, xp - aX)))
 									/ pow(length(aX - xp), 4));
 
-            Ep *= weight; // Weighting contribution and normalizing
+        Ep *= weight; // Weighting contribution and normalizing
 
-            rsmOutput += Ep; // Accumulate
-        }
+        output += Ep; // Accumulate
+    }
 
-    return rsmOutput / aSampleCount * aIntensity; // Modulate result with some intensity value
+    return output / aSampleCount * aIntensity; // Modulate result with some intensity value
 }

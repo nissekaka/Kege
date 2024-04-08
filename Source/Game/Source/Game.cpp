@@ -51,6 +51,7 @@ namespace Kaka
 
 		flashlightTexture = ModelLoader::LoadTexture(wnd.Gfx(), "Assets\\Textures\\Flashlight_cookie.png", 5u);
 
+		// 131072 * 4 = 524288
 		dustParticles.Init(wnd.Gfx(), 0.0125f, 131072u, true, "Assets\\Textures\\particle.png", camera.GetPosition());
 
 		// Flashlight setup
@@ -534,36 +535,36 @@ namespace Kaka
 
 			switch (e->GetKeyCode())
 			{
-			case VK_ESCAPE:
-				if (wnd.CursorEnabled())
-				{
-					wnd.DisableCursor();
-					wnd.mouse.EnableRaw();
-				}
-				else
-				{
-					wnd.EnableCursor();
-					wnd.mouse.DisableRaw();
-				}
-				break;
-			case VK_F1:
-				showImGui = !showImGui;
-				break;
-			case VK_F2:
-				showStatsWindow = !showStatsWindow;
-				break;
-			case VK_F3:
-				drawLightDebug = !drawLightDebug;
-				break;
-			case 'T':
-				taaBuffer.useTAA = !taaBuffer.useTAA;
-				break;
-			case 'F':
-				flashlightOn = !flashlightOn;
-				break;
-			case 'R':
-				drawRSM = !drawRSM;
-				break;
+				case VK_ESCAPE:
+					if (wnd.CursorEnabled())
+					{
+						wnd.DisableCursor();
+						wnd.mouse.EnableRaw();
+					}
+					else
+					{
+						wnd.EnableCursor();
+						wnd.mouse.DisableRaw();
+					}
+					break;
+				case VK_F1:
+					showImGui = !showImGui;
+					break;
+				case VK_F2:
+					showStatsWindow = !showStatsWindow;
+					break;
+				case VK_F3:
+					drawLightDebug = !drawLightDebug;
+					break;
+				case 'T':
+					taaBuffer.useTAA = !taaBuffer.useTAA;
+					break;
+				case 'F':
+					flashlightOn = !flashlightOn;
+					break;
+				case 'R':
+					drawRSM = !drawRSM;
+					break;
 			}
 		}
 

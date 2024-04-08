@@ -44,7 +44,7 @@ float4 main(PixelInput aInput) : SV_TARGET
 
     const float distToLight = length(lightPosition - aInput.worldPos);
     
-    float spotlightAlpha = 0.05f;
+    float spotlightAlpha = 0.15f;
     if (IsInSpotlightCone(aInput.worldPos, angleInner) && intensityInner > 200.0f)
     {
         if (distToLight < 100.0f)
@@ -53,7 +53,7 @@ float4 main(PixelInput aInput) : SV_TARGET
         }
         else
         {
-            spotlightAlpha = 0.05f;
+            spotlightAlpha = 0.15f;
         }
     }
     else if (IsInSpotlightCone(aInput.worldPos, angleOuter) && intensityOuter > 200.0f)
@@ -64,7 +64,7 @@ float4 main(PixelInput aInput) : SV_TARGET
         }
         else
         {
-            spotlightAlpha = 0.05f;
+            spotlightAlpha = 0.15f;
         }
     }
 

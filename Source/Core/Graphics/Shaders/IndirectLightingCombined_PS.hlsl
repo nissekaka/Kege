@@ -66,7 +66,7 @@ float4 main(const PixelInput aInput) : SV_TARGET
     const float3 previousColour = previousDirectional.Sample(linearSampler, reprojectedUV).rgb;
 
     // Arbitrary out of range numbers
-    float3 minColor = 9999.0, maxColor = -9999.0;
+    float3 minColour = 9999.0, maxColour = -9999.0;
  
 	// Sample a 3x3 neighborhood to create a box in color space
     for (int x = -1; x <= 1; ++x)
@@ -74,36 +74,20 @@ float4 main(const PixelInput aInput) : SV_TARGET
         for (int y = -1; y <= 1; ++y)
         {
             const float3 colour = currentDirectional.Sample(linearSampler, aInput.texCoord + float2(x, y) / resolution); // Sample neighbor
-            minColor = min(minColor, colour); // Take min and max
-            maxColor = max(maxColor, colour);
+            minColour = min(minColour, colour); // Take min and max
+            maxColour = max(maxColour, colour);
         }
     }
  
 	// Clamp previous color to min/max bounding box
-    const float3 previousColourClamped = clamp(previousColour, minColor, maxColor);
+    const float3 previousColourClamped = clamp(previousColour, minColour, maxColour);
 
-    float3 output = currentColour * 0.05f + previousColourClamped * 0.95f;
+    const float3 output = currentColour * 0.2f + previousColourClamped * 0.8f;
 
-    //float sharpness = 0.1f;
-
-    //// Sharpening
-    //float3 sharpenedSum = output.rgb * (1.0f + 4.0f * sharpness);
-
-    //sharpenedSum -= previousDirectional.Sample(linearSampler, aInput.texCoord + float2(0.0f, 1.0f) / resolution).rgb * sharpness;
-    //sharpenedSum -= previousDirectional.Sample(linearSampler, aInput.texCoord - float2(0.0f, 1.0f) / resolution).rgb * sharpness;
-    //sharpenedSum -= previousDirectional.Sample(linearSampler, aInput.texCoord + float2(1.0f, 0.0f) / resolution).rgb * sharpness;
-    //sharpenedSum -= previousDirectional.Sample(linearSampler, aInput.texCoord - float2(1.0f, 0.0f) / resolution).rgb * sharpness;
-
-    //output = float4(sharpenedSum, 1.0f);
-
-    //output += currentSpot.Sample(linearSampler, aInput.texCoord).rgb;
-
-	return float4(output, 1.0f);
-
-    float3 antialiased = previousColourClamped.rgb;
+    float3 antialiased = previousColourClamped;
 
     float2 off = float2(1.0f / resolution.x, 1.0f / resolution.y);
-    float3 in0 = output; //    currentTexture.Sample(linearSampler, uv).rgb;
+    float3 in0 = currentColour;
 
     antialiased = lerp(antialiased * antialiased, in0 * in0, 0.5f);
     antialiased = sqrt(antialiased);
@@ -128,8 +112,8 @@ float4 main(const PixelInput aInput) : SV_TARGET
     in7 = encodePalYuv(in7);
     in8 = encodePalYuv(in8);
 
-    float3 minColour = min(min(min(in0, in1), min(in2, in3)), in4);
-    float3 maxColour = max(max(max(in0, in1), max(in2, in3)), in4);
+    minColour = min(min(min(in0, in1), min(in2, in3)), in4);
+    maxColour = max(max(max(in0, in1), max(in2, in3)), in4);
     minColour = lerp(minColour, min(min(min(in5, in6), min(in7, in8)), minColour), 0.5);
     maxColour = lerp(maxColour, max(max(max(in5, in6), max(in7, in8)), maxColour), 0.5);
 
